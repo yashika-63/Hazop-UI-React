@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import "./Hazop.css";
+import "./Node.css";
 import NodePopup from "./NodePopup";
 
-const HazopPage = () => {
+const NodePage = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [nodes, setNodes] = useState([]);
 
@@ -126,4 +126,4 @@ const HazopPage = () => {
   );
 };
 
-export default HazopPage;
+export default NodePage;
