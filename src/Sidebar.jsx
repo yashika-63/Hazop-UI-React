@@ -5,7 +5,7 @@ import './CommonCss/Sidebar.css';
 
 const Sidebar = ({ isOpen }) => {
   const menuItems = [
-    { name: 'Home', path: '/', icon: <FaHome /> },
+    { name: 'HazopPage', path: '/HazopPage', icon: <FaHome /> },
   ];
 
   return (

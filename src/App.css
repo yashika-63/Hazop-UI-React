@@ -38,12 +38,12 @@
 }
 
 .page-wrapper {
-  padding-top: 20px;
+  /* padding-top: 20px; */
   padding-bottom: 40px;
-  padding-left: 20px;
-  padding-right: 20px;
+  padding-left: 10px;
+  padding-right: 10px;
   min-height: calc(100vh - 60px);
-  background: #ffffff;
+  background: transparent;
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -57,10 +57,8 @@
 .page-card {
   width: 100%;
   max-width: 1080px;
-  background: white;
-  padding: 30px;
+  background: transparent;
   border-radius: 12px;
-  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.15);
 }
 
 /* Base content area */

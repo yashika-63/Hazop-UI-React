@@ -3,7 +3,7 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
 import './App.css';
-import EmployeeForm from './Test/EmployeeForm';
+import HazopPage from './HazopEntry/HazopPage';
 
 const App = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -18,7 +18,7 @@ const App = () => {
       <div className={`content-area ${isSidebarOpen ? 'shifted' : ''}`}>
         <div className="page-wrapper">
           <div className="page-card">
-            <EmployeeForm />
+            <HazopPage />
           </div>
         </div>
       </div>
