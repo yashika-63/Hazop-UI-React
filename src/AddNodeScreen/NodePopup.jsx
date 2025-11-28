@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./Hazop.css";
+import "./Node.css";
 
 const NodePopup = ({ onClose, onSave }) => {
   const [form, setForm] = useState({

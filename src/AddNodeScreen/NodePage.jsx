@@ -34,7 +34,7 @@ const NodePage = () => {
   };
 
   return (
-    <div className="coreContainer">
+    <div className="">
 
       {/* HAZOP INFO CARD */}
       <div className="card hazop-info-card">

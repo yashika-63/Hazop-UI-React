@@ -8,7 +8,7 @@ const Sidebar = ({ isOpen }) => {
     { name: 'HazopPage', path: '/HazopPage', icon: <FaHome /> },
     { name: 'Home', path: '/', icon: <FaHome /> },
     { name: 'Employee', path: '/employee', icon: <FaUser /> },
-    { name: 'Hazop', path: '/hazop', icon: <FaProjectDiagram /> },
+    { name: 'Node', path: '/NodePage', icon: <FaProjectDiagram /> },
   ];
 
   return (

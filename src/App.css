@@ -63,10 +63,10 @@
 
 /* Base content area */
 .content-area {
-  margin-top: 60px;
-  margin-left: 60px;
-  padding: 20px;
+  padding: 40px;
   transition: margin-left 0.3s ease, padding 0.3s ease;
+  margin: 60px 0px 0px 60px;
+  max-width: 100%;
 }
 
 .content-area.shifted {
