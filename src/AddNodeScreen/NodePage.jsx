@@ -34,18 +34,18 @@ const HazopPage = () => {
   };
 
   return (
-    <div className="hazop-container">
+    <div className="coreContainer">
 
       {/* HAZOP INFO CARD */}
       <div className="card hazop-info-card">
         <h2>HAZOP Information</h2>
 
-        <div className="info-grid">
-          <div><strong>ID:</strong> {hazopInfo.id}</div>
-          <div><strong>Date:</strong> {hazopInfo.date}</div>
-          <div><strong>Site:</strong> {hazopInfo.site}</div>
-          <div><strong>Department:</strong> {hazopInfo.department}</div>
-        </div>
+        <div className="info-tiles-row">
+  <div className="info-tile id">ID: {hazopInfo.id}</div>
+  <div className="info-tile date">Date: {hazopInfo.date}</div>
+  <div className="info-tile site">Site: {hazopInfo.site}</div>
+  <div className="info-tile department">Department: {hazopInfo.department}</div>
+</div>
 
         <div className="description">
           <strong>Description:</strong>
@@ -54,14 +54,16 @@ const HazopPage = () => {
 
         <h3>Group Members</h3>
         <div className="members-list">
-          {groupMembers.map((m, idx) => (
-            <div key={idx} className="member-card">
-              <p><strong>{m.name}</strong></p>
-              <p>{m.email}</p>
-              <p>{m.department}</p>
-            </div>
-          ))}
-        </div>
+  {groupMembers.map((m, idx) => (
+    <div key={idx} className="member-card">
+      <span className="label">Name:</span> {m.name}
+      <span className="sep">|</span>
+      <span className="label">Department:</span> {m.department}
+      <span className="sep">|</span>
+      <span className="label">Email:</span> {m.email}
+    </div>
+  ))}
+</div>
       </div>
 
       {/* BUTTON + TABLE */}
