@@ -3,23 +3,29 @@ import axios from "axios";
 import "./HazopPage.css";
 import HazopRegistration from "./HazopRegistration";
 import { strings } from "../string";
-import { FaTimes } from "react-icons/fa";
- 
+import { FaEllipsisV, FaEye, FaEdit, FaTrash, FaTimes } from "react-icons/fa";
+import '../CommonCss/CommonCss.css';
+
 const HazopPage = () => {
     const [newRegistered, setNewRegistered] = useState([]);
     const [pending, setPending] = useState([]);
     const [completed, setCompleted] = useState([]);
- 
+
     const [showPopup, setShowPopup] = useState(false);
- 
+    const [activeTab, setActiveTab] = useState("NewCreated");
     const openPopup = () => setShowPopup(true);
     const closePopup = () => setShowPopup(false);
- 
-    // Load kanban data
+    const [openDropdown, setOpenDropdown] = useState(null);
+
+
+    const toggleDropdown = (id) => {
+        setOpenDropdown(openDropdown === id ? null : id);
+    };
+
     useEffect(() => {
         fetchColumns();
     }, []);
- 
+
     const fetchColumns = async () => {
         try {
             const col1 = await axios.get(
@@ -29,11 +35,11 @@ const HazopPage = () => {
             const col2 = await axios.get(
                 `http://localhost:5559/api/hazopRegistration/filter?companyId=1&status=true&completionStatus=true&sendForVerification=false`
             );
- 
+
             const col3 = await axios.get(
                 `http://localhost:5559/api/hazopRegistration/filter?companyId=1&status=true&completionStatus=true&sendForVerification=false`
             );
- 
+
             setNewRegistered(col1.data);
             setPending(col2.data);
             setCompleted(col3.data);
@@ -41,7 +47,25 @@ const HazopPage = () => {
             console.error("Error loading HAZOP data:", err);
         }
     };
- 
+
+
+    const renderDropdown = (item) => (
+        <div className="dropdown card-dropdown">
+            <button className="dots-button" onClick={() => toggleDropdown(item.id)}>
+                <FaEllipsisV />
+            </button>
+
+            {openDropdown === item.id && (
+                <div className="dropdown-content">
+                    <button onClick={() => handleView(item)}><FaEye /> View</button>
+                    <button onClick={() => handleUpdate(item)}><FaEdit /> Update</button>
+                    <button onClick={() => handleDelete(item)}><FaTrash /> Delete</button>
+                </div>
+            )}
+        </div>
+    );
+
+
     return (
         <div className="page-wrapper">
             <div className="page-card">
@@ -49,43 +73,66 @@ const HazopPage = () => {
                     <h2>HAZOP Dashboard</h2>
                 </div>
                 <button className="create-btn" onClick={openPopup}> Create Hazop </button>
- 
+
                 <div className="kanban-container">
                     <div className="kanban-column">
-                        <h3>New Registered</h3>
+                        <div
+                            className={`column-header menu-item ${activeTab === "NewCreated" ? "active" : ""}`}
+                            onClick={() => setActiveTab("NewCreated")}
+                        >
+                            New Registered
+                        </div>
                         {newRegistered.map((item, idx) => (
                             <div className="kanban-card" key={idx}>
-                                <div className="card-title">{item.title || "Untitled"}</div>
+                                {renderDropdown(item)}
+                                <div className="card-title">{item.site || "Untitled"}</div>
                                 <div className="card-sub">{item.description}</div>
+                                <div className="dateBadge">{item.hazopCreationDate}</div>
                             </div>
                         ))}
                     </div>
+
                     <div className="kanban-column">
-                        <h3>Pending</h3>
+                        <div
+                            className="column-header menu-item"
+                            onClick={() => setActiveTab("Pending")}
+                        >
+                            Pending
+                        </div>
                         {pending.map((item, idx) => (
                             <div className="kanban-card" key={idx}>
-                                <div className="card-title">{item.title || "Untitled"}</div>
+                                {renderDropdown(item)}
+                                <div className="card-title">{item.site || "Untitled"}</div>
                                 <div className="card-sub">{item.description}</div>
+                                <div className="dateBadge">{item.hazopCreationDate}</div>
                             </div>
                         ))}
                     </div>
+
                     <div className="kanban-column">
-                        <h3>Completed</h3>
+                        <div
+                            className={`column-header menu-item ${activeTab === "Completed" ? "active" : ""}`}
+                            onClick={() => setActiveTab("Completed")}
+                        >
+                            Completed
+                        </div>
                         {completed.map((item, idx) => (
                             <div className="kanban-card" key={idx}>
-                                <div className="card-title">{item.title || "Untitled"}</div>
+                                {renderDropdown(item)}
+                                <div className="card-title">{item.site || "Untitled"}</div>
                                 <div className="card-sub">{item.description}</div>
+                                <div className="dateBadge">{item.hazopCreationDate}</div>
                             </div>
                         ))}
                     </div>
- 
                 </div>
+
+
             </div>
- 
+
             {showPopup && (
                 <div className="modal-overlay">
                     <div className="modal-box">
-                        <button className="close-btn" onClick={closePopup}><FaTimes/></button>
                         <HazopRegistration closePopup={closePopup} />
                     </div>
                 </div>
@@ -93,7 +140,6 @@ const HazopPage = () => {
         </div>
     );
 };
- 
+
 export default HazopPage;
- 
- 
+
