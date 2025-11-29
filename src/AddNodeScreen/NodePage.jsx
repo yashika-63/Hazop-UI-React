@@ -1,23 +1,41 @@
 import React, { useState } from "react";
 import "./Node.css";
 import NodePopup from "./NodePopup";
+import { formatDate } from "../CommonUI/CommonUI";
 
 const NodePage = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [nodes, setNodes] = useState([]);
+  const [showAllMembers, setShowAllMembers] = useState(false);
 
   // sample group members
   const groupMembers = [
     { name: "John Doe", email: "john@example.com", department: "Safety" },
-    { name: "Priya Verma", email: "priya@example.com", department: "Operations" },
+    {
+      name: "Priya Verma",
+      email: "priya@example.com",
+      department: "Operations",
+    },
     { name: "Amit Shah", email: "amit@example.com", department: "Engineering" },
     { name: "Sara Ali", email: "sara@example.com", department: "Quality" },
-    { name: "Vikram Rao", email: "vikram@example.com", department: "Maintenance" },
-     { name: "John Doe", email: "john@example.com", department: "Safety" },
-    { name: "Priya Verma", email: "priya@example.com", department: "Operations" },
+    {
+      name: "Vikram Rao",
+      email: "vikram@example.com",
+      department: "Maintenance",
+    },
+    { name: "John Doe", email: "john@example.com", department: "Safety" },
+    {
+      name: "Priya Verma",
+      email: "priya@example.com",
+      department: "Operations",
+    },
     { name: "Amit Shah", email: "amit@example.com", department: "Engineering" },
     { name: "Sara Ali", email: "sara@example.com", department: "Quality" },
-    { name: "Vikram Rao", email: "vikram@example.com", department: "Maintenance" },
+    {
+      name: "Vikram Rao",
+      email: "vikram@example.com",
+      department: "Maintenance",
+    },
   ];
 
   const hazopInfo = {
@@ -25,7 +43,8 @@ const NodePage = () => {
     date: "2025-01-12",
     site: "Main Plant A",
     department: "Production",
-    description: "Hazop study for distillation unit & allied sections.",
+    description:
+      "Hazop study for distillation unit & allied sections. Hazop study for distillation unit & allied sections. Hazop study for distillation unit & allied sections. Hazop study for distillation unit & allied sections. Hazop study for distillation unit & allied sections. Hazop study for distillation unit & allied sections. Hazop study for distillation unit & allied sections. Hazop study for distillation unit & allied sections. Hazop study for distillation unit & allied sections. Hazop study for distillation unit & allied sections. Hazop study for distillation unit & allied sections. Hazop study for distillation unit & allied sections. Hazop study for distillation unit & allied sections. Hazop study for distillation unit & allied sections. Hazop study for distillation unit & allied sections. Hazop study for distillation unit & allied sections. Hazop study for distillation unit & allied sections. Hazop study for distillation unit & allied sections. Hazop study for distillation unit & allied sections. Hazop study for distillation unit & allied sections. Hazop study for distillation unit & allied sections. Hazop study for distillation unit & allied sections. Hazop study for distillation unit & allied sections. Hazop study for distillation unit & allied sections. Hazop study for distillation unit & allied sections. Hazop study for distillation unit & allied sections.",
   };
 
   const handleSaveNode = (node) => {
@@ -35,42 +54,78 @@ const NodePage = () => {
 
   return (
     <div className="">
-
       {/* HAZOP INFO CARD */}
       <div className="card hazop-info-card">
-        <h2>HAZOP Information</h2>
+        <h1>Hazop Information</h1>
 
-        <div className="info-tiles-row">
-  <div className="info-tile id">ID: {hazopInfo.id}</div>
-  <div className="info-tile date">Date: {hazopInfo.date}</div>
-  <div className="info-tile site">Site: {hazopInfo.site}</div>
-  <div className="info-tile department">Department: {hazopInfo.department}</div>
-</div>
+        <div className="hazop-info-card">
+          <div className="info-grid">
+            <div className="info-item">
+              <span className="label">ID:</span>
+              <span className="value">{hazopInfo.id}</span>
+            </div>
+
+            <div className="info-item">
+              <span className="label">Date:</span>
+              <span className="value">{formatDate(hazopInfo?.date)}</span>
+            </div>
+
+            <div className="info-item">
+              <span className="label">Site:</span>
+              <span className="value">{hazopInfo.site}</span>
+            </div>
+
+            <div className="info-item">
+              <span className="label">Department:</span>
+              <span className="value">{hazopInfo.department}</span>
+            </div>
+          </div>
 
         <div className="description">
           <strong>Description:</strong>
           <p>{hazopInfo.description}</p>
         </div>
+        </div>
 
-        <h3>Group Members</h3>
-        <div className="members-list">
-  {groupMembers.map((m, idx) => (
-    <div key={idx} className="member-card">
-      <span className="label">Name:</span> {m.name}
-      <span className="sep">|</span>
-      <span className="label">Department:</span> {m.department}
-      <span className="sep">|</span>
-      <span className="label">Email:</span> {m.email}
-    </div>
-  ))}
+<div className="members-header">
+        <h2>Total Group Members: {groupMembers.length}</h2>
+  <button
+    className="view-btn"
+    onClick={() => setShowAllMembers(!showAllMembers)}
+  >
+    {showAllMembers ? "Hide Members" : "View All Members"}
+  </button>
+</div>
+
+<div className={`members-table-wrapper ${showAllMembers ? "expanded" : ""}`}>
+  {showAllMembers && (
+    <table className="members-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Department</th>
+          <th>Email</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {groupMembers.map((m, idx) => (
+          <tr key={idx}>
+            <td>{m.name}</td>
+            <td>{m.department}</td>
+            <td>{m.email}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  )}
 </div>
       </div>
 
       {/* BUTTON + TABLE */}
       <div className="table-section">
-
         <div className="table-header">
-          <h2>Nodes</h2>
+          <h1>Nodes</h1>
           <button className="add-btn" onClick={() => setShowPopup(true)}>
             + Add Node
           </button>
@@ -95,7 +150,9 @@ const NodePage = () => {
             <tbody>
               {nodes.length === 0 ? (
                 <tr>
-                  <td colSpan="10" className="no-data">No nodes added yet.</td>
+                  <td colSpan="10" className="no-data">
+                    No nodes added yet.
+                  </td>
                 </tr>
               ) : (
                 nodes.map((n, idx) => (
@@ -120,8 +177,12 @@ const NodePage = () => {
         <button className="save-btn">Save All Nodes</button>
       </div>
 
-      {showPopup && <NodePopup onClose={() => setShowPopup(false)} onSave={handleSaveNode} />}
-
+      {showPopup && (
+        <NodePopup
+          onClose={() => setShowPopup(false)}
+          onSave={handleSaveNode}
+        />
+      )}
     </div>
   );
 };
