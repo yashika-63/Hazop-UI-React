@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import axios from "axios";
 import { FaTimes } from "react-icons/fa";
 import './HazopRegistration.css';
-import { showToast } from "../CommonUtils";
+import { showToast } from "../CommonUI/CommonUI";
+
 
 const HazopRegistration = ({ closePopup }) => {
   const [formData, setFormData] = useState({
