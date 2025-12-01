@@ -7,6 +7,7 @@ import "./styles/global.css";
 import HazopPage from './HazopEntry/HazopPage';
 import NodePage from "./AddNodeScreen/NodePage";
 import { ToastContainer } from 'react-toastify';
+import NodeDetails from './AddNodeScreen/NodeDetails';
 
 const App = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -21,6 +22,7 @@ const App = () => {
             <Routes>
               <Route path="/NodePage" element={<NodePage />} />
               <Route path="/HazopPage" element={<HazopPage />} />
+              <Route path='/node/:id' element={<NodeDetails />} />
             </Routes>
             <ToastContainer />
       </div>
