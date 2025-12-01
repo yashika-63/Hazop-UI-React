@@ -1,0 +1,117 @@
+.layout {
+    display: flex;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Sidebar styling */
+.verticalForm {
+    width: 200px;
+    min-height: auto;
+    background-color: white;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border-radius: 8px;
+    box-shadow: 5px 2px 5px 5px rgba(0, 0, 0, 0.1);
+}
+
+.verticalForm button {
+    background-color: transparent;
+    border: none;
+    padding: 10px;
+    font-size: 14px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.verticalForm button:hover {
+    background-color: #eaeaea;
+}
+
+.verticalForm button.active {
+    background: linear-gradient(#4a5c73, #3e4f63);
+    color: white;
+    border-radius: 5px;
+}
+
+/* Content styling */
+.Companycontent {
+    flex: 1;
+    padding: 20px;
+}
+
+
+
+.approveBtn {
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.rejectBtn {
+    background-color: #dc3545;
+    color: #fff;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+
+
+
+
+.details-container {
+    max-width: 600px;
+}
+
+.details-row {
+    display: flex;
+    padding: 8px 10px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.details-row .label {
+    font-weight: bold;
+    color: #333;
+    width: 40%;
+    font-size: 12px;
+}
+
+.details-row .value {
+    width: 55%;
+    text-align: right;
+    color: #555;
+    font-size: 13px;
+}
+
+.spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}

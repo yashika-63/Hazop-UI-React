@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import axios, { formToJSON } from "axios";
 import "./HazopPage.css";
 import HazopRegistration from "./HazopRegistration";
-import { strings } from "../string";
 import { FaEllipsisV, FaEye, FaEdit, FaTrash, FaTimes } from "react-icons/fa";
-import '../CommonCss/CommonCss.css';
+import AddHazopTeamPopup from "./AddHazopTeamPopup";
+import { strings } from "../string";
+import '../styles/global.css';
+import { formatDate } from "../CommonUI/CommonUI";
 
 const HazopPage = () => {
     const [newRegistered, setNewRegistered] = useState([]);
@@ -16,7 +18,9 @@ const HazopPage = () => {
     const openPopup = () => setShowPopup(true);
     const closePopup = () => setShowPopup(false);
     const [openDropdown, setOpenDropdown] = useState(null);
-
+    const [showAddTeamPopup, setShowAddTeamPopup] = useState(false);
+    const [hazopData, setHazopData] = useState(null); // Store the selected HAZOP data
+    const [hazopTeam, setHazopTeam] = useState([]); // Store the selected team's members
 
     const toggleDropdown = (id) => {
         setOpenDropdown(openDropdown === id ? null : id);
@@ -48,32 +52,38 @@ const HazopPage = () => {
         }
     };
 
+    const handleUpdate = (item) => {
+        setHazopData(item);
+        setHazopTeam(item.team || []);
+        setShowAddTeamPopup(true);
+    };
+
+    const closeAddTeamPopup = () => {
+        setShowAddTeamPopup(false);
+    };
 
     const renderDropdown = (item) => (
-        <div className="dropdown card-dropdown">
+        <div className="dropdown">
             <button className="dots-button" onClick={() => toggleDropdown(item.id)}>
                 <FaEllipsisV />
             </button>
 
             {openDropdown === item.id && (
                 <div className="dropdown-content">
-                    <button onClick={() => handleView(item)}><FaEye /> View</button>
-                    <button onClick={() => handleUpdate(item)}><FaEdit /> Update</button>
-                    <button onClick={() => handleDelete(item)}><FaTrash /> Delete</button>
+                    <button type="button" onClick={() => handleUpdate(item)}><FaEdit /> Update</button>
+                    <button type="button" onClick={() => handleDelete(item)}><FaTrash /> Delete</button>
                 </div>
             )}
         </div>
     );
 
-
     return (
         <div className="page-wrapper">
             <div className="page-card">
-                <div className="hazop-header">
-                    <h2>HAZOP Dashboard</h2>
+                <h1>Hazop</h1>
+                <div className="rightbtn-controls">
+                    <button className="create-btn" onClick={openPopup}> + Create Hazop </button>
                 </div>
-                <button className="create-btn" onClick={openPopup}> Create Hazop </button>
-
                 <div className="kanban-container">
                     <div className="kanban-column">
                         <div
@@ -87,7 +97,7 @@ const HazopPage = () => {
                                 {renderDropdown(item)}
                                 <div className="card-title">{item.site || "Untitled"}</div>
                                 <div className="card-sub">{item.description}</div>
-                                <div className="dateBadge">{item.hazopCreationDate}</div>
+                                <div className="dateBadge">{formatDate(item.hazopCreationDate)}</div>
                             </div>
                         ))}
                     </div>
@@ -104,7 +114,7 @@ const HazopPage = () => {
                                 {renderDropdown(item)}
                                 <div className="card-title">{item.site || "Untitled"}</div>
                                 <div className="card-sub">{item.description}</div>
-                                <div className="dateBadge">{item.hazopCreationDate}</div>
+                                <div className="dateBadge">{formatDate(item.hazopCreationDate)}</div>
                             </div>
                         ))}
                     </div>
@@ -121,13 +131,11 @@ const HazopPage = () => {
                                 {renderDropdown(item)}
                                 <div className="card-title">{item.site || "Untitled"}</div>
                                 <div className="card-sub">{item.description}</div>
-                                <div className="dateBadge">{item.hazopCreationDate}</div>
+                                <div className="dateBadge">{formatDate(item.hazopCreationDate)}</div>
                             </div>
                         ))}
                     </div>
                 </div>
-
-
             </div>
 
             {showPopup && (
@@ -137,9 +145,22 @@ const HazopPage = () => {
                     </div>
                 </div>
             )}
+
+            {showAddTeamPopup && (
+                <div className="modal-overlay">
+                    <div className="modal-box">
+
+                        <AddHazopTeamPopup
+                            closePopup={closeAddTeamPopup}
+                            hazopData={hazopData}
+                            existingTeam={hazopTeam}
+                        />
+
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
 
 export default HazopPage;
-

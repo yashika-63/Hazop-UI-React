@@ -1,12 +1,15 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { FaHome, FaUser, FaProjectDiagram } from 'react-icons/fa';
+import { FaHome, FaUser, FaProjectDiagram, FaFileArchive, FaFileAlt, FaList } from 'react-icons/fa';
 import './CommonCss/Sidebar.css';
+import { FaPeopleGroup } from 'react-icons/fa6';
 
 const Sidebar = ({ isOpen }) => {
   const menuItems = [
     { name: 'HazopPage', path: '/HazopPage', icon: <FaHome /> },
     { name: 'Node', path: '/NodePage', icon: <FaProjectDiagram /> },
+    { name: 'HazopList', path: '/HazopList', icon: <FaList /> },
+    {name: 'ApprovalRequest', path:'/RequestHandler', icon:<FaPeopleGroup/>}
   ];
 
   return (

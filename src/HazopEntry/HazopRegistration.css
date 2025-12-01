@@ -1,114 +1,289 @@
 /* Search Results Dropdown */
 .search-results {
-    list-style: none;
-    margin: 5px 0 0 0;
-    padding: 0;
-    max-height: 150px;
-    overflow-y: auto;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    background-color: #fff;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    z-index: 100;
+  list-style: decimal;
+  margin: 5px 0 0 0;
+  padding: 0;
+  max-height: 150px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+}
+
+.search-results li {
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.search-results li:hover {
+  background-color: #f0f0f0;
+}
+
+
+
+.hazoptable-wrapper {
+  overflow-y: auto;
+  margin-top: 10px;
+  position: relative;
+  min-height: 500px;
+}
+
+
+
+.table-wrapper {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-top: 10px;
+  position: relative;
+}
+
+.team-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  margin-top: 10px;
+  overflow-y: auto;
+}
+
+.team-table th,
+.team-table td {
+  text-align: left;
+  padding: 12px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.team-table th {
+  background-color: #f7f7f7;
+  font-weight: 600;
+  color: #333;
+}
+
+.team-table tbody tr:nth-child(even) {
+  background-color: #fafafa;
+}
+
+.team-table tbody tr:hover {
+  background-color: #f1f1f1;
+}
+
+.team-table button {
+  padding: 4px 8px;
+  font-size: 0.85rem;
+  color: red;
+  background-color: #ffffff;
+  border: 1px solid red;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.team-table button:hover {
+  background-color: red;
+  color: white;
+}
+
+
+/* ------------------------------------------------------
+   HAZOP LIST TABLE – Professional UI
+-------------------------------------------------------*/
+
+.hazoplist-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 6px;
+  margin-top: 20px;
+  background: transparent;
+  font-size: 14px;
+  transition: width 0.3s ease;
+  font-family: "Segoe UI", "Inter", sans-serif;
+}
+
+/* --------- Table Header (CORPORATE BLUE) --------- */
+.hazoplist-table thead {
+  background: linear-gradient(90deg, #6b788a, #3e4f63);
+
+
+}
+
+.hazoplist-table th {
+  color: #fff;
+  padding: 10px 14px;
+  text-align: left;
+  white-space: nowrap;
+  font-weight: 600;
+  border-bottom: 2px solid #2f3c4b;
+  letter-spacing: 0.4px;
+}
+
+/* --------- Body rows --------- */
+.hazoplist-table tbody tr {
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
+  transition: 0.12s ease;
+}
+
+.hazoplist-table tbody tr:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+  background-color: #eaeaea !important;
+  cursor: pointer;
+}
+
+/* --------- Table Cells --------- */
+.hazoplist-table td {
+  padding: 10px 14px;
+  color: #333;
+  white-space: nowrap;
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+}
+
+/* first cell border highlight */
+.hazoplist-table td:first-child {
+  border-left: 4px solid #556a84;
+  border-radius: 6px 0 0 6px;
+}
+
+/* last cell rounded edge */
+.hazoplist-table td:last-child {
+  border-radius: 0 6px 6px 0;
+}
+
+/* --------- Description Cell --------- */
+.description-cell {
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #444;
+  line-height: 1.4;
+}
+
+/* --------- Risk indicators --------- */
+.risk-high {
+  color: #d9534f;
+  font-weight: 500;
+}
+
+.risk-medium {
+  color: #d39e00;
+  font-weight: 500;
+}
+
+.risk-low {
+  color: #4cae4c;
+  font-weight: 500;
+}
+
+
+
+
+
+.hazoplist-table td .dropdown {
+  z-index: 100;
+  position: relative;
+}
+
+/* Optional: buttons inside dropdown more visible */
+.dropdown-content button {
+  font-size: 14px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+}
+
+/* -------- Responsive -------- */
+@media (max-width: 1024px) {
+  .hazoplist-table {
+    display: block;
+    overflow-x: auto;
   }
-  
-  .search-results li {
-    padding: 8px 12px;
-    cursor: pointer;
-    transition: background 0.2s;
+
+  .hazoplist-table th,
+  .hazoplist-table td {
+    padding: 8px 10px;
   }
-  
-  .search-results li:hover {
-    background-color: #f0f0f0;
+
+  .description-cell {
+    max-width: 180px;
   }
-  
-  /* Team Table */
-  .team-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-    font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+
+  .hazoplist-table th,
+  .hazoplist-table td {
+    font-size: 12px;
+    padding: 6px 8px;
   }
-  
-  .team-table th,
-  .team-table td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: left;
+
+  .description-cell {
+    max-width: 120px;
   }
-  
-  .team-table th {
-    background-color: #f5f5f5;
-    font-weight: 600;
+}
+
+
+
+
+
+
+
+.hazop-info {
+  border: 1px solid #ddd;
+  background-color: #fafafa;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #333;
+}
+
+.hazop-info h3 {
+  margin: 0 0 12px 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #111;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 6px;
+}
+
+.hazop-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px 20px;
+}
+
+.hazop-info-grid div {
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.hazop-info-grid div.full-width {
+  grid-column: 1 / -1;
+  /* span both columns for Description */
+}
+
+.hazop-info-grid div strong {
+  display: inline-block;
+  min-width: 120px;
+  font-weight: 500;
+  color: #555;
+}
+
+@media (max-width: 600px) {
+  .hazop-info-grid {
+    grid-template-columns: 1fr;
+    /* stack all fields on small screens */
+    gap: 6px 0;
   }
-  
-  .team-table tbody tr:nth-child(even) {
-    background-color: #fafafa;
+
+  .hazop-info-grid div strong {
+    min-width: 100px;
   }
-  
-  .team-table tbody tr:hover {
-    background-color: #f1f1f1;
-  }
-  
-  .team-table button {
-    padding: 4px 8px;
-    font-size: 0.8rem;
-    color: #fff;
-    background-color: #d9534f;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-  
-  .team-table button:hover {
-    background-color: #c9302c;
-  }
-  
-  /* Team Section Wrapper */
-  #team-section {
-    margin-top: 20px;
-  }
-  
-  #team-section input[type="text"] {
-    width: 100%;
-    padding: 6px 10px;
-    margin-bottom: 5px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    box-sizing: border-box;
-  }
-  
-  /* Optional: make search input and results look connected */
-  #team-section .search-results {
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-  }
-/* Wrapper for search input */
-.team-search-wrapper {
-    position: relative;
-    width: 100%;
-    margin-bottom: 5px;
-  }
-  
-  /* Search input */
-  .team-search-wrapper input[type="text"] {
-    width: 100%;
-    padding: 6px 35px 6px 10px; /* padding-right for icon */
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    box-sizing: border-box;
-  }
-  
-  /* Search icon */
-  .team-search-wrapper::after {
-    content: "\1F50D"; /* Unicode for magnifying glass 🔍 */
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    pointer-events: none; /* so clicking the icon still focuses input */
-    font-size: 16px;
-    color: #888;
-  }
-    
+}

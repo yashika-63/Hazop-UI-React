@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { FaTimes } from "react-icons/fa";
-import './HazopRegistration.css';
+import { FaSearch, FaTimes } from "react-icons/fa";
+import "./HazopRegistration.css";
 import { showToast } from "../CommonUI/CommonUI";
-
 
 const HazopRegistration = ({ closePopup }) => {
   const [formData, setFormData] = useState({
@@ -18,16 +17,21 @@ const HazopRegistration = ({ closePopup }) => {
 
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-
-  // Team search state
   const [teamSearch, setTeamSearch] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [hazopTeam, setHazopTeam] = useState([]);
   const [showTeamSearch, setShowTeamSearch] = useState(false);
+  const [confirmPopup, setConfirmPopup] = useState(null);
 
-  // -------------------------------
-  // VALIDATION RULES
-  // -------------------------------
+
+  useEffect(() => {
+    if (loading) {
+      document.body.classList.add("loading");
+    } else {
+      document.body.classList.remove("loading");
+    }
+  }, [loading]);
+
   const validate = () => {
     const newErrors = {};
 
@@ -37,25 +41,28 @@ const HazopRegistration = ({ closePopup }) => {
     }
     if (!formData.site.trim()) {
       newErrors.site = "Site is required.";
+      showToast("Site is required.", "warn");
     } else if (!/^[A-Za-z0-9\s,-]+$/.test(formData.site)) {
       newErrors.site = "Only letters, numbers, commas & hyphens allowed.";
     }
+
     if (!formData.department.trim()) {
       newErrors.department = "Department is required.";
+      showToast("Department is required.", "warn");
     } else if (!/^[A-Za-z\s]+$/.test(formData.department)) {
       newErrors.department = "Only alphabets allowed.";
+      showToast("Only alphabets are allowed in department.", "warn");
     }
+
     if (!formData.description.trim()) {
       newErrors.description = "Description is required.";
+      showToast("Description is required.", "warn");
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  // -------------------------------
-  // ON INPUT CHANGE
-  // -------------------------------
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({
@@ -64,9 +71,6 @@ const HazopRegistration = ({ closePopup }) => {
     });
   };
 
-  // -------------------------------
-  // TEAM SEARCH
-  // -------------------------------
   const handleTeamSearchChange = async (e) => {
     const value = e.target.value;
     setTeamSearch(value);
@@ -87,192 +91,243 @@ const HazopRegistration = ({ closePopup }) => {
   };
 
   const addTeamMember = (member) => {
-    if (!hazopTeam.some((m) => m.id === member.id)) {
+    if (!hazopTeam.some((m) => m.empCode === member.empCode)) {
       setHazopTeam([...hazopTeam, member]);
     }
     setTeamSearch("");
     setSearchResults([]);
   };
 
-  const removeTeamMember = (id) => {
-    setHazopTeam(hazopTeam.filter((m) => m.id !== id));
+  const removeTeamMember = (empCode) => {
+    setHazopTeam(hazopTeam.filter((m) => m.empCode !== empCode));
   };
 
-  // -------------------------------
-  // SAVE API CALL
-  // -------------------------------
+
   const handleSave = async () => {
     if (!validate()) return;
 
+    // CASE 1: No team selected
+    if (hazopTeam.length === 0) {
+      setConfirmPopup({
+        message: "You have not added any team for this HAZOP. Do you want to proceed without adding a team?",
+        yes: async () => {
+          setConfirmPopup(null);
+          await saveHazop();
+        },
+        no: () => {
+          setConfirmPopup(null);
+          showToast("Please click on Add HAZOP Team and proceed", "warn");
+        }
+      });
+      return;
+    }
+
+    // CASE 2: Team is present → ask confirmation before saving
+    setConfirmPopup({
+      message: "Do you want to save this HAZOP entry?",
+      yes: async () => {
+        setConfirmPopup(null);
+        await saveHazop();
+      },
+      no: () => setConfirmPopup(null)
+    });
+  };
+
+  const saveHazop = async () => {
     setLoading(true);
+
     try {
-      // 1️⃣ Save HAZOP entry
       const hazopResponse = await axios.post(
-        "http://localhost:5559/api/hazopRegistration/saveByCompany/1",
+        `http://localhost:5559/api/hazopRegistration/saveByCompany/1`,
         formData
       );
 
-      const hazopId = hazopResponse.data.id; // Assuming API returns id
+      const hazopId = hazopResponse.data.id;
 
-      // 2️⃣ Save team
       if (hazopTeam.length > 0) {
         await axios.post(
-          `http://localhost:5559/api/hazopTeam/saveTeam/1`,
-          {
-            hazopId,
-            team: hazopTeam.map((m) => ({ employeeId: m.id })),
-          }
+          `http://localhost:5559/api/hazopTeam/saveTeam/${hazopId}`,
+          hazopTeam.map((m) => m.empCode)
         );
       }
 
       showToast("HAZOP saved successfully!", "success");
       closePopup();
+
     } catch (err) {
       console.error("Save failed:", err);
       showToast("Failed to save HAZOP", "error");
     }
+
     setLoading(false);
+  };
+
+
+
+  const ConfirmationPopup = ({ message, onConfirm, onCancel }) => {
+    return (
+      <div className="confirm-overlay">
+        <div className="confirm-box">
+          <p>{message}</p>
+          <div className="confirm-buttons">
+            <button type="button" onClick={onCancel} className="cancel-btn">No</button>
+            <button type="button" onClick={onConfirm} className="confirm-btn">Yes</button>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
     <div>
+
+      {loading && (
+        <div className="loading-overlay">
+          <div className="loading-spinner"></div>
+        </div>
+      )}
+
       <div className="modal-header">
         HAZOP Registration
-        <button className="close-btn" onClick={closePopup}>
+        <button className="close-btn" onClick={closePopup} disabled={loading}>
           <FaTimes />
         </button>
       </div>
 
       <div className="modal-content">
-        {/* HAZOP Form */}
-        <label>HAZOP Date *</label>
-        <input
-          type="date"
-          name="hazopDate"
-          value={formData.hazopDate}
-          onChange={handleChange}
-        />
-        {errors.hazopDate && <p className="error">{errors.hazopDate}</p>}
-
-        <label>Site *</label>
-        <input
-          type="text"
-          name="site"
-          placeholder="e.g., Mumbai Refinery Unit 3"
-          value={formData.site}
-          onChange={handleChange}
-        />
-        {errors.site && <p className="error">{errors.site}</p>}
-
-        <label>Department *</label>
-        <input
-          type="text"
-          name="department"
-          placeholder="e.g., Process Safety"
-          value={formData.department}
-          onChange={handleChange}
-        />
-        {errors.department && <p className="error">{errors.department}</p>}
-
-        <label>Description *</label>
-        <textarea
-          name="description"
-          placeholder="Write HAZOP description..."
-          value={formData.description}
-          onChange={handleChange}
-        ></textarea>
-        {errors.description && <p className="error">{errors.description}</p>}
-
-        <div className="checkbox-row">
-          <label>
+        <div className="input-row">
+          <div className="form-group">
+            <span className="required-marker">*</span>
+            <label>HAZOP Date</label>
             <input
-              type="checkbox"
-              name="verificationStatus"
-              checked={formData.verificationStatus}
+              type="date"
+              name="hazopDate"
+              value={formData.hazopDate}
               onChange={handleChange}
+              disabled={loading}
             />
-            Verification Status
-          </label>
+          </div>
 
-          <label>
+          <div className="form-group">
+            <span className="required-marker">*</span>
+            <label>Site</label>
             <input
-              type="checkbox"
-              name="verificationComplitionStatus"
-              checked={formData.verificationComplitionStatus}
+              type="text"
+              name="site"
+              value={formData.site}
               onChange={handleChange}
+              disabled={loading}
             />
-            Verification Completion Status
-          </label>
+          </div>
 
-          <label>
+          <div className="form-group">
+            <span className="required-marker">*</span>
+            <label>Department</label>
             <input
-              type="checkbox"
-              name="completionStatus"
-              checked={formData.completionStatus}
+              type="text"
+              name="department"
+              value={formData.department}
               onChange={handleChange}
+              disabled={loading}
             />
-            Completion Status
-          </label>
+          </div>
         </div>
 
-        {/* --------------------- HAZOP TEAM --------------------- */}
-        <div style={{ marginTop: "20px" }}>
+        <div className="input-row">
+          <div className="form-group">
+            <span className="required-marker">*</span>
+            <label>Description</label>
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              disabled={loading}
+            ></textarea>
+          </div>
+        </div>
+
+        <div className="rightbtn-controls">
           <button
             type="button"
-            className="outline-btn"
+            className="add-btn"
             onClick={() => setShowTeamSearch(!showTeamSearch)}
+            disabled={loading}
           >
-            Add HAZOP Team
+            + Add HAZOP Team
           </button>
+        </div>
 
-          {showTeamSearch && (
-            <div className="team-search-wrapper">
+        {showTeamSearch && (
+          <div className="Search-container">
+            <div className="search-bar-wrapper">
               <input
                 type="text"
                 placeholder="Search employee..."
                 value={teamSearch}
                 onChange={handleTeamSearchChange}
+                disabled={loading}
               />
+              <FaSearch className="search-icon" />
+
               <ul className="search-results">
                 {searchResults.map((user) => (
-                  <li key={user.id} onClick={() => addTeamMember(user)}>
-                    {user.name} ({user.email || user.username})
+                  <li key={user.empCode} onClick={() => addTeamMember(user)}>
+                    {user.empCode}- ({user.emailId || "NA"}) ({user.department || 'NA'})
                   </li>
                 ))}
               </ul>
-
-              {/* Team table */}
-              {hazopTeam.length > 0 && (
-                <table className="team-table">
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Email/Username</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {hazopTeam.map((member) => (
-                      <tr key={member.id}>
-                        <td>{member.name}</td>
-                        <td>{member.email || member.username}</td>
-                        <td>
-                          <button onClick={() => removeTeamMember(member.id)}>
-                            Remove
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
-        {/* --------------------- Footer Buttons --------------------- */}
-        <div className="center-controls" style={{ marginTop: "20px" }}>
-          <button type="button" className="outline-btn" onClick={closePopup}>
+        {hazopTeam.length > 0 && (
+          <table className="team-table">
+            <thead>
+              <tr>
+                <th>Employee Code</th>
+                <th>Employee Name</th>
+                <th>Email Id</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {hazopTeam.map((member) => (
+                <tr key={member.empCode}>
+                  <td>{member.empCode}</td>
+                  <td>
+                    {member.firstName} {member.lastName}
+                  </td>
+                  <td>{member.emailId || "NA"}</td>
+                  <td>
+                    <button
+                      onClick={() => removeTeamMember(member.empCode)}
+                      disabled={loading}
+                    >
+                      Remove
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+        {confirmPopup && (
+          <ConfirmationPopup
+            message={confirmPopup.message}
+            onConfirm={confirmPopup.yes}
+            onCancel={confirmPopup.no}
+          />
+        )}
+
+        {/* Footer Buttons */}
+        <div className="center-controls">
+          <button
+            type="button"
+            className="outline-btn"
+            onClick={closePopup}
+            disabled={loading}
+          >
             Close
           </button>
 

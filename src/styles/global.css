@@ -1,11 +1,11 @@
 .coreContainer {
-    font-size: 12px;
-    line-height: 1.2;
-    color: #333;
-    width: 100%;
-    margin: 0;
-    padding: 0;
-    max-width: 1090px;
+  font-size: 12px;
+  line-height: 1.2;
+  color: #333;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  max-width: 1090px;
 }
 
 /* Add Node button */
@@ -21,6 +21,19 @@
   box-shadow: 0 10px 20px rgba(79, 70, 229, 0.35);
 }
 
+.create-btn {
+  background: linear-gradient(135deg, #eadbfd, #ba94e8);
+  border: none;
+  padding: 6px 10px;
+  font-weight: 600;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 13px;
+  color: black;
+  box-shadow: 0 10px 20px rgba(79, 70, 229, 0.35);
+
+}
+
 .add-btn:hover {
   background: linear-gradient(135deg, #5b6fd2, #162b7a);
   transform: translateY(-2px);
@@ -32,6 +45,7 @@
 .table-card {
   padding: 0;
   overflow: hidden;
+  width: 100%;
 }
 
 .table-card table {
@@ -46,7 +60,7 @@
 
 .table-card th,
 .table-card td {
-  padding: 8px 10px;
+  padding: 8px 8px;
   border-bottom: 1px solid #e5e7eb;
   text-align: left;
 }
@@ -87,8 +101,8 @@ h2 {
 }
 
 .form-group {
-  display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 .form-group label {
@@ -104,7 +118,7 @@ h2 {
 .form-group select,
 .form-group textarea {
   width: 100%;
-  padding: 10px 12px;
+  padding: 8px 10px;
   border-radius: 10px;
   border: 1px solid #e5e7eb;
   font-size: 14px;
@@ -119,7 +133,7 @@ h2 {
 .form-group textarea:focus {
   border-color: #0b0ea1;
   background: #ffffff;
-  box-shadow: 0 0 0 4px rgba(62, 63, 104, 0.2);
+  box-shadow: 0 0 0 4px rgba(169, 169, 169, 0.2);
 }
 
 .form-group input:hover,
@@ -129,18 +143,7 @@ h2 {
   box-shadow: 0 1px 3px rgba(101, 102, 178, 0.1);
 }
 
-.close-btn {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  cursor: pointer;
-  font-size: 20px;
-  color: #888;
-}
 
-.close-btn:hover {
-  color: #333;
-}
 
 .form-controls {
   display: flex;
@@ -170,10 +173,11 @@ button:focus, button:focus-visible {
 
 /*Three Dot menu*/
 
-.card-dropdown {
+.dropdown {
   position: absolute;
   top: 10px;
   right: 10px;
+  z-index: 10;
 }
 
 .dots-button {
@@ -202,8 +206,12 @@ button:focus, button:focus-visible {
   z-index: 200;
   overflow: hidden;
   backdrop-filter: blur(6px);
-
 }
+
+.dropdown.active .dropdown-content {
+  display: block;
+}
+
 
 .dropdown:hover .dropdown-content {
   display: block;
@@ -219,15 +227,27 @@ button:focus, button:focus-visible {
   cursor: pointer;
   font-size: 14px;
   outline: none;
+
 }
 
+.dropdown-content button:active {
+  background: linear-gradient(145deg, #f0f0f0, #dcdcdc);
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(2px);
+}
+
+.dropdown-content button:hover {
+  background-color: #f0f0f0;
+  color: #0066cc;
+  border-radius: 4px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  transform: scale(1.05);
+}
 
 /* Button Css */
-
-
 .close-btn {
   position: absolute;
-  top: 0px;
+  top: -20px;
   right: 0px;
   cursor: pointer;
   font-size: 20px;
@@ -254,7 +274,7 @@ button:focus, button:focus-visible {
   border-radius: 5px;
 }
 
-.roghtbtn-controls {
+.rightbtn-controls {
   display: flex;
   justify-content: flex-end;
   align-items: center;
@@ -268,13 +288,18 @@ button:focus, button:focus-visible {
   display: flex;
   justify-content: center;
   margin: 2%;
-
+  gap: 10px;
 }
+
+
 
 
 /* Required Marker */
 .required-marker {
   color: red;
+  font-size: 16px;
+  line-height: 1;
+  margin-bottom: 2px;
 }
 
 
@@ -296,10 +321,8 @@ button:focus, button:focus-visible {
   /* TL, TR, BR, BL */
   padding: 16px 20px !important;
   box-shadow:
-      0 6px 18px rgba(0, 0, 0, 0.15),
-      /* outer shadow */
-      inset 0 2px 6px rgba(255, 255, 255, 0.2);
-  /* inner highlight for 3D effect */
+    0 6px 18px rgba(0, 0, 0, 0.15),
+    inset 0 2px 6px rgba(255, 255, 255, 0.2);
   border: 1px solid #e0e0e0 !important;
   min-width: 300px;
   max-width: 400px;
@@ -310,8 +333,8 @@ button:focus, button:focus-visible {
 .my-toast:hover {
   transform: translateY(-3px);
   box-shadow:
-      0 8px 22px rgba(0, 0, 0, 0.2),
-      inset 0 2px 6px rgba(255, 255, 255, 0.25);
+    0 8px 22px rgba(0, 0, 0, 0.2),
+    inset 0 2px 6px rgba(255, 255, 255, 0.25);
 }
 
 /* Glossy highlight using pseudo-element */
@@ -348,4 +371,216 @@ button:focus, button:focus-visible {
 
 .my-toast-info .Toastify__progress-bar {
   background: #2196f3 !important;
+}
+
+
+
+
+
+
+/* Search-Bar Css */
+
+.Search-container {
+  display: flex;
+  justify-content: flex-start;
+  position: relative;
+  margin-top: 10px;
+}
+
+.search-bar-wrapper {
+  position: relative;
+  width: 250px;
+}
+
+.search-bar-wrapper input[type="text"] {
+  width: 100%;
+  padding: 8px 20px 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.search-bar-wrapper input[type="text"]:focus {
+  border-color: #020202;
+  box-shadow: 0 0 0 4px rgba(174, 173, 173, 0.2);
+  background: #fff;
+}
+
+.search-bar-wrapper .search-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #888;
+  font-size: 16px;
+  pointer-events: none;
+}
+
+.search-bar-wrapper .search-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 360px;
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  border-radius: 0 0 8px 8px;
+  background: #fff;
+  z-index: 100;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 2px;
+  padding: 0px;
+  list-style: decimal;
+  padding-left: 20px;
+  font-size: 14px;
+}
+
+.search-bar-wrapper .search-results li {
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+  width: 100%;
+  white-space: nowrap;
+}
+
+.search-bar-wrapper .search-results li:hover {
+  background-color: #f5f5f5;
+}
+
+
+
+
+/* Error message */
+.error {
+  color: red;
+  font-size: small;
+  padding: 0;
+  margin: 0;
+}
+
+
+
+/* Loading Spinner */
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.loading-spinner {
+  border: 6px solid #f3f3f3;
+  border-top: 6px solid #3498db;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Optional: Disable pointer events for the rest of the page */
+body.loading {
+  pointer-events: none;
+  user-select: none;
+}
+
+
+
+
+
+/* Confirmation Popup */
+
+.confirm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+}
+
+.confirm-box {
+  background: #fff;
+  padding: 20px 25px;
+  border-radius: 8px;
+  width: 400px;
+  text-align: center;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.confirm-buttons {
+  margin-top: 15px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.confirm-btn {
+  padding: 8px 18px;
+  background: #154c75;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.confirm-btn:disabled {
+  padding: 8px 18px;
+  background: #3c6889;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: not-allowed;
+}
+
+.cancel-btn {
+  padding: 8px 18px;
+  background: #aaa;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.confirm-btn:hover {
+  background: #045f9c;
+}
+
+.cancel-btn:hover {
+  background: #777;
+}
+
+
+
+/* 
+No data table message */
+.no-data1 {
+  text-align: center;
+  padding: 5px;
+  color: #9ca3af;
+  font-size: small;
+  font-style: italic;
 }
