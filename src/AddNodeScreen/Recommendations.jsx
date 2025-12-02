@@ -3,8 +3,10 @@ import { FaTimes } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { showToast } from "../CommonUI/CommonUI";
 
-const Recommendations = ({ onClose, onSave, initialRecommendations = [], nodeID }) => {
-  // Initialize with at least one empty recommendation if initialRecommendations is empty
+const Recommendations = ({ onClose, onSave, initialRecommendations = [], nodeID, nodeDetailId }) => {
+  const [errors, setErrors] = useState({});
+const [loading, setLoading] = useState(false);
+
   const initialArray =
     Array.isArray(initialRecommendations) && initialRecommendations.length > 0
       ? initialRecommendations
@@ -24,40 +26,34 @@ const Recommendations = ({ onClose, onSave, initialRecommendations = [], nodeID 
     ]);
   };
 
-  const handleChange = (index, field, value) => {
-    const updated = [...recommendations];
-    updated[index][field] = value;
-    setRecommendations(updated);
-  };
+const handleChange = (index, field, value) => {
+  const updated = [...recommendations];
+  updated[index][field] = value;
+  setRecommendations(updated);
+};
 
-  const handleSave = async () => {
-    try {
-      const response = await fetch(
-        `http://localhost:5559/api/nodeRecommendation/save/${nodeID}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(recommendations),
-        }
-      );
-
-      if (response.ok) {
-        const displayText = recommendations
-          .map((r) => r.recommendation)
-          .filter((r) => r.trim() !== "");
-        onSave(displayText);
-        showToast("Recommendations saved successfully!", "success");
-      } else {
-        showToast("Failed to save details.", "error");
-      }
-    } catch (error) {
-      console.error("Error saving recommendations:", error);
-      showToast("Error saving details.", "error");
+  const validate = () => {
+  const newErrors = {};
+  recommendations.forEach((rec, index) => {
+    if (!rec.recommendation) {
+      newErrors[`recommendation-${index}`] = "Recommendation is required.";
+      showToast("Recommendation is required", "warn");
     }
-    onClose();
-  };
+    if (!rec.remarkbyManagement) {
+      newErrors[`remarkbyManagement-${index}`] = "Remarks by management is required.";
+      showToast("Remarks by management is required", "warn");
+    }
+  });
+  setErrors(newErrors);
+  return Object.keys(newErrors).length === 0;
+};
+
+const handleSave = () => {
+  if (!validate()) return;
+  const displayText = recommendations.map((r) => r.recommendation).filter((r) => r.trim() !== "");
+  onSave(displayText);
+  onClose();
+};
 
   return (
     <div className="modal-overlay">
@@ -77,7 +73,7 @@ const Recommendations = ({ onClose, onSave, initialRecommendations = [], nodeID 
 
           {recommendations.map((rec, index) => (
             <div key={index} className="form-group">
-              <label>Recommendation</label>
+              <label> <span className="required-marker">* </span>Recommendation</label>
               <textarea
                 type="text"
                 rows={5}
@@ -86,7 +82,7 @@ const Recommendations = ({ onClose, onSave, initialRecommendations = [], nodeID 
                   handleChange(index, "recommendation", e.target.value)
                 }
               />
-              <label>Remarks by Management</label>
+              <label> <span className="required-marker">* </span>Remarks by Management</label>
               <input
                 type="text"
                 value={rec.remarkbyManagement}

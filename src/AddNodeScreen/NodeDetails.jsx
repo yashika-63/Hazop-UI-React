@@ -4,14 +4,15 @@ import NodeDetailsPopup from "./NodeDetailsPopup";
 import { formatDate } from "../CommonUI/CommonUI";
 import NodeDetailsUpdatePopup from "./NodeDetailsUpdatePopup";
 import { FaEdit, FaEllipsisV } from "react-icons/fa";
-import TextareaAutosize from 'react-textarea-autosize';
+import TextareaAutosize from "react-textarea-autosize";
 
 const NodeDetails = () => {
-  const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const node = location.state?.node;
 
+  const { id } = location.state || {};
+
+  const [node, setNode] = useState(null);
   const [showDetailPopup, setShowDetailPopup] = useState(false);
   const [details, setDetails] = useState([]);
   const [showUpdatePopup, setShowUpdatePopup] = useState(false);
@@ -39,36 +40,35 @@ const NodeDetails = () => {
     </div>
   );
 
-  useEffect(() => {
-    const fetchDetails = async () => {
-      try {
-        const response = await fetch(
-          `http://localhost:5559/api/hazopNodeDetail/node/${id}`
-        );
-
-        if (!response.ok) {
-          const text = await response.text();
-          console.error("Failed to fetch node details:", text);
-          setDetails([]); // fallback to empty
-          return;
-        }
-
-        const contentType = response.headers.get("content-type") || "";
-        if (!contentType.includes("application/json")) {
-          const text = await response.text();
-          console.error("Expected JSON, got:", text);
-          setDetails([]);
-          return;
-        }
-
-        const data = await response.json();
-        setDetails(Array.isArray(data) ? data : [data]);
-      } catch (error) {
-        console.error("Error fetching node details:", error);
-        setDetails([]);
+  const fetchDetails = async () => {
+    if (!id) return;
+    try {
+      const response = await fetch(
+        `http://localhost:5559/api/hazopNodeDetail/node/${id}`
+      );
+      if (!response.ok) {
+        const text = await response.text();
+        console.error("Failed to fetch node details:", text);
+        setDetails([]); // fallback to empty
+        return;
       }
-    };
 
+      const contentType = response.headers.get("content-type") || "";
+      if (!contentType.includes("application/json")) {
+        const text = await response.text();
+        console.error("Expected JSON, got:", text);
+        setDetails([]);
+        return;
+      }
+
+      const data = await response.json();
+      setDetails(Array.isArray(data) ? data : [data]);
+    } catch (error) {
+      console.error("Error fetching node details:", error);
+      setDetails([]);
+    }
+  };
+  useEffect(() => {
     if (id) fetchDetails();
   }, [id]);
 
@@ -87,59 +87,79 @@ const NodeDetails = () => {
     setShowUpdatePopup(true);
   };
 
+function ShowMoreText({ text, previewLength = 250 }) {
+  const [expanded, setExpanded] = useState(false);
+
+  const preview = text?.slice(0, previewLength);
+
   return (
     <div>
-      <div>
+      <div className="showmore-text">
+        {expanded ? text : preview + (text.length > previewLength ? "..." : "")}
+      </div>
+
+      {text.length > previewLength && (
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="showmore-btn btn-container"
+        >
+          {expanded ? "Show Less" : "Show More"}
+        </button>
+      )}
+    </div>
+  );
+}
+
+  return (
+    <div>
+      <div className="node-header">
         <button className="nd-back-btn" onClick={() => navigate(-1)}>
           ← Back
         </button>
         <h1>Node {node?.nodeNumber || id} Details</h1>
       </div>
 
-      <div className="hazop-info-card">
-        <div className="info-grid">
-          <div className="info-item">
-            <span className="label">Node No.</span>
-            <span className="value">{node?.nodeNumber}</span>
+      <div className="hazop-info">
+        <div className="hazop-info-grid">
+          <div>
+            <strong>Node No.:</strong> {node?.nodeNumber}
           </div>
-          <div className="info-item">
-            <span className="label">Registration Date</span>
-            <span className="value">
-              {node?.registrationDate && formatDate(node.registrationDate)}
-            </span>
+          <div>
+            <strong>Registration Date:</strong>
+            {node?.registrationDate && formatDate(node.registrationDate)}
           </div>
-          <div className="info-item">
-            <span className="label">Title</span>
-            <span className="value">{node?.title}</span>
+          <div>
+            <strong>Title:</strong>
+            {node?.title}
           </div>
-          <div className="info-item">
-            <span className="label">Design Intent</span>
-            <span className="value">{node?.designIntent}</span>
+          <div>
+            <strong>Design Intent:</strong>
+            {node?.designIntent}
           </div>
-          <div className="info-item">
-            <span className="label">Equipment</span>
-            <span className="value">{node?.equipment}</span>
+          <div>
+            <strong>Equipment:</strong>
+            {node?.equipment}
           </div>
-          <div className="info-item">
-            <span className="label">Controls</span>
-            <span className="value">{node?.controls}</span>
+          <div>
+            <strong>Controls:</strong>
+            {node?.controls}
           </div>
-          <div className="info-item">
-            <span className="label">Temperature</span>
-            <span className="value">{node?.temperature}</span>
+          <div>
+            <strong>Temperature:</strong>
+            {node?.temperature}
           </div>
-          <div className="info-item">
-            <span className="label">Pressure</span>
-            <span className="value">{node?.pressure}</span>
+          <div>
+            <strong>Pressure:</strong>
+            {node?.pressure}
           </div>
-          <div className="info-item">
-            <span className="label">Quantity / Flow Rate</span>
-            <span className="value">{node?.quantityFlowRate}</span>
+          <div>
+            <strong>Quantity/ Flow Rate:</strong>
+            {node?.quantityFlowRate}
           </div>
         </div>
       </div>
 
-      <div class="btn-container">
+      <div className="btn-container">
         <button className="add-btn" onClick={() => setShowDetailPopup(true)}>
           + Create Node Detail
         </button>
@@ -154,92 +174,77 @@ const NodeDetails = () => {
             </p>
           ) : (
             details.map((d, index) => (
-              <div key={index} className="nd-detail-card">
+              <div key={d.id} className="nd-detail-card">
                 {renderDropdown(d)}
                 <div className="nd-detail-header">
-                    <div>
-                  <h2>
-                    General Parameter: {d.generalParameter}
-                  </h2>
-                  <p>
-                      Specific Parameter: {d.specificParameter}
-                      </p>
-                      <p>
-                      Guide Word: {d.guideWord}
-                      </p>
+                  <div>
+                    <h2>General Parameter: {d.generalParameter}</h2>
+                    <p>Specific Parameter: {d.specificParameter}</p>
+                    <p>Guide Word: {d.guidWord}</p>
                   </div>
                   <span className="nd-detail-tag">
                     Risk Rating: {d.riskRating || "-"}
                   </span>
+                  <span className="nd-detail-tag">
+                    Additional Risk Rating: {d.additionalRiskRating || "-"}
+                  </span>
                 </div>
 
                 <div className="input-row">
+                  <div className="form-group">
+                    <span>Causes</span>
+                    <ShowMoreText text={d.causes} />
+                  </div>
+                  <div className="form-group">
+                    <span>Consequences</span>
+                    <ShowMoreText text={d.consequences} />
+                  </div>
+                  <div className="form-group">
+                    <span>Deviation</span>
+                    <ShowMoreText text={d.deviation} />
+                  </div>
+                </div>
+
+                <div className="grid-row">
+                  <div className="form-group existing-control">
+                    <label>Existing control</label>
+                    <ShowMoreText
+                      text={d.existineControl}
+                    />
+                  </div>
+                  <div className="existing-metrics">
                     <div className="form-group">
-                      <span>Causes</span>
-                       <TextareaAutosize className="textareaFont" value={d.causes} />
+                      <label>Probability</label>
+                      <input value={d.existineProbability || "-"} />
                     </div>
                     <div className="form-group">
-                      <span>Consequences</span>
-                       <TextareaAutosize className="textareaFont" value={d.consequences} />
+                      <label>Severity</label>
+                      <input value={d.existingSeverity || "-"} />
                     </div>
                     <div className="form-group">
-                      <span>Deviation</span>
-                       <TextareaAutosize className="textareaFont" value={d.deviation} />
+                      <label>Risk Rating</label>
+                      <input value={d.riskRating || "-"} />
                     </div>
                   </div>
+                </div>
 
-                  <div className="nd-detail-col">
-                    <h3 className="nd-section-title">Existing Controls</h3>
-                    <div className="nd-row">
-                      <span className="nd-label">Control</span>
-                      <span className="nd-value">{d.existingControl}</span>
+                <div className="grid-row">
+                  <div className="form-group existing-control">
+                    <label>Additional Control</label>
+                    <ShowMoreText text={d.additionalControl} />
+                  </div>
+                  <div className="existing-metrics">
+                    <div className="form-group">
+                      <label>Probability</label>
+                      <input value={d.additionalProbability || "-"} />
                     </div>
-                    <div className="nd-prob-sev-row">
-                      <div>
-                        <span className="nd-label">Probability</span>
-                        <span className="nd-chip">
-                          {d.existingProbability || "-"}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="nd-label">Severity</span>
-                        <span className="nd-chip">
-                          {d.existingSeverity || "-"}
-                        </span>
-                      </div>
+                    <div className="form-group">
+                      <label>Severity</label>
+                      <input value={d.additionalSeverity || "-"} />
                     </div>
-                    <div className="nd-row">
-                      <span className="nd-label">Risk Rating</span>
-                      <span className="nd-chip nd-chip-primary">
-                        {d.riskRating || "-"}
-                      </span>
-                    </div>
-
-                  <div className="nd-detail-col">
-                    <h3 className="nd-section-title">Additional Controls</h3>
-                    <div className="nd-row">
-                      <span className="nd-label">Control</span>
-                      <span className="nd-value">{d.additionalControl}</span>
-                    </div>
-                    <div className="nd-prob-sev-row">
-                      <div>
-                        <span className="nd-label">Probability</span>
-                        <span className="nd-chip">
-                          {d.additionalProbability || "-"}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="nd-label">Severity</span>
-                        <span className="nd-chip">
-                          {d.additionalSeverity || "-"}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="nd-row">
-                      <span className="nd-label">Additional Risk Rating</span>
-                      <span className="nd-chip nd-chip-secondary">
-                        {d.additionalRiskRating || "-"}
-                      </span>
+                    <div className="form-group">
+                      <label>Additional Risk Rating</label>
+                      <input value={d.additionalRiskRating || "-"} />
                     </div>
                   </div>
                 </div>

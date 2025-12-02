@@ -33,43 +33,56 @@ const NodePopup = ({ onClose, onSaved }) => {
     const newErrors = {};
 
     if (!form.nodeNumber) {
-      newErrors.nodeNumber = "Node Number is required.";
+      newErrors.nodeNumber = "Node number is required.";
+      showToast("Node number is required", "warn");
     }
     if (!form.date) {
       newErrors.date = "Date is required.";
+      showToast("Date is required", "warn");
     }
     if (!form.designIntent.trim()) {
-      newErrors.designIntent = "Design Intent is required.";
+      newErrors.designIntent = "Design intent is required.";
+      showToast("Design Intent is required", "warn");
     }
     if (!form.pIdRevision) {
       newErrors.pIdRevision = "P&ID No. & Revision is required.";
+      showToast("P&ID No. is required", "warn");
     }
     if (!form.title.trim()) {
-      newErrors.title = "Node Title is required.";
+      newErrors.title = "Node title is required.";
+      showToast("Node title is required", "warn");
     }
     if (!form.sopNo.trim()) {
       newErrors.sopNo = "SOP Number is required.";
+      showToast("SOP number is required", "warn");
     }
     if (!form.sopDate) {
       newErrors.sopDate = "SOP Date is required.";
+      showToast("SOP date is required", "warn");
     }
     if (!form.equipment.trim()) {
       newErrors.equipment = "Equipment is required.";
+      showToast("Equipment is required", "warn");
     }
     if (!form.controls.trim()) {
       newErrors.controls = "Controls are required.";
+      showToast("Controls are required", "warn");
     }
     if (!form.chemicalAndUtilities.trim()) {
       newErrors.chemicalAndUtilities = "Chemicals and utilities are required.";
+      showToast("Chemicals and utilities are required", "warn");
     }
     if (!form.temperature.trim()) {
       newErrors.temperature = "Temperature is required.";
+      showToast("Temperature is required", "warn");
     }
     if (!form.pressure.trim()) {
       newErrors.pressure = "Pressure is required.";
+      showToast("Pressure is required", "warn");
     }
     if (!form.quantityFlowRate.trim()) {
       newErrors.quantityFlowRate = "Quantity is required.";
+      showToast("Quantity is required", "warn");
     }
 
     setErrors(newErrors);
@@ -136,7 +149,7 @@ const NodePopup = ({ onClose, onSaved }) => {
               <div className="input-row">
                 <div className="form-group">
                   <label>
-                    <label className="required-marker">* </label>Node Number
+                    <span className="required-marker">* </span>Node Number
                   </label>
                   <input
                     type="number"
@@ -144,14 +157,11 @@ const NodePopup = ({ onClose, onSaved }) => {
                     value={form.nodeNumber}
                     onChange={handleChange}
                   />
-                  {errors.nodeNumber && (
-                    <p className="error">{errors.nodeNumber}</p>
-                  )}
                 </div>
 
                 <div className="form-group">
                   <label>
-                    <label className="required-marker">* </label>Node Date
+                    <span className="required-marker">* </span>Node Date
                   </label>
                   <input
                     type="date"
@@ -160,12 +170,11 @@ const NodePopup = ({ onClose, onSaved }) => {
                     onChange={handleChange}
                     max={new Date().toISOString().split("T")[0]}
                   />
-                  {errors.date && <p className="error">{errors.date}</p>}
                 </div>
 
                 <div className="form-group">
                   <label>
-                    <label className="required-marker">* </label>P&ID No. &
+                    <span className="required-marker">* </span>P&ID No. &
                     Revision
                   </label>
                   <input
@@ -174,14 +183,11 @@ const NodePopup = ({ onClose, onSaved }) => {
                     value={form.pIdRevision}
                     onChange={handleChange}
                   />
-                  {errors.pIdRevision && (
-                    <p className="error">{errors.pIdRevision}</p>
-                  )}
                 </div>
 
                 <div className="form-group ">
                   <label>
-                    <label className="required-marker">* </label>Node Title
+                    <span className="required-marker">* </span>Node Title
                   </label>
                   <input
                     type="text"
@@ -189,14 +195,13 @@ const NodePopup = ({ onClose, onSaved }) => {
                     value={form.title}
                     onChange={handleChange}
                   />
-                  {errors.title && <p className="error">{errors.title}</p>}
                 </div>
               </div>
 
               {/* Design / P&ID */}
               <div className="form-group">
                 <label>
-                  <label className="required-marker">* </label>Design Intent
+                  <span className="required-marker">* </span>Design Intent
                 </label>
                 <textarea
                   name="designIntent"
@@ -204,16 +209,13 @@ const NodePopup = ({ onClose, onSaved }) => {
                   rows={3}
                   onChange={handleChange}
                 />
-                {errors.designIntent && (
-                  <p className="error">{errors.designIntent}</p>
-                )}
               </div>
 
               {/* SOP */}
               <div className="input-row">
                 <div className="form-group">
                   <label>
-                    <label className="required-marker">* </label>SOP Number
+                    <span className="required-marker">* </span>SOP Number
                   </label>
                   <input
                     type="text"
@@ -221,12 +223,11 @@ const NodePopup = ({ onClose, onSaved }) => {
                     value={form.sopNo}
                     onChange={handleChange}
                   />
-                  {errors.sopNo && <p className="error">{errors.sopNo}</p>}
                 </div>
 
                 <div className="form-group">
                   <label>
-                    <label className="required-marker">* </label>SOP Date
+                    <span className="required-marker">* </span>SOP Date
                   </label>
                   <input
                     type="date"
@@ -235,12 +236,11 @@ const NodePopup = ({ onClose, onSaved }) => {
                     onChange={handleChange}
                                       max={new Date().toISOString().split("T")[0]}
 />
-                  {errors.sopDate && <p className="error">{errors.sopDate}</p>}
                 </div>
 
                 <div className="form-group">
                   <label>
-                    <label className="required-marker">* </label>Temperature
+                    <span className="required-marker">* </span>Temperature
                   </label>
                   <input
                     type="text"
@@ -248,14 +248,11 @@ const NodePopup = ({ onClose, onSaved }) => {
                     value={form.temperature}
                     onChange={handleChange}
                   />
-                  {errors.temperature && (
-                    <p className="error">{errors.temperature}</p>
-                  )}
                 </div>
 
                 <div className="form-group">
                   <label>
-                    <label className="required-marker">* </label>Pressure, barg
+                    <span className="required-marker">* </span>Pressure, barg
                   </label>
                   <input
                     type="text"
@@ -263,7 +260,6 @@ const NodePopup = ({ onClose, onSaved }) => {
                     value={form.pressure}
                     onChange={handleChange}
                   />
-                                {errors.pressure && <p className="error">{errors.pressure}</p>}
 </div>
               </div>
 
@@ -271,7 +267,7 @@ const NodePopup = ({ onClose, onSaved }) => {
               <div className="input-row">
                 <div className="form-group">
                   <label>
-                    <label className="required-marker">* </label>Equipment
+                    <span className="required-marker">* </span>Equipment
                   </label>
                   <input
                     type="text"
@@ -279,14 +275,11 @@ const NodePopup = ({ onClose, onSaved }) => {
                     value={form.equipment}
                     onChange={handleChange}
                   />
-                  {errors.equipment && (
-                    <p className="error">{errors.equipment}</p>
-                  )}
                 </div>
 
                 <div className="form-group">
                   <label>
-                    <label className="required-marker">* </label>Controls
+                    <span className="required-marker">* </span>Controls
                   </label>
                   <input
                     type="text"
@@ -294,15 +287,12 @@ const NodePopup = ({ onClose, onSaved }) => {
                     value={form.controls}
                     onChange={handleChange}
                   />
-                  {errors.controls && (
-                    <p className="error">{errors.controls}</p>
-                  )}
                 </div>
 
                 {/* Chemicals */}
                 <div className="form-group full-width">
                   <label>
-                    <label className="required-marker">* </label>Chemicals and
+                    <span className="required-marker">* </span>Chemicals and
                     utilities
                   </label>
                   <input
@@ -312,16 +302,13 @@ const NodePopup = ({ onClose, onSaved }) => {
                     rows={2}
                     onChange={handleChange}
                   />
-                  {errors.chemicalAndUtilities && (
-                    <p className="error">{errors.chemicalAndUtilities}</p>
-                  )}
                 </div>
 
                 {/* Process conditions */}
                 <div className="input-row">
                   <div className="form-group">
                     <label>
-                      <label className="required-marker">* </label>Quantity
+                      <span className="required-marker">* </span>Quantity
                     </label>
                     <input
                       type="text"
@@ -329,9 +316,6 @@ const NodePopup = ({ onClose, onSaved }) => {
                       value={form.quantityFlowRate}
                       onChange={handleChange}
                     />
-                    {errors.quantityFlowRate && (
-                      <p className="error">{errors.quantityFlowRate}</p>
-                    )}
                   </div>
                 </div>
               </div>

@@ -27,7 +27,7 @@ const App = () => {
               <Route path='/HazopList' element={<HazopList/>}/>
               <Route path='/RequestHandler' element={<RequestHandler/>}/>
               <Route path="/HazopPage" element={<HazopPage />} />
-              <Route path='/node/:id' element={<NodeDetails />} />
+              <Route path='/NodeDetails' element={<NodeDetails />} />
             </Routes>
             <ToastContainer />
       </div>

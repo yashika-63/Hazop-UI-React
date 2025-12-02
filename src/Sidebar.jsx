@@ -17,7 +17,10 @@ const Sidebar = ({ isOpen }) => {
       <ul className="menu-list">
         {menuItems.map((item, index) => (
           <li key={index}>
-            <NavLink to={item.path} className="menu-link" activeClassName="active">
+<NavLink
+  to={item.path}
+  className={({ isActive }) => isActive ? "menu-link active" : "menu-link"}
+>
               <span className="icon">{item.icon}</span>
               {isOpen && <span className="text">{item.name}</span>}
             </NavLink>
