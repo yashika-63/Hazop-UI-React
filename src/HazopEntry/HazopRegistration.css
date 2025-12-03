@@ -1,27 +1,3 @@
-/* Search Results Dropdown */
-.search-results {
-  list-style: decimal;
-  margin: 5px 0 0 0;
-  padding: 0;
-  max-height: 150px;
-  overflow-y: auto;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  background-color: #fff;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  z-index: 100;
-}
-
-.search-results li {
-  padding: 8px 12px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.search-results li:hover {
-  background-color: #f0f0f0;
-}
-
 
 
 .hazoptable-wrapper {
@@ -186,6 +162,7 @@
 .hazoplist-table td .dropdown {
   z-index: 100;
   position: relative;
+  
 }
 
 /* Optional: buttons inside dropdown more visible */

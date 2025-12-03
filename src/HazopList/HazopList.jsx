@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { FaEllipsisV, FaFilePdf, FaHistory } from "react-icons/fa";
 import HazopReport from "../Reports/HazopReport";
+import { strings } from "../string";
 import HazopRevision from "./HazopRevision";
 
 const HazopList = () => {
@@ -25,7 +26,7 @@ const HazopList = () => {
     const fetchHazopData = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5559/api/hazopRegistration/filter?companyId=1&status=true&completionStatus=true&sendForVerification=false"
+          `http://${strings.localhost}/api/hazopRegistration/filter?companyId=1&status=true&completionStatus=true&sendForVerification=false`
         );
         setHazopData(response.data);
         setLoading(false);

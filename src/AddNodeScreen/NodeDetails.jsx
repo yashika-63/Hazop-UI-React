@@ -39,7 +39,7 @@ const [showRiskPopup, setShowRiskPopup] = useState(false);
   };
 
   const renderDropdown = (item) => (
-    <div className="dropdown card-dropdown">
+    <div className="dropdown">
       <button className="dots-button" onClick={() => toggleDropdown(item.id)}>
         <FaEllipsisV />
       </button>

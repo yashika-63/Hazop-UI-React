@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FaEllipsisV, FaEye, FaTimes } from "react-icons/fa";
 import './Approval.css';
-import { showToast } from "../CommonUI/CommonUI";
+import { formatDate, showToast } from "../CommonUI/CommonUI";
+import { strings } from "../string";
 
 const HazopTeamAcceptanceApproval = () => {
     const [teamData, setTeamData] = useState([]);
@@ -14,35 +15,35 @@ const HazopTeamAcceptanceApproval = () => {
     const [processing, setProcessing] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
     const [confirmAction, setConfirmAction] = useState(null);
-    const [hazopDetails, setHazopDetails] = useState(null);
     const [hazopLoading, setHazopLoading] = useState(false);
 
-    const empCode = "Dhananjay patil";
+    const empCode = localStorage.getItem("empCode");
 
     const toggleDropdown = (id) => {
         setOpenDropdown(openDropdown === id ? null : id);
     };
 
+
+    const fetchTeamData = async () => {
+        try {
+            const response = await axios.get(`http://${strings.localhost}/api/hazopTeam/getDataByEmployee`, {
+                params: {
+                    empCode,
+                    sendForAcceptance: 1,
+                    actionTaken: 0
+                }
+            });
+            setTeamData(response.data || []);
+        } catch (err) {
+            console.error(err);
+            setError("Failed to fetch HAZOP team data.");
+        } finally {
+            setLoading(false);
+        }
+    };
     useEffect(() => {
-        const fetchTeamData = async () => {
-            try {
-                const response = await axios.get(`http://localhost:5559/api/hazopTeam/getDataByEmployee`, {
-                    params: {
-                        empCode,
-                        sendForAcceptance: 1,
-                        actionTaken: 0
-                    }
-                });
-                setTeamData(response.data || []);
-            } catch (err) {
-                console.error(err);
-                setError("Failed to fetch HAZOP team data.");
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchTeamData();
-    }, []);
+    }, [empCode]);
 
     const renderDropdown = (item) => (
         <div className="dropdown">
@@ -63,23 +64,6 @@ const HazopTeamAcceptanceApproval = () => {
     const openRecordModal = async (record) => {
         setSelectedRecord(record);
         setShowModal(true);
-
-        const hazopId = record.hazopId || record.id;
-
-        setHazopLoading(true);
-        try {
-            const response = await axios.get(
-                `http://localhost:5559/api/hazopRegistration/by-id`,
-                { params: { hazopId } }
-            );
-
-            setHazopDetails(response.data);
-        } catch (err) {
-            console.error(err);
-            showToast("Failed to load HAZOP details.", "error");
-        } finally {
-            setHazopLoading(false);
-        }
     };
 
 
@@ -102,7 +86,7 @@ const HazopTeamAcceptanceApproval = () => {
             const teamId = selectedRecord.id;
             const empCode = selectedRecord.empCode;
 
-            await axios.put(`http://localhost:5559/api/hazopTeam/updateAction`, null, {
+            await axios.put(`http://${strings.localhost}/api/hazopTeam/updateAction`, null, {
                 params: {
                     teamId,
                     empCode,
@@ -131,10 +115,10 @@ const HazopTeamAcceptanceApproval = () => {
             <table className="hazoplist-table">
                 <thead>
                     <tr>
-                        <th>HAZOP ID</th>
-                        <th>Team Member</th>
+                        <th>Sr.No</th>
+                        <th>Hazop Site</th>
                         <th>Department</th>
-                        <th>Email Id</th>
+                        <th>Hazop Creation Date</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -148,10 +132,10 @@ const HazopTeamAcceptanceApproval = () => {
                     ) : (
                         teamData.map((item, idx) => (
                             <tr key={idx}>
-                                <td>{item.id}</td>
-                                <td>{item.employeeName || item.empCode}</td>
-                                <td>{item.dimension1 || "-"}</td>
-                                <td>{item.emailId || '-'}</td>
+                                <td>{idx+1}</td>
+                                <td>{item.javaHazopRegistration?.site || '-'}</td>
+                                <td>{item.javaHazopRegistration?.department || "-"}</td>
+                                <td>{formatDate(item.javaHazopRegistration?.hazopCreationDate) || "-"}</td>
                                 <td>{renderDropdown(item)}</td>
                             </tr>
                         ))
@@ -162,34 +146,35 @@ const HazopTeamAcceptanceApproval = () => {
             {showModal && selectedRecord && (
                 <div className="modal-overlay">
                     <div className="modal-body">
+
                         <div className="modal-header">
                             <buttton type="button" className="close-btn" onClick={closeModal}><FaTimes /></buttton>
-                            <h4>HAZOP  Details</h4>
+                            <h4 className="centerText">HAZOP  Details</h4>
                         </div>
 
                         {hazopLoading ? (
                             <p>Loading HAZOP details...</p>
-                        ) : hazopDetails ? (
+                        ) : teamData ? (
                             <div className="details-container">
 
                                 <div className="details-row">
-                                    <span className="label">Title:</span>
-                                    <span className="value">{hazopDetails.title || "-"}</span>
+                                    <span className="label">Site:</span>
+                                    <span className="value">{selectedRecord.javaHazopRegistration?.site || "-"}</span>
                                 </div>
 
                                 <div className="details-row">
                                     <span className="label">Description:</span>
-                                    <span className="value">{hazopDetails.description || "-"}</span>
+                                    <span className="value">{selectedRecord.javaHazopRegistration?.description || "-"}</span>
                                 </div>
 
                                 <div className="details-row">
                                     <span className="label">Created By:</span>
-                                    <span className="value">{hazopDetails.createdBy || "-"}</span>
+                                    <span className="value">{selectedRecord.javaHazopRegistration?.empCode || "-"}</span>
                                 </div>
 
                                 <div className="details-row">
-                                    <span className="label">Created Date:</span>
-                                    <span className="value">{hazopDetails.createdDate || "-"}</span>
+                                    <span className="label">Hazop Creation Date:</span>
+                                    <span className="value">{formatDate(selectedRecord.javaHazopRegistration?.hazopCreationDate) || "-"}</span>
                                 </div>
 
                             </div>
@@ -198,11 +183,7 @@ const HazopTeamAcceptanceApproval = () => {
                         )}
 
                         <div className="details-container">
-                            <div className="details-row">
-                                <span className="label">HAZOP ID:</span>
-                                <span className="value">{selectedRecord.id}</span>
-                            </div>
-
+                         
                             <div className="details-row">
                                 <span className="label">Team Member:</span>
                                 <span className="value">{selectedRecord.employeeName || selectedRecord.empCode}</span>
@@ -210,7 +191,7 @@ const HazopTeamAcceptanceApproval = () => {
 
                             <div className="details-row">
                                 <span className="label">Department:</span>
-                                <span className="value">{selectedRecord.dimension1 || "-"}</span>
+                                <span className="value">{selectedRecord.javaHazopRegistration?.department || "-"}</span>
                             </div>
 
                             <div className="details-row">
@@ -235,42 +216,46 @@ const HazopTeamAcceptanceApproval = () => {
                             <button type="button" disabled={processing} onClick={() => handleApproveReject(false)} className="rejectBtn">Reject</button>
                             <button type="button" disabled={processing} onClick={closeModal} className="cancel-btn">Close</button>
                         </div>
-                    </div>
 
-                    {/* Custom Confirmation Modal */}
-                    {showConfirm && (
-                        <div className="confirm-overlay">
-                            <div className="confirm-box">
-                                <h4>Confirmation</h4>
-                                <p>Are you sure you want to {confirmAction ? "APPROVE" : "REJECT"} this record?</p>
-                                <div className="confirm-buttons">
-                                    <button
-                                        disabled={processing}
-                                        onClick={() => setShowConfirm(false)}
-                                        className="cancel-btn"
-                                    >
-                                        No
-                                    </button>
 
-                                    <button
-                                        disabled={processing}
-                                        onClick={confirmActionApi}
-                                        className="confirm-btn"
-                                    >
-                                        {processing ? (
-                                            <>
-                                                <span className="spinner"></span> {confirmAction ? "Approving..." : "Rejecting..."}
-                                            </>
-                                        ) : (
-                                            "Yes"
-                                        )}
-                                    </button>
+                        {/* Custom Confirmation Modal */}
+                        {showConfirm && (
+                            <div className="confirm-overlay">
+                                <div className="confirm-box">
+                                    <h4>Confirmation</h4>
+                                    <p>Are you sure you want to {confirmAction ? "APPROVE" : "REJECT"} this record?</p>
+                                    <div className="confirm-buttons">
+                                        <button
+                                        type="button"
+                                            disabled={processing}
+                                            onClick={() => setShowConfirm(false)}
+                                            className="cancel-btn"
+                                        >
+                                            No
+                                        </button>
+
+                                        <button
+                                        type="button"
+                                            disabled={processing}
+                                            onClick={confirmActionApi}
+                                            className="confirm-btn"
+                                        >
+                                            {processing ? (
+                                                <>
+                                                    <span className="spinner"></span> {confirmAction ? "Approving..." : "Rejecting..."}
+                                                </>
+                                            ) : (
+                                                "Yes"
+                                            )}
+                                        </button>
+                                    </div>
+
                                 </div>
-
                             </div>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
+
             )}
         </div>
     );

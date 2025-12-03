@@ -1,455 +1,533 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { PDFViewer, Document, Page, View, Text, Image, pdf } from "@react-pdf/renderer";
-import pdfStyles from "./pdfStyles";
+import { Document, Page, Text, View, StyleSheet, PDFViewer, Image } from "@react-pdf/renderer";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
+import { strings } from "../string";
+
+const styles = StyleSheet.create({
+    page: { paddingTop: 120, paddingBottom: 60, paddingHorizontal: 40, fontFamily: 'Helvetica', fontSize: 10, color: '#333', backgroundColor: '#fff' },
+    headerContainer: { position: 'absolute', top: 0, left: 0, right: 0, height: 100, paddingHorizontal: 40, paddingTop: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderBottomWidth: 2, borderBottomColor: '#0056b3' },
+    logo: { width: 60, height: 60, objectFit: 'contain' },
+    headerTitleBlock: { textAlign: 'center', flex: 1 },
+    companyName: { fontSize: 16, fontWeight: 'bold', color: '#003366', textTransform: 'uppercase' },
+    reportTitle: { fontSize: 12, color: '#555', marginTop: 4, letterSpacing: 1 },
+    headerMeta: { textAlign: 'right', minWidth: 100 },
+    metaText: { fontSize: 9, color: '#666' },
+    footerContainer: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 50, paddingHorizontal: 40, borderTopWidth: 1, borderTopColor: '#ccc', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    footerText: { fontSize: 9, color: '#888' },
+    section: { marginBottom: 20 },
+    sectionTitle: { fontSize: 12, fontWeight: 'bold', color: '#0056b3', marginBottom: 10, borderBottomWidth: 1, borderBottomColor: '#ddd', paddingBottom: 4 },
+    infoCard: { backgroundColor: '#f1f3f5', padding: 12, borderRadius: 6, marginBottom: 15 },
+    infoItem: { marginBottom: 6 }, infoCard: {
+        backgroundColor: '#f1f3f5',
+        padding: 12,
+        borderRadius: 6,
+        marginBottom: 15
+    },
+
+    // Ensure that infoItem uses a row-based layout
+    infoItem: {
+        flexDirection: 'row',  // This will align label and value horizontally
+        justifyContent: 'space-between', // This ensures the label and value are spaced out
+        marginBottom: 6
+    },
+
+    infoLabel: {
+        fontSize: 9,
+        fontWeight: 'bold',
+        color: '#495057',
+        marginBottom: 2,
+        width: '30%' // Fixed width for labels, adjust as needed
+    },
+
+    infoValue: {
+        fontSize: 10,
+        color: '#212529',
+        flex: 1,  // This ensures the value takes up the remaining space
+        textAlign: 'right'  // Optional, to align the value to the right side
+    },
+    infoLabel: { fontSize: 9, fontWeight: 'bold', color: '#495057', marginBottom: 2 },
+    infoValue: { fontSize: 10, fontWeight: 'normal', color: '#212529' },
+    table: { width: '100%', borderStyle: 'solid', borderWidth: 1, borderColor: '#bfbfbf', borderRightWidth: 0, borderBottomWidth: 0, marginBottom: 15 },
+    tableRow: { flexDirection: 'row', minHeight: 20 },
+    tableRowHeader: { backgroundColor: '#004085' },
+    tableRowEven: { backgroundColor: '#e9ecef' },
+    tableCol: { width: '33.33%', borderStyle: 'solid', borderWidth: 1, borderLeftWidth: 0, borderTopWidth: 0, borderColor: '#bfbfbf', padding: 3 },
+    tableCellHeader: { fontSize: 9, fontWeight: 'bold', color: '#fff' },
+    tableCell: { fontSize: 9, color: '#212529' },
+    nodeContainer: { borderWidth: 1, borderColor: '#dee2e6', borderRadius: 6, marginBottom: 15 },
+    nodeHeader: { backgroundColor: '#e9ecef', padding: 8, borderBottomWidth: 1, borderBottomColor: '#ced4da', flexDirection: 'row', justifyContent: 'space-between' },
+    nodeTitle: { fontSize: 11, fontWeight: 'bold' },
+    nodeBody: { padding: 10 },
+    badge: { borderRadius: 8, paddingHorizontal: 6, paddingVertical: 2, fontSize: 8, color: 'white' },
+    bgGreen: { backgroundColor: '#28a745' },
+    bgRed: { backgroundColor: '#dc3545' },
+    bgBlue: { backgroundColor: '#007bff' },
+});
+
+const Header = ({ hazop }) => (
+    <View style={styles.headerContainer} fixed>
+        <Image src="/logo.png" style={styles.logo} />
+        <View style={styles.headerTitleBlock}>
+            <Text style={styles.companyName}>ALKYL AMINES CHEMICALS LTD</Text>
+            {/* <Text style={styles.reportTitle}>HAZOP SAFETY REPORT</Text> */}
+        </View>
+        <View style={styles.headerMeta}>
+            {/* <Text style={styles.metaText}>Ref: {hazop?.hazopId || '-'}</Text> */}
+            <Text style={styles.metaText}>Date: {hazop?.hazopDate || '-'}</Text>
+        </View>
+    </View>
+);
+
+const Footer = ({ downloadDate }) => (
+    <View style={styles.footerContainer} fixed>
+        <Text style={styles.footerText}>Generated: {downloadDate} | Confidential</Text>
+        <Text style={styles.footerText} render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`} />
+    </View>
+);
+
+// Updated MyDocument with default props and safe optional chaining
+const MyDocument = ({
+    hazop = {},
+    team = [],
+    nodes = [],
+    nodeDetails = {},
+    nodeRecommendations = {},
+    allRecommendations = [],
+    assignData = { rejected: [], accepted: [], assigned: [], notAssigned: [] },
+    downloadDate = new Date().toLocaleString(),
+}) => (
+    <Document>
+        {/* Page 1: HAZOP Info + Team */}
+        <Page size="A4" style={styles.page}>
+            <Header hazop={hazop} />
+            <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Hazop Details</Text>
+                <View style={styles.infoCard}>
+                    <View style={styles.infoItem}>
+                        <Text style={styles.infoLabel}>Site</Text>
+                        <Text style={styles.infoValue}>{hazop?.site || '-'}</Text>
+                    </View>
+                    <View style={styles.infoItem}>
+                        <Text style={styles.infoLabel}>Department</Text>
+                        <Text style={styles.infoValue}>{hazop?.department || '-'}</Text>
+                    </View>
+                    <View style={styles.infoItem}>
+                        <Text style={styles.infoLabel}>Revision</Text>
+                        <Text style={styles.infoValue}>{hazop?.hazopRevisionNo || '-'}</Text>
+                    </View>
+                    <View style={styles.infoItem}>
+                        <Text style={styles.infoLabel}>Hazop Creation Date</Text>
+                        <Text style={styles.infoValue}>{hazop?.hazopCreationDate || '-'}</Text>
+                    </View>
+                    <View style={styles.infoItem}>
+                        <Text style={styles.infoLabel}>Completion Status</Text>
+                        <Text style={styles.infoValue}>{hazop?.completionStatus ? 'Completed' : 'Pending' || '-'}</Text>
+                    </View>
+                    <View style={styles.infoItem}>
+                        <Text style={styles.infoLabel}>Created By</Text>
+                        <Text style={styles.infoValue}>{hazop?.createdBy || '-'}</Text>
+                    </View>
+                    <View style={styles.infoItem}>
+                        <Text style={styles.infoLabel}>Description</Text>
+                        <Text style={styles.infoValue}>{hazop?.description || '-'}</Text>
+                    </View>
+                </View>
+            </View>
+
+
+
+            <View style={styles.section}>
+                <Text style={styles.sectionTitle}>HAZOP Team</Text>
+                <View style={styles.table}>
+                    <View style={[styles.tableRow, styles.tableRowHeader]}>
+                        <View style={styles.tableCol}><Text style={styles.tableCellHeader}>Name</Text></View>
+                        <View style={styles.tableCol}><Text style={styles.tableCellHeader}>Department</Text></View>
+                        <View style={styles.tableCol}><Text style={styles.tableCellHeader}>Email</Text></View>
+                    </View>
+                    {team?.map((m, i) => (
+                        <View key={i} style={[styles.tableRow, i % 2 !== 0 ? styles.tableRowEven : {}]}>
+
+                            <View style={styles.tableCol}><Text style={styles.tableCell}>{m?.firstName || ''} {m?.lastName || ''}</Text></View>
+                            <View style={styles.tableCol}><Text style={styles.tableCell}>{m?.dimension3 || '-'}</Text></View>
+                            <View style={styles.tableCol}><Text style={styles.tableCell}>{m?.emailId || '-'}</Text></View>
+                        </View>
+                    ))}
+                </View>
+            </View>
+            <Footer downloadDate={downloadDate} />
+        </Page>
+
+        {/* Page 2: Node Overview */}
+        <Page size="A4" style={styles.page}>
+            <Header hazop={hazop} />
+            <Text style={styles.sectionTitle}>All Nodes</Text>
+            {nodes?.map((node, index) => (
+                <View key={node.id} style={styles.nodeContainer} wrap={false}>
+                    <View style={styles.nodeHeader}>{node.nodeTitle|| '-'}-{node.nodeNumber ||'-'}</View>
+                    <View style={{ flexDirection: 'row', padding: 10 }}>
+                        <View style={{ flex: 1, paddingRight: 10 }}>
+                            <View style={{ flexDirection: 'row', marginBottom: 6 }}>
+                                <Text style={{ fontWeight: 'bold', width: '40%' }}>Design Intent:</Text>
+                                <Text>{node?.designIntent || '-'}</Text>
+                            </View>
+                            <View style={{ flexDirection: 'row', marginBottom: 6 }}>
+                                <Text style={{ fontWeight: 'bold', width: '40%' }}>P&ID Revision:</Text>
+                                <Text>{node?.pIdRevision || '-'}</Text>
+                            </View>
+                            <View style={{ flexDirection: 'row', marginBottom: 6 }}>
+                                <Text style={{ fontWeight: 'bold', width: '40%' }}>SOP No.:</Text>
+                                <Text>{node?.sopNo || '-'}</Text>
+                            </View>
+                            <View style={{ flexDirection: 'row', marginBottom: 6 }}>
+                                <Text style={{ fontWeight: 'bold', width: '40%' }}>SOP Date:</Text>
+                                <Text>{node?.sopDate || '-'}</Text>
+                            </View>
+                            <View style={{ flexDirection: 'row', marginBottom: 6 }}>
+                                <Text style={{ fontWeight: 'bold', width: '40%' }}>Creation Date:</Text>
+                                <Text>{node?.creationDate || '-'}</Text>
+                            </View>
+                            <View style={{ flexDirection: 'row', marginBottom: 6 }}>
+                                <Text style={{ fontWeight: 'bold', width: '40%' }}>Completion Date:</Text>
+                                <Text>{node?.completionDate || '-'}</Text>
+                            </View>
+                        </View>
+                        <View style={{ flex: 1, paddingLeft: 10 }}>
+                            <View style={{ flexDirection: 'row', marginBottom: 6 }}>
+                                <Text style={{ fontWeight: 'bold', width: '40%' }}>Equipment:</Text>
+                                <Text>{node?.equipment || '-'}</Text>
+                            </View>
+                            <View style={{ flexDirection: 'row', marginBottom: 6 }}>
+                                <Text style={{ fontWeight: 'bold', width: '40%' }}>Controls:</Text>
+                                <Text>{node?.controls || '-'}</Text>
+                            </View>
+                            <View style={{ flexDirection: 'row', marginBottom: 6 }}>
+                                <Text style={{ fontWeight: 'bold', width: '40%' }}>Temperature:</Text>
+                                <Text>{node?.temperature || '-'}</Text>
+                            </View>
+                            <View style={{ flexDirection: 'row', marginBottom: 6 }}>
+                                <Text style={{ fontWeight: 'bold', width: '40%' }}>Pressure:</Text>
+                                <Text>{node?.pressure || '-'}</Text>
+                            </View>
+                            <View style={{ flexDirection: 'row', marginBottom: 6 }}>
+                                <Text style={{ fontWeight: 'bold', width: '40%' }}>Quantity / Flow Rate:</Text>
+                                <Text>{node?.quantityFlowRate || '-'}</Text>
+                            </View>
+                            <View style={{ flexDirection: 'row', marginBottom: 6 }}>
+                                <Text style={{ fontWeight: 'bold', width: '40%' }}>Chemical & Utilities:</Text>
+                                <Text>{node?.chemicalAndUtilities || '-'}</Text>
+                            </View>
+                            <View style={{ flexDirection: 'row', marginBottom: 6 }}>
+                                <Text style={{ fontWeight: 'bold', width: '40%' }}>Registration Date:</Text>
+                                <Text>{node?.registrationDate || '-'}</Text>
+                            </View>
+                        </View>
+                    </View>
+
+                </View>
+
+            ))}
+            <Footer downloadDate={downloadDate} />
+        </Page>
+
+
+        {/* Page 3: All Recommendations */}
+        <Page size="A4" style={styles.page}>
+            <Header hazop={hazop} />
+            <Text style={styles.sectionTitle}>All Recommendations for HAZOP</Text>
+
+            <View style={styles.table}>
+                <View style={[styles.tableRow, styles.tableRowHeader]}>
+                    <View style={{ ...styles.tableCol, width: '30%' }}><Text style={styles.tableCellHeader}>Node</Text></View>
+                    <View style={{ ...styles.tableCol, width: '40%' }}><Text style={styles.tableCellHeader}>Recommendation</Text></View>
+                    <View style={{ ...styles.tableCol, width: '15%' }}><Text style={styles.tableCellHeader}>Remark</Text></View>
+                    <View style={{ ...styles.tableCol, width: '15%' }}><Text style={styles.tableCellHeader}>Status</Text></View>
+                </View>
+
+                {allRecommendations?.length > 0 ? (
+                    allRecommendations.map((r, i) => (
+                        <View key={i} style={styles.tableRow}>
+                            <View style={{ ...styles.tableCol, width: '30%' }}>
+                                <Text style={styles.tableCell}>{r?.id || 'N/A'}</Text>
+                            </View>
+                            <View style={{ ...styles.tableCol, width: '40%' }}>
+                                <Text style={styles.tableCell}>{r?.recommendation || 'No recommendation available'}</Text>
+                            </View>
+                            <View style={{ ...styles.tableCol, width: '15%' }}>
+                                <Text style={styles.tableCell}>{r?.remarkbyManagement || 'No remarks'}</Text>
+                            </View>
+                            <View style={{ ...styles.tableCol, width: '15%' }}>
+                                <Text style={styles.tableCell}>{r?.responsibility || 'No responsibility assigned'}</Text>
+                            </View>
+                        </View>
+                    ))
+                ) : (
+                    <Text>No recommendations found for this HAZOP.</Text>
+                )}
+            </View>
+
+
+            <Footer downloadDate={downloadDate} />
+        </Page>
+
+
+        {/* Pages 4+: Node Details + Recommendations */}
+        {nodes?.map((node) => (
+            <Page size="A4" style={styles.page} key={`node-${node?.id}`}>
+                <Header hazop={hazop} />
+
+                {/* Node Card for Each Node */}
+                <View style={styles.nodeContainer}>
+                    {/* Node Information (Title & Number) */}
+                    <View style={styles.nodeHeader}>
+                        <Text style={styles.nodeTitle}>Node {node?.nodeNumber}: {node?.nodeTitle || '-'}</Text>
+                        <View style={[styles.badge, node?.completionStatus ? styles.bgGreen : styles.bgRed]}>
+                            <Text style={{ color: 'white', fontSize: 8 }}>
+                                {node?.completionStatus ? 'Completed' : 'Pending'}
+                            </Text>
+                        </View>
+                    </View>
+
+                    {/* Node Details Section */}
+                    <View style={styles.nodeBody}>
+                        <Text style={styles.sectionTitle}>Node Details</Text>
+                        <View style={{ flexDirection: 'row', marginBottom: 10 }}>
+                            {/* Left Column for Node Details */}
+                            <View style={{ flex: 1, paddingRight: 10 }}>
+                                <View style={styles.infoItem}>
+                                    <Text style={styles.infoLabel}>Design Intent</Text>
+                                    <Text style={styles.infoValue}>{nodeDetails?.[node?.id]?.[0]?.designIntent || '-'}</Text>
+                                </View>
+                                {/* More details as needed */}
+                            </View>
+
+                            {/* Right Column for Node Details */}
+                            <View style={{ flex: 1, paddingLeft: 10 }}>
+                                <View style={styles.infoItem}>
+                                    <Text style={styles.infoLabel}>Equipment</Text>
+                                    <Text style={styles.infoValue}>{nodeDetails?.[node?.id]?.[0]?.equipment || '-'}</Text>
+                                </View>
+                                {/* More details as needed */}
+                            </View>
+                        </View>
+                    </View>
+
+                    {/* Recommendations for Node Details */}
+                    <View style={styles.nodeBody}>
+                        {nodeDetails?.[node?.id]?.map((detail, index) => (
+                            <View key={index} style={styles.detailCard}>
+                                <Text style={{ fontSize: 10, fontWeight: 'bold', color: '#d63384', marginBottom: 5 }}>
+                                    Recommendations for {detail?.designIntent || 'Detail ' + (index + 1)}
+                                </Text>
+                                {nodeRecommendations?.[node?.id]?.filter(rec => rec?.detailId === detail?.detailId)?.length > 0 ? (
+                                    <View style={styles.table}>
+                                        <View style={[styles.tableRow, styles.tableRowHeader]}>
+                                            <View style={{ ...styles.tableCol, width: '40%' }}><Text style={styles.tableCellHeader}>Recommendation</Text></View>
+                                            <View style={{ ...styles.tableCol, width: '20%' }}><Text style={styles.tableCellHeader}>Resp</Text></View>
+                                            <View style={{ ...styles.tableCol, width: '20%' }}><Text style={styles.tableCellHeader}>Remark</Text></View>
+                                            <View style={{ ...styles.tableCol, width: '20%' }}><Text style={styles.tableCellHeader}>Status</Text></View>
+                                        </View>
+
+                                        {nodeRecommendations[node?.id].filter(rec => rec?.detailId === detail?.detailId).map((r, i) => (
+                                            <View key={i} style={styles.tableRow}>
+                                                <View style={{ ...styles.tableCol, width: '40%' }}><Text style={styles.tableCell}>{r?.recommendation || '-'}</Text></View>
+                                                <View style={{ ...styles.tableCol, width: '20%' }}><Text style={styles.tableCell}>{r?.responsibility || '-'}</Text></View>
+                                                <View style={{ ...styles.tableCol, width: '20%' }}><Text style={styles.tableCell}>{r?.remarkbyManagement || '-'}</Text></View>
+                                                <View style={{ ...styles.tableCol, width: '20%' }}><Text style={styles.tableCell}>{r?.completionStatus ? 'Yes' : 'No'}</Text></View>
+                                            </View>
+                                        ))}
+                                    </View>
+                                ) : (
+                                    <Text>No recommendations available for this detail.</Text>
+                                )}
+                            </View>
+                        ))}
+                    </View>
+
+                </View>
+
+                <Footer downloadDate={downloadDate} />
+            </Page>
+        ))}
+
+
+        {/* Last Page: Assignment Summary */}
+        <Page size="A4" style={styles.page}>
+            <Header hazop={hazop} />
+            <Text style={styles.sectionTitle}>Assignment Summary</Text>
+            {['accepted', 'notAssigned', 'rejected', 'assigned'].map((key) => (
+                (assignData?.[key] || [])?.length > 0 && (
+                    <View key={key} style={{ marginBottom: 15 }}>
+                        <Text style={{ fontSize: 10, fontWeight: 'bold', color: '#007bff', marginBottom: 5 }}>{key.toUpperCase()}</Text>
+                        <View style={styles.table}>
+                            <View style={[styles.tableRow, styles.tableRowHeader]}>
+                                <View style={{ ...styles.tableCol, width: '70%' }}><Text style={styles.tableCellHeader}>Recommendation</Text></View>
+                                <View style={{ ...styles.tableCol, width: '30%' }}><Text style={styles.tableCellHeader}>Assigned To</Text></View>
+                            </View>
+                            {(assignData?.[key] || []).map((item, i) => (
+                                <View key={i} style={styles.tableRow}>
+                                    <View style={{ ...styles.tableCol, width: '70%' }}><Text style={styles.tableCell}>{item?.javaHazopNodeRecommendation?.recommendation || '-'}</Text></View>
+                                    <View style={{ ...styles.tableCol, width: '30%' }}><Text style={styles.tableCell}>{item?.assignToEmpCode || '-'}</Text></View>
+                                </View>
+                            ))}
+                        </View>
+                    </View>
+                )
+            ))}
+            <Footer downloadDate={downloadDate} />
+        </Page>
+    </Document>
+);
+
 
 const HazopReportPage = ({ hazopId, onClose }) => {
+    const [loading, setLoading] = useState(true);
     const [hazop, setHazop] = useState(null);
     const [team, setTeam] = useState([]);
     const [nodes, setNodes] = useState([]);
     const [nodeDetails, setNodeDetails] = useState({});
-    const downloadDate = new Date().toLocaleString();
     const [nodeRecommendations, setNodeRecommendations] = useState({});
+    const [assignData, setAssignData] = useState({ rejected: [], accepted: [], assigned: [], notAssigned: [] });
+    const downloadDate = new Date().toLocaleString();
+    const [allRecommendations, setAllRecommendations] = useState([]);
+
 
     useEffect(() => {
-        // Fetch HAZOP info
-        axios.get(`http://localhost:5559/api/hazopRegistration/by-id?hazopId=${hazopId}`)
-            .then(res => setHazop(res.data));
+        const loadData = async () => {
+            if (!hazopId) return;
 
-        // Fetch HAZOP team
-        axios.get(`http://localhost:5559/api/hazopTeam/teamByHazop/${hazopId}?status=false`)
-            .then(res => setTeam(res.data));
+            setLoading(true);
+            try {
+                // 1. HAZOP info + team
+                const [hRes, tRes] = await Promise.all([
+                    axios.get(`http://${strings.localhost}/api/hazopRegistration/by-id?hazopId=${hazopId}`),
+                    axios.get(`http://${strings.localhost}/api/hazopTeam/teamByHazop/${hazopId}?status=true`)
+                ]);
 
-        // Fetch nodes and node details
-        axios.get(`http://localhost:5559/api/hazopNode/by-registration-status?registrationId=${hazopId}&status=true`)
-            .then(async (res) => {
-                const nodesData = res.data;
-                setNodes(nodesData);
+                setHazop(hRes.data || {});
 
-                const detailsPromises = nodesData.map(node =>
-                    axios.get(`http://localhost:5559/api/hazopNodeDetail/node/${node.id}`)
-                        .then(r => ({ nodeId: node.id, details: Array.isArray(r.data) ? r.data : [] }))
-                        .catch(() => ({ nodeId: node.id, details: [] }))
-                );
+                setTeam(Array.isArray(tRes.data) ? tRes.data : []);
 
-                const detailsResults = await Promise.all(detailsPromises);
-                const detailsMap = {};
-                detailsResults.forEach(d => detailsMap[d.nodeId] = d.details);
-                setNodeDetails(detailsMap);
-            });
+                // 2. Nodes
+                const nRes = await axios.get(`http://${strings.localhost}/api/hazopNode/by-registration-status?registrationId=${hazopId}&status=true`);
+                const fetchedNodes = Array.isArray(nRes.data) ? nRes.data : [];
+                setNodes(fetchedNodes);
+
+                const nodeIds = fetchedNodes.map(n => n.id);
+
+                const dMap = {};
+                const rMap = {};
+
+                if (nodeIds.length > 0) {
+                    await Promise.all(nodeIds.map(async (nodeId) => {
+                        // Node details
+                        const detailsRes = await axios.get(`http://${strings.localhost}/api/hazopNodeDetail/node/${nodeId}`)
+                            .then(res => Array.isArray(res.data) ? res.data : [])
+                            .catch(err => {
+                                console.error(`Error fetching node details for nodeId ${nodeId}:`, err);
+                                return [];
+                            });
+                        dMap[nodeId] = detailsRes;
+
+                        // Node recommendations
+                        const recsPerDetail = await Promise.all(detailsRes.map(async detail => {
+                            if (!detail.id) return [];
+                            const recs = await axios.get(`http://${strings.localhost}/api/nodeRecommendation/getByDetailId/${detail.id}`)
+                                .then(res => Array.isArray(res.data) ? res.data : [])
+                                .catch(err => {
+                                    console.error(`Error fetching recommendations for detailId ${detail.id}:`, err);
+                                    return [];
+                                });
+                            return recs;
+                        }));
+                        rMap[nodeId] = recsPerDetail;
+                    }));
+
+                    setNodeDetails(dMap);
+                    setNodeRecommendations(rMap);
+                }
+
+                // 3. All recommendations for the HAZOP
+                const allRecRes = await axios.get(`http://${strings.localhost}/api/nodeRecommendation/getByHazopRegistration/${hazopId}`)
+                    .then(res => Array.isArray(res.data) ? res.data : [])
+                    .catch(err => {
+                        console.error("Error fetching all recommendations for HAZOP:", err);
+                        return [];
+                    });
+                setAllRecommendations(allRecRes); // You can create a new state for this
+
+                // 4. Assignments
+                const assignRes = await axios.get(`http://${strings.localhost}/api/recommendation/assign/getAllByRegistration/${hazopId}`);
+                setAssignData({
+                    rejected: Array.isArray(assignRes.data?.rejected) ? assignRes.data.rejected : [],
+                    accepted: Array.isArray(assignRes.data?.accepted) ? assignRes.data.accepted : [],
+                    assigned: Array.isArray(assignRes.data?.assigned) ? assignRes.data.assigned : [],
+                    notAssigned: Array.isArray(assignRes.data?.notAssigned) ? assignRes.data.notAssigned : []
+                });
+
+                setLoading(false);
+            } catch (err) {
+                console.error("Error loading data", err);
+                setLoading(false);
+            }
+        };
+
+        loadData();
     }, [hazopId]);
-
-    // Separate useEffect to fetch recommendations once nodes are loaded
-    useEffect(() => {
-        if (nodes.length === 0) return;
-
-        const recommendationPromises = nodes.map(node =>
-            axios.get(`http://localhost:5559/api/nodeRecommendation/getByNode/${node.id}`)
-                .then(res => ({ nodeId: node.id, recommendations: Array.isArray(res.data) ? res.data : [] }))
-                .catch(() => ({ nodeId: node.id, recommendations: [] }))
-        );
-
-        Promise.all(recommendationPromises).then(results => {
-            const recMap = {};
-            results.forEach(r => recMap[r.nodeId] = r.recommendations);
-            setNodeRecommendations(recMap);
-        });
-    }, [nodes]);
 
     const downloadExcel = async () => {
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet("HAZOP Report");
-
-        // 1. HAZOP Info
         worksheet.addRow(["HAZOP Info"]);
-        worksheet.addRow(["Site", hazop.site]);
-        worksheet.addRow(["Department", hazop.department]);
-        worksheet.addRow(["Description", hazop.description]);
-        worksheet.addRow([]); // empty row
-
-        // 2. HAZOP Team (if exists)
-        if (team.length > 0) {
-            worksheet.addRow(["HAZOP Team"]);
-            worksheet.addRow(["Name", "Employee Code", "Email", "Role"]);
-            team.forEach(member => {
-                worksheet.addRow([
-                    `${member.firstName || ""} ${member.middleName || ""} ${member.lastName || ""}`.trim(),
-                    member.empCode,
-                    member.emailId,
-                    member.role || "-"
-                ]);
-            });
-            worksheet.addRow([]);
-        }
-
-        // 3. All Nodes Combined
-        if (nodes.length > 0) {
-            worksheet.addRow(["All Nodes"]);
-            nodes.forEach(node => {
-                worksheet.addRow([`${node.nodeTitle || "NA"}: ${node.nodeNumber || "-"}`]);
-                const nodeRow = [
-                    `Design Intent: ${node.designIntent}`,
-                    `Controls: ${node.controls}`,
-                    `Temp/Pressure: ${node.temprature} / ${node.pressure}`,
-                    `SOP: ${node.sopNo} (${node.sopDate || "-"})`,
-                    `Completed: ${node.completionStatus ? "Yes" : "No"}`
-                ];
-                worksheet.addRow(nodeRow);
-                worksheet.addRow([]);
-            });
-        }
-
-        // 4. All Node Details Combined
-        if (Object.keys(nodeDetails).length > 0) {
-            worksheet.addRow(["All Node Details"]);
-            nodes.forEach(node => {
-                const details = nodeDetails[node.id] || [];
-                details.forEach(detail => {
-                    Object.entries(detail).forEach(([key, val]) => {
-                        worksheet.addRow([key, val]);
-                    });
-                    worksheet.addRow([]);
-                });
-            });
-        }
-
-        // 5. Node-specific Details
-        nodes.forEach(node => {
-            if (nodeDetails[node.id]?.length > 0) {
-                worksheet.addRow([`Node ${node.nodeTitle || "N/A"}: ${node.nodeNumber}`]);
-                worksheet.addRow([
-                    `Design Intent: ${node.designIntent}`,
-                    `Controls: ${node.controls}`,
-                    `Temp/Pressure: ${node.temprature} / ${node.pressure}`,
-                    `SOP: ${node.sopNo} (${node.sopDate || "-"})`,
-                    `Completed: ${node.completionStatus ? "Yes" : "No"}`
-                ]);
-
-                nodeDetails[node.id].forEach(detail => {
-                    Object.entries(detail).forEach(([key, val]) => {
-                        worksheet.addRow([key, val]);
-                    });
-                });
-                worksheet.addRow([]);
-            }
-        });
-
-        // Auto-adjust column widths
-        worksheet.columns.forEach(column => {
-            let maxLength = 0;
-            column.eachCell({ includeEmpty: true }, cell => {
-                const cellLength = cell.value ? cell.value.toString().length : 10;
-                if (cellLength > maxLength) maxLength = cellLength;
-            });
-            column.width = maxLength + 5; // some padding
-        });
-
-        // Save Excel
+        worksheet.addRow(["Site", hazop?.site]);
         const buffer = await workbook.xlsx.writeBuffer();
         saveAs(new Blob([buffer]), `HAZOP_Report_${hazopId}.xlsx`);
     };
-    if (!hazop) return <div>Loading...</div>;
-
-    const MyDocument = (
-        <Document>
-            <Page size="A4" style={pdfStyles.page} wrap>
-                {/* Header */}
-                <View style={pdfStyles.header} fixed>
-                    {/* Left: Logo */}
-                    <Image src="/logo.png" style={pdfStyles.logo} />
-
-                    {/* Center: Report Title */}
-                    <View style={pdfStyles.reportTitleCenter}>
-                        <Text style={pdfStyles.reportTitle}>ALKYL AMINES CHEMICALS LIMITED</Text>
-                    </View>
-
-                    {/* Right: Side Title & Date */}
-                    <View style={pdfStyles.reportSideContainer}>
-                        <Text style={pdfStyles.reportSideTitle}>HAZOP Report</Text>
-                        <Text style={pdfStyles.creationDate}>Created on: {hazop.hazopDate}</Text>
-                    </View>
-                </View>
-
-
-                {/* HAZOP Info */}
-                <View style={pdfStyles.section}>
-                    <View style={pdfStyles.infoRow}>
-                        <Text><Text style={pdfStyles.label}>Site:</Text> {hazop.site || '-'}</Text>
-                    </View>
-                    <View style={pdfStyles.infoRow}>
-                        <Text><Text style={pdfStyles.label}>Department:</Text> {hazop.department || "-"}</Text>
-                    </View>
-                    <View style={pdfStyles.infoRow}>
-                        <Text><Text style={pdfStyles.label}>Hazop Revision No:</Text> {hazop.hazopRevisionNo || '-'}</Text>
-                    </View>
-                    <View style={pdfStyles.infoRow}>
-                        <Text><Text style={pdfStyles.label}>Created By:</Text> {hazop.createdBy || '-'}</Text>
-                    </View>
-                    <View style={pdfStyles.infoRow}>
-                        <Text><Text style={pdfStyles.label}>Created By Email:</Text> {hazop.createdByEmail || "-"}</Text>
-                    </View>
-                    <View style={pdfStyles.infoRow}>
-                        <Text><Text style={pdfStyles.label}>Employee Code:</Text> {hazop.empCode || '-'}</Text>
-                    </View>
-                    <View style={pdfStyles.description}>
-                        <Text><Text style={pdfStyles.label}>Description:</Text> {hazop.description || '-'}</Text>
-                    </View>
-                </View>
-
-
-                {/* HAZOP Team */}
-                {team.length > 0 && (
-                    <View style={pdfStyles.section}>
-                        <Text style={{ fontSize: 12, fontWeight: "bold", marginBottom: 4 }}>HAZOP Team</Text>
-                        <View style={pdfStyles.table}>
-                            <View style={pdfStyles.tableRow}>
-                                <Text style={pdfStyles.tableColHeader}>Name</Text>
-                                <Text style={pdfStyles.tableColHeader}>Employee Code</Text>
-                                <Text style={pdfStyles.tableColHeader}>Email</Text>
-                                <Text style={pdfStyles.tableColHeader}>Role</Text>
-                            </View>
-                            {team.map((member, idx) => (
-                                <View key={member.id} style={[pdfStyles.tableRow, idx % 2 === 0 ? pdfStyles.alternateRow : null]}>
-                                    <Text style={pdfStyles.tableCol}>{`${member.firstName || ""} ${member.middleName || ""} ${member.lastName || ""}`.trim()}</Text>
-                                    <Text style={pdfStyles.tableCol}>{member.empCode}</Text>
-                                    <Text style={pdfStyles.tableCol}>{member.emailId}</Text>
-                                    <Text style={pdfStyles.tableCol}>{member.role || "-"}</Text>
-                                </View>
-                            ))}
-                        </View>
-                    </View>
-                )}
-
-                {/* All Nodes Combined */}
-
-                {nodes.length > 0 && (
-                    <View break style={pdfStyles.section}>
-                        {/* Heading once */}
-                        <Text style={{ fontSize: 12, fontWeight: "bold", marginBottom: 4 }}>All Nodes</Text>
-                        {nodes.map(node => (
-                            <View key={node.id} style={pdfStyles.nodeCard}>
-
-                                <Text style={pdfStyles.nodeTitle}>{node.nodeTitle || "NA"}: {node.nodeNumber || "-"}</Text>
-
-                                {/* Row 1: Design Intent + Controls */}
-                                <View style={pdfStyles.nodeInfoRow}>
-                                    <View style={pdfStyles.nodeInfoColumn}>
-                                        <Text style={pdfStyles.nodeInfoLabel}>Design Intent:</Text>
-                                        <Text style={pdfStyles.nodeInfoValue}>{node.designIntent}</Text>
-                                    </View>
-                                    <View style={pdfStyles.nodeInfoColumn}>
-                                        <Text style={pdfStyles.nodeInfoLabel}>Controls:</Text>
-                                        <Text style={pdfStyles.nodeInfoValue}>{node.controls}</Text>
-                                    </View>
-                                </View>
-
-                                {/* Row 2: Temp/Pressure + SOP */}
-                                <View style={pdfStyles.nodeInfoRow}>
-                                    <View style={pdfStyles.nodeInfoColumn}>
-                                        <Text style={pdfStyles.nodeInfoLabel}>Temp/Pressure:</Text>
-                                        <Text style={pdfStyles.nodeInfoValue}>{node.temprature} / {node.pressure}</Text>
-                                    </View>
-                                    <View style={pdfStyles.nodeInfoColumn}>
-                                        <Text style={pdfStyles.nodeInfoLabel}>SOP:</Text>
-                                        <Text style={pdfStyles.nodeInfoValue}>{node.sopNo} ({node.sopDate || "-"})</Text>
-                                    </View>
-                                </View>
-
-                                {/* Row 3: Completed + (optional empty) */}
-                                <View style={pdfStyles.nodeInfoRow}>
-                                    <View style={pdfStyles.nodeInfoColumn}>
-                                        <Text style={pdfStyles.nodeInfoLabel}>Completed:</Text>
-                                        <Text style={pdfStyles.nodeInfoValue}>  {node.completionStatus ? "Yes" : "No"}</Text>
-                                    </View>
-                                    <View style={pdfStyles.nodeInfoColumn}>{/* Empty column for alignment */}</View>
-                                </View>
-                            </View>
-                        ))}
-                    </View>
-                )}
-                {/* All Node Details Combined */}
-                {/* {Object.keys(nodeDetails).length > 0 && (
-                    <View style={pdfStyles.allNodeDetailsContainer}>
-                        <Text style={{ fontSize: 12, fontWeight: "bold", marginBottom: 6 }}>All Node Details</Text>
-                        {nodes.map(node =>
-                            nodeDetails[node.id]?.map((detail, idx) => (
-                                <View key={`${node.id}-${idx}`} style={pdfStyles.allNodeDetailCard}>
-                                    {Object.entries(detail).map(([key, val], i) => {
-                                        const isLong = String(val).length > 50; // threshold for paragraph
-                                        return isLong ? (
-                                            <View key={i} style={pdfStyles.allNodeDetailRowFull}>
-                                                <Text style={pdfStyles.allNodeDetailLabel}>{key}:</Text>
-                                                <Text style={pdfStyles.allNodeDetailValueFull}>{val}</Text>
-                                            </View>
-                                        ) : (
-                                            <View key={i} style={pdfStyles.allNodeDetailRow}>
-                                                <Text style={pdfStyles.allNodeDetailLabel}>{key}:</Text>
-                                                <Text style={pdfStyles.allNodeDetailValue}>{val}</Text>
-                                            </View>
-                                        );
-                                    })}
-                                </View>
-                            ))
-                        )}
-
-                    </View>
-                )} */}
-
-
-                {/* Node-specific section: only for nodes with details */}
-                {nodes.filter(node =>
-                    (nodeDetails[node.id]?.length > 0) || (nodeRecommendations[node.id]?.length > 0)
-                ).map(node => (
-                    <View break key={node.id} style={pdfStyles.section}>
-                        {/* Node Info */}
-                        <Text style={pdfStyles.nodeTitle}>Node {node.nodeTitle || "N/A"}: {node.nodeNumber}</Text>
-
-                        <View style={pdfStyles.nodeInfoRow}>
-                            <View style={pdfStyles.nodeInfoColumn}>
-                                <Text style={pdfStyles.nodeInfoLabel}>Design Intent:</Text>
-                                <Text style={pdfStyles.nodeInfoValue}>{node.designIntent}</Text>
-                            </View>
-                            <View style={pdfStyles.nodeInfoColumn}>
-                                <Text style={pdfStyles.nodeInfoLabel}>Controls:</Text>
-                                <Text style={pdfStyles.nodeInfoValue}>{node.controls}</Text>
-                            </View>
-                        </View>
-
-                        <View style={pdfStyles.nodeInfoRow}>
-                            <View style={pdfStyles.nodeInfoColumn}>
-                                <Text style={pdfStyles.nodeInfoLabel}>Temp/Pressure:</Text>
-                                <Text style={pdfStyles.nodeInfoValue}>{node.temprature} / {node.pressure}</Text>
-                            </View>
-                            <View style={pdfStyles.nodeInfoColumn}>
-                                <Text style={pdfStyles.nodeInfoLabel}>SOP:</Text>
-                                <Text style={pdfStyles.nodeInfoValue}>{node.sopNo} ({node.sopDate || "-"})</Text>
-                            </View>
-                        </View>
-
-                        <View style={pdfStyles.nodeInfoRow}>
-                            <View style={pdfStyles.nodeInfoColumn}>
-                                <Text style={pdfStyles.nodeInfoLabel}>Completed:</Text>
-                                <Text style={pdfStyles.nodeInfoValue}>{node.completionStatus ? "Yes" : "No"}</Text>
-                            </View>
-                            <View style={pdfStyles.nodeInfoColumn}></View>
-                        </View>
-
-                        {/* Node Details */}
-                        {nodeDetails[node.id]?.length > 0 && (
-                            <View style={{ marginTop: 10 }}>
-                                <Text style={{ fontWeight: "bold", marginBottom: 6 }}>Node Details of {node.nodeTitle || '-'}</Text>
-                                {nodeDetails[node.id].map((detail, idx) => (
-                                    <View key={idx} style={pdfStyles.nodeDetailCard}>
-                                        {Object.entries(detail).map(([key, val], i) => {
-                                            const isLong = String(val).length > 50;
-                                            return isLong ? (
-                                                <View key={i} style={pdfStyles.nodeDetailRowFull}>
-                                                    <Text style={pdfStyles.nodeDetailLabel}>{key}:</Text>
-                                                    <Text style={pdfStyles.nodeDetailValueFull}>{val}</Text>
-                                                </View>
-                                            ) : (
-                                                <View key={i} style={pdfStyles.nodeDetailRow}>
-                                                    <Text style={pdfStyles.nodeDetailLabel}>{key}:</Text>
-                                                    <Text style={pdfStyles.nodeDetailValue}>{val}</Text>
-                                                </View>
-                                            );
-                                        })}
-                                    </View>
-                                ))}
-                            </View>
-                        )}
-
-                        {/* Node Recommendations */}
-                        {nodeRecommendations[node.id]?.length > 0 && (
-                            <View style={{ marginTop: 12 }}>
-                                <Text style={{ fontWeight: "bold", marginBottom: 6, fontSize: 12, color: "#1565c0" }}>
-                                    Recommendations for Node {node.nodeTitle || '-'}: {node.nodeNumber || '-'}
-                                </Text>
-                                <View style={pdfStyles.table}>
-                                    <View style={pdfStyles.tableRow}>
-                                        <Text style={pdfStyles.tableColHeader}>Recommendation</Text>
-                                        <Text style={pdfStyles.tableColHeader}>Remark by Management</Text>
-                                        <Text style={pdfStyles.tableColHeader}>Responsibility</Text>
-                                        <Text style={pdfStyles.tableColHeader}>Verification Responsible Employee</Text>
-                                        <Text style={pdfStyles.tableColHeader}>Completion Status</Text>
-                                    </View>
-                                    {nodeRecommendations[node.id].map((rec, idx) => (
-                                        <View key={rec.id} style={[pdfStyles.tableRow, idx % 2 === 0 ? pdfStyles.alternateRow : null]}>
-                                            <Text style={pdfStyles.tableCol}>{rec.recommendation || '-'}</Text>
-                                            <Text style={pdfStyles.tableCol}>{rec.remarkbyManagement || '-'}</Text>
-                                            <Text style={pdfStyles.tableCol}>{rec.responsibility || '-'}</Text>
-                                            <Text style={pdfStyles.tableCol}>{rec.verificationResponsibleEmpCode || '-'}</Text>
-                                            <Text style={pdfStyles.tableCol}>{rec.completionStatus ? 'Yes' : 'No'}</Text>
-                                        </View>
-                                    ))}
-                                </View>
-                            </View>
-                        )}
-                    </View>
-                ))}
-
-                {/* Node Recommendations */}
-                {nodes.map(node => nodeRecommendations[node.id]?.length > 0 && (
-                    <View break key={`rec-${node.id}`} style={pdfStyles.section}>
-                        <Text style={{ fontSize: 12, fontWeight: "bold", marginBottom: 6 }}>
-                            Recommendations for Node {node.nodeTitle || '-'}: {node.nodeNumber || '-'}
-                        </Text>
-                        <View style={pdfStyles.table}>
-                            <View style={pdfStyles.tableRow}>
-                                <Text style={pdfStyles.tableColHeader}>Recommendation</Text>
-                                <Text style={pdfStyles.tableColHeader}>Remark by Management</Text>
-                                <Text style={pdfStyles.tableColHeader}>Responsibility</Text>
-                                <Text style={pdfStyles.tableColHeader}>Verification Responsible Employee</Text>
-                                <Text style={pdfStyles.tableColHeader}>Completion Status</Text>
-                            </View>
-                            {nodeRecommendations[node.id].map((rec, idx) => (
-                                <View key={rec.id} style={[pdfStyles.tableRow, idx % 2 === 0 ? pdfStyles.alternateRow : null]}>
-                                    <Text style={pdfStyles.tableCol}>{rec.recommendation || '-'}</Text>
-                                    <Text style={pdfStyles.tableCol}>{rec.remarkbyManagement || '-'}</Text>
-                                    <Text style={pdfStyles.tableCol}>{rec.responsibility || '-'}</Text>
-                                    <Text style={pdfStyles.tableCol}>{rec.verificationResponsibleEmpCode || '-'}</Text>
-                                    <Text style={pdfStyles.tableCol}>{rec.completionStatus ? 'Yes' : 'No'}</Text>
-                                </View>
-                            ))}
-                        </View>
-                    </View>
-                ))}
-
-                {/* Footer */}
-                <View style={pdfStyles.footer} fixed>
-                    <Text render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`} />
-                    <Text>Download Date: {downloadDate}</Text>
-                </View>
-            </Page >
-        </Document >
-    );
-
-    const downloadPDF = async () => {
-        const blob = await pdf(MyDocument).toBlob();
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `HAZOP_Report_${hazopId}.pdf`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    };
 
     return (
-        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000 }}>
-            <div style={{ width: "85%", height: "95%", background: "#fff", borderRadius: 8, overflow: "hidden", display: "flex", flexDirection: "column" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", padding: 10, borderBottom: "1px solid #ddd", backgroundColor: "#f5f5f5" }}>
-                    <button onClick={onClose} style={{ cursor: "pointer", backgroundColor: "#dc3545", color: "#fff", border: "none", padding: "5px 12px", borderRadius: 4 }}>Close</button>
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.7)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000 }}>
+            <div style={{ width: "90%", height: "95%", background: "#fff", borderRadius: 8, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", padding: 15, borderBottom: "1px solid #ddd", backgroundColor: "#f8f9fa" }}>
+                    <button onClick={onClose} style={{ cursor: "pointer", backgroundColor: "#dc3545", color: "#fff", border: "none", padding: "8px 16px", borderRadius: 4 }}>Close</button>
                     <div>
-                        <button onClick={downloadExcel} style={{ cursor: "pointer", backgroundColor: "#621290", color: "#fff", border: "none", padding: "5px 12px", borderRadius: 4, marginRight: 5 }}>Download Excel</button>
-                        <button onClick={downloadPDF} style={{ cursor: "pointer", backgroundColor: "#2E86AB", color: "#fff", border: "none", padding: "5px 12px", borderRadius: 4, marginRight: 5 }}>Download PDF</button>
+                        <button onClick={downloadExcel} style={{ cursor: "pointer", backgroundColor: "#28a745", color: "#fff", border: "none", padding: "8px 16px", borderRadius: 4, marginRight: 10 }}>Download Excel</button>
                     </div>
                 </div>
-                <PDFViewer width="100%" height="100%">{MyDocument}</PDFViewer>
+                <div style={{ flex: 1, backgroundColor: '#525659', position: 'relative' }}>
+                    {loading && (
+                        <div className="loading-overlay">
+                            <div className="loading-spinner"></div>
+                        </div>
+                    )}
+                    {!loading ? (
+                        <PDFViewer
+                            width="100%"
+                            height="100%"
+                            style={{ border: 'none' }}
+                            showToolbar={true}
+                        >
+                            <MyDocument
+                                hazop={hazop}
+                                team={team}
+                                nodes={nodes}
+                                nodeDetails={nodeDetails}
+                                nodeRecommendations={nodeRecommendations}
+                                allRecommendations={allRecommendations}
+                                assignData={assignData}
+                                downloadDate={downloadDate}
+                            />
+                        </PDFViewer>
+                    ) : (
+                        <div style={{ color: 'white', textAlign: 'center', marginTop: 100 }}>
+                            Loading Data...
+                        </div>
+                    )}
+                </div>
+
             </div>
         </div>
+
     );
 };
 

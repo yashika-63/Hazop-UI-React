@@ -1,0 +1,214 @@
+.TopFormBar {
+    width: 100%;
+    max-width: 1090px;
+    display: flex;
+    justify-content: space-between;
+    margin: 0 auto;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    padding: 5px;
+    box-sizing: border-box;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
+}
+
+.TopFormBar button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    color: #333;
+}
+
+.TopFormBarcontainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+.TopFormBar {
+    display: flex;
+    justify-content: space-around;
+    background-color: white;
+    width: 100%;
+    position: relative;
+}
+
+.TopFormBar button {
+    background-color: transparent;
+    border: none;
+    font-size: 14px;
+    color: #888888;
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    cursor: pointer;
+}
+
+.TopFormBar button .icon {
+    margin-right: 8px;
+    font-size: 18px;
+}
+
+.TopFormBar .active {
+    border-radius: 25px;
+    position: relative;
+    overflow: visible;
+    cursor: pointer;
+    /* color: #6a0dad; */
+    color: #718eb0;
+
+}
+
+
+
+
+
+
+
+/* Recommandation Table CSS */
+/* Glassmorphic Recommendation Table */
+
+.recommendation-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 16px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.recommendation-table thead {
+    background: rgba(255, 255, 255, 0.6);
+    color: #1f2937;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.recommendation-table th {
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid rgba(200, 200, 200, 0.4);
+}
+
+.recommendation-table td {
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #334155;
+    border-bottom: 1px solid rgba(200, 200, 200, 0.2);
+}
+
+.recommendation-table tbody tr:nth-child(odd) {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.recommendation-table tbody tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.recommendation-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+
+.status-na {
+    color: #475569;
+}
+
+
+.recommendation-table .dropdown-content {
+    left: 20px;
+}
+
+.badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    text-align: center;
+}
+
+.badge-pending {
+    background-color: #f8e3c3;
+    border: 1px solid #ff9800;
+    color: #ff9800;
+}
+
+.badge-action {
+    background-color: #d6f4d7;
+    color: #062d08;
+    border: 1px solid #062d08;
+}
+
+.badge-na {
+    background-color: #e2dede;
+    color: rgb(71, 69, 69);
+    border: 1px solid rgb(71, 70, 70);
+}
+
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    margin-top: 20px;
+}
+
+.recommandation-table th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+
+
+.recommandation-table td .dropdown {
+    position: relative;
+    z-index: auto;
+}
+
+.dropdown-content button {
+    font-size: 14px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 10px;
+}
+
+
+
+.centerText {
+    margin-bottom: 20px;
+    font-size: 16px;
+    text-align: center;
+}
+
+.remove-icon {
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.2s ease;
+    margin-left: 20px;
+    color: red;
+}
+
+.remove-icon:hover {
+    color: #102858;
+    transform: scale(1.2);
+}
+
+
+/* Disabled dropdown item */
+.disabled-option {
+    opacity: 0.5;
+    cursor: not-allowed !important;
+    pointer-events: auto;
+}
+
+.dropdown-content button:hover:not(.disabled-option) {
+    background-color: #f0f0f0;
+}

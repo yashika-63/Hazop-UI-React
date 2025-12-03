@@ -3,6 +3,7 @@ import { FaTimes } from "react-icons/fa";
 import { showToast } from "../CommonUI/CommonUI";
 import "./Node.css";
 import Recommendations from "./Recommendations";
+import { strings } from "../string";
 
 const initialState = {
   generalParameter: "",

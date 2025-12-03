@@ -1,0 +1,622 @@
+/* HazopReport.css */
+ 
+/* --- PRINT MEDIA QUERY --- */
+
+@media print {
+
+    @page {
+
+        size: A4;
+
+        margin: 10mm;
+
+    }
+
+    body {
+
+        -webkit-print-color-adjust: exact;
+
+        print-color-adjust: exact;
+
+        background-color: white;
+
+    }
+ 
+    /* Hide the modal UI buttons when printing */
+
+    .no-print {
+
+        display: none !important;
+
+    }
+
+}
+ 
+/* --- LAYOUT STRUCTURE --- */
+
+.print-container {
+
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+    color: #333;
+
+    background: white;
+
+    font-size: 12px;
+
+    line-height: 1.4;
+
+}
+ 
+/* The Table Trick for Repeating Headers/Footers */
+
+.report-table {
+
+    width: 100%;
+
+    border-collapse: collapse;
+
+}
+ 
+.report-header-space { height: 110px; } /* Adjust to match header height */
+
+.report-footer-space { height: 50px; }
+ 
+/* Fixed Header */
+
+.print-header {
+
+    position: fixed;
+
+    top: 0;
+
+    left: 0;
+
+    right: 0;
+
+    height: 100px;
+
+    background: white;
+
+    border-bottom: 3px solid #0056b3;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding-bottom: 10px;
+
+    z-index: 100;
+
+}
+ 
+/* Fixed Footer */
+
+.print-footer {
+
+    position: fixed;
+
+    bottom: 0;
+
+    left: 0;
+
+    right: 0;
+
+    height: 40px;
+
+    background: white;
+
+    border-top: 1px solid #ccc;
+
+    padding-top: 5px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    font-size: 10px;
+
+    color: #666;
+
+}
+ 
+/* --- HEADER CONTENT --- */
+
+.logo-area img { height: 60px; max-width: 150px; }
+
+.title-area { text-align: center; flex: 1; padding: 0 20px; }
+
+.company-name { font-size: 18px; font-weight: 800; color: #003366; text-transform: uppercase; margin: 0; }
+
+.report-name { font-size: 14px; color: #555; margin: 0; font-weight: 600; letter-spacing: 1px; }
+
+.meta-area { text-align: right; font-size: 11px; color: #444; min-width: 150px; }
+ 
+/* --- SECTION STYLING --- */
+
+.section-wrapper {
+
+    margin-bottom: 25px;
+
+    /* This ensures a section title doesn't get orphaned at bottom of page */
+
+    break-inside: avoid; 
+
+}
+ 
+.section-title {
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+    color: #0056b3;
+
+    border-bottom: 2px solid #e0e0e0;
+
+    padding-bottom: 5px;
+
+    margin-bottom: 10px;
+
+    text-transform: uppercase;
+
+}
+ 
+/* --- CARDS & GRIDS --- */
+
+/* The 'break-inside: avoid' is CRITICAL to prevent awkward cuts */
+
+.info-card {
+
+    background: #f8f9fa;
+
+    border: 1px solid #e9ecef;
+
+    border-radius: 6px;
+
+    padding: 15px;
+
+    break-inside: avoid; 
+
+}
+ 
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+ 
+.field-label { font-weight: 700; color: #555; font-size: 11px; display: block; margin-bottom: 2px; }
+
+.field-value { font-weight: 500; color: #000; }
+ 
+/* --- NODE CARDS (The main look) --- */
+
+.node-container {
+
+    border: 1px solid #ced4da;
+
+    border-radius: 8px;
+
+    margin-bottom: 20px;
+
+    overflow: hidden;
+
+    break-inside: avoid; /* Keeps node content together if possible */
+
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+
+}
+ 
+.node-header {
+
+    background: #e9ecef;
+
+    padding: 10px 15px;
+
+    border-bottom: 1px solid #ced4da;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+}
+ 
+.node-title { font-weight: 700; font-size: 13px; color: #343a40; }
+
+.node-status { font-size: 11px; background: #28a745; color: white; padding: 2px 8px; border-radius: 10px; }
+
+.node-status.no { background: #dc3545; }
+ 
+.node-body { padding: 15px; }
+ 
+/* --- TABLES --- */
+
+.styled-table {
+
+    width: 100%;
+
+    border-collapse: collapse;
+
+    font-size: 11px;
+
+    margin-top: 10px;
+
+}
+ 
+.styled-table th {
+
+    background-color: #004085;
+
+    color: white;
+
+    text-align: left;
+
+    padding: 8px;
+
+    font-weight: 600;
+
+}
+ 
+.styled-table td {
+
+    border: 1px solid #dee2e6;
+
+    padding: 8px;
+
+    vertical-align: top;
+
+}
+ 
+.styled-table tr:nth-child(even) { background-color: #f8f9fa; }
+ 
+/* --- STATUS COLORS FOR ASSIGNMENTS --- */
+
+.status-section { margin-top: 15px; break-inside: avoid; }
+
+.status-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; color: white; font-weight: bold; font-size: 10px; margin-bottom: 5px; }
+
+.bg-accept { background-color: #28a745; }
+
+.bg-reject { background-color: #dc3545; }
+
+.bg-assign { background-color: #007bff; }
+
+.bg-orange { background-color: #fd7e14; }
+ 
+/* --- MODAL UI (Screen Only) --- */
+
+.modal-overlay {
+
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+
+    background: rgba(0,0,0,0.6);
+
+    display: flex; justify-content: center; align-items: center;
+
+    z-index: 1000;
+
+}
+
+.modal-content {
+
+    width: 90%; height: 95%; background: #f4f6f9;
+
+    border-radius: 8px; display: flex; flex-direction: column; overflow: hidden;
+
+}
+
+.modal-toolbar {
+
+    padding: 15px; background: white; border-bottom: 1px solid #ddd;
+
+    display: flex; justify-content: space-between; align-items: center;
+
+}
+
+.modal-preview {
+
+    flex: 1; overflow-y: auto; padding: 20px;
+
+    display: flex; justify-content: center;
+
+}
+
+.paper-shadow {
+
+    width: 210mm; min-height: 297mm; background: white;
+
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+
+    padding: 10mm; /* Screen padding, distinct from print margin */
+
+}
+
+.btn { border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; color: white; font-weight: 600; font-size: 13px; margin-left: 8px; }
+
+.btn-close { background: #6c757d; }
+
+.btn-excel { background: #28a745; }
+
+.btn-pdf { background: #0056b3; }
+ 
+Hazop report 1.txt
+ 
+/* HazopReport.css */
+ 
+/* --- 1. PRINT CONFIGURATION --- */
+
+@media print {
+
+    @page {
+
+        size: A4;
+
+        margin: 10mm; 
+
+    }
+
+    body {
+
+        -webkit-print-color-adjust: exact; /* Force background colors to print */
+
+        print-color-adjust: exact;
+
+        background-color: white;
+
+    }
+ 
+    /* Hide the screen-only toolbar when printing */
+
+    .no-print { display: none !important; }
+
+}
+ 
+/* --- 2. REPORT LAYOUT STRUCTURE --- */
+
+.print-container {
+
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+    color: #333;
+
+    font-size: 11px;
+
+    line-height: 1.5;
+
+    width: 100%;
+
+}
+ 
+/* THE MAGIC TRICK: Table Wrapper for Repeating Headers */
+
+.report-table { width: 100%; border-collapse: collapse; }
+
+.report-header-space { height: 120px; } /* Must match .print-header height */
+
+.report-footer-space { height: 50px; }  /* Must match .print-footer height */
+ 
+/* Fixed Visual Header */
+
+.print-header {
+
+    position: fixed;
+
+    top: 0; left: 0; right: 0;
+
+    height: 110px; /* Fixed height */
+
+    background: white;
+
+    border-bottom: 3px solid #0056b3;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    z-index: 1000;
+
+    padding-bottom: 10px;
+
+}
+ 
+/* Fixed Visual Footer */
+
+.print-footer {
+
+    position: fixed;
+
+    bottom: 0; left: 0; right: 0;
+
+    height: 40px;
+
+    background: white;
+
+    border-top: 1px solid #ccc;
+
+    padding-top: 5px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    font-size: 10px;
+
+    color: #666;
+
+}
+ 
+/* --- 3. HEADER CONTENT STYLING --- */
+
+.logo-box img { height: 70px; max-width: 180px; object-fit: contain; }
+
+.title-box { text-align: center; flex: 1; padding: 0 15px; }
+
+.company-title { font-size: 20px; font-weight: 800; color: #003366; margin: 0; text-transform: uppercase; }
+
+.report-subtitle { font-size: 14px; font-weight: 600; color: #555; margin: 0; letter-spacing: 1px; }
+
+.meta-box { text-align: right; min-width: 150px; font-size: 11px; color: #444; }
+ 
+/* --- 4. CONTENT SECTIONS --- */
+
+.section-wrapper {
+
+    margin-bottom: 20px;
+
+    /* CRITICAL: Prevents section titles from being orphaned at bottom of page */
+
+    break-inside: avoid; 
+
+}
+ 
+.section-header {
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+    color: #0056b3;
+
+    border-bottom: 2px solid #e9ecef;
+
+    padding-bottom: 4px;
+
+    margin-bottom: 12px;
+
+    text-transform: uppercase;
+
+}
+ 
+/* --- 5. CARDS & GRIDS --- */
+
+/* General Info Grid */
+
+.info-grid {
+
+    display: grid;
+
+    grid-template-columns: repeat(3, 1fr); /* 3 Columns */
+
+    gap: 12px;
+
+    background: #f8f9fa;
+
+    padding: 15px;
+
+    border-radius: 6px;
+
+    border: 1px solid #dee2e6;
+
+    break-inside: avoid;
+
+}
+ 
+.info-item { display: flex; flex-direction: column; }
+
+.label { font-size: 10px; font-weight: 700; color: #6c757d; text-transform: uppercase; }
+
+.value { font-size: 12px; font-weight: 500; color: #212529; }
+ 
+/* --- 6. NODE CARDS (The Dynamic Part) --- */
+
+.node-card {
+
+    border: 1px solid #ced4da;
+
+    border-radius: 6px;
+
+    margin-bottom: 20px;
+
+    background: #fff;
+
+    /* CRITICAL: Ensures a single node card is not cut in half across pages */
+
+    break-inside: avoid; 
+
+    page-break-inside: avoid;
+
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+
+}
+ 
+.node-header-row {
+
+    background: #e9ecef;
+
+    padding: 8px 12px;
+
+    border-bottom: 1px solid #ced4da;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+}
+ 
+.node-title-text { font-weight: 700; color: #343a40; font-size: 13px; }
+
+.node-status-badge { font-size: 10px; padding: 2px 8px; border-radius: 12px; color: white; font-weight: bold; }
+
+.status-yes { background-color: #28a745; }
+
+.status-no { background-color: #dc3545; }
+ 
+.node-content { padding: 12px; }
+ 
+/* --- 7. TABLES --- */
+
+.styled-table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 8px; }
+
+.styled-table th { background-color: #004085; color: white; padding: 6px 8px; text-align: left; font-weight: 600; }
+
+.styled-table td { border: 1px solid #dee2e6; padding: 6px 8px; vertical-align: top; }
+
+.styled-table tr:nth-child(even) { background-color: #f8f9fa; }
+ 
+/* --- 8. ASSIGNMENT STATUS --- */
+
+.status-block { margin-top: 15px; break-inside: avoid; }
+
+.status-label-badge { display: inline-block; padding: 4px 10px; color: white; font-weight: bold; border-radius: 4px; font-size: 11px; margin-bottom: 6px; }
+
+.bg-green { background-color: #28a745; }
+
+.bg-blue { background-color: #007bff; }
+
+.bg-red { background-color: #dc3545; }
+
+.bg-orange { background-color: #fd7e14; }
+ 
+/* --- 9. MODAL UI (Screen Only) --- */
+
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; display: flex; justify-content: center; align-items: center; }
+
+.modal-window { width: 90%; height: 95%; background: #f0f2f5; display: flex; flex-direction: column; border-radius: 8px; overflow: hidden; }
+
+.toolbar { background: white; padding: 10px 20px; display: flex; justify-content: space-between; border-bottom: 1px solid #ddd; }
+
+.preview-pane { flex: 1; overflow-y: auto; padding: 20px; display: flex; justify-content: center; }
+
+.paper-sheet { width: 210mm; min-height: 297mm; background: white; box-shadow: 0 0 10px rgba(0,0,0,0.1); padding: 10mm; }
+ 
+/* Buttons */
+
+.btn { border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; color: white; font-weight: 600; margin-left: 8px; }
+
+.btn-close { background: #6c757d; }
+
+.btn-excel { background: #28a745; }
+
+.btn-print { background: #0056b3; }
+ 

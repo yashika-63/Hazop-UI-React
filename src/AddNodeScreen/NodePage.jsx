@@ -5,6 +5,7 @@ import { formatDate, showToast } from "../CommonUI/CommonUI";
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
+import { strings } from "../string";
 import { FaEllipsisV } from "react-icons/fa";
 import { FaSquareCheck } from "react-icons/fa6";
 
@@ -46,6 +47,7 @@ console.log("Hazop Team Received: ", stateTeam);
       try {
         const response = await fetch(
           `http://localhost:5559/api/hazopNode/by-registration-status?registrationId=${hazopData.id}&status=true`
+          `http://${strings.localhost}/api/hazopNode/by-registration-status?registrationId=1&status=true`
         );
         const data = await response.json();
         setNodes(data);
