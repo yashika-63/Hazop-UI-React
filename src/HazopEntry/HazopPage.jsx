@@ -88,7 +88,7 @@ const handleOpenNode = (item) => {
             <FaTrash /> Delete
           </button>
           <button type="button" onClick={() => handleOpenNode(item)}>
-            <FaTrash /> Open Node
+            <FaEye /> Open Node
           </button>
         </div>
       )}

@@ -21,13 +21,15 @@ const initialState = {
   additionalRiskRating: "",
 };
 
-const NodeDetailsUpdatePopup = ({ onClose, nodeID }) => {
+const NodeDetailsUpdatePopup = ({ onClose, nodeID, detail }) => {
   const [form, setForm] = useState(initialState);
   const [rows, setRows] = useState(6);
   const [smallRows, setSmallRows] = useState(3);
   const [loading, setLoading] = useState(false);
   const [originalForm, setOriginalForm] = useState(initialState);
   const [showRecommendations, setShowRecommendations] = useState(false);
+  const [tempRecommendations, setTempRecommendations] = useState([]);
+  const [nodeDetailId, setNodeDetailId] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -41,7 +43,6 @@ const NodeDetailsUpdatePopup = ({ onClose, nodeID }) => {
       ) {
         const lineCount = value.split("\n").length;
         setRows(Math.min(20, Math.max(6, lineCount)));
-        setSmallRows(Math.min(20, Math.max(6, lineCount)));
       }
 
       if (name === "additionalControl" || name === "existineControl") {
@@ -70,34 +71,40 @@ useEffect(() => {
   const fetchDetail = async () => {
     try {
       const res = await fetch(
-        `http://localhost:5559/api/hazopNodeDetail/node/${nodeID}`
+        `http://localhost:5559/api/hazopNodeDetail/${detail.id}`
       );
+
       if (!res.ok) return;
+
       const data = await res.json();
-      const detail = Array.isArray(data) ? data[0] : data;
+
+      const detailData = Array.isArray(data) ? data[0] : data;
 
       const filled = {
         ...initialState,
-        ...detail,
-        id: detail.id,
+        ...detailData,
+        id: detailData.id,
       };
+
       setForm(filled);
-      setOriginalForm(filled); // keep a copy for comparison
+      setOriginalForm(filled);
+      setNodeDetailId(detailData.id);
+
     } catch (err) {
       console.error(err);
       showToast("Failed to load details for update.", "error");
     }
   };
 
-  if (nodeID) fetchDetail();
-}, [nodeID]);
+  if (detail?.id) fetchDetail();
+}, [detail]);
 
- const openRecommendations = () => {
+  const openRecommendations = () => {
     setShowRecommendations(true);
   };
 
   const saveRecommendations = (recs) => {
-    const bulletText = recs.map(r => `- ${r}`).join('\n');
+    const bulletText = recs.map((r) => `- ${r}`).join("\n");
     setForm((prev) => ({ ...prev, additionalControl: bulletText }));
     setShowRecommendations(false);
   };
@@ -119,24 +126,20 @@ useEffect(() => {
       return;
     }
 
-    // build diff object
     const changedFields = {};
     Object.keys(form).forEach((key) => {
       if (form[key] !== originalForm[key]) {
         changedFields[key] = form[key];
       }
     });
-
-    // always include id (needed by backend)
     changedFields.id = form.id;
 
     try {
       setLoading(true);
-
       const response = await fetch(
         `http://localhost:5559/api/hazopNodeDetail/update/${form.id}`,
         {
-          method: "PUT", 
+          method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
@@ -145,8 +148,12 @@ useEffect(() => {
       );
 
       if (response.ok) {
-        const message = await response.text();
-        console.log("Update response:", message);
+        const nodeDetailResult = await response.json();
+        const id = nodeDetailResult.nodeDetailId;
+        setNodeDetailId(id);
+
+        const text = await response.text(); // Use .text() for plain text
+        console.log("Raw response:", text);
         showToast("Details updated successfully!", "success");
         onClose();
       } else {
@@ -196,7 +203,7 @@ useEffect(() => {
         <div className="popup-body">
           <form onSubmit={handleSubmit}>
             <div>
-              <div className="input-row">
+              <div className="grid-row">
                 <div className="form-group">
                   <label>General Parameter</label>
                   <input
@@ -226,7 +233,7 @@ useEffect(() => {
                 </div>
               </div>
 
-              <div className="input-row">
+              <div className="grid-row">
                 <div className="form-group">
                   <label>Causes</label>
                   <textarea
@@ -234,6 +241,7 @@ useEffect(() => {
                     rows={rows}
                     value={form.causes}
                     onChange={handleChange}
+                    className="textareaFont"
                   />
                 </div>
                 <div className="form-group">
@@ -243,6 +251,7 @@ useEffect(() => {
                     rows={rows}
                     value={form.consequences}
                     onChange={handleChange}
+                    className="textareaFont"
                   />
                 </div>
                 <div className="form-group">
@@ -252,95 +261,116 @@ useEffect(() => {
                     rows={rows}
                     value={form.deviation}
                     onChange={handleChange}
+                    className="textareaFont"
                   />
                 </div>
               </div>
 
-              <div className="input-row">
-                <div className="form-group">
+              <div className="grid-row">
+                <div className="form-group existing-control">
                   <label>Existing Control</label>
                   <textarea
                     name="existineControl"
                     rows={smallRows}
                     value={form.existineControl}
                     onChange={handleChange}
+                    className="textareaFont"
                   />
                 </div>
-                <div className="form-group">
-                  <label>Existing Probability (1–5)</label>
-                  {renderScaleSelect(
-                    "existingProbability",
-                    form.existineProbability
-                  )}
-                </div>
-                <div className="form-group">
-                  <label>Existing Severity (1–5)</label>
-                  {renderScaleSelect("existingSeverity", form.existingSeverity)}
-                </div>
-                <div className="form-group">
-                  <label>Risk Rating</label>
-                  <input
-                    type="text"
-                    name="riskRating"
-                    value={form.riskRating}
-                    onChange={handleChange}
-                  />
+                <div className="existing-metrics">
+                  <div className="form-group">
+                    <label>Existing Probability (1–5)</label>
+                    {renderScaleSelect(
+                      "existineProbability",
+                      form.existineProbability
+                    )}
+                  </div>
+                  <div className="form-group">
+                    <label>Existing Severity (1–5)</label>
+                    {renderScaleSelect(
+                      "existingSeverity",
+                      form.existingSeverity
+                    )}
+                  </div>
+                  <div className="form-group">
+                    <label>Risk Rating</label>
+                    <input
+                      type="text"
+                      name="riskRating"
+                      value={form.riskRating}
+                      onChange={handleChange}
+                    readOnly
+                    className="readonly"
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className="input-row">
-                <div className="form-group">
+              <div className="grid-row">
+                <div className="form-group existing-control">
                   <label>
-                    Additional Control
                     {isAdditionalRequired() && (
                       <span className="required">*</span>
                     )}
-                                      <button type="button" className="add-btn" onClick={openRecommendations}>Add</button>
-</label>
+                    Additional Control
+                    <button
+                      type="button"
+                      className="add-btn"
+                      onClick={openRecommendations}
+                    >
+                      Add
+                    </button>
+                  </label>
                   <textarea
                     name="additionalControl"
                     rows={smallRows}
                     value={form.additionalControl}
                     onChange={handleChange}
+                    readOnly
+                    className="readonly textareaFont"
                   />
                 </div>
-                <div className="form-group">
-                  <label>
-                    Additional Probability (1–5)
-                    {isAdditionalRequired() && (
-                      <span className="required">*</span>
+                <div className="existing-metrics">
+                  <div className="form-group">
+                    <label>
+                      Additional Probability (1–5)
+                      {isAdditionalRequired() && (
+                        <span className="required">*</span>
+                      )}
+                    </label>
+                    {renderScaleSelect(
+                      "additionalProbability",
+                      form.additionalProbability
                     )}
-                  </label>
-                  {renderScaleSelect(
-                    "additionalProbability",
-                    form.additionalProbability
-                  )}
-                </div>
-                <div className="form-group">
-                  <label>
-                    Additional Severity (1–5)
-                    {isAdditionalRequired() && (
-                      <span className="required">*</span>
+                  </div>
+                  <div className="form-group">
+                    <label>
+                      Additional Severity (1–5)
+                      {isAdditionalRequired() && (
+                        <span className="required">*</span>
+                      )}
+                    </label>
+                    {renderScaleSelect(
+                      "additionalSeverity",
+                      form.additionalSeverity
                     )}
-                  </label>
-                  {renderScaleSelect(
-                    "additionalSeverity",
-                    form.additionalSeverity
-                  )}
-                </div>
-                <div className="form-group">
-                  <label>
-                    Additional Risk Rating
-                    {isAdditionalRequired() && (
-                      <span className="required">*</span>
-                    )}
-                  </label>
-                  <input
-                    type="text"
-                    name="additionalRiskRating"
-                    value={form.additionalRiskRating}
-                    onChange={handleChange}
-                  />
+                  </div>
+                  <div className="form-group">
+                    <label>
+                      Additional Risk Rating
+                      {isAdditionalRequired() && (
+                        <span className="required">*</span>
+                      )}
+                    </label>
+                    <input
+                      type="text"
+                      name="additionalRiskRating"
+                      value={form.additionalRiskRating}
+                      onChange={handleChange}
+                    readOnly
+                    className="readonly"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -365,7 +395,8 @@ useEffect(() => {
             onClose={() => setShowRecommendations(false)}
             onSave={saveRecommendations}
             initialRecommendations={[]}
-  nodeDetailId={nodeDetailId}
+            nodeID={nodeID}
+            nodeDetailId={nodeDetailId}
           />
         )}
       </div>

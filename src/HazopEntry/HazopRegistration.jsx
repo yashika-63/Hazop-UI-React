@@ -3,6 +3,7 @@ import axios from "axios";
 import { FaSearch, FaTimes } from "react-icons/fa";
 import "./HazopRegistration.css";
 import { showToast } from "../CommonUI/CommonUI";
+import { useLocation } from "react-router-dom";
 
 const HazopRegistration = ({ closePopup }) => {
   const [formData, setFormData] = useState({
@@ -22,7 +23,15 @@ const HazopRegistration = ({ closePopup }) => {
   const [hazopTeam, setHazopTeam] = useState([]);
   const [showTeamSearch, setShowTeamSearch] = useState(false);
   const [confirmPopup, setConfirmPopup] = useState(null);
+const location = useLocation();
+    const hazopId = location.state?.hazopId;
 
+    useEffect(() => {
+        if (hazopId) {
+            // Fetch the single HAZOP data for editing
+            fetchHazopById(hazopId);
+        }
+    }, [hazopId]);
 
   useEffect(() => {
     if (loading) {

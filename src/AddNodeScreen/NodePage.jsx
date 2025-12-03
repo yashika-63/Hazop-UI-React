@@ -5,27 +5,41 @@ import { formatDate, showToast } from "../CommonUI/CommonUI";
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
+import { FaEllipsisV } from "react-icons/fa";
+import { FaSquareCheck } from "react-icons/fa6";
 
 const NodePage = ({ hazopData: propHazopData, hazopTeam: propHazopTeam }) => {
   const [showPopup, setShowPopup] = useState(false);
   const [nodes, setNodes] = useState([]);
   const [showAllMembers, setShowAllMembers] = useState(false);
   const navigate = useNavigate();
-     const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const location = useLocation();
-  const { hazopData } = location.state || {
-    hazopData: propHazopData,
-    hazopTeam: [],
-  };
+const { hazopData, hazopTeam: stateTeam } = location.state || {};
   const [showFullDescription, setShowFullDescription] = useState(false);
-const [hazopTeam, setHazopTeam] = useState([]);
-    const [originalTeam, setOriginalTeam] = useState([]);
+  const [hazopTeam, setHazopTeam] = useState([]);
+  const [originalTeam, setOriginalTeam] = useState([]);
+  const [openDropdown, setOpenDropdown] = useState(null);
+
+  const toggleDropdown = (id) => {
+    setOpenDropdown(openDropdown === id ? null : id);
+  };
+
+ console.log("Hazop Data Received: ", hazopData);
+console.log("Hazop Team Received: ", stateTeam);
+
+  const setSelectedRevisionId = (id) => {
+    console.log("Selected revision ID:", id);
+    // Add your completion logic here later
+  };
 
   useEffect(() => {
-    console.log("hazopTeam:", hazopTeam);
-  }, [hazopTeam]);
+  if (stateTeam) {
+    setHazopTeam(stateTeam);
+    setOriginalTeam(stateTeam);
+  }
+}, [stateTeam]);
 
-  // Fetch nodes from API on component mount
   useEffect(() => {
     const fetchNodes = async () => {
       if (!hazopData?.id) return;
@@ -59,134 +73,164 @@ const [hazopTeam, setHazopTeam] = useState([]);
   }, [hazopData]);
 
   const fetchExistingTeam = async (hazopId) => {
-  setLoading(true);
-  try {
-    const response = await axios.get(
-      `http://localhost:5559/api/hazopTeam/teamByHazop/${hazopId}?status=true`
-    );
-    setHazopTeam(response.data || []); // Use setHazopTeam, not hazopTeam
-    setOriginalTeam(response.data || []);
-  } catch (err) {
-    console.error("Error fetching team:", err);
-    showToast("Failed to load existing team.", "error");
-  }
-  setLoading(false);
-};
+    setLoading(true);
+    try {
+      const response = await axios.get(
+        `http://localhost:5559/api/hazopTeam/teamByHazop/${hazopId}?status=true`
+      );
+      setHazopTeam(response.data || []); // Use setHazopTeam, not hazopTeam
+      setOriginalTeam(response.data || []);
+    } catch (err) {
+      console.error("Error fetching team:", err);
+      showToast("Failed to load existing team.", "error");
+    }
+    setLoading(false);
+  };
+
+  const renderDropdown = (item) => (
+    <div className="dropdown">
+      <button
+        className="dots-button"
+        onClick={(e) => {
+          toggleDropdown(item.id);
+        }}
+      >
+        <FaEllipsisV />
+      </button>
+
+      {openDropdown === item.id && (
+        <div className="dropdown-content">
+          <button
+            type="button"
+            onClick={(e) => {
+              setSelectedRevisionId(item.id);
+            }}
+          >
+            <FaSquareCheck /> Complete
+          </button>
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <div>
       {/* HAZOP INFO CARD */}
-      <div>
+      <div className="node-header">
+        <button className="nd-back-btn" onClick={() => navigate(-1)}>
+          ← Back
+        </button>
         <h1>Hazop Information</h1>
-
-        <div className="hazop-info">
-          {hazopData ? (
-            <div className="hazop-info-grid">
-              <div>
-                <strong>ID:</strong> {hazopData.id}
+      </div>
+      <div className="hazop-info">
+        {hazopData ? (
+          <div className="hazop-info-grid">
+            <div>
+              <strong>ID:</strong> {hazopData.id}
+            </div>
+            <div>
+              <strong>Site:</strong> {hazopData.site}
+            </div>
+            <div>
+              <strong>Department:</strong> {hazopData.department}
+            </div>
+            <div>
+              <strong>HAZOP Date:</strong> {formatDate(hazopData.hazopDate)}
+            </div>
+            <div>
+              <strong>Completion Status:</strong>{" "}
+              {hazopData.completionStatus ? "Completed" : "Pending"}
+            </div>
+            <div>
+              <strong>Status:</strong>{" "}
+              {hazopData.status ? "Active" : "Inactive"}
+            </div>
+            <div>
+              <strong>Send for Verification:</strong>{" "}
+              {hazopData.sendForVerification ? "Yes" : "No"}
+            </div>
+            <div>
+              <strong>Created By:</strong> {hazopData.createdBy || "N/A"}
+            </div>
+            <div>
+              <strong>Email:</strong> {hazopData.createdByEmail || "N/A"}
+            </div>
+            {hazopData.hazopRevisionNo && (
+  <div>
+    <strong>Hazop Revision No.:</strong> {hazopData.hazopRevisionNo}
+  </div>
+)}
+            <div className="full-width">
+              <strong>Description:</strong>
+              <div
+                className={
+                  showFullDescription ? "description-full" : "description-clamp"
+                }
+              >
+                {hazopData.description}
               </div>
-              <div>
-                <strong>Site:</strong> {hazopData.site}
-              </div>
-              <div>
-                <strong>Department:</strong> {hazopData.department}
-              </div>
-              <div>
-                <strong>HAZOP Date:</strong> {formatDate(hazopData.hazopDate)}
-              </div>
-              <div>
-                <strong>Completion Status:</strong>{" "}
-                {hazopData.completionStatus ? "Completed" : "Pending"}
-              </div>
-              <div>
-                <strong>Status:</strong>{" "}
-                {hazopData.status ? "Active" : "Inactive"}
-              </div>
-              <div>
-                <strong>Send for Verification:</strong>{" "}
-                {hazopData.sendForVerification ? "Yes" : "No"}
-              </div>
-              <div>
-                <strong>Created By:</strong> {hazopData.createdBy || "N/A"}
-              </div>
-              <div>
-                <strong>Email:</strong> {hazopData.createdByEmail || "N/A"}
-              </div>
-              <div className="full-width">
-                <strong>Description:</strong>
-                <div
-                  className={
-                    showFullDescription
-                      ? "description-full"
-                      : "description-clamp"
-                  }
+              {hazopData.description && hazopData.description.length > 100 && (
+                <button
+                  type="button"
+                  onClick={() => setShowFullDescription(!showFullDescription)}
+                  className="read-more-btn"
                 >
-                  {hazopData.description}
-                </div>
-                {hazopData.description &&
-                  hazopData.description.length > 100 && (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setShowFullDescription(!showFullDescription)
-                      }
-                      className="read-more-btn"
-                    >
-                      {showFullDescription ? "Read Less" : "Read More"}
-                    </button>
-                  )}
-              </div>
+                  {showFullDescription ? "Read Less" : "Read More"}
+                </button>
+              )}
             </div>
-          ) : (
-            <p>No HAZOP data available.</p>
-          )}
-
-          <div className="roghtbtn-controls">
-            <h6
-              style={{ cursor: "pointer" }}
-              onClick={() => setShowAllMembers(!showAllMembers)}
-            >
-              View Total Group Members: {hazopTeam.length}
-            </h6>
           </div>
+        ) : (
+          <p>No HAZOP data available.</p>
+        )}
 
-          {showAllMembers && (
-            <div className="table-section">
-              <div className="card table-card">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Sr. No.</th>
-                                    <th>Employee Code</th>
-                      <th>Employee Name</th>
-                      <th>Department</th>
-                      <th>Email Id</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {hazopTeam.length === 0 ? (
-                      <tr>
-                        <td colSpan="4" className="no-data">
-                          No members added yet.
-                        </td>
-                      </tr>
-                    ) : (
-                      hazopTeam.map((m, idx) => (
-                        <tr key={idx}>
-                          <td>{idx + 1}</td>
-                                        <td>{m.empCode}</td>
-                                        <td>{m.firstName} {m.lastName}</td>
-                          <td>{m.dimension1}</td>
-                          <td>{m.emailId}</td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
+        <div className="rightbtn-controls">
+          <h6
+            style={{ cursor: "pointer" }}
+            onClick={() => setShowAllMembers(!showAllMembers)}
+          >
+            View Total Group Members: {hazopTeam.length}
+          </h6>
         </div>
+
+        {showAllMembers && (
+          <div className="table-section">
+            <div className="card table-card">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Sr. No.</th>
+                    <th>Employee Code</th>
+                    <th>Employee Name</th>
+                    <th>Department</th>
+                    <th>Email Id</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {hazopTeam.length === 0 ? (
+                    <tr>
+                      <td colSpan="4" className="no-data">
+                        No members added yet.
+                      </td>
+                    </tr>
+                  ) : (
+                    hazopTeam.map((m, idx) => (
+                      <tr key={idx}>
+                        <td>{idx + 1}</td>
+                        <td>{m.empCode}</td>
+                        <td>
+                          {m.firstName} {m.lastName}
+                        </td>
+                        <td>{m.dimension1}</td>
+                        <td>{m.emailId}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* BUTTON + TABLE */}
@@ -213,12 +257,13 @@ const [hazopTeam, setHazopTeam] = useState([]);
                 <th>Pressure</th>
                 <th>Quantity Flow Rate</th>
                 <th>Completion Status</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
               {nodes.length === 0 ? (
                 <tr>
-                  <td colSpan="11" className="no-data">
+                  <td colSpan="12" className="no-data">
                     No nodes added yet.
                   </td>
                 </tr>
@@ -254,6 +299,7 @@ const [hazopTeam, setHazopTeam] = useState([]);
                         {n.completionStatus === true ? "Completed" : "Pending"}
                       </span>
                     </td>
+                    <td onClick={(e) => e.stopPropagation()} >{renderDropdown(n)}</td>
                   </tr>
                 ))
               )}
@@ -266,6 +312,7 @@ const [hazopTeam, setHazopTeam] = useState([]);
         <NodePopup
           onClose={() => setShowPopup(false)}
           onSave={handleSaveNode}
+          hazopData={hazopData}
         />
       )}
     </div>
