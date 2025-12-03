@@ -6,7 +6,7 @@ import { strings } from "../string";
 
 const Recommendations = ({ onClose, onSave, initialRecommendations = [], nodeID, nodeDetailId }) => {
   const [errors, setErrors] = useState({});
-const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const initialArray =
     Array.isArray(initialRecommendations) && initialRecommendations.length > 0
@@ -27,62 +27,35 @@ const [loading, setLoading] = useState(false);
     ]);
   };
 
-const handleChange = (index, field, value) => {
-  const updated = [...recommendations];
-  updated[index][field] = value;
-  setRecommendations(updated);
-};
+  const handleChange = (index, field, value) => {
+    const updated = [...recommendations];
+    updated[index][field] = value;
+    setRecommendations(updated);
+  };
 
   const validate = () => {
-  const newErrors = {};
-  recommendations.forEach((rec, index) => {
-    if (!rec.recommendation) {
-      newErrors[`recommendation-${index}`] = "Recommendation is required.";
-      showToast("Recommendation is required", "warn");
-    }
-    if (!rec.remarkbyManagement) {
-      newErrors[`remarkbyManagement-${index}`] = "Remarks by management is required.";
-      showToast("Remarks by management is required", "warn");
-    }
-  });
-  setErrors(newErrors);
-  return Object.keys(newErrors).length === 0;
-};
-
-const handleSave = () => {
-  if (!validate()) return;
-  const displayText = recommendations.map((r) => r.recommendation).filter((r) => r.trim() !== "");
-  onSave(displayText);
-  onClose();
-};
-  const handleSave = async () => {
-    try {
-      const response = await fetch(
-        `http://${strings.localhost}/api/nodeRecommendation/save/${nodeID}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(recommendations),
-        }
-      );
-
-      if (response.ok) {
-        const displayText = recommendations
-          .map((r) => r.recommendation)
-          .filter((r) => r.trim() !== "");
-        onSave(displayText);
-        showToast("Recommendations saved successfully!", "success");
-      } else {
-        showToast("Failed to save details.", "error");
+    const newErrors = {};
+    recommendations.forEach((rec, index) => {
+      if (!rec.recommendation) {
+        newErrors[`recommendation-${index}`] = "Recommendation is required.";
+        showToast("Recommendation is required", "warn");
       }
-    } catch (error) {
-      console.error("Error saving recommendations:", error);
-      showToast("Error saving details.", "error");
-    }
+      if (!rec.remarkbyManagement) {
+        newErrors[`remarkbyManagement-${index}`] = "Remarks by management is required.";
+        showToast("Remarks by management is required", "warn");
+      }
+    });
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSave = () => {
+    if (!validate()) return;
+    const displayText = recommendations.map((r) => r.recommendation).filter((r) => r.trim() !== "");
+    onSave(displayText);
     onClose();
   };
+ 
 
   return (
     <div className="modal-overlay">

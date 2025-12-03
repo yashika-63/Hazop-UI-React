@@ -3,6 +3,7 @@ import axios from "axios";
 import "./Node.css";
 import { FaTimes } from "react-icons/fa";
 import { formatDateToBackend, showToast } from "../CommonUI/CommonUI";
+import { strings } from "../string";
 
 const NodePopup = ({ onClose, onSaved }) => {
   const [form, setForm] = useState({
@@ -116,7 +117,7 @@ const NodePopup = ({ onClose, onSaved }) => {
       ];
 
       const res = await axios.post(
-        "http://localhost:5559/api/hazopNode/saveNodes/1",
+        `http://${strings.localhost}/api/hazopNode/saveNodes/${registrationId}`,
         payload
       );
 
@@ -234,8 +235,8 @@ const NodePopup = ({ onClose, onSaved }) => {
                     name="sopDate"
                     value={form.sopDate}
                     onChange={handleChange}
-                                      max={new Date().toISOString().split("T")[0]}
-/>
+                    max={new Date().toISOString().split("T")[0]}
+                  />
                 </div>
 
                 <div className="form-group">
@@ -260,7 +261,7 @@ const NodePopup = ({ onClose, onSaved }) => {
                     value={form.pressure}
                     onChange={handleChange}
                   />
-</div>
+                </div>
               </div>
 
               {/* Equipment / controls */}

@@ -324,7 +324,7 @@ button:focus, button:focus-visible {
   color: black;
 }
 
-.roghtbtn-controls {
+.rightbtn-controls {
   display: flex;
   justify-content: flex-end;
   align-items: center;
@@ -332,6 +332,7 @@ button:focus, button:focus-visible {
   flex-wrap: wrap;
   height: 30px;
   padding-right: 30px;
+  margin-top: 10px;
 }
 
 .center-controls {
@@ -519,10 +520,7 @@ p {
   font-size: 12px;
 }
 
-  font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
-  font-size: 13px;
-  line-height: 20px;
-}
+ 
 
 
 

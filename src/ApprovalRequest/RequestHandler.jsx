@@ -4,14 +4,14 @@ import './Approval.css';
 
 import HazopTeamAcceptanceApproval from "./HazopTeamAcceptanceApproval";
 import HazopRecommendationApproval from "./HazopRecommandationApproval";
-import { FaCalendarDay, FaLightbulb } from "react-icons/fa";
+import { FaCalendarDay, FaCheckCircle, FaLightbulb } from "react-icons/fa";
+import HazopApprovalPage from "./HazopApprovalPage";
 
 const RequestHandler = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const defaultTab = searchParams.get('tab') || 'HazopTeamAcceptance';
     const [activeSection, setActiveSection] = useState(defaultTab);
 
-    // track which tabs have been loaded to avoid re-fetch
     const [loadedTabs, setLoadedTabs] = useState([defaultTab]);
 
     const handleButtonClick = (section) => {
@@ -46,11 +46,22 @@ const RequestHandler = () => {
                         <FaLightbulb />
                         Hazop Recommendation
                     </button>
+
+                    <button
+                        type="button"
+                        className={activeSection === 'HazopApprove' ? 'active' : ''}
+                        onClick={() => handleButtonClick('HazopApprove')}
+                    >
+                        <FaCheckCircle />
+                        Hazop Review / Approve
+                    </button>
                 </div>
 
                 <div className="Companycontent">
                     {activeSection === 'HazopTeamAcceptance' && <HazopTeamAcceptanceApproval />}
                     {activeSection === 'HazopRecommendationApproval' && <HazopRecommendationApproval />}
+                    {activeSection === 'HazopApprove' && <HazopApprovalPage />}
+
                 </div>
             </div>
         </div>

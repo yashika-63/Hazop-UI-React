@@ -27,7 +27,8 @@ const Login = ({ setToken }) => {
         localStorage.setItem('empCode', response.data.empCode);
         localStorage.setItem('email', response.data.email);
         localStorage.setItem('fullName', response.data.fullName);
-
+        localStorage.setItem('companyId', response.data.companyId);
+        localStorage.setItem('Role', response.data.hazopRoles);
         alert(`Hey, welcome ${response.data.fullName}`);
         window.location.href = '/HazopPage';
 

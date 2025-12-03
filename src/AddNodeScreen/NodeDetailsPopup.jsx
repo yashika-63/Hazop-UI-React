@@ -74,7 +74,7 @@ const handleSubmit = async (e) => {
     setLoading(true);
     // Save node detail first
     const nodeDetailResponse = await fetch(
-      `http://localhost:5559/api/hazopNodeDetail/saveDetails/${nodeID}`,
+      `http://${strings.localhost}/api/hazopNodeDetail/saveDetails/${nodeID}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -89,7 +89,7 @@ const handleSubmit = async (e) => {
       // Now save recommendations if any
       if (tempRecommendations.length > 0) {
         await fetch(
-          `http://localhost:5559/api/nodeRecommendation/save/${nodeID}/${nodeDetailId}`,
+          `http://${strings.localhost}/api/nodeRecommendation/save/${nodeID}/${nodeDetailId}`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },

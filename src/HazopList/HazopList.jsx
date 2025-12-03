@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { FaEllipsisV, FaFilePdf } from "react-icons/fa";
+import { FaEllipsisV, FaFilePdf, FaLink, FaSearch } from "react-icons/fa";
 import HazopReport from "../Reports/HazopReport";
 import { strings } from "../string";
+import MocPopup from "./MocPopup";
 
 const HazopList = () => {
     const [hazopData, setHazopData] = useState([]);
@@ -11,6 +12,8 @@ const HazopList = () => {
     const [openDropdown, setOpenDropdown] = useState(null);
     const [selectedHazopId, setSelectedHazopId] = useState(null);
 
+    const [openMocPopup, setOpenMocPopup] = useState(false);
+ const companyId = localStorage.getItem("companyId");
     const toggleDropdown = (id) => {
         setOpenDropdown(openDropdown === id ? null : id);
     };
@@ -19,7 +22,7 @@ const HazopList = () => {
         const fetchHazopData = async () => {
             try {
                 const response = await axios.get(
-                    `http://${strings.localhost}/api/hazopRegistration/filter?companyId=1&status=true&completionStatus=true&sendForVerification=false`
+                    `http://${strings.localhost}/api/hazopRegistration/filter?companyId=${companyId}&status=true&completionStatus=true&sendForVerification=false`
                 );
                 setHazopData(response.data);
                 setLoading(false);
@@ -28,27 +31,26 @@ const HazopList = () => {
                 setLoading(false);
             }
         };
-
         fetchHazopData();
     }, []);
-
-    const truncateDescription = (description) => {
-        const words = description.split(" ");
-        return words.length > 3 ? words.slice(0, 3).join(" ") + "..." : description;
-    };
 
     const renderDropdown = (item) => (
         <div className="dropdown">
             <button className="dots-button" onClick={() => toggleDropdown(item.id)}>
                 <FaEllipsisV />
             </button>
+
             {openDropdown === item.id && (
                 <div className="dropdown-content">
+                    <button onClick={() => setSelectedHazopId(item.id)}> <FaFilePdf /> Report</button>
+
                     <button
-                        type="button"
-                        onClick={() => setSelectedHazopId(item.id)}
+                        onClick={() => {
+                            setOpenMocPopup(item.id);
+                            setOpenDropdown(null);
+                        }}
                     >
-                        <FaFilePdf /> Report
+                     <FaLink />  Link MOC
                     </button>
                 </div>
             )}
@@ -58,6 +60,7 @@ const HazopList = () => {
     return (
         <div>
             <h1>HAZOP List</h1>
+
             <div className="hazoptable-wrapper">
                 <table className="hazoplist-table">
                     <thead>
@@ -72,6 +75,7 @@ const HazopList = () => {
                             <th>Action</th>
                         </tr>
                     </thead>
+
                     <tbody>
                         {hazopData.length > 0 ? (
                             hazopData.map((hazop) => (
@@ -88,9 +92,7 @@ const HazopList = () => {
                             ))
                         ) : (
                             <tr>
-                                <td colSpan="12" className="no-data">
-                                    No Data Found
-                                </td>
+                                <td colSpan="12" className="no-data">No Data Found</td>
                             </tr>
                         )}
                     </tbody>
@@ -98,10 +100,16 @@ const HazopList = () => {
             </div>
 
             {selectedHazopId && (
-
                 <HazopReport
                     hazopId={selectedHazopId}
                     onClose={() => setSelectedHazopId(null)}
+                />
+            )}
+
+            {openMocPopup && (
+                <MocPopup
+                    hazopId={openMocPopup}
+                    onClose={() => setOpenMocPopup(null)}
                 />
             )}
         </div>

@@ -12,15 +12,15 @@ const NodePage = ({ hazopData: propHazopData, hazopTeam: propHazopTeam }) => {
   const [nodes, setNodes] = useState([]);
   const [showAllMembers, setShowAllMembers] = useState(false);
   const navigate = useNavigate();
-     const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const location = useLocation();
   const { hazopData } = location.state || {
     hazopData: propHazopData,
     hazopTeam: [],
   };
   const [showFullDescription, setShowFullDescription] = useState(false);
-const [hazopTeam, setHazopTeam] = useState([]);
-    const [originalTeam, setOriginalTeam] = useState([]);
+  const [hazopTeam, setHazopTeam] = useState([]);
+  const [originalTeam, setOriginalTeam] = useState([]);
 
   useEffect(() => {
     console.log("hazopTeam:", hazopTeam);
@@ -32,8 +32,7 @@ const [hazopTeam, setHazopTeam] = useState([]);
       if (!hazopData?.id) return;
       try {
         const response = await fetch(
-          `http://localhost:5559/api/hazopNode/by-registration-status?registrationId=${hazopData.id}&status=true`
-          `http://${strings.localhost}/api/hazopNode/by-registration-status?registrationId=1&status=true`
+            `http://${strings.localhost}/api/hazopNode/by-registration-status?registrationId=${hazopData.id}&status=true`
         );
         const data = await response.json();
         setNodes(data);
@@ -61,19 +60,19 @@ const [hazopTeam, setHazopTeam] = useState([]);
   }, [hazopData]);
 
   const fetchExistingTeam = async (hazopId) => {
-  setLoading(true);
-  try {
-    const response = await axios.get(
-      `http://localhost:5559/api/hazopTeam/teamByHazop/${hazopId}?status=true`
-    );
-    setHazopTeam(response.data || []); // Use setHazopTeam, not hazopTeam
-    setOriginalTeam(response.data || []);
-  } catch (err) {
-    console.error("Error fetching team:", err);
-    showToast("Failed to load existing team.", "error");
-  }
-  setLoading(false);
-};
+    setLoading(true);
+    try {
+      const response = await axios.get(
+        `http://${strings.localhost}/api/hazopTeam/teamByHazop/${hazopId}?status=true`
+      );
+      setHazopTeam(response.data || []); // Use setHazopTeam, not hazopTeam
+      setOriginalTeam(response.data || []);
+    } catch (err) {
+      console.error("Error fetching team:", err);
+      showToast("Failed to load existing team.", "error");
+    }
+    setLoading(false);
+  };
 
   return (
     <div>
@@ -159,7 +158,7 @@ const [hazopTeam, setHazopTeam] = useState([]);
                   <thead>
                     <tr>
                       <th>Sr. No.</th>
-                                    <th>Employee Code</th>
+                      <th>Employee Code</th>
                       <th>Employee Name</th>
                       <th>Department</th>
                       <th>Email Id</th>
@@ -176,8 +175,8 @@ const [hazopTeam, setHazopTeam] = useState([]);
                       hazopTeam.map((m, idx) => (
                         <tr key={idx}>
                           <td>{idx + 1}</td>
-                                        <td>{m.empCode}</td>
-                                        <td>{m.firstName} {m.lastName}</td>
+                          <td>{m.empCode}</td>
+                          <td>{m.firstName} {m.lastName}</td>
                           <td>{m.dimension1}</td>
                           <td>{m.emailId}</td>
                         </tr>
@@ -249,8 +248,8 @@ const [hazopTeam, setHazopTeam] = useState([]);
                           n.completionStatus === true
                             ? "status-completed"
                             : n.completionStatus === false
-                            ? "status-pending"
-                            : "status-pending"
+                              ? "status-pending"
+                              : "status-pending"
                         }
                       >
                         {n.completionStatus === true ? "Completed" : "Pending"}
