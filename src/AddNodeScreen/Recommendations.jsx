@@ -4,8 +4,10 @@ import { toast } from "react-toastify";
 import { showToast } from "../CommonUI/CommonUI";
 import { strings } from "../string";
 
-const Recommendations = ({ onClose, onSave, initialRecommendations = [], nodeID }) => {
-  // Initialize with at least one empty recommendation if initialRecommendations is empty
+const Recommendations = ({ onClose, onSave, initialRecommendations = [], nodeID, nodeDetailId }) => {
+  const [errors, setErrors] = useState({});
+const [loading, setLoading] = useState(false);
+
   const initialArray =
     Array.isArray(initialRecommendations) && initialRecommendations.length > 0
       ? initialRecommendations
@@ -25,12 +27,34 @@ const Recommendations = ({ onClose, onSave, initialRecommendations = [], nodeID 
     ]);
   };
 
-  const handleChange = (index, field, value) => {
-    const updated = [...recommendations];
-    updated[index][field] = value;
-    setRecommendations(updated);
-  };
+const handleChange = (index, field, value) => {
+  const updated = [...recommendations];
+  updated[index][field] = value;
+  setRecommendations(updated);
+};
 
+  const validate = () => {
+  const newErrors = {};
+  recommendations.forEach((rec, index) => {
+    if (!rec.recommendation) {
+      newErrors[`recommendation-${index}`] = "Recommendation is required.";
+      showToast("Recommendation is required", "warn");
+    }
+    if (!rec.remarkbyManagement) {
+      newErrors[`remarkbyManagement-${index}`] = "Remarks by management is required.";
+      showToast("Remarks by management is required", "warn");
+    }
+  });
+  setErrors(newErrors);
+  return Object.keys(newErrors).length === 0;
+};
+
+const handleSave = () => {
+  if (!validate()) return;
+  const displayText = recommendations.map((r) => r.recommendation).filter((r) => r.trim() !== "");
+  onSave(displayText);
+  onClose();
+};
   const handleSave = async () => {
     try {
       const response = await fetch(
@@ -78,7 +102,7 @@ const Recommendations = ({ onClose, onSave, initialRecommendations = [], nodeID 
 
           {recommendations.map((rec, index) => (
             <div key={index} className="form-group">
-              <label>Recommendation</label>
+              <label> <span className="required-marker">* </span>Recommendation</label>
               <textarea
                 type="text"
                 rows={5}
@@ -87,7 +111,7 @@ const Recommendations = ({ onClose, onSave, initialRecommendations = [], nodeID 
                   handleChange(index, "recommendation", e.target.value)
                 }
               />
-              <label>Remarks by Management</label>
+              <label> <span className="required-marker">* </span>Remarks by Management</label>
               <input
                 type="text"
                 value={rec.remarkbyManagement}

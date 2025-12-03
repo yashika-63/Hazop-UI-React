@@ -69,6 +69,19 @@ const App = () => {
           }
         />
       </Routes>
+      <Topbar toggleSidebar={toggleSidebar} />
+      <Sidebar isOpen={isSidebarOpen} />
+      <div className={`content-area ${isSidebarOpen ? 'shifted' : ''}`}>
+            <Routes>
+              <Route path="/NodePage" element={<NodePage />} />
+              <Route path="/HazopPage" element={<HazopPage/>} />
+              <Route path='/HazopList' element={<HazopList/>}/>
+              <Route path='/RequestHandler' element={<RequestHandler/>}/>
+              <Route path="/HazopPage" element={<HazopPage />} />
+              <Route path='/NodeDetails' element={<NodeDetails />} />
+            </Routes>
+            <ToastContainer />
+      </div>
     </Router>
   );
 };

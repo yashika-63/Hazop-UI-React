@@ -366,6 +366,7 @@ useEffect(() => {
             onClose={() => setShowRecommendations(false)}
             onSave={saveRecommendations}
             initialRecommendations={[]}
+  nodeDetailId={nodeDetailId}
           />
         )}
       </div>

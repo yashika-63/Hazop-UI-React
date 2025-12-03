@@ -28,6 +28,7 @@ const NodeDetailsPopup = ({ onClose, nodeID }) => {
   const [smallRows, setSmallRows] = useState(3);
   const [loading, setLoading] = useState(false);
   const [showRecommendations, setShowRecommendations] = useState(false);
+const [tempRecommendations, setTempRecommendations] = useState([]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -60,47 +61,57 @@ const NodeDetailsPopup = ({ onClose, nodeID }) => {
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const additionalRequired = isAdditionalRequired();
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  const additionalRequired = isAdditionalRequired();
 
-    if (
-      additionalRequired &&
-      (!form.additionalControl ||
-        !form.additionalProbability ||
-        !form.additionalSeverity)
-    ) {
-      showToast("Additional Control, Probability, and Severity are required when Risk Rating is 12 or higher.", "warn");
-      return;
-    }
+  if (additionalRequired && (!form.additionalControl || !form.additionalProbability || !form.additionalSeverity)) {
+    showToast("Additional Control, Probability, and Severity are required when Risk Rating is 12 or higher.", "warn");
+    return;
+  }
 
-    try {
-      setLoading(true);
-      const response = await fetch(
-        `http://${strings.localhost}/api/hazopNodeDetail/saveDetails/${nodeID}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify([form]),
-        }
-      );
-
-      if (response.ok) {
-        showToast("Details saved successfully!", "success");
-        setForm(initialState);
-        onClose();
-      } else {
-        showToast("Failed to save details.", "error");
+  try {
+    setLoading(true);
+    // Save node detail first
+    const nodeDetailResponse = await fetch(
+      `http://localhost:5559/api/hazopNodeDetail/saveDetails/${nodeID}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify([form]),
       }
-    } catch (error) {
-      console.error("Error saving details:", error);
-      showToast("Error saving details.", "error");
-    } finally {
-      setLoading(false);
+    );
+
+    if (nodeDetailResponse.ok) {
+      const nodeDetailResult = await nodeDetailResponse.json();
+      const nodeDetailId = nodeDetailResult.nodeDetailId;
+
+      // Now save recommendations if any
+      if (tempRecommendations.length > 0) {
+        await fetch(
+          `http://localhost:5559/api/nodeRecommendation/save/${nodeID}/${nodeDetailId}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(tempRecommendations),
+          }
+        );
+      }
+
+      showToast("Details and recommendations saved successfully!", "success");
+      setForm(initialState);
+      setTempRecommendations([]);
+      onClose();
+    } else {
+      showToast("Failed to save details.", "error");
     }
-  };
+  } catch (error) {
+    console.error("Error saving details:", error);
+    showToast("Error saving details.", "error");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const isAdditionalRequired = () => {
     const riskRating = parseInt(form.riskRating, 10) || 0;
@@ -115,6 +126,7 @@ const NodeDetailsPopup = ({ onClose, nodeID }) => {
     const bulletText = recs.map(r => `- ${r}`).join('\n');
     setForm((prev) => ({ ...prev, additionalControl: bulletText }));
     setShowRecommendations(false);
+    setTempRecommendations(recs);
   };
 
   const renderScaleSelect = (name, value) => (
@@ -146,7 +158,7 @@ const NodeDetailsPopup = ({ onClose, nodeID }) => {
         <div className="popup-body">
           <form onSubmit={handleSubmit}>
             <div>
-              <div className="input-row">
+              <div className="grid-row">
                 <div className="form-group">
                   <label>General Parameter</label>
                   <input
@@ -176,7 +188,7 @@ const NodeDetailsPopup = ({ onClose, nodeID }) => {
                 </div>
               </div>
 
-              <div className="input-row">
+              <div className="grid-row">
                 <div className="form-group">
                   <label>Causes</label>
                   <textarea
@@ -206,8 +218,8 @@ const NodeDetailsPopup = ({ onClose, nodeID }) => {
                 </div>
               </div>
 
-              <div className="input-row">
-                <div className="form-group">
+              <div className="grid-row">
+                <div className="form-group existing-control">
                   <label>Existing Control</label>
                   <textarea
                     name="existineControl"
@@ -216,6 +228,7 @@ const NodeDetailsPopup = ({ onClose, nodeID }) => {
                     onChange={handleChange}
                   />
                 </div>
+                <div className="existing-metrics">
                 <div className="form-group">
                   <label>Existing Probability (1–5)</label>
                   {renderScaleSelect(
@@ -236,12 +249,13 @@ const NodeDetailsPopup = ({ onClose, nodeID }) => {
                     onChange={handleChange}
                   />
                 </div>
+                </div>
               </div>
 
-              <div className="input-row">
-                <div className="form-group">
-                  <label>Additional Control
-                    {isAdditionalRequired() && <span className="required">*</span>}
+              <div className="grid-row">
+                <div className="form-group existing-control">
+                  <label>
+                    {isAdditionalRequired() && <span className="required-marker">* </span>}Additional Control
                     <button type="button" className="add-btn" onClick={openRecommendations}>Add</button>
                   </label>
                   <textarea
@@ -249,11 +263,14 @@ const NodeDetailsPopup = ({ onClose, nodeID }) => {
                     rows={smallRows}
                     value={form.additionalControl}
                     onChange={handleChange}
+                    readOnly
+                    className="readonly"
                   />
                 </div>
+                <div className="existing-metrics">
                 <div className="form-group">
-                  <label>Additional Probability (1–5)
-                    {isAdditionalRequired() && <span className="required">*</span>}
+                  <label>
+                    {isAdditionalRequired() && <span className="required-marker">* </span>}Additional Probability (1–5)
                   </label>
                   {renderScaleSelect(
                     "additionalProbability",
@@ -261,14 +278,14 @@ const NodeDetailsPopup = ({ onClose, nodeID }) => {
                   )}
                 </div>
                 <div className="form-group">
-                  <label>Additional Severity (1–5)
-                    {isAdditionalRequired() && <span className="required">*</span>}
+                  <label>
+                    {isAdditionalRequired() && <span className="required-marker">* </span>}Additional Severity (1–5)
                   </label>
                   {renderScaleSelect("additionalSeverity", form.additionalSeverity)}
                 </div>
                 <div className="form-group">
-                  <label>Additional Risk Rating
-                    {isAdditionalRequired() && <span className="required">*</span>}
+                  <label>
+                    {isAdditionalRequired() && <span className="required-marker">* </span>}Additional Risk Rating
                   </label>
                   <input
                     type="text"
@@ -276,6 +293,7 @@ const NodeDetailsPopup = ({ onClose, nodeID }) => {
                     value={form.additionalRiskRating}
                     onChange={handleChange}
                   />
+                </div>
                 </div>
               </div>
 

@@ -52,7 +52,6 @@
 .table-card {
   padding: 0;
   overflow: hidden;
-  width: 100%;
 }
 
 .table-card table {
@@ -98,6 +97,14 @@ h2 {
   color: rgb(63, 63, 63);
   font-size: 18px;
   margin-bottom: 20px;
+}
+
+h6 {
+  color: grey;
+  font-size: 14px;
+  margin-top: 10px;
+  text-align: center;
+  text-decoration: underline;
 }
 
 .input-row {
@@ -259,7 +266,7 @@ button:focus, button:focus-visible {
 /* Button Css */
 .close-btn {
   position: absolute;
-  top: -20px;
+  top: 0px;
   right: 0px;
   cursor: pointer;
   font-size: 20px;
@@ -302,7 +309,7 @@ button:focus, button:focus-visible {
   border: none;
   background: transparent;
   color: #9ca3af;
-  font-size: 0.9rem;
+  font-size: 14px;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -313,8 +320,8 @@ button:focus, button:focus-visible {
 }
 
 .nd-back-btn:hover {
-  background: rgba(148, 163, 184, 0.16);
-  color: #f9fafb;
+  background: rgba(118, 123, 131, 0.16);
+  color: black;
 }
 
 .roghtbtn-controls {
@@ -480,6 +487,38 @@ p {
 }
 
 .textareaFont {
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    font-size: 13px;
+    line-height: 20px;
+    height: 1200px;
+    resize: none;
+    overflow: hidden;
+}
+
+.readonly {
+  cursor: not-allowed;
+}
+
+.showmore-text {
+  white-space: pre-wrap;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #fafafa;
+  font-size: 13px;
+}
+
+.showmore-btn {
+  background: white;
+  color: #4d4d4d;
+  padding: 4px 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  align-items: flex-end;
+  font-size: 12px;
+}
+
   font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
   font-size: 13px;
   line-height: 20px;
