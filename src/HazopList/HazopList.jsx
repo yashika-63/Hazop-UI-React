@@ -20,14 +20,7 @@ const HazopList = () => {
     setOpenDropdown(null);
   };
 
-  const toggleDropdown = (id) => {
-    setOpenDropdown(openDropdown === id ? null : id);
-  };
-    const [openMocPopup, setOpenMocPopup] = useState(false);
- const companyId = localStorage.getItem("companyId");
-    const toggleDropdown = (id) => {
-        setOpenDropdown(openDropdown === id ? null : id);
-    };
+
 
   useEffect(() => {
     const fetchHazopData = async () => {

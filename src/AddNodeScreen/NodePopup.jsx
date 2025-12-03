@@ -119,7 +119,6 @@ const NodePopup = ({ onClose, onSaved, hazopData }) => {
 
       const res = await axios.post(
         `http://${strings.localhost}/api/hazopNode/saveNodes/${registrationId}`,
-        `http://localhost:5559/api/hazopNode/saveNodes/${registrationId}`,
         payload
       );
 

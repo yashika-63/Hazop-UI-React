@@ -15,7 +15,6 @@ const NodePage = ({ hazopData: propHazopData, hazopTeam: propHazopTeam }) => {
   const [showAllMembers, setShowAllMembers] = useState(false);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [loading, setLoading] = useState(false);
   const location = useLocation();
 const { hazopData, hazopTeam: stateTeam } = location.state || {};
   const [showFullDescription, setShowFullDescription] = useState(false);

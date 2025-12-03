@@ -83,21 +83,7 @@ const NodeDetailsPopup = ({ onClose, nodeID }) => {
       return;
     }
 
-  try {
-    setLoading(true);
-    // Save node detail first
-    const nodeDetailResponse = await fetch(
-      `http://${strings.localhost}/api/hazopNodeDetail/saveDetails/${nodeID}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify([form]),
-      }
-    );
     try {
-      setLoading(true);
-      // Save node detail first
-      const nodeDetailResponse = await fetch(
         `http://localhost:5559/api/hazopNodeDetail/saveDetails/${nodeID}`,
         {
           method: "POST",

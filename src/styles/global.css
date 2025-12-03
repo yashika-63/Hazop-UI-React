@@ -324,7 +324,6 @@ button:focus, button:focus-visible {
 }
 
 .rightbtn-controls {
-.rightbtn-controls {
   display: flex;
   justify-content: flex-end;
   align-items: center;
