@@ -110,11 +110,11 @@ const NodeDetailsPopup = ({ onClose, nodeID }) => {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(
-  tempRecommendations.map((item) => ({
-    recommendation: item.recommendation,
-    remarkbyManagement: item.remarkbyManagement
-  }))
-)
+                tempRecommendations.map((item) => ({
+                  recommendation: item.recommendation,
+                  remarkbyManagement: item.remarkbyManagement,
+                }))
+              ),
             }
           );
         }
@@ -144,10 +144,10 @@ const NodeDetailsPopup = ({ onClose, nodeID }) => {
   };
 
   const saveRecommendations = (recs) => {
-const bulletText = recs.map((r) => `- ${r.recommendation}`).join("\n");
+    const bulletText = recs.map((r) => `• ${r.recommendation}`).join("\n");
+
     setForm((prev) => ({ ...prev, additionalControl: bulletText }));
     setShowRecommendations(false);
-setTempRecommendations(recs);
   };
 
   const renderScaleSelect = (name, value) => (

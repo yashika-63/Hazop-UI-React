@@ -16,18 +16,17 @@ const NodePage = ({ hazopData: propHazopData, hazopTeam: propHazopTeam }) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const location = useLocation();
-const { hazopData, hazopTeam: stateTeam } = location.state || {};
+  const { hazopData, hazopTeam: stateTeam } = location.state || {};
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [hazopTeam, setHazopTeam] = useState([]);
   const [originalTeam, setOriginalTeam] = useState([]);
   const [openDropdown, setOpenDropdown] = useState(null);
+const [mocDetails, setMocDetails] = useState(null); 
+const [hasMoc, setHasMoc] = useState(false);
 
   const toggleDropdown = (id) => {
     setOpenDropdown(openDropdown === id ? null : id);
   };
-
- console.log("Hazop Data Received: ", hazopData);
-console.log("Hazop Team Received: ", stateTeam);
 
   const setSelectedRevisionId = (id) => {
     console.log("Selected revision ID:", id);
@@ -35,19 +34,18 @@ console.log("Hazop Team Received: ", stateTeam);
   };
 
   useEffect(() => {
-  if (stateTeam) {
-    setHazopTeam(stateTeam);
-    setOriginalTeam(stateTeam);
-  }
-}, [stateTeam]);
+    if (stateTeam) {
+      setHazopTeam(stateTeam);
+      setOriginalTeam(stateTeam);
+    }
+  }, [stateTeam]);
 
   useEffect(() => {
     const fetchNodes = async () => {
       if (!hazopData?.id) return;
       try {
         const response = await fetch(
-          `http://localhost:5559/api/hazopNode/by-registration-status?registrationId=${hazopData.id}&status=true`
-          `http://${strings.localhost}/api/hazopNode/by-registration-status?registrationId=1&status=true`
+          `http://${strings.localhost}/api/hazopNode/by-registration-status?registrationId=${hazopData.id}&status=true`
         );
         const data = await response.json();
         setNodes(data);
@@ -115,6 +113,28 @@ console.log("Hazop Team Received: ", stateTeam);
     </div>
   );
 
+useEffect(() => {
+  if (!hazopData?.id) return;
+
+  const fetchMocDetails = async () => {
+    try {
+      const res = await axios.get(
+        `http://localhost:5559/api/moc-reference/by-hazop?hazopRegistrationId=${hazopData.id}`
+      );
+
+      setMocDetails(res.data);
+      setHasMoc(true);        
+    } catch (err) {
+      console.error("MOC Error:", err);
+
+      setHasMoc(false);       
+      setMocDetails(null);
+    }
+  };
+
+  fetchMocDetails();
+}, [hazopData]);
+
   return (
     <div>
       {/* HAZOP INFO CARD */}
@@ -158,10 +178,10 @@ console.log("Hazop Team Received: ", stateTeam);
               <strong>Email:</strong> {hazopData.createdByEmail || "N/A"}
             </div>
             {hazopData.hazopRevisionNo && (
-  <div>
-    <strong>Hazop Revision No.:</strong> {hazopData.hazopRevisionNo}
-  </div>
-)}
+              <div>
+                <strong>Hazop Revision No.:</strong> {hazopData.hazopRevisionNo}
+              </div>
+            )}
             <div className="full-width">
               <strong>Description:</strong>
               <div
@@ -234,6 +254,28 @@ console.log("Hazop Team Received: ", stateTeam);
           </div>
         )}
       </div>
+{hasMoc && mocDetails && (
+<div className="hazop-info">
+  <h1>MOC Details</h1>
+
+  {mocDetails.length > 0 ? (
+    mocDetails.map((moc, index) => (
+      <div key={moc.id} className="hazop-info-grid">
+        <div><strong>MOC ID:</strong> {moc.id}</div>
+        <div><strong>MOC No.:</strong> {moc.mocNo}</div>
+        <div><strong>Register Date:</strong> {formatDate(moc.registerDate)}</div>
+        <div><strong>MOC Date:</strong> {formatDate(moc.mocDate)}</div>
+        <div><strong>Title:</strong> {moc.mocTitle}</div>
+        <div><strong>Plant:</strong> {moc.mocPlant}</div>
+        <div><strong>Department:</strong> {moc.mocDepartment}</div>
+        <div><strong>Financial Year:</strong> {moc.mocFinancialYear || "N/A"}</div>
+      </div>
+    ))
+  ) : (
+    <p>No MOC details available.</p>
+  )}
+</div>
+)}
 
       {/* BUTTON + TABLE */}
       <div className="table-section">
@@ -259,13 +301,12 @@ console.log("Hazop Team Received: ", stateTeam);
                 <th>Pressure</th>
                 <th>Quantity Flow Rate</th>
                 <th>Completion Status</th>
-                <th>Action</th>
               </tr>
             </thead>
             <tbody>
               {nodes.length === 0 ? (
                 <tr>
-                  <td colSpan="12" className="no-data">
+                  <td colSpan="11" className="no-data">
                     No nodes added yet.
                   </td>
                 </tr>
@@ -301,7 +342,6 @@ console.log("Hazop Team Received: ", stateTeam);
                         {n.completionStatus === true ? "Completed" : "Pending"}
                       </span>
                     </td>
-                    <td onClick={(e) => e.stopPropagation()} >{renderDropdown(n)}</td>
                   </tr>
                 ))
               )}

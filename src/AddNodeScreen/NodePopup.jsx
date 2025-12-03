@@ -3,6 +3,7 @@ import axios from "axios";
 import "./Node.css";
 import { FaTimes } from "react-icons/fa";
 import { formatDateToBackend, showToast } from "../CommonUI/CommonUI";
+import { strings } from "../string";
 
 const NodePopup = ({ onClose, onSaved, hazopData }) => {
   const [form, setForm] = useState({
@@ -117,7 +118,7 @@ const NodePopup = ({ onClose, onSaved, hazopData }) => {
       ];
 
       const res = await axios.post(
-        `http://localhost:5559/api/hazopNode/saveNodes/${registrationId}`,
+        `http://${strings.localhost}/api/hazopNode/saveNodes/${registrationId}`,
         payload
       );
 

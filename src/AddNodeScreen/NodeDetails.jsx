@@ -19,7 +19,10 @@ const NodeDetails = () => {
   const [showUpdatePopup, setShowUpdatePopup] = useState(false);
   const [selectedDetail, setSelectedDetail] = useState(null);
   const [openDropdown, setOpenDropdown] = useState(null);
-const [showRiskPopup, setShowRiskPopup] = useState(false);
+  const [showRiskPopup, setShowRiskPopup] = useState(false);
+  const [showCompletePopup, setShowCompletePopup] = useState(false);
+  const [recommendationsMap, setRecommendationsMap] = useState({});
+  const [expandedDetailId, setExpandedDetailId] = useState(null);
 
   const root = document.documentElement;
   const trivial = getComputedStyle(root).getPropertyValue("--trivial").trim();
@@ -37,6 +40,7 @@ const [showRiskPopup, setShowRiskPopup] = useState(false);
   const toggleDropdown = (id) => {
     setOpenDropdown(openDropdown === id ? null : id);
   };
+  const [showAllRecommendations, setShowAllRecommendations] = useState(false);
 
   const renderDropdown = (item) => (
     <div className="dropdown">
@@ -190,6 +194,116 @@ const [showRiskPopup, setShowRiskPopup] = useState(false);
     }
   };
 
+  const handleCompleteNode = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:5559/api/hazopNode/complete/${id}`,
+        { method: "PUT" }
+      );
+
+      if (!response.ok) {
+        alert("Failed to complete node");
+        return;
+      }
+
+      alert("Node marked as complete!");
+      setShowCompletePopup(false);
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Something went wrong");
+    }
+  };
+
+  const fetchRecommendations = async (detailId) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5559/api/nodeRecommendation/getByDetailId/${detailId}`
+      );
+
+      if (!response.ok) {
+        console.error("Failed to fetch recommendations");
+        return;
+      }
+
+      const data = await response.json();
+
+      setRecommendationsMap((prev) => ({
+        ...prev,
+        [detailId]: data || [],
+      }));
+    } catch (error) {
+      console.error("Error fetching recommendations:", error);
+    }
+  };
+
+  const ConfirmationPopup = ({ message, onConfirm, onCancel }) => {
+    return (
+      <div className="confirm-overlay">
+        <div className="confirm-box">
+          <p>{message}</p>
+          <div className="confirm-buttons">
+            <button type="button" onClick={onCancel} className="cancel-btn">
+              No
+            </button>
+            <button type="button" onClick={onConfirm} className="confirm-btn">
+              Yes
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const handleToggleRecommendations = async (detailId) => {
+    const isOpening = expandedDetailId !== detailId;
+
+    if (isOpening) {
+      await fetchRecommendations(detailId);
+    }
+
+    setExpandedDetailId(isOpening ? detailId : null);
+  };
+
+  const RecommendationTable = ({ recommendations }) => {
+    return (
+      <div className="table-section">
+        <div className="card table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>Sr. No</th>
+                <th>Recommendation</th>
+                <th>Remarks By Management</th>
+                <th>Completion Date</th>
+                <th>Department</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {recommendations?.length > 0 ? (
+                recommendations.map((r, index) => (
+                  <tr key={r.id}>
+                    <td>{index + 1}</td>
+                    <td>{r.recommendation}</td>
+                    <td>{r.remarkbyManagement}</td>
+                    <td>{formatDate(r.completionDate)}</td>
+                    <td>{r.department}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="5" style={{ textAlign: "center" }}>
+                    No recommendations found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div>
       <div className="node-header">
@@ -244,8 +358,11 @@ const [showRiskPopup, setShowRiskPopup] = useState(false);
           + Create Node Detail
         </button>
         <button className="add-btn" onClick={() => setShowRiskPopup(true)}>
-    View Risk Levels
-  </button>
+          View Risk Levels
+        </button>
+        <button className="add-btn" onClick={() => setShowCompletePopup(true)}>
+          Complete Node
+        </button>
       </div>
 
       <div className="nd-details-wrapper">
@@ -418,6 +535,24 @@ const [showRiskPopup, setShowRiskPopup] = useState(false);
                     </div>
                   </div>
                 </div>
+                <div className="rightbtn-controls">
+                  <h6
+                    style={{ cursor: "pointer" }}
+                    onClick={() => handleToggleRecommendations(d.id)}
+                  >
+                    {expandedDetailId === d.id
+                      ? "Hide Recommendations"
+                      : "View All Recommendations"}
+                  </h6>
+                </div>
+
+                {expandedDetailId === d.id && (
+                  <div className="recommendation-table-container">
+                    <RecommendationTable
+                      recommendations={recommendationsMap[d.id] || []}
+                    />
+                  </div>
+                )}
               </div>
             ))
           )}
@@ -442,9 +577,16 @@ const [showRiskPopup, setShowRiskPopup] = useState(false);
       )}
 
       {showRiskPopup && (
-  <RiskLevelPopup onClose={() => setShowRiskPopup(false)} />
-)}
+        <RiskLevelPopup onClose={() => setShowRiskPopup(false)} />
+      )}
 
+      {showCompletePopup && (
+        <ConfirmationPopup
+          message="Are you sure you want to mark this node as completed?"
+          onConfirm={handleCompleteNode}
+          onCancel={() => setShowCompletePopup(false)}
+        />
+      )}
     </div>
   );
 };

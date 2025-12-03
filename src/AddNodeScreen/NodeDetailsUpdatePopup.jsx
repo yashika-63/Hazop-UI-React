@@ -4,6 +4,7 @@ import { showToast } from "../CommonUI/CommonUI";
 import "./Node.css";
 import Recommendations from "./Recommendations";
 import { strings } from "../string";
+import UpdateRecommendations from "./UpdateRecommendations";
 
 const initialState = {
   generalParameter: "",
@@ -92,7 +93,6 @@ useEffect(() => {
       setNodeDetailId(detailData.id);
 
     } catch (err) {
-      console.error(err);
       showToast("Failed to load details for update.", "error");
     }
   };
@@ -105,7 +105,8 @@ useEffect(() => {
   };
 
   const saveRecommendations = (recs) => {
-    const bulletText = recs.map((r) => `- ${r}`).join("\n");
+    const bulletText = recs.map((r) => `• ${r.recommendation}`).join("\n");
+
     setForm((prev) => ({ ...prev, additionalControl: bulletText }));
     setShowRecommendations(false);
   };
@@ -149,21 +150,15 @@ useEffect(() => {
       );
 
       if (response.ok) {
-        const nodeDetailResult = await response.json();
-        const id = nodeDetailResult.nodeDetailId;
-        setNodeDetailId(id);
+  await response.text(); // read and ignore
+  showToast("Details updated successfully!", "success");
+  onClose();
+} else {
+  const errorText = await response.text();
+  showToast("Failed to update details.", "error");
+}
 
-        const text = await response.text(); // Use .text() for plain text
-        console.log("Raw response:", text);
-        showToast("Details updated successfully!", "success");
-        onClose();
-      } else {
-        const errorText = await response.text();
-        console.error("Update failed:", errorText);
-        showToast("Failed to update details.", "error");
-      }
     } catch (error) {
-      console.error("Error updating details:", error);
       showToast("Error updating details.", "error");
     } finally {
       setLoading(false);
@@ -210,7 +205,7 @@ useEffect(() => {
                   <input
                     type="text"
                     name="generalParameter"
-                    value={form.generalParameter}
+                    value={form.generalParameter ?? ""}
                     onChange={handleChange}
                   />
                 </div>
@@ -219,7 +214,7 @@ useEffect(() => {
                   <input
                     type="text"
                     name="specificParameter"
-                    value={form.specificParameter}
+                    value={form.specificParameter ?? ""}
                     onChange={handleChange}
                   />
                 </div>
@@ -228,7 +223,7 @@ useEffect(() => {
                   <input
                     type="text"
                     name="guidWord"
-                    value={form.guidWord}
+                    value={form.guidWord ?? ""}
                     onChange={handleChange}
                   />
                 </div>
@@ -240,7 +235,7 @@ useEffect(() => {
                   <textarea
                     name="causes"
                     rows={rows}
-                    value={form.causes}
+                    value={form.causes ?? ""}
                     onChange={handleChange}
                     className="textareaFont"
                   />
@@ -250,7 +245,7 @@ useEffect(() => {
                   <textarea
                     name="consequences"
                     rows={rows}
-                    value={form.consequences}
+                    value={form.consequences ?? ""}
                     onChange={handleChange}
                     className="textareaFont"
                   />
@@ -260,7 +255,7 @@ useEffect(() => {
                   <textarea
                     name="deviation"
                     rows={rows}
-                    value={form.deviation}
+                    value={form.deviation ?? ""}
                     onChange={handleChange}
                     className="textareaFont"
                   />
@@ -273,7 +268,7 @@ useEffect(() => {
                   <textarea
                     name="existineControl"
                     rows={smallRows}
-                    value={form.existineControl}
+                    value={form.existineControl ?? ""}
                     onChange={handleChange}
                     className="textareaFont"
                   />
@@ -298,7 +293,7 @@ useEffect(() => {
                     <input
                       type="text"
                       name="riskRating"
-                      value={form.riskRating}
+                      value={form.riskRating ?? ""}
                       onChange={handleChange}
                     readOnly
                     className="readonly"
@@ -325,7 +320,7 @@ useEffect(() => {
                   <textarea
                     name="additionalControl"
                     rows={smallRows}
-                    value={form.additionalControl}
+                    value={form.additionalControl ?? ""}
                     onChange={handleChange}
                     readOnly
                     className="readonly textareaFont"
@@ -366,7 +361,7 @@ useEffect(() => {
                     <input
                       type="text"
                       name="additionalRiskRating"
-                      value={form.additionalRiskRating}
+                      value={form.additionalRiskRating ?? ""}
                       onChange={handleChange}
                     readOnly
                     className="readonly"
@@ -392,7 +387,7 @@ useEffect(() => {
           </form>
         </div>
         {showRecommendations && (
-          <Recommendations
+          <UpdateRecommendations
             onClose={() => setShowRecommendations(false)}
             onSave={saveRecommendations}
             initialRecommendations={[]}

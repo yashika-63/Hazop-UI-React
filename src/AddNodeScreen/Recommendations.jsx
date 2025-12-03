@@ -65,12 +65,12 @@ const Recommendations = ({ onClose, onSave, initialRecommendations = [], nodeID,
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSave = () => {
-    if (!validate()) return;
-    onSave(recommendations);
-    showToast("Recommendations saved successfully", "success");
-    onClose();
-  };
+const handleSave = () => {
+  if (!validate()) return;
+  const displayText = recommendations.map((r) => r.recommendation).filter((r) => r.trim() !== "");
+  onSave(displayText);
+  onClose();
+};
 
   return (
     <div className="modal-overlay">
