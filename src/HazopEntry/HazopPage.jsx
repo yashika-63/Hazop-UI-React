@@ -109,7 +109,7 @@ const companyId = localStorage.getItem("companyId");
             <FaLightbulb /> Recommendation
           </button>
           <button type="button" onClick={() => handleOpenNode(item)}>
-            <FaTrash /> Open Node
+            <FaEye /> Open Node
           </button>
         </div>
       )}

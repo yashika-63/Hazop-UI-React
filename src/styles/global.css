@@ -188,7 +188,7 @@ button:focus, button:focus-visible {
 /*Three Dot menu*/
 
 .dropdown {
-  position: relative; /* Ensure dropdown stays inside the table row */
+  position: relative; 
   z-index: 10;
 }
 
@@ -287,7 +287,6 @@ button:focus, button:focus-visible {
   padding: 1px 8px;
   color: black;
   background: linear-gradient(270deg, #c8c8c8, #ffffff);
-  ;
   border-radius: 5px;
   display: inline-flex;
   align-items: center;
@@ -325,10 +324,11 @@ button:focus, button:focus-visible {
 }
 
 .rightbtn-controls {
+.rightbtn-controls {
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
   flex-wrap: wrap;
   height: 30px;
   padding-right: 30px;
@@ -491,9 +491,9 @@ p {
     font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
     font-size: 13px;
     line-height: 20px;
-    height: 1200px;
+    max-height: 200px;
     resize: none;
-    overflow: hidden;
+    overflow: auto;
 }
 
 .readonly {
