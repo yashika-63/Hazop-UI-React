@@ -84,6 +84,9 @@ const NodeDetailsPopup = ({ onClose, nodeID }) => {
     }
 
     try {
+      setLoading(true);
+      // Save node detail first
+      const nodeDetailResponse = await fetch(
         `http://localhost:5559/api/hazopNodeDetail/saveDetails/${nodeID}`,
         {
           method: "POST",
@@ -100,32 +103,6 @@ const NodeDetailsPopup = ({ onClose, nodeID }) => {
 
         const nodeDetailId = savedDetail.id;
 
-      // Now save recommendations if any
-      if (tempRecommendations.length > 0) {
-        await fetch(
-          `http://${strings.localhost}/api/nodeRecommendation/save/${nodeID}/${nodeDetailId}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(tempRecommendations),
-          }
-        );
-      }
-
-      showToast("Details and recommendations saved successfully!", "success");
-      setForm(initialState);
-      setTempRecommendations([]);
-      onClose();
-    } else {
-      showToast("Failed to save details.", "error");
-    }
-  } catch (error) {
-    console.error("Error saving details:", error);
-    showToast("Error saving details.", "error");
-  } finally {
-    setLoading(false);
-  }
-};
         if (tempRecommendations.length > 0 && nodeDetailId) {
           await fetch(
             `http://localhost:5559/api/nodeRecommendation/save/${nodeID}/${nodeDetailId}`,
@@ -133,11 +110,11 @@ const NodeDetailsPopup = ({ onClose, nodeID }) => {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(
-  tempRecommendations.map((item) => ({
-    recommendation: item.recommendation,
-    remarkbyManagement: item.remarkbyManagement
-  }))
-)
+                tempRecommendations.map((item) => ({
+                  recommendation: item.recommendation,
+                  remarkbyManagement: item.remarkbyManagement,
+                }))
+              ),
             }
           );
         }
@@ -167,10 +144,10 @@ const NodeDetailsPopup = ({ onClose, nodeID }) => {
   };
 
   const saveRecommendations = (recs) => {
-const bulletText = recs.map((r) => `- ${r.recommendation}`).join("\n");
+    const bulletText = recs.map((r) => `- ${r.recommendation}`).join("\n");
     setForm((prev) => ({ ...prev, additionalControl: bulletText }));
     setShowRecommendations(false);
-setTempRecommendations(recs);
+    setTempRecommendations(recs);
   };
 
   const renderScaleSelect = (name, value) => (

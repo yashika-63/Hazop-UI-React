@@ -16,7 +16,7 @@ const NodePage = ({ hazopData: propHazopData, hazopTeam: propHazopTeam }) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const location = useLocation();
-const { hazopData, hazopTeam: stateTeam } = location.state || {};
+  const { hazopData, hazopTeam: stateTeam } = location.state || {};
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [hazopTeam, setHazopTeam] = useState([]);
   const [originalTeam, setOriginalTeam] = useState([]);
@@ -26,29 +26,20 @@ const { hazopData, hazopTeam: stateTeam } = location.state || {};
     setOpenDropdown(openDropdown === id ? null : id);
   };
 
- console.log("Hazop Data Received: ", hazopData);
-console.log("Hazop Team Received: ", stateTeam);
-
-  const setSelectedRevisionId = (id) => {
-    console.log("Selected revision ID:", id);
-    // Add your completion logic here later
-  };
-  const [hazopTeam, setHazopTeam] = useState([]);
-  const [originalTeam, setOriginalTeam] = useState([]);
 
   useEffect(() => {
-  if (stateTeam) {
-    setHazopTeam(stateTeam);
-    setOriginalTeam(stateTeam);
-  }
-}, [stateTeam]);
+    if (stateTeam) {
+      setHazopTeam(stateTeam);
+      setOriginalTeam(stateTeam);
+    }
+  }, [stateTeam]);
 
   useEffect(() => {
     const fetchNodes = async () => {
       if (!hazopData?.id) return;
       try {
         const response = await fetch(
-            `http://${strings.localhost}/api/hazopNode/by-registration-status?registrationId=${hazopData.id}&status=true`
+          `http://${strings.localhost}/api/hazopNode/by-registration-status?registrationId=${hazopData.id}&status=true`
         );
         const data = await response.json();
         setNodes(data);
@@ -115,19 +106,7 @@ console.log("Hazop Team Received: ", stateTeam);
       )}
     </div>
   );
-    setLoading(true);
-    try {
-      const response = await axios.get(
-        `http://${strings.localhost}/api/hazopTeam/teamByHazop/${hazopId}?status=true`
-      );
-      setHazopTeam(response.data || []); // Use setHazopTeam, not hazopTeam
-      setOriginalTeam(response.data || []);
-    } catch (err) {
-      console.error("Error fetching team:", err);
-      showToast("Failed to load existing team.", "error");
-    }
-    setLoading(false);
-  };
+
 
   return (
     <div>
@@ -172,10 +151,10 @@ console.log("Hazop Team Received: ", stateTeam);
               <strong>Email:</strong> {hazopData.createdByEmail || "N/A"}
             </div>
             {hazopData.hazopRevisionNo && (
-  <div>
-    <strong>Hazop Revision No.:</strong> {hazopData.hazopRevisionNo}
-  </div>
-)}
+              <div>
+                <strong>Hazop Revision No.:</strong> {hazopData.hazopRevisionNo}
+              </div>
+            )}
             <div className="full-width">
               <strong>Description:</strong>
               <div
@@ -247,128 +226,130 @@ console.log("Hazop Team Received: ", stateTeam);
             </div>
           </div>
         )}
-          {showAllMembers && (
-            <div className="table-section">
-              <div className="card table-card">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Sr. No.</th>
-                      <th>Employee Code</th>
-                      <th>Employee Name</th>
-                      <th>Department</th>
-                      <th>Email Id</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {hazopTeam.length === 0 ? (
-                      <tr>
-                        <td colSpan="4" className="no-data">
-                          No members added yet.
-                        </td>
-                      </tr>
-                    ) : (
-                      hazopTeam.map((m, idx) => (
-                        <tr key={idx}>
-                          <td>{idx + 1}</td>
-                          <td>{m.empCode}</td>
-                          <td>{m.firstName} {m.lastName}</td>
-                          <td>{m.dimension1}</td>
-                          <td>{m.emailId}</td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* BUTTON + TABLE */}
-      <div className="table-section">
-        <div className="table-header">
-          <h1>Nodes</h1>
-          <button className="add-btn" onClick={() => setShowPopup(true)}>
-            + Add Node
-          </button>
-        </div>
-
-        <div className="card table-card">
-          <table>
-            <thead>
-              <tr>
-                <th>Sr. No.</th>
-                <th>Node No.</th>
-                <th>Registration Date</th>
-                <th>Design Intent</th>
-                <th>Title</th>
-                <th>Equipment</th>
-                <th>Controls</th>
-                <th>Temperature</th>
-                <th>Pressure</th>
-                <th>Quantity Flow Rate</th>
-                <th>Completion Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {nodes.length === 0 ? (
-                <tr>
-                  <td colSpan="12" className="no-data">
-                    No nodes added yet.
-                  </td>
-                </tr>
-              ) : (
-                nodes.map((n, idx) => (
-                  <tr
-                    key={n.id}
-                    style={{ cursor: "pointer" }}
-                    onClick={() =>
-                      navigate(`/NodeDetails`, { state: { id: n.id } })
-                    }
-                  >
-                    <td>{idx + 1}</td>
-                    <td>{n.nodeNumber}</td>
-                    <td>{formatDate(n.registrationDate)}</td>
-                    <td>{n.designIntent}</td>
-                    <td>{n.title}</td>
-                    <td>{n.equipment}</td>
-                    <td>{n.controls}</td>
-                    <td>{n.temperature}</td>
-                    <td>{n.pressure}</td>
-                    <td>{n.quantityFlowRate}</td>
-                    <td>
-                      <span
-                        className={
-                          n.completionStatus === true
-                            ? "status-completed"
-                            : n.completionStatus === false
-                              ? "status-pending"
-                              : "status-pending"
-                        }
-                      >
-                        {n.completionStatus === true ? "Completed" : "Pending"}
-                      </span>
-                    </td>
-                    <td onClick={(e) => e.stopPropagation()} >{renderDropdown(n)}</td>
+        {showAllMembers && (
+          <div className="table-section">
+            <div className="card table-card">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Sr. No.</th>
+                    <th>Employee Code</th>
+                    <th>Employee Name</th>
+                    <th>Department</th>
+                    <th>Email Id</th>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+                </thead>
+                <tbody>
+                  {hazopTeam.length === 0 ? (
+                    <tr>
+                      <td colSpan="4" className="no-data">
+                        No members added yet.
+                      </td>
+                    </tr>
+                  ) : (
+                    hazopTeam.map((m, idx) => (
+                      <tr key={idx}>
+                        <td>{idx + 1}</td>
+                        <td>{m.empCode}</td>
+                        <td>{m.firstName} {m.lastName}</td>
+                        <td>{m.dimension1}</td>
+                        <td>{m.emailId}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
 
-      {showPopup && (
-        <NodePopup
-          onClose={() => setShowPopup(false)}
-          onSave={handleSaveNode}
-          hazopData={hazopData}
-        />
-      )}
+        <div className="table-section">
+          <div className="table-header">
+            <h1>Nodes</h1>
+            <button className="add-btn" onClick={() => setShowPopup(true)}>
+              + Add Node
+            </button>
+          </div>
+
+          <div className="card table-card">
+            <table>
+              <thead>
+                <tr>
+                  <th>Sr. No.</th>
+                  <th>Node No.</th>
+                  <th>Registration Date</th>
+                  <th>Design Intent</th>
+                  <th>Title</th>
+                  <th>Equipment</th>
+                  <th>Controls</th>
+                  <th>Temperature</th>
+                  <th>Pressure</th>
+                  <th>Quantity Flow Rate</th>
+                  <th>Completion Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {nodes.length === 0 ? (
+                  <tr>
+                    <td colSpan="12" className="no-data">
+                      No nodes added yet.
+                    </td>
+                  </tr>
+                ) : (
+                  nodes.map((n, idx) => (
+                    <tr
+                      key={n.id}
+                      style={{ cursor: "pointer" }}
+                      onClick={() =>
+                        navigate(`/NodeDetails`, { state: { id: n.id } })
+                      }
+                    >
+                      <td>{idx + 1}</td>
+                      <td>{n.nodeNumber}</td>
+                      <td>{formatDate(n.registrationDate)}</td>
+                      <td>{n.designIntent}</td>
+                      <td>{n.title}</td>
+                      <td>{n.equipment}</td>
+                      <td>{n.controls}</td>
+                      <td>{n.temperature}</td>
+                      <td>{n.pressure}</td>
+                      <td>{n.quantityFlowRate}</td>
+                      <td>
+                        <span
+                          className={
+                            n.completionStatus === true
+                              ? "status-completed"
+                              : n.completionStatus === false
+                                ? "status-pending"
+                                : "status-pending"
+                          }
+                        >
+                          {n.completionStatus === true ? "Completed" : "Pending"}
+                        </span>
+                      </td>
+                      <td onClick={(e) => e.stopPropagation()} >{renderDropdown(n)}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {
+          showPopup && (
+            <NodePopup
+              onClose={() => setShowPopup(false)}
+              onSave={handleSaveNode}
+              hazopData={hazopData}
+            />
+          )
+        }
+      </div>
     </div>
+
+
   );
 };
 
