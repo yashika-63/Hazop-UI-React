@@ -136,7 +136,7 @@ const NodePopup = ({ onClose, onSaved }) => {
               <div className="input-row">
                 <div className="form-group">
                   <label>
-                    <label className="required-marker">* </label>Node Number
+                    <label className="required-marker">*</label>Node Number
                   </label>
                   <input
                     type="number"

@@ -1,27 +1,27 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import './Approval.css';
 
-
 import HazopTeamAcceptanceApproval from "./HazopTeamAcceptanceApproval";
-import { FaCalendarDay } from "react-icons/fa";
-
+import HazopRecommendationApproval from "./HazopRecommandationApproval";
+import { FaCalendarDay, FaLightbulb } from "react-icons/fa";
 
 const RequestHandler = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const defaultTab = searchParams.get('tab') || 'HazopTeamAcceptance';
     const [activeSection, setActiveSection] = useState(defaultTab);
 
-    useEffect(() => {
-        const currentTab = searchParams.get('tab');
-        if (currentTab && currentTab !== activeSection) {
-            setActiveSection(currentTab);
-        }
-    }, [searchParams, activeSection]);
+    // track which tabs have been loaded to avoid re-fetch
+    const [loadedTabs, setLoadedTabs] = useState([defaultTab]);
 
     const handleButtonClick = (section) => {
         setActiveSection(section);
         setSearchParams({ tab: section });
+
+        // mark this tab as loaded
+        if (!loadedTabs.includes(section)) {
+            setLoadedTabs([...loadedTabs, section]);
+        }
     };
 
     return (
@@ -38,21 +38,19 @@ const RequestHandler = () => {
                         Team Member Acceptance
                     </button>
 
-                    {/* <button 
-                        type="button" 
-                        className={activeSection === 'HazopNodeAcceptance' ? 'active' : ''} 
-                        onClick={() => handleButtonClick('HazopNodeAcceptance')}
+                    <button
+                        type="button"
+                        className={activeSection === 'HazopRecommendationApproval' ? 'active' : ''}
+                        onClick={() => handleButtonClick('HazopRecommendationApproval')}
                     >
-                        <FontAwesomeIcon className="icon" icon={faClipboardList} />
-                        Node Acceptance
-                    </button> */}
-
+                        <FaLightbulb />
+                        Hazop Recommendation
+                    </button>
                 </div>
 
                 <div className="Companycontent">
                     {activeSection === 'HazopTeamAcceptance' && <HazopTeamAcceptanceApproval />}
-                    {activeSection === 'HazopNodeAcceptance' && <HazopTeamAcceptance />}
-
+                    {activeSection === 'HazopRecommendationApproval' && <HazopRecommendationApproval />}
                 </div>
             </div>
         </div>

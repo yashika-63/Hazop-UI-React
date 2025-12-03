@@ -3,6 +3,7 @@ import { FaTimes } from "react-icons/fa";
 import { showToast } from "../CommonUI/CommonUI";
 import './Node.css';
 import Recommendations from "./Recommendations";
+import { strings } from "../string";
 
 const initialState = {
   generalParameter: "",
@@ -76,7 +77,7 @@ const NodeDetailsPopup = ({ onClose, nodeID }) => {
     try {
       setLoading(true);
       const response = await fetch(
-        `http://localhost:5559/api/hazopNodeDetail/saveDetails/${nodeID}`,
+        `http://${strings.localhost}/api/hazopNodeDetail/saveDetails/${nodeID}`,
         {
           method: "POST",
           headers: {

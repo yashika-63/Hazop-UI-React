@@ -5,6 +5,7 @@ import { formatDate } from "../CommonUI/CommonUI";
 import NodeDetailsUpdatePopup from "./NodeDetailsUpdatePopup";
 import { FaEdit, FaEllipsisV } from "react-icons/fa";
 import TextareaAutosize from 'react-textarea-autosize';
+import { strings } from "../string";
 
 const NodeDetails = () => {
   const { id } = useParams();
@@ -24,7 +25,7 @@ const NodeDetails = () => {
   };
 
   const renderDropdown = (item) => (
-    <div className="dropdown card-dropdown">
+    <div className="dropdown">
       <button className="dots-button" onClick={() => toggleDropdown(item.id)}>
         <FaEllipsisV />
       </button>
@@ -43,7 +44,7 @@ const NodeDetails = () => {
     const fetchDetails = async () => {
       try {
         const response = await fetch(
-          `http://localhost:5559/api/hazopNodeDetail/node/${id}`
+          `http://${strings.localhost}/api/hazopNodeDetail/node/${id}`
         );
 
         if (!response.ok) {

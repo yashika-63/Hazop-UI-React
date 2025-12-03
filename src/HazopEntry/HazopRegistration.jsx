@@ -3,6 +3,7 @@ import axios from "axios";
 import { FaSearch, FaTimes } from "react-icons/fa";
 import "./HazopRegistration.css";
 import { showToast } from "../CommonUI/CommonUI";
+import { strings } from "../string";
 
 const HazopRegistration = ({ closePopup }) => {
   const [formData, setFormData] = useState({
@@ -82,7 +83,7 @@ const HazopRegistration = ({ closePopup }) => {
 
     try {
       const response = await axios.get(
-        `http://localhost:5559/api/employee/search?search=${encodeURIComponent(value)}`
+        `http://${strings.localhost}/api/employee/search?search=${encodeURIComponent(value)}`
       );
       setSearchResults(response.data || []);
     } catch (err) {
@@ -138,7 +139,7 @@ const HazopRegistration = ({ closePopup }) => {
 
     try {
       const hazopResponse = await axios.post(
-        `http://localhost:5559/api/hazopRegistration/saveByCompany/1`,
+        `http://${strings.localhost}/api/hazopRegistration/saveByCompany/1`,
         formData
       );
 
@@ -146,7 +147,7 @@ const HazopRegistration = ({ closePopup }) => {
 
       if (hazopTeam.length > 0) {
         await axios.post(
-          `http://localhost:5559/api/hazopTeam/saveTeam/${hazopId}`,
+          `http://${strings.localhost}/api/hazopTeam/saveTeam/${hazopId}`,
           hazopTeam.map((m) => m.empCode)
         );
       }

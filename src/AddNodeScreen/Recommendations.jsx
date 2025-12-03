@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { FaTimes } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { showToast } from "../CommonUI/CommonUI";
+import { strings } from "../string";
 
 const Recommendations = ({ onClose, onSave, initialRecommendations = [], nodeID }) => {
   // Initialize with at least one empty recommendation if initialRecommendations is empty
@@ -33,7 +34,7 @@ const Recommendations = ({ onClose, onSave, initialRecommendations = [], nodeID 
   const handleSave = async () => {
     try {
       const response = await fetch(
-        `http://localhost:5559/api/nodeRecommendation/save/${nodeID}`,
+        `http://${strings.localhost}/api/nodeRecommendation/save/${nodeID}`,
         {
           method: "POST",
           headers: {

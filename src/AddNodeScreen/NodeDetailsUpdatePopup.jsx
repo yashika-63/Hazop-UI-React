@@ -3,6 +3,7 @@ import { FaTimes } from "react-icons/fa";
 import { showToast } from "../CommonUI/CommonUI";
 import "./Node.css";
 import Recommendations from "./Recommendations";
+import { strings } from "../string";
 
 const initialState = {
   generalParameter: "",
@@ -70,7 +71,7 @@ useEffect(() => {
   const fetchDetail = async () => {
     try {
       const res = await fetch(
-        `http://localhost:5559/api/hazopNodeDetail/node/${nodeID}`
+        `http://${strings.localhost}/api/hazopNodeDetail/node/${nodeID}`
       );
       if (!res.ok) return;
       const data = await res.json();
@@ -134,7 +135,7 @@ useEffect(() => {
       setLoading(true);
 
       const response = await fetch(
-        `http://localhost:5559/api/hazopNodeDetail/update/${form.id}`,
+        `http://${strings.localhost}/api/hazopNodeDetail/update/${form.id}`,
         {
           method: "PUT", 
           headers: {

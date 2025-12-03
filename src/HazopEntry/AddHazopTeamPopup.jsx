@@ -2,28 +2,28 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { FaSearch, FaTimes } from "react-icons/fa";
 import { showToast } from "../CommonUI/CommonUI";
+import { strings } from "../string";
 
 const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
     const [teamSearch, setTeamSearch] = useState("");
     const [searchResults, setSearchResults] = useState([]);
-    const [hazopTeam, setHazopTeam] = useState(existingTeam || []); // Use existing team if passed
+    const [hazopTeam, setHazopTeam] = useState(existingTeam || []); 
     const [loading, setLoading] = useState(false);
-    const [confirmPopup, setConfirmPopup] = useState(null); // State for confirmation popup
+    const [confirmPopup, setConfirmPopup] = useState(null);
     const [originalTeam, setOriginalTeam] = useState([]);
+    const [removeConfirmationPopup, setRemoveConfirmationPopup] = useState(null);
 
-    // Fetch existing team members on mount
     useEffect(() => {
         if (hazopData && hazopData.id) {
             fetchExistingTeam(hazopData.id);
         }
     }, [hazopData]);
 
-    // Function to fetch the existing team from the API
     const fetchExistingTeam = async (hazopId) => {
         setLoading(true);
         try {
             const response = await axios.get(
-                `http://localhost:5559/api/hazopTeam/teamByHazop/${hazopId}`
+                `http://${strings.localhost}/api/hazopTeam/teamByHazop/${hazopId}?status=true`
             );
             setHazopTeam(response.data || []);
             setOriginalTeam(response.data || []);
@@ -45,7 +45,7 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
 
         try {
             const response = await axios.get(
-                `http://localhost:5559/api/employee/search?search=${encodeURIComponent(value)}`
+                `http://${strings.localhost}/api/employee/search?search=${encodeURIComponent(value)}`
             );
             setSearchResults(response.data || []);
         } catch (err) {
@@ -64,28 +64,47 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
     };
 
     const removeTeamMember = (empCode) => {
-        // Show confirmation popup
-        setConfirmPopup({
-            message: "Do you want to remove this team member?",
-            yes: async () => {
-                setConfirmPopup(null);
-                setLoading(true);
-                try {
-                    await axios.put(
-                        `http://localhost:5559/api/hazopTeam/updateStatusToFalse?id=${hazopData.id}`
+        const member = hazopTeam.find(m => m.empCode === empCode);
 
+        setRemoveConfirmationPopup({
+            message: `Do you want to remove ${member.firstName} ${member.lastName}?`,
+            yes: async () => {
+                setRemoveConfirmationPopup(null);
+                setLoading(true);
+
+                try {
+                    // backend call to deactivate ONLY THIS MEMBER
+                    await axios.put(
+                        `http://${strings.localhost}/api/hazopTeam/updateStatusToFalse?empCode=${empCode}&hazopId=${hazopData.id}`
                     );
+
                     setHazopTeam(hazopTeam.filter((m) => m.empCode !== empCode));
                     showToast("Team member removed!", "success");
                 } catch (err) {
                     console.error("Error removing team member:", err);
                     showToast("Failed to remove team member.", "error");
                 }
+
                 setLoading(false);
             },
-            no: () => setConfirmPopup(null)
+            no: () => setRemoveConfirmationPopup(null)
         });
     };
+    const RemoveConfirmationPopup = ({ message, onConfirm, onCancel }) => {
+        return (
+            <div className="confirm-overlay">
+                <div className="confirm-box">
+                    <p>{message}</p>
+
+                    <div className="confirm-buttons">
+                        <button type="button" className="cancel-btn" onClick={onCancel}>No</button>
+                        <button type="button" className="confirm-btn" onClick={onConfirm} >Yes</button>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
 
 
     const handleSave = () => {
@@ -103,8 +122,6 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
             showToast("Please add at least one team member.", "warn");
             return;
         }
-
-        // Show confirmation before saving the HAZOP team
         setConfirmPopup({
             message: "Do you want to save this HAZOP team?",
             yes: async () => {
@@ -123,7 +140,7 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
 
             if (hazopTeam.length > 0) {
                 await axios.post(
-                    `http://localhost:5559/api/hazopTeam/saveTeam/${hazopId}`,
+                    `http://${strings.localhost}/api/hazopTeam/saveTeam/${hazopId}`,
                     newMembers.map((m) => m.empCode)
                 );
             }
@@ -145,8 +162,8 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
                 <div className="confirm-box">
                     <p>{message}</p>
                     <div className="confirm-buttons">
-                        <button onClick={onCancel} className="cancel-btn">No</button>
-                        <button onClick={onConfirm} className="confirm-btn">Yes</button>
+                        <button type="button" onClick={onCancel} className="cancel-btn">No</button>
+                        <button type="button" onClick={onConfirm} className="confirm-btn">Yes</button>
                     </div>
                 </div>
             </div>
@@ -248,6 +265,13 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
                         message={confirmPopup.message}
                         onConfirm={confirmPopup.yes}
                         onCancel={confirmPopup.no}
+                    />
+                )}
+                {removeConfirmationPopup && (
+                    <RemoveConfirmationPopup
+                        message={removeConfirmationPopup.message}
+                        onConfirm={removeConfirmationPopup.yes}
+                        onCancel={removeConfirmationPopup.no}
                     />
                 )}
 

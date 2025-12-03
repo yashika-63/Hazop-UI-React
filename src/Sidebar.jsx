@@ -9,15 +9,21 @@ const Sidebar = ({ isOpen }) => {
     { name: 'HazopPage', path: '/HazopPage', icon: <FaHome /> },
     { name: 'Node', path: '/NodePage', icon: <FaProjectDiagram /> },
     { name: 'HazopList', path: '/HazopList', icon: <FaList /> },
-    {name: 'ApprovalRequest', path:'/RequestHandler', icon:<FaPeopleGroup/>}
+    { name: 'ApprovalRequest', path: '/RequestHandler', icon: <FaPeopleGroup /> }
   ];
 
   return (
+
     <div className={`sidebar ${isOpen ? 'open' : 'closed'}`}>
       <ul className="menu-list">
         {menuItems.map((item, index) => (
           <li key={index}>
-            <NavLink to={item.path} className="menu-link" activeClassName="active">
+            <NavLink
+              to={item.path}
+              className={({ isActive }) =>
+                isActive ? "menu-link active" : "menu-link"
+              }
+            >
               <span className="icon">{item.icon}</span>
               {isOpen && <span className="text">{item.name}</span>}
             </NavLink>

@@ -3,6 +3,7 @@ import "./Node.css";
 import NodePopup from "./NodePopup";
 import { formatDate } from "../CommonUI/CommonUI";
 import { useNavigate } from "react-router-dom";
+import { strings } from "../string";
 
 const NodePage = () => {
   const [showPopup, setShowPopup] = useState(false);
@@ -54,7 +55,7 @@ const NodePage = () => {
     const fetchNodes = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5559/api/hazopNode/by-registration-status?registrationId=1&status=true"
+          `http://${strings.localhost}/api/hazopNode/by-registration-status?registrationId=1&status=true`
         );
         const data = await response.json();
         setNodes(data); // Assuming API returns an array of nodes

@@ -142,7 +142,6 @@
 .card-sub a:hover {
   text-decoration: underline;
 }
-
 /* Modal Styles */
 .modal-overlay {
   position: fixed;
@@ -156,32 +155,45 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 10px 0;
+  padding: 10px;
   backdrop-filter: blur(6px);
   z-index: 1000;
+  overflow-y: auto; /* allow scrolling if modal is taller than viewport */
 }
 
-.modal-body{
+.modal-body {
   background: #fff;
   border-radius: 10px;
   width: 40%;
+  max-width: 600px; /* optional max width for large screens */
   padding: 30px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   position: relative;
   display: flex;
   flex-direction: column;
-  max-height: 80vh;
+
+  /* Scrollable content */
+  max-height: 75vh; /* max height relative to viewport */
+  overflow-y: auto; /* scroll if content exceeds max height */
 }
 
+/* Optional: Smooth fade-in animation */
 @keyframes modalFadeIn {
   0% {
     opacity: 0;
+    transform: translateY(-10px);
   }
-
   100% {
     opacity: 1;
+    transform: translateY(0);
   }
 }
+
+.modal-body {
+  animation: modalFadeIn 0.3s ease-in-out;
+}
+
+
 
 .modal-box {
   background: #fff;
