@@ -600,6 +600,8 @@ const NodeDetails = () => {
       {showRiskPopup && (
         <RiskLevelPopup onClose={() => setShowRiskPopup(false)} />
       )}
+        <RiskLevelPopup onClose={() => setShowRiskPopup(false)} />
+      )}
 
       {showCompletePopup && (
         <ConfirmationPopup

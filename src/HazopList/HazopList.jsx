@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { FaEllipsisV, FaFilePdf, FaHistory, FaLink, FaSearch } from "react-icons/fa";
+import { FaEllipsisV, FaFilePdf, FaHistory,FaSearch } from "react-icons/fa";
 import HazopReport from "../Reports/HazopReport";
 import { strings } from "../string";
 import HazopRevision from "./HazopRevision";
 import MocPopup from "./MocPopup";
+import { FaLink } from "react-icons/fa";
 
 const HazopList = () => {
   const [hazopData, setHazopData] = useState([]);
@@ -30,7 +31,7 @@ const HazopList = () => {
     const fetchHazopData = async () => {
       try {
         const response = await axios.get(
-          `http://${strings.localhost}/api/hazopRegistration/filter?companyId=1&status=true&completionStatus=true&sendForVerification=false`
+          `http://${strings.localhost}/api/hazopRegistration/filter?companyId=${companyId}&status=true&completionStatus=true&sendForVerification=false`
         );
         setHazopData(response.data);
         setLoading(false);
@@ -97,7 +98,8 @@ const HazopList = () => {
         <table className="hazoplist-table">
           <thead>
             <tr>
-              <th>ID</th>
+              <th>Sr.No</th>
+              <th>Hazop Title</th>
               <th>HAZOP Date</th>
               <th>Site</th>
               <th>Department</th>
@@ -109,9 +111,10 @@ const HazopList = () => {
           </thead>
           <tbody>
             {hazopData.length > 0 ? (
-              hazopData.map((hazop) => (
+              hazopData.map((hazop, index) => (
                 <tr key={hazop.id}>
-                  <td>{hazop.id}</td>
+                  <td>{index+1}</td>
+                  <td>{hazop.title || '-'}</td>
                   <td>{hazop.hazopDate}</td>
                   <td>{hazop.site}</td>
                   <td>{hazop.department}</td>

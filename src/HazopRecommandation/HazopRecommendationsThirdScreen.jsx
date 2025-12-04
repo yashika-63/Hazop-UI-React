@@ -93,7 +93,7 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
             await axios.post(
                 `http://${strings.localhost}/hazopApproval/save?hazopId=${hazopId}&employeeCode=${selectedEmployee.empCode}`
             );
-            showToast("Hazop Send successfully for completion.", "success");
+            showToast("Hazop Send successfully for verification.", "success");
             setShowConfirmation(false);
             setShowModal(false);
             setSelectedEmployee(null);
@@ -155,7 +155,7 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
                     disabled={!allCompleted}
                     title={!allCompleted ? "All records must be completed to enable this button" : ""}
                 >
-                    Complete
+                    Send For Verification
                 </button>
             </div>
             {showModal && (

@@ -4,8 +4,9 @@ import './Approval.css';
 
 import HazopTeamAcceptanceApproval from "./HazopTeamAcceptanceApproval";
 import HazopRecommendationApproval from "./HazopRecommandationApproval";
-import { FaCalendarDay, FaCheckCircle, FaLightbulb } from "react-icons/fa";
+import { FaCalendarDay, FaCheckCircle, FaLightbulb , FaList } from "react-icons/fa";
 import HazopApprovalPage from "./HazopApprovalPage";
+import HazopConfirmationApproval from "./HazopConfirmationApproval";
 
 const RequestHandler = () => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -18,7 +19,6 @@ const RequestHandler = () => {
         setActiveSection(section);
         setSearchParams({ tab: section });
 
-        // mark this tab as loaded
         if (!loadedTabs.includes(section)) {
             setLoadedTabs([...loadedTabs, section]);
         }
@@ -52,8 +52,16 @@ const RequestHandler = () => {
                         className={activeSection === 'HazopApprove' ? 'active' : ''}
                         onClick={() => handleButtonClick('HazopApprove')}
                     >
-                        <FaCheckCircle />
+                        <FaList />
                         Hazop Review / Approve
+                    </button>
+                    <button
+                        type="button"
+                        className={activeSection === 'HazopConfirmationApproval' ? 'active' : ''}
+                        onClick={() => handleButtonClick('HazopConfirmationApproval')}
+                    >
+                        <FaCheckCircle />
+                        Hazop Completion
                     </button>
                 </div>
 
@@ -61,7 +69,7 @@ const RequestHandler = () => {
                     {activeSection === 'HazopTeamAcceptance' && <HazopTeamAcceptanceApproval />}
                     {activeSection === 'HazopRecommendationApproval' && <HazopRecommendationApproval />}
                     {activeSection === 'HazopApprove' && <HazopApprovalPage />}
-
+                    {activeSection === 'HazopConfirmationApproval' && <HazopConfirmationApproval />}
                 </div>
             </div>
         </div>

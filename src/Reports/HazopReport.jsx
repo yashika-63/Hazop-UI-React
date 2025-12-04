@@ -1,9 +1,13 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { pdf } from "@react-pdf/renderer";
 import { Document, Page, Text, View, StyleSheet, PDFViewer, Image } from "@react-pdf/renderer";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { strings } from "../string";
+import { formatDate } from "../CommonUI/CommonUI";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 const styles = StyleSheet.create({
     page: { paddingTop: 120, paddingBottom: 60, paddingHorizontal: 40, fontFamily: 'Helvetica', fontSize: 10, color: '#333', backgroundColor: '#fff' },
@@ -68,7 +72,7 @@ const styles = StyleSheet.create({
 
 const Header = ({ hazop }) => (
     <View style={styles.headerContainer} fixed>
-        <Image src="/logo.png" style={styles.logo} />
+        <Image src="/assets/AACL.png" style={styles.logo} />
         <View style={styles.headerTitleBlock}>
             <Text style={styles.companyName}>ALKYL AMINES CHEMICALS LTD</Text>
             {/* <Text style={styles.reportTitle}>HAZOP SAFETY REPORT</Text> */}
@@ -95,6 +99,8 @@ const MyDocument = ({
     nodeDetails = {},
     nodeRecommendations = {},
     allRecommendations = [],
+    verificationData = {},
+    mocReferences = {},
     assignData = { rejected: [], accepted: [], assigned: [], notAssigned: [] },
     downloadDate = new Date().toLocaleString(),
 }) => (
@@ -102,9 +108,16 @@ const MyDocument = ({
         {/* Page 1: HAZOP Info + Team */}
         <Page size="A4" style={styles.page}>
             <Header hazop={hazop} />
+
+            {/* Hazop Details */}
             <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Hazop Details</Text>
                 <View style={styles.infoCard}>
+                    {/* Hazop Info Items */}
+                    <View style={styles.infoItem}>
+                        <Text style={styles.infoLabel}>Title</Text>
+                        <Text style={styles.infoValue}>{hazop?.title || '-'}</Text>
+                    </View>
                     <View style={styles.infoItem}>
                         <Text style={styles.infoLabel}>Site</Text>
                         <Text style={styles.infoValue}>{hazop?.site || '-'}</Text>
@@ -123,7 +136,7 @@ const MyDocument = ({
                     </View>
                     <View style={styles.infoItem}>
                         <Text style={styles.infoLabel}>Completion Status</Text>
-                        <Text style={styles.infoValue}>{hazop?.completionStatus ? 'Completed' : 'Pending' || '-'}</Text>
+                        <Text style={styles.infoValue}>{hazop?.completionStatus ? 'Completed' : 'Pending'}</Text>
                     </View>
                     <View style={styles.infoItem}>
                         <Text style={styles.infoLabel}>Created By</Text>
@@ -135,9 +148,37 @@ const MyDocument = ({
                     </View>
                 </View>
             </View>
-
-
-
+            {/* MOC References - show only if present */}
+            {mocReferences.length > 0 && (
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>MOC References</Text>
+                    {mocReferences.map((moc, index) => (
+                        <View key={index} style={{ marginBottom: 10, padding: 10, border: '1pt solid #ddd', borderRadius: 4 }}>
+                            <View style={{ flexDirection: 'row', marginBottom: 2 }}>
+                                <Text style={{ flex: 1, fontSize: 10, fontWeight: 'bold' }}>MOC No:</Text>
+                                <Text style={{ flex: 2, fontSize: 10 }}>{moc.mocNo || '-'}</Text>
+                            </View>
+                            <View style={{ flexDirection: 'row', marginBottom: 2 }}>
+                                <Text style={{ flex: 1, fontSize: 10, fontWeight: 'bold' }}>MOC Title:</Text>
+                                <Text style={{ flex: 2, fontSize: 10 }}>{moc.mocTitle || '-'}</Text>
+                            </View>
+                            <View style={{ flexDirection: 'row', marginBottom: 2 }}>
+                                <Text style={{ flex: 1, fontSize: 10, fontWeight: 'bold' }}>Plant:</Text>
+                                <Text style={{ flex: 2, fontSize: 10 }}>{moc.mocPlant || '-'}</Text>
+                            </View>
+                            <View style={{ flexDirection: 'row', marginBottom: 2 }}>
+                                <Text style={{ flex: 1, fontSize: 10, fontWeight: 'bold' }}>Department:</Text>
+                                <Text style={{ flex: 2, fontSize: 10 }}>{moc.mocDepartment || '-'}</Text>
+                            </View>
+                            <View style={{ flexDirection: 'row', marginBottom: 2 }}>
+                                <Text style={{ flex: 1, fontSize: 10, fontWeight: 'bold' }}>MOC Date:</Text>
+                                <Text style={{ flex: 2, fontSize: 10 }}>{moc.mocDate || '-'}</Text>
+                            </View>
+                        </View>
+                    ))}
+                </View>
+            )}
+            {/* HAZOP Team */}
             <View style={styles.section}>
                 <Text style={styles.sectionTitle}>HAZOP Team</Text>
                 <View style={styles.table}>
@@ -148,7 +189,6 @@ const MyDocument = ({
                     </View>
                     {team?.map((m, i) => (
                         <View key={i} style={[styles.tableRow, i % 2 !== 0 ? styles.tableRowEven : {}]}>
-
                             <View style={styles.tableCol}><Text style={styles.tableCell}>{m?.firstName || ''} {m?.lastName || ''}</Text></View>
                             <View style={styles.tableCol}><Text style={styles.tableCell}>{m?.dimension3 || '-'}</Text></View>
                             <View style={styles.tableCol}><Text style={styles.tableCell}>{m?.emailId || '-'}</Text></View>
@@ -156,8 +196,14 @@ const MyDocument = ({
                     ))}
                 </View>
             </View>
+
+
+
             <Footer downloadDate={downloadDate} />
         </Page>
+
+
+
 
         {/* Page 2: Node Overview */}
         <Page size="A4" style={styles.page}>
@@ -165,7 +211,7 @@ const MyDocument = ({
             <Text style={styles.sectionTitle}>All Nodes</Text>
             {nodes?.map((node, index) => (
                 <View key={node.id} style={styles.nodeContainer} wrap={false}>
-                    <View style={styles.nodeHeader}>{node.nodeTitle|| '-'}-{node.nodeNumber ||'-'}</View>
+                    <View style={styles.nodeHeader}>{node.title || '-'}-{node.nodeNumber || '-'}</View>
                     <View style={{ flexDirection: 'row', padding: 10 }}>
                         <View style={{ flex: 1, paddingRight: 10 }}>
                             <View style={{ flexDirection: 'row', marginBottom: 6 }}>
@@ -182,15 +228,15 @@ const MyDocument = ({
                             </View>
                             <View style={{ flexDirection: 'row', marginBottom: 6 }}>
                                 <Text style={{ fontWeight: 'bold', width: '40%' }}>SOP Date:</Text>
-                                <Text>{node?.sopDate || '-'}</Text>
+                                <Text>{formatDate(node?.sopDate || '-')}</Text>
                             </View>
                             <View style={{ flexDirection: 'row', marginBottom: 6 }}>
                                 <Text style={{ fontWeight: 'bold', width: '40%' }}>Creation Date:</Text>
-                                <Text>{node?.creationDate || '-'}</Text>
+                                <Text>{formatDate(node?.creationDate || '-')}</Text>
                             </View>
                             <View style={{ flexDirection: 'row', marginBottom: 6 }}>
                                 <Text style={{ fontWeight: 'bold', width: '40%' }}>Completion Date:</Text>
-                                <Text>{node?.completionDate || '-'}</Text>
+                                <Text>{formatDate(node?.completionDate || '-')}</Text>
                             </View>
                         </View>
                         <View style={{ flex: 1, paddingLeft: 10 }}>
@@ -220,7 +266,7 @@ const MyDocument = ({
                             </View>
                             <View style={{ flexDirection: 'row', marginBottom: 6 }}>
                                 <Text style={{ fontWeight: 'bold', width: '40%' }}>Registration Date:</Text>
-                                <Text>{node?.registrationDate || '-'}</Text>
+                                <Text>{formatDate(node?.registrationDate || '-')}</Text>
                             </View>
                         </View>
                     </View>
@@ -230,6 +276,133 @@ const MyDocument = ({
             ))}
             <Footer downloadDate={downloadDate} />
         </Page>
+
+
+        {/* Pages 4+: Node Details + Recommendations */}
+        {nodes?.map((node) => (
+            <Page size="A4" style={styles.page} key={`node-${node?.id}`}>
+                <Header hazop={hazop} />
+
+                {/* Node Card for Each Node */}
+                <View style={styles.nodeContainer}>
+                    {/* Node Information (Title & Number) */}
+                    <View style={styles.nodeHeader}>
+                        <Text style={styles.title}>Node {node?.nodeNumber}: {node?.title || '-'}</Text>
+                        <View style={[styles.badge, node?.completionStatus ? styles.bgGreen : styles.bgRed]}>
+                            <Text style={{ color: 'white', fontSize: 8 }}>
+                                {node?.completionStatus ? 'Completed' : 'Pending'}
+                            </Text>
+                        </View>
+                    </View>
+
+                    {/* Node Details Section */}
+                    <View style={styles.nodeBody}>
+                        <Text style={styles.sectionTitle}>Node Details</Text>
+
+                        <View style={styles.table}>
+                            {/* Table Header */}
+                            <View style={[styles.tableRow, styles.tableRowHeader]}>
+                                <View style={{ ...styles.tableCol, width: '25%' }}>
+                                    <Text style={styles.tableCellHeader}>Deviation</Text>
+                                </View>
+                                <View style={{ ...styles.tableCol, width: '25%' }}>
+                                    <Text style={styles.tableCellHeader}>Causes</Text>
+                                </View>
+                                <View style={{ ...styles.tableCol, width: '25%' }}>
+                                    <Text style={styles.tableCellHeader}>Consequences</Text>
+                                </View>
+                                <View style={{ ...styles.tableCol, width: '25%' }}>
+                                    <Text style={styles.tableCellHeader}>Risk Rating</Text>
+                                </View>
+                            </View>
+
+                            {/* Table Body */}
+                            {nodeDetails?.[node?.id]?.map((detail, index) => (
+                                <View key={index} style={styles.tableRow}>
+                                    <View style={{ ...styles.tableCol, width: '25%' }}>
+                                        <Text style={styles.tableCell}>{detail?.deviation || '-'}</Text>
+                                    </View>
+                                    <View style={{ ...styles.tableCol, width: '25%' }}>
+                                        <Text style={styles.tableCell}>{detail?.causes || '-'}</Text>
+                                    </View>
+                                    <View style={{ ...styles.tableCol, width: '25%' }}>
+                                        <Text style={styles.tableCell}>{detail?.consequences || '-'}</Text>
+                                    </View>
+                                    <View style={{ ...styles.tableCol, width: '25%' }}>
+                                        <Text style={styles.tableCell}>{detail?.riskRating || '-'}</Text>
+                                    </View>
+                                </View>
+                            ))}
+                        </View>
+                    </View>
+
+
+                    {/* Recommendations for Node Details */}
+                    <View style={styles.nodeBody}>
+                        {nodeDetails?.[node?.id]?.map((detail, index) => {
+                            // Safely get recommendations for this detail
+                            const recs = nodeRecommendations?.[node?.id]?.[detail?.id] || [];
+
+                            return (
+                                <View key={index} style={styles.detailCard}>
+                                    <Text style={{ fontSize: 10, fontWeight: 'bold', color: '#d63384', marginBottom: 5 }}>
+                                        Recommendations for {detail?.designIntent || 'Detail ' + (index + 1)}
+                                    </Text>
+
+                                    {recs.length > 0 ? (
+                                        <View style={styles.table}>
+                                            <View style={[styles.tableRow, styles.tableRowHeader]}>
+                                                <View style={{ ...styles.tableCol, width: '40%' }}>
+                                                    <Text style={styles.tableCellHeader}>Recommendation</Text>
+                                                </View>
+                                                <View style={{ ...styles.tableCol, width: '20%' }}>
+                                                    <Text style={styles.tableCellHeader}>Department</Text>
+                                                </View>
+                                                <View style={{ ...styles.tableCol, width: '20%' }}>
+                                                    <Text style={styles.tableCellHeader}>Remark</Text>
+                                                </View>
+                                                <View style={{ ...styles.tableCol, width: '20%' }}>
+                                                    <Text style={styles.tableCellHeader}>Completion Date</Text>
+                                                </View>
+                                                <View style={{ ...styles.tableCol, width: '20%' }}>
+                                                    <Text style={styles.tableCellHeader}>Completion Status</Text>
+                                                </View>
+                                            </View>
+
+                                            {recs.map((r, i) => (
+                                                <View key={i} style={styles.tableRow}>
+                                                    <View style={{ ...styles.tableCol, width: '40%' }}>
+                                                        <Text style={styles.tableCell}>{r?.recommendation || '-'}</Text>
+                                                    </View>
+                                                    <View style={{ ...styles.tableCol, width: '20%' }}>
+                                                        <Text style={styles.tableCell}>{r?.department || '-'}</Text>
+                                                    </View>
+                                                    <View style={{ ...styles.tableCol, width: '20%' }}>
+                                                        <Text style={styles.tableCell}>{r?.remarkbyManagement || '-'}</Text>
+                                                    </View>
+                                                    <View style={{ ...styles.tableCol, width: '20%' }}>
+                                                        <Text style={styles.tableCell}>{formatDate(r?.completionDate)}</Text>
+                                                    </View>
+                                                    <View style={{ ...styles.tableCol, width: '20%' }}>
+                                                        <Text style={styles.tableCell}>{r?.completionStatus ? 'Completed' : 'Pending'}</Text>
+                                                    </View>
+                                                </View>
+                                            ))}
+                                        </View>
+                                    ) : (
+                                        <Text>No recommendations available for this detail.</Text>
+                                    )}
+                                </View>
+                            );
+                        })}
+                    </View>
+
+                </View>
+
+                <Footer downloadDate={downloadDate} />
+            </Page>
+        ))}
+
 
 
         {/* Page 3: All Recommendations */}
@@ -271,104 +444,29 @@ const MyDocument = ({
             <Footer downloadDate={downloadDate} />
         </Page>
 
-
-        {/* Pages 4+: Node Details + Recommendations */}
-        {nodes?.map((node) => (
-            <Page size="A4" style={styles.page} key={`node-${node?.id}`}>
-                <Header hazop={hazop} />
-
-                {/* Node Card for Each Node */}
-                <View style={styles.nodeContainer}>
-                    {/* Node Information (Title & Number) */}
-                    <View style={styles.nodeHeader}>
-                        <Text style={styles.nodeTitle}>Node {node?.nodeNumber}: {node?.nodeTitle || '-'}</Text>
-                        <View style={[styles.badge, node?.completionStatus ? styles.bgGreen : styles.bgRed]}>
-                            <Text style={{ color: 'white', fontSize: 8 }}>
-                                {node?.completionStatus ? 'Completed' : 'Pending'}
-                            </Text>
-                        </View>
-                    </View>
-
-                    {/* Node Details Section */}
-                    <View style={styles.nodeBody}>
-                        <Text style={styles.sectionTitle}>Node Details</Text>
-                        <View style={{ flexDirection: 'row', marginBottom: 10 }}>
-                            {/* Left Column for Node Details */}
-                            <View style={{ flex: 1, paddingRight: 10 }}>
-                                <View style={styles.infoItem}>
-                                    <Text style={styles.infoLabel}>Design Intent</Text>
-                                    <Text style={styles.infoValue}>{nodeDetails?.[node?.id]?.[0]?.designIntent || '-'}</Text>
-                                </View>
-                                {/* More details as needed */}
-                            </View>
-
-                            {/* Right Column for Node Details */}
-                            <View style={{ flex: 1, paddingLeft: 10 }}>
-                                <View style={styles.infoItem}>
-                                    <Text style={styles.infoLabel}>Equipment</Text>
-                                    <Text style={styles.infoValue}>{nodeDetails?.[node?.id]?.[0]?.equipment || '-'}</Text>
-                                </View>
-                                {/* More details as needed */}
-                            </View>
-                        </View>
-                    </View>
-
-                    {/* Recommendations for Node Details */}
-                    <View style={styles.nodeBody}>
-                        {nodeDetails?.[node?.id]?.map((detail, index) => (
-                            <View key={index} style={styles.detailCard}>
-                                <Text style={{ fontSize: 10, fontWeight: 'bold', color: '#d63384', marginBottom: 5 }}>
-                                    Recommendations for {detail?.designIntent || 'Detail ' + (index + 1)}
-                                </Text>
-                                {nodeRecommendations?.[node?.id]?.filter(rec => rec?.detailId === detail?.detailId)?.length > 0 ? (
-                                    <View style={styles.table}>
-                                        <View style={[styles.tableRow, styles.tableRowHeader]}>
-                                            <View style={{ ...styles.tableCol, width: '40%' }}><Text style={styles.tableCellHeader}>Recommendation</Text></View>
-                                            <View style={{ ...styles.tableCol, width: '20%' }}><Text style={styles.tableCellHeader}>Resp</Text></View>
-                                            <View style={{ ...styles.tableCol, width: '20%' }}><Text style={styles.tableCellHeader}>Remark</Text></View>
-                                            <View style={{ ...styles.tableCol, width: '20%' }}><Text style={styles.tableCellHeader}>Status</Text></View>
-                                        </View>
-
-                                        {nodeRecommendations[node?.id].filter(rec => rec?.detailId === detail?.detailId).map((r, i) => (
-                                            <View key={i} style={styles.tableRow}>
-                                                <View style={{ ...styles.tableCol, width: '40%' }}><Text style={styles.tableCell}>{r?.recommendation || '-'}</Text></View>
-                                                <View style={{ ...styles.tableCol, width: '20%' }}><Text style={styles.tableCell}>{r?.responsibility || '-'}</Text></View>
-                                                <View style={{ ...styles.tableCol, width: '20%' }}><Text style={styles.tableCell}>{r?.remarkbyManagement || '-'}</Text></View>
-                                                <View style={{ ...styles.tableCol, width: '20%' }}><Text style={styles.tableCell}>{r?.completionStatus ? 'Yes' : 'No'}</Text></View>
-                                            </View>
-                                        ))}
-                                    </View>
-                                ) : (
-                                    <Text>No recommendations available for this detail.</Text>
-                                )}
-                            </View>
-                        ))}
-                    </View>
-
-                </View>
-
-                <Footer downloadDate={downloadDate} />
-            </Page>
-        ))}
-
-
         {/* Last Page: Assignment Summary */}
         <Page size="A4" style={styles.page}>
             <Header hazop={hazop} />
             <Text style={styles.sectionTitle}>Assignment Summary</Text>
-            {['accepted', 'notAssigned', 'rejected', 'assigned'].map((key) => (
+            {['assigned', 'notAssigned', 'accepted', 'rejected',].map((key) => (
                 (assignData?.[key] || [])?.length > 0 && (
                     <View key={key} style={{ marginBottom: 15 }}>
                         <Text style={{ fontSize: 10, fontWeight: 'bold', color: '#007bff', marginBottom: 5 }}>{key.toUpperCase()}</Text>
                         <View style={styles.table}>
                             <View style={[styles.tableRow, styles.tableRowHeader]}>
                                 <View style={{ ...styles.tableCol, width: '70%' }}><Text style={styles.tableCellHeader}>Recommendation</Text></View>
+                                <View style={{ ...styles.tableCol, width: '70%' }}><Text style={styles.tableCellHeader}>Remark</Text></View>
                                 <View style={{ ...styles.tableCol, width: '30%' }}><Text style={styles.tableCellHeader}>Assigned To</Text></View>
+                                <View style={{ ...styles.tableCol, width: '30%' }}><Text style={styles.tableCellHeader}>Assigned Date</Text></View>
+
                             </View>
                             {(assignData?.[key] || []).map((item, i) => (
                                 <View key={i} style={styles.tableRow}>
                                     <View style={{ ...styles.tableCol, width: '70%' }}><Text style={styles.tableCell}>{item?.javaHazopNodeRecommendation?.recommendation || '-'}</Text></View>
-                                    <View style={{ ...styles.tableCol, width: '30%' }}><Text style={styles.tableCell}>{item?.assignToEmpCode || '-'}</Text></View>
+                                    <View style={{ ...styles.tableCol, width: '70%' }}><Text style={styles.tableCell}>{item?.javaHazopNodeRecommendation?.remarkbyManagement || '-'}</Text></View>
+                                    <View style={{ ...styles.tableCol, width: '30%' }}><Text style={styles.tableCell}>{item?.acceptedByEmployeeName || '-'}</Text></View>
+                                    <View style={{ ...styles.tableCol, width: '30%' }}><Text style={styles.tableCell}>{formatDate(item?.assignWorkDate || '-')}</Text></View>
+
                                 </View>
                             ))}
                         </View>
@@ -377,6 +475,72 @@ const MyDocument = ({
             ))}
             <Footer downloadDate={downloadDate} />
         </Page>
+        <Page size="A4" style={styles.page}>
+            <Text style={styles.sectionTitle}>Verification Summary</Text>
+            {(verificationData || []).length === 0 ? (
+                <Text style={{ fontSize: 10, marginBottom: 10 }}>No verification records available</Text>
+            ) : (
+                <View style={{ marginBottom: 15 }}>
+                    <View style={styles.table}>
+                        <View style={[styles.tableRow, styles.tableRowHeader]}>
+                            <View style={{ ...styles.tableCol, width: '40%' }}>
+                                <Text style={styles.tableCellHeader}>Recommendation</Text>
+                            </View>
+                            <View style={{ ...styles.tableCol, width: '30%' }}>
+                                <Text style={styles.tableCellHeader}>Remark</Text>
+                            </View>
+                            <View style={{ ...styles.tableCol, width: '30%' }}>
+                                <Text style={styles.tableCellHeader}>department</Text>
+                            </View>
+                            <View style={{ ...styles.tableCol, width: '30%' }}>
+                                <Text style={styles.tableCellHeader}>Completion Status</Text>
+                            </View>
+                            <View style={{ ...styles.tableCol, width: '30%' }}>
+                                <Text style={styles.tableCellHeader}>Completion Date</Text>
+                            </View>
+                            <View style={{ ...styles.tableCol, width: '30%' }}>
+                                <Text style={styles.tableCellHeader}>Verification Date</Text>
+                            </View>
+                        </View>
+                        {verificationData.map((item, i) => (
+                            <View key={i} style={styles.tableRow}>
+                                <View style={{ ...styles.tableCol, width: '40%' }}>
+                                    <Text style={styles.tableCell}>{item.recommendation || '-'}</Text>
+                                </View>
+                                <View style={{ ...styles.tableCol, width: '30%' }}>
+                                    <Text style={styles.tableCell}>{item.remarkbyManagement || '-'}</Text>
+                                </View>
+                                <View style={{ ...styles.tableCol, width: '30%' }}>
+                                    <Text style={styles.tableCell}>
+                                        {item.verificationDate ? formatDate(item.department) : '-'}
+                                    </Text>
+                                </View>
+                                <View style={{ ...styles.tableCol, width: '30%' }}>
+                                    <Text style={styles.tableCell}>
+                                        {item.verificationDate ? (item.completionStatus ? 'Completed' : 'Pending') : '-'}
+                                    </Text>
+                                </View>
+                                <View style={{ ...styles.tableCol, width: '30%' }}>
+                                    <Text style={styles.tableCell}>
+                                        {item.verificationDate ? formatDate(item.completionDate) : '-'}
+                                    </Text>
+                                </View>
+                                <View style={{ ...styles.tableCol, width: '30%' }}>
+                                    <Text style={styles.tableCell}>
+                                        {item.verificationDate ? formatDate(item.verificationDate) : '-'}
+                                    </Text>
+                                </View>
+
+                            </View>
+                        ))}
+                    </View>
+                </View>
+            )}
+
+            <Footer downloadDate={downloadDate} />
+        </Page>
+
+
     </Document>
 );
 
@@ -391,73 +555,81 @@ const HazopReportPage = ({ hazopId, onClose }) => {
     const [assignData, setAssignData] = useState({ rejected: [], accepted: [], assigned: [], notAssigned: [] });
     const downloadDate = new Date().toLocaleString();
     const [allRecommendations, setAllRecommendations] = useState([]);
+    const [verificationData, setVerificationdata] = useState([]);
+    const [mocReferences, setMocReferences] = useState([]);
 
 
     useEffect(() => {
         const loadData = async () => {
             if (!hazopId) return;
-
             setLoading(true);
+
             try {
-                // 1. HAZOP info + team
+                // 1️⃣ Fetch HAZOP info + team in parallel
                 const [hRes, tRes] = await Promise.all([
                     axios.get(`http://${strings.localhost}/api/hazopRegistration/by-id?hazopId=${hazopId}`),
                     axios.get(`http://${strings.localhost}/api/hazopTeam/teamByHazop/${hazopId}?status=true`)
                 ]);
 
                 setHazop(hRes.data || {});
-
                 setTeam(Array.isArray(tRes.data) ? tRes.data : []);
 
-                // 2. Nodes
-                const nRes = await axios.get(`http://${strings.localhost}/api/hazopNode/by-registration-status?registrationId=${hazopId}&status=true`);
+                // 2️⃣ Fetch nodes
+                const nRes = await axios.get(
+                    `http://${strings.localhost}/api/hazopNode/by-registration-status?registrationId=${hazopId}&status=true`
+                );
                 const fetchedNodes = Array.isArray(nRes.data) ? nRes.data : [];
                 setNodes(fetchedNodes);
 
                 const nodeIds = fetchedNodes.map(n => n.id);
-
-                const dMap = {};
-                const rMap = {};
+                const dMap = {}; // nodeId -> details
+                const rMap = {}; // nodeId -> detailId -> recommendations
 
                 if (nodeIds.length > 0) {
-                    await Promise.all(nodeIds.map(async (nodeId) => {
-                        // Node details
-                        const detailsRes = await axios.get(`http://${strings.localhost}/api/hazopNodeDetail/node/${nodeId}`)
-                            .then(res => Array.isArray(res.data) ? res.data : [])
-                            .catch(err => {
-                                console.error(`Error fetching node details for nodeId ${nodeId}:`, err);
-                                return [];
-                            });
-                        dMap[nodeId] = detailsRes;
+                    // Fetch all node details in parallel
+                    const nodeDetailsPromises = nodeIds.map(nodeId =>
+                        axios.get(`http://${strings.localhost}/api/hazopNodeDetail/node/${nodeId}`)
+                            .then(res => ({ nodeId, details: Array.isArray(res.data) ? res.data : [] }))
+                            .catch(() => ({ nodeId, details: [] }))
+                    );
 
-                        // Node recommendations
-                        const recsPerDetail = await Promise.all(detailsRes.map(async detail => {
-                            if (!detail.id) return [];
-                            const recs = await axios.get(`http://${strings.localhost}/api/nodeRecommendation/getByDetailId/${detail.id}`)
-                                .then(res => Array.isArray(res.data) ? res.data : [])
-                                .catch(err => {
-                                    console.error(`Error fetching recommendations for detailId ${detail.id}:`, err);
-                                    return [];
-                                });
-                            return recs;
-                        }));
-                        rMap[nodeId] = recsPerDetail;
-                    }));
+                    const nodeDetailsResults = await Promise.all(nodeDetailsPromises);
+
+                    const allRecPromises = [];
+
+                    nodeDetailsResults.forEach(({ nodeId, details }) => {
+                        dMap[nodeId] = details;
+
+                        details.forEach(detail => {
+                            if (detail.id) {
+                                allRecPromises.push(
+                                    axios.get(`http://${strings.localhost}/api/nodeRecommendation/getByDetailId/${detail.id}`)
+                                        .then(res => ({ nodeId, detailId: detail.id, recs: Array.isArray(res.data) ? res.data : [] }))
+                                        .catch(() => ({ nodeId, detailId: detail.id, recs: [] }))
+                                );
+                            }
+                        });
+                    });
+
+                    const allRecResults = await Promise.all(allRecPromises);
+
+                    // Organize recommendations by nodeId and detailId
+                    allRecResults.forEach(({ nodeId, detailId, recs }) => {
+                        if (!rMap[nodeId]) rMap[nodeId] = {};
+                        rMap[nodeId][detailId] = recs;
+                    });
 
                     setNodeDetails(dMap);
                     setNodeRecommendations(rMap);
                 }
 
-                // 3. All recommendations for the HAZOP
+                // 3️⃣ Fetch all recommendations for HAZOP
                 const allRecRes = await axios.get(`http://${strings.localhost}/api/nodeRecommendation/getByHazopRegistration/${hazopId}`)
                     .then(res => Array.isArray(res.data) ? res.data : [])
-                    .catch(err => {
-                        console.error("Error fetching all recommendations for HAZOP:", err);
-                        return [];
-                    });
-                setAllRecommendations(allRecRes); // You can create a new state for this
+                    .catch(() => []);
+                setAllRecommendations(allRecRes);
 
-                // 4. Assignments
+                // 4️⃣ Fetch assignment data
                 const assignRes = await axios.get(`http://${strings.localhost}/api/recommendation/assign/getAllByRegistration/${hazopId}`);
                 setAssignData({
                     rejected: Array.isArray(assignRes.data?.rejected) ? assignRes.data.rejected : [],
@@ -465,6 +637,18 @@ const HazopReportPage = ({ hazopId, onClose }) => {
                     assigned: Array.isArray(assignRes.data?.assigned) ? assignRes.data.assigned : [],
                     notAssigned: Array.isArray(assignRes.data?.notAssigned) ? assignRes.data.notAssigned : []
                 });
+
+                // 5️⃣ Fetch verification data
+                const verificationRes = await axios.get(
+                    `http://${strings.localhost}/api/nodeRecommendation/getVerificationActionRecords/${hazopId}`
+                );
+                setVerificationdata(Array.isArray(verificationRes.data) ? verificationRes.data : []);
+
+                // 6️⃣ Fetch MOC references
+                const mocRes = await axios.get(
+                    `http://${strings.localhost}/api/moc-reference/by-hazop?hazopRegistrationId=${hazopId}`
+                );
+                setMocReferences(Array.isArray(mocRes.data) ? mocRes.data : []);
 
                 setLoading(false);
             } catch (err) {
@@ -476,13 +660,40 @@ const HazopReportPage = ({ hazopId, onClose }) => {
         loadData();
     }, [hazopId]);
 
-    const downloadExcel = async () => {
-        const workbook = new ExcelJS.Workbook();
-        const worksheet = workbook.addWorksheet("HAZOP Report");
-        worksheet.addRow(["HAZOP Info"]);
-        worksheet.addRow(["Site", hazop?.site]);
-        const buffer = await workbook.xlsx.writeBuffer();
-        saveAs(new Blob([buffer]), `HAZOP_Report_${hazopId}.xlsx`);
+    // const downloadExcel = async () => {
+    //     const workbook = new ExcelJS.Workbook();
+    //     const worksheet = workbook.addWorksheet("HAZOP Report");
+    //     worksheet.addRow(["HAZOP Info"]);
+    //     worksheet.addRow(["Site", hazop?.site]);
+    //     const buffer = await workbook.xlsx.writeBuffer();
+    //     saveAs(new Blob([buffer]), `HAZOP_Report_${hazopId}.xlsx`);
+    // };
+    const downloadPdf = async () => {
+        try {
+            const blob = await pdf(
+                <MyDocument
+                    hazop={hazop}
+                    team={team}
+                    nodes={nodes}
+                    nodeDetails={nodeDetails}
+                    nodeRecommendations={nodeRecommendations}
+                    allRecommendations={allRecommendations}
+                    verificationData={verificationData}
+                    mocReferences={mocReferences}
+                    assignData={assignData}
+                    downloadDate={downloadDate}
+                />
+            ).toBlob();
+
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `Hazop_Report_${hazopId}.pdf`;
+            link.click();
+            URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error("PDF generation failed:", error);
+        }
     };
 
     return (
@@ -491,7 +702,9 @@ const HazopReportPage = ({ hazopId, onClose }) => {
                 <div style={{ display: "flex", justifyContent: "space-between", padding: 15, borderBottom: "1px solid #ddd", backgroundColor: "#f8f9fa" }}>
                     <button onClick={onClose} style={{ cursor: "pointer", backgroundColor: "#dc3545", color: "#fff", border: "none", padding: "8px 16px", borderRadius: 4 }}>Close</button>
                     <div>
-                        <button onClick={downloadExcel} style={{ cursor: "pointer", backgroundColor: "#28a745", color: "#fff", border: "none", padding: "8px 16px", borderRadius: 4, marginRight: 10 }}>Download Excel</button>
+                        {/* <button onClick={downloadExcel} style={{ cursor: "pointer", backgroundColor: "#28a745", color: "#fff", border: "none", padding: "8px 16px", borderRadius: 4, marginRight: 10 }}>Download Excel</button> */}
+                        <button onClick={downloadPdf} style={{ cursor: "pointer", backgroundColor: "#28a745", color: "#fff", border: "none", padding: "8px 16px", borderRadius: 4, marginRight: 10 }}>Download PDF</button>
+
                     </div>
                 </div>
                 <div style={{ flex: 1, backgroundColor: '#525659', position: 'relative' }}>
@@ -514,6 +727,8 @@ const HazopReportPage = ({ hazopId, onClose }) => {
                                 nodeDetails={nodeDetails}
                                 nodeRecommendations={nodeRecommendations}
                                 allRecommendations={allRecommendations}
+                                verificationData={verificationData || []}
+                                mocReferences={mocReferences}
                                 assignData={assignData}
                                 downloadDate={downloadDate}
                             />

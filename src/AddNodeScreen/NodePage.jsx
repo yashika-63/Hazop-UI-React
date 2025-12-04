@@ -77,7 +77,7 @@ useEffect(() => {
       const response = await axios.get(
         `http://${strings.localhost}/api/hazopTeam/teamByHazop/${hazopId}?status=true`
       );
-      setHazopTeam(response.data || []); // Use setHazopTeam, not hazopTeam
+      setHazopTeam(response.data || []); 
       setOriginalTeam(response.data || []);
     } catch (err) {
       console.error("Error fetching team:", err);
@@ -136,7 +136,6 @@ useEffect(() => {
 
   return (
     <div>
-      {/* HAZOP INFO CARD */}
       <div className="node-header">
         <button className="nd-back-btn" onClick={() => navigate(-1)}>
           ← Back
