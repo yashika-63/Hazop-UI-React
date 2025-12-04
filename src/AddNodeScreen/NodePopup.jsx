@@ -5,7 +5,7 @@ import { FaTimes } from "react-icons/fa";
 import { formatDateToBackend, showToast } from "../CommonUI/CommonUI";
 import { strings } from "../string";
 
-const NodePopup = ({ onClose, onSaved, hazopData }) => {
+const NodePopup = ({ onClose, onSave, hazopData }) => {
   const [form, setForm] = useState({
     nodeNumber: "",
     date: "",
@@ -95,7 +95,6 @@ const NodePopup = ({ onClose, onSaved, hazopData }) => {
 
     setLoading(true);
     try {
-      setLoading(true);
       setErrors({});
 
       const registrationId = hazopData.id;
@@ -122,8 +121,8 @@ const NodePopup = ({ onClose, onSaved, hazopData }) => {
         payload
       );
 
-      if (onSaved) {
-        onSaved(res.data || payload);
+      if (onSave) {
+        onSave();
       }
 
       showToast("Hazop note created successfully!", "success");
@@ -139,8 +138,13 @@ const NodePopup = ({ onClose, onSaved, hazopData }) => {
   return (
     <div className="modal-overlay">
       <div className="modal-box">
+        {loading && (
+          <div className="loading-overlay">
+            <div className="loading-spinner"></div>
+          </div>
+        )}
         <div className="modal-content">
-          <button className="close-btn" onClick={onClose}>
+          <button className="close-btn" onClick={onClose} disabled={loading}>
             <FaTimes />
           </button>
           <h2 className="modal-header">Create Hazop Node</h2>
@@ -158,6 +162,7 @@ const NodePopup = ({ onClose, onSaved, hazopData }) => {
                     name="nodeNumber"
                     value={form.nodeNumber}
                     onChange={handleChange}
+                    disabled={loading}
                   />
                 </div>
 
@@ -170,6 +175,7 @@ const NodePopup = ({ onClose, onSaved, hazopData }) => {
                     name="date"
                     value={form.date}
                     onChange={handleChange}
+                    disabled={loading}
                     max={new Date().toISOString().split("T")[0]}
                   />
                 </div>
@@ -184,6 +190,7 @@ const NodePopup = ({ onClose, onSaved, hazopData }) => {
                     name="pIdRevision"
                     value={form.pIdRevision}
                     onChange={handleChange}
+                    disabled={loading}
                   />
                 </div>
 
@@ -196,6 +203,7 @@ const NodePopup = ({ onClose, onSaved, hazopData }) => {
                     name="title"
                     value={form.title}
                     onChange={handleChange}
+                    disabled={loading}
                   />
                 </div>
               </div>
@@ -210,6 +218,8 @@ const NodePopup = ({ onClose, onSaved, hazopData }) => {
                   value={form.designIntent}
                   rows={3}
                   onChange={handleChange}
+                  className="textareaFont"
+                  disabled={loading}
                 />
               </div>
 
@@ -224,6 +234,7 @@ const NodePopup = ({ onClose, onSaved, hazopData }) => {
                     name="sopNo"
                     value={form.sopNo}
                     onChange={handleChange}
+                    disabled={loading}
                   />
                 </div>
 
@@ -236,9 +247,9 @@ const NodePopup = ({ onClose, onSaved, hazopData }) => {
                     name="sopDate"
                     value={form.sopDate}
                     onChange={handleChange}
+                    disabled={loading}
                     max={new Date().toISOString().split("T")[0]}
                   />
-
                 </div>
 
                 <div className="form-group">
@@ -250,7 +261,16 @@ const NodePopup = ({ onClose, onSaved, hazopData }) => {
                     name="temperature"
                     value={form.temperature}
                     onChange={handleChange}
+                    disabled={loading}
+                    maxLength={1000}
                   />
+                  <small
+                  className={`char-count ${
+                    form.temperature.length >= 1000 ? "limit-reached" : ""
+                  }`}
+                >
+                  {form.temperature.length}/1000
+                </small>
                 </div>
 
                 <div className="form-group">
@@ -262,7 +282,16 @@ const NodePopup = ({ onClose, onSaved, hazopData }) => {
                     name="pressure"
                     value={form.pressure}
                     onChange={handleChange}
+                    disabled={loading}
+                    maxLength={1000}
                   />
+                  <small
+                  className={`char-count ${
+                    form.pressure.length >= 1000 ? "limit-reached" : ""
+                  }`}
+                >
+                  {form.pressure.length}/1000
+                </small>
                 </div>
               </div>
             </div>
@@ -278,7 +307,16 @@ const NodePopup = ({ onClose, onSaved, hazopData }) => {
                   name="equipment"
                   value={form.equipment}
                   onChange={handleChange}
+                  disabled={loading}
+                  maxLength={2000}
                 />
+                <small
+                  className={`char-count ${
+                    form.equipment.length >= 2000 ? "limit-reached" : ""
+                  }`}
+                >
+                  {form.equipment.length}/2000
+                </small>
               </div>
 
               <div className="form-group">
@@ -290,7 +328,16 @@ const NodePopup = ({ onClose, onSaved, hazopData }) => {
                   name="controls"
                   value={form.controls}
                   onChange={handleChange}
+                  disabled={loading}
+                  maxLength={2000}
                 />
+                <small
+                  className={`char-count ${
+                    form.controls.length >= 2000 ? "limit-reached" : ""
+                  }`}
+                >
+                  {form.controls.length}/2000
+                </small>
               </div>
 
               {/* Chemicals */}
@@ -305,7 +352,16 @@ const NodePopup = ({ onClose, onSaved, hazopData }) => {
                   value={form.chemicalAndUtilities}
                   rows={2}
                   onChange={handleChange}
+                  disabled={loading}
+                  maxLength={1000}
                 />
+                <small
+                  className={`char-count ${
+                    form.chemicalAndUtilities.length >= 1000 ? "limit-reached" : ""
+                  }`}
+                >
+                  {form.chemicalAndUtilities.length}/1000
+                </small>
               </div>
 
               {/* Process conditions */}
@@ -319,7 +375,16 @@ const NodePopup = ({ onClose, onSaved, hazopData }) => {
                     name="quantityFlowRate"
                     value={form.quantityFlowRate}
                     onChange={handleChange}
+                    disabled={loading}
+                    maxLength={1000}
                   />
+                  <small
+                  className={`char-count ${
+                    form.quantityFlowRate.length >= 1000 ? "limit-reached" : ""
+                  }`}
+                >
+                  {form.quantityFlowRate.length}/1000
+                </small>
                 </div>
               </div>
             </div>
@@ -328,10 +393,15 @@ const NodePopup = ({ onClose, onSaved, hazopData }) => {
 
         <div className="center-controls">
           <button
-            className="save-btn"
-            onClick={handleSave}
+            type="button"
+            className="outline-btn"
+            onClick={onClose}
             disabled={loading}
           >
+            Close
+          </button>
+
+          <button className="save-btn" onClick={handleSave} disabled={loading}>
             {loading ? "Saving..." : "Save Node"}
           </button>
         </div>

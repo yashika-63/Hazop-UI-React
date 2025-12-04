@@ -2,7 +2,14 @@ import React, { useEffect, useState } from "react";
 import axios, { formToJSON } from "axios";
 import "./HazopPage.css";
 import HazopRegistration from "./HazopRegistration";
-import { FaEllipsisV, FaEye, FaEdit, FaTrash, FaTimes, FaLightbulb } from "react-icons/fa";
+import {
+  FaEllipsisV,
+  FaEye,
+  FaEdit,
+  FaTrash,
+  FaTimes,
+  FaLightbulb,
+} from "react-icons/fa";
 import AddHazopTeamPopup from "./AddHazopTeamPopup";
 import { strings } from "../string";
 import "../styles/global.css";
@@ -24,11 +31,9 @@ const HazopPage = () => {
   const [hazopData, setHazopData] = useState(null); // Store the selected HAZOP data
   const [hazopTeam, setHazopTeam] = useState([]); // Store the selected team's members
   const [showNodePopup, setShowNodePopup] = useState(false); // Store the selected team's members
-  const navigate = useNavigate();
   const [selectedHazopForUpdate, setSelectedHazopForUpdate] = useState(null);
-  const [showUpdatePopup, setShowUpdatePopup] = useState(null);
 
-const companyId = localStorage.getItem("companyId");
+  const companyId = localStorage.getItem("companyId");
   const [showUpdatePopup, setShowUpdatePopup] = useState(false); // Store the selected team's members
 
   const toggleDropdown = (id) => {
@@ -42,26 +47,15 @@ const companyId = localStorage.getItem("companyId");
   const fetchColumns = async () => {
     try {
       const col1 = await axios.get(
-        `http://${strings.localhost}/api/hazopRegistration/filter?companyId=${companyId}&status=true&completionStatus=false&sendForVerification=false`
+        `http://${strings.localhost}/api/hazopRegistration/filter?companyId=1&status=true&completionStatus=false&sendForVerification=false`
       );
       console.log("response,", col1);
       const col2 = await axios.get(
-        `http://localhost:5559/api/hazopRegistration/filter?companyId=${companyId}&status=true&completionStatus=true&sendForVerification=true`
+        `http://${strings.localhost}/api/hazopRegistration/filter?companyId=1&status=true&completionStatus=false&sendForVerification=true`
       );
-  const fetchColumns = async () => {
-        try {
-            const col1 = await axios.get(
-                `http://${strings.localhost}/api/hazopRegistration/filter?companyId=1&status=true&completionStatus=false&sendForVerification=false`
-            );
-            console.log("response,", col1);
-            const col2 = await axios.get(
-                `http://${strings.localhost}/api/hazopRegistration/filter?companyId=1&status=true&completionStatus=false&sendForVerification=true`
-            );
 
       const col3 = await axios.get(
-        `http://${strings.localhost}/api/hazopRegistration/filter?companyId=${companyId}&status=true&completionStatus=true&sendForVerification=false`
-      );
-        `http://localhost:5559/api/hazopRegistration/filter?companyId=1&status=true&completionStatus=true&sendForVerification=false`
+        `http://${strings.localhost}/api/hazopRegistration/filter?companyId=1&status=true&completionStatus=true&sendForVerification=false`
       );
 
       setNewRegistered(col1.data);
@@ -72,33 +66,22 @@ const companyId = localStorage.getItem("companyId");
     }
   };
 
-  // const handleUpdate = (item) => {
-  //   setHazopData(item);
-  //   setHazopTeam(item.team || []);
-  //   setShowAddTeamPopup(true);
-  // };
   const handleUpdate = (hazop) => {
     setSelectedHazopForUpdate(hazop);
     setShowUpdatePopup(true);
     setOpenDropdown(null);
     setHazopTeam(hazop.team || []);
   };
-    const handleUpdate = (hazop) => {
-        setSelectedHazopForUpdate(hazop);
-        setShowUpdatePopup(true);
-        setOpenDropdown(null);
-        setHazopTeam(hazop.team || []);
-    };
-
 
   const closeUpdatePopup = () => {
     setSelectedHazopForUpdate(null);
     setShowUpdatePopup(false);
   };
 
-
   const handleOpenNode = (item) => {
-    navigate(`/NodePage`, { state: { hazopData: item, hazopTeam: item.team || [] } });
+    navigate(`/NodePage`, {
+      state: { hazopData: item, hazopTeam: item.team || [] },
+    });
   };
 
   const closeNodePopup = (item) => {
@@ -109,9 +92,8 @@ const companyId = localStorage.getItem("companyId");
   };
   const handleRecommendation = (hazop) => {
     sessionStorage.setItem("hazopId", hazop.id);
-    navigate('/RecommandationHandler'); // no id in URL
+    navigate("/RecommandationHandler"); // no id in URL
   };
-
 
   const renderDropdown = (item) => (
     <div className="dropdown">
@@ -127,9 +109,6 @@ const companyId = localStorage.getItem("companyId");
           <button type="button" onClick={() => handleRecommendation(item)}>
             <FaLightbulb /> Recommendation
           </button>
-          <button type="button" onClick={() => handleRecommendation(item)}>
-                        <FaLightbulb /> Recommendation
-                    </button>
           <button type="button" onClick={() => handleOpenNode(item)}>
             <FaEye /> Open Node
           </button>
@@ -137,7 +116,6 @@ const companyId = localStorage.getItem("companyId");
       )}
     </div>
   );
-
 
   return (
     <div className="page-wrapper">
@@ -152,8 +130,9 @@ const companyId = localStorage.getItem("companyId");
         <div className="kanban-container">
           <div className="kanban-column">
             <div
-              className={`column-header menu-item ${activeTab === "NewCreated" ? "active" : ""
-                }`}
+              className={`column-header menu-item ${
+                activeTab === "NewCreated" ? "active" : ""
+              }`}
               onClick={() => setActiveTab("NewCreated")}
             >
               New Registered
@@ -169,8 +148,6 @@ const companyId = localStorage.getItem("companyId");
               </div>
             ))}
           </div>
-
-
 
           <div className="kanban-column">
             <div
@@ -190,47 +167,28 @@ const companyId = localStorage.getItem("companyId");
               </div>
             ))}
           </div>
-
-
-          <div className="kanban-column">
-            <div
-              className={`column-header menu-item ${activeTab === "Completed" ? "active" : ""
-                }`}
-              onClick={() => setActiveTab("Completed")}
-            >
-              Completed
-            </div>
-            {completed.map((item, idx) => (
-              <div className="kanban-card" key={idx}>
-                <div className="top-header">{renderDropdown(item)}</div>
-                <div className="card-title">{item.site || "Untitled"}</div>
-                <div className="card-sub">{item.description}</div>
-                <div className="dateBadge">
-                  {formatDate(item.hazopCreationDate)}
-                </div>
-              </div>
-            ))}
+        <div className="kanban-column">
+          <div
+            className={`column-header menu-item ${
+              activeTab === "Completed" ? "active" : ""
+            }`}
+            onClick={() => setActiveTab("Completed")}
+          >
+            Completed
           </div>
+          {completed.map((item, idx) => (
+            <div className="kanban-card" key={idx}>
+              <div className="top-header"> {renderDropdown(item)}</div>
+              <div className="card-title">{item.site || "Untitled"}</div>
+              <div className="card-sub">{item.description}</div>
+              <div className="dateBadge">
+                {formatDate(item.hazopCreationDate)}
+              </div>
+            </div>
+          ))}
+        </div>
         </div>
       </div>
-                  <div className="kanban-column">
-                        <div
-                            className={`column-header menu-item ${activeTab === "Completed" ? "active" : ""}`}
-                            onClick={() => setActiveTab("Completed")}
-                        >
-                            Completed
-                        </div>
-                        {completed.map((item, idx) => (
-                            <div className="kanban-card" key={idx}>
-                                <div className="top-header"> {renderDropdown(item)}</div>
-                                <div className="card-title">{item.site || "Untitled"}</div>
-                                <div className="card-sub">{item.description}</div>
-                                <div className="dateBadge">{formatDate(item.hazopCreationDate)}</div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
 
       {showPopup && (
         <div className="modal-overlay">
@@ -240,13 +198,13 @@ const companyId = localStorage.getItem("companyId");
         </div>
       )}
 
-      {showAddTeamPopup && (
+      {showUpdatePopup && selectedHazopForUpdate && (
         <div className="modal-overlay">
           <div className="modal-box">
             <AddHazopTeamPopup
-              closePopup={closeAddTeamPopup}
-              hazopData={hazopData}
-              existingTeam={hazopTeam}
+              closePopup={closeUpdatePopup}
+              hazopData={selectedHazopForUpdate}
+              existingTeam={selectedHazopForUpdate.team || []}
             />
           </div>
         </div>
@@ -259,35 +217,6 @@ const companyId = localStorage.getItem("companyId");
           existingTeam={hazopTeam}
         />
       )}
-      {
-        showUpdatePopup && selectedHazopForUpdate && (
-          <div className="modal-overlay">
-            <div className="modal-box">
-              <AddHazopTeamPopup
-                closePopup={closeUpdatePopup}
-                hazopData={selectedHazopForUpdate}
-                existingTeam={selectedHazopForUpdate.team || []}
-              />
-            </div>
-          </div>
-        )
-      }
-    </div>
-  );
-
-
-
-            {showUpdatePopup && selectedHazopForUpdate && (
-                <div className="modal-overlay">
-                    <div className="modal-box">
-                        <AddHazopTeamPopup
-                            closePopup={closeUpdatePopup}
-                            hazopData={selectedHazopForUpdate}
-                            existingTeam={selectedHazopForUpdate.team || []}
-                        />
-                    </div>
-                </div>
-            )}
     </div>
   );
 };

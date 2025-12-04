@@ -17,18 +17,16 @@ const NodePage = ({ hazopData: propHazopData, hazopTeam: propHazopTeam }) => {
   const [loading, setLoading] = useState(false);
   const location = useLocation();
   const { hazopData, hazopTeam: stateTeam } = location.state || {};
-  const { hazopData, hazopTeam: stateTeam } = location.state || {};
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [hazopTeam, setHazopTeam] = useState([]);
   const [originalTeam, setOriginalTeam] = useState([]);
   const [openDropdown, setOpenDropdown] = useState(null);
-const [mocDetails, setMocDetails] = useState(null); 
-const [hasMoc, setHasMoc] = useState(false);
+  const [mocDetails, setMocDetails] = useState(null);
+  const [hasMoc, setHasMoc] = useState(false);
 
   const toggleDropdown = (id) => {
     setOpenDropdown(openDropdown === id ? null : id);
   };
-
 
   const setSelectedRevisionId = (id) => {
     console.log("Selected revision ID:", id);
@@ -41,34 +39,27 @@ const [hasMoc, setHasMoc] = useState(false);
       setOriginalTeam(stateTeam);
     }
   }, [stateTeam]);
-    if (stateTeam) {
-      setHazopTeam(stateTeam);
-      setOriginalTeam(stateTeam);
-    }
-  }, [stateTeam]);
 
-  useEffect(() => {
-    const fetchNodes = async () => {
-      if (!hazopData?.id) return;
-      try {
-        const response = await fetch(
-          `http://${strings.localhost}/api/hazopNode/by-registration-status?registrationId=${hazopData.id}&status=true`
-          `http://${strings.localhost}/api/hazopNode/by-registration-status?registrationId=${hazopData.id}&status=true`
-        );
-        const data = await response.json();
-        setNodes(data);
-      } catch (error) {
-        console.error("Error fetching nodes:", error);
-      }
-    };
+const fetchNodes = async () => {
+  if (!hazopData?.id) return;
+  try {
+    const response = await axios.get(
+      `http://${strings.localhost}/api/hazopNode/by-registration-status?registrationId=${hazopData.id}&status=true`
+    );
+    setNodes(response.data);
+  } catch (error) {
+    console.error("Error fetching nodes:", error);
+  }
+};
 
-    fetchNodes();
-  }, [hazopData]);
+  const handleSaveNode = async () => {
+  await fetchNodes();  
+  setShowPopup(false);
+};
 
-  const handleSaveNode = (node) => {
-    setNodes([...nodes, node]);
-    setShowPopup(false);
-  };
+useEffect(() => {
+  fetchNodes();
+}, [hazopData]);
 
   useEffect(() => {
     setShowFullDescription(false);
@@ -84,7 +75,7 @@ const [hasMoc, setHasMoc] = useState(false);
     setLoading(true);
     try {
       const response = await axios.get(
-        `http://localhost:5559/api/hazopTeam/teamByHazop/${hazopId}?status=true`
+        `http://${strings.localhost}/api/hazopTeam/teamByHazop/${hazopId}?status=true`
       );
       setHazopTeam(response.data || []); // Use setHazopTeam, not hazopTeam
       setOriginalTeam(response.data || []);
@@ -121,28 +112,27 @@ const [hasMoc, setHasMoc] = useState(false);
     </div>
   );
 
+  useEffect(() => {
+    if (!hazopData?.id) return;
 
-useEffect(() => {
-  if (!hazopData?.id) return;
+    const fetchMocDetails = async () => {
+      try {
+        const res = await axios.get(
+          `http://${strings.localhost}/api/moc-reference/by-hazop?hazopRegistrationId=${hazopData.id}`
+        );
 
-  const fetchMocDetails = async () => {
-    try {
-      const res = await axios.get(
-        `http://localhost:5559/api/moc-reference/by-hazop?hazopRegistrationId=${hazopData.id}`
-      );
+        setMocDetails(res.data);
+        setHasMoc(true);
+      } catch (err) {
+        console.error("MOC Error:", err);
 
-      setMocDetails(res.data);
-      setHasMoc(true);        
-    } catch (err) {
-      console.error("MOC Error:", err);
+        setHasMoc(false);
+        setMocDetails(null);
+      }
+    };
 
-      setHasMoc(false);       
-      setMocDetails(null);
-    }
-  };
-
-  fetchMocDetails();
-}, [hazopData]);
+    fetchMocDetails();
+  }, [hazopData]);
 
   return (
     <div>
@@ -158,6 +148,9 @@ useEffect(() => {
           <div className="hazop-info-grid">
             <div>
               <strong>ID:</strong> {hazopData.id}
+            </div>
+            <div>
+              <strong>Title:</strong> {hazopData.title}
             </div>
             <div>
               <strong>Site:</strong> {hazopData.site}
@@ -187,10 +180,6 @@ useEffect(() => {
               <strong>Email:</strong> {hazopData.createdByEmail || "N/A"}
             </div>
             {hazopData.hazopRevisionNo && (
-              <div>
-                <strong>Hazop Revision No.:</strong> {hazopData.hazopRevisionNo}
-              </div>
-            )}
               <div>
                 <strong>Hazop Revision No.:</strong> {hazopData.hazopRevisionNo}
               </div>
@@ -266,65 +255,48 @@ useEffect(() => {
             </div>
           </div>
         )}
-        {showAllMembers && (
-          <div className="table-section">
-            <div className="card table-card">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Sr. No.</th>
-                    <th>Employee Code</th>
-                    <th>Employee Name</th>
-                    <th>Department</th>
-                    <th>Email Id</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {hazopTeam.length === 0 ? (
-                    <tr>
-                      <td colSpan="4" className="no-data">
-                        No members added yet.
-                      </td>
-                    </tr>
-                  ) : (
-                    hazopTeam.map((m, idx) => (
-                      <tr key={idx}>
-                        <td>{idx + 1}</td>
-                        <td>{m.empCode}</td>
-                        <td>{m.firstName} {m.lastName}</td>
-                        <td>{m.dimension1}</td>
-                        <td>{m.emailId}</td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
+        </div>
+
+        {hasMoc && mocDetails && (
+          <div className="hazop-info">
+            <h1>MOC Details</h1>
+
+            {mocDetails.length > 0 ? (
+              mocDetails.map((moc, index) => (
+                <div key={moc.id} className="hazop-info-grid">
+                  <div>
+                    <strong>MOC ID:</strong> {moc.id}
+                  </div>
+                  <div>
+                    <strong>MOC No.:</strong> {moc.mocNo}
+                  </div>
+                  <div>
+                    <strong>Register Date:</strong>{" "}
+                    {formatDate(moc.registerDate)}
+                  </div>
+                  <div>
+                    <strong>MOC Date:</strong> {formatDate(moc.mocDate)}
+                  </div>
+                  <div>
+                    <strong>Title:</strong> {moc.mocTitle}
+                  </div>
+                  <div>
+                    <strong>Plant:</strong> {moc.mocPlant}
+                  </div>
+                  <div>
+                    <strong>Department:</strong> {moc.mocDepartment}
+                  </div>
+                  <div>
+                    <strong>Financial Year:</strong>{" "}
+                    {moc.mocFinancialYear || "N/A"}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p>No MOC details available.</p>
+            )}
           </div>
         )}
-      </div>
-{hasMoc && mocDetails && (
-<div className="hazop-info">
-  <h1>MOC Details</h1>
-
-  {mocDetails.length > 0 ? (
-    mocDetails.map((moc, index) => (
-      <div key={moc.id} className="hazop-info-grid">
-        <div><strong>MOC ID:</strong> {moc.id}</div>
-        <div><strong>MOC No.:</strong> {moc.mocNo}</div>
-        <div><strong>Register Date:</strong> {formatDate(moc.registerDate)}</div>
-        <div><strong>MOC Date:</strong> {formatDate(moc.mocDate)}</div>
-        <div><strong>Title:</strong> {moc.mocTitle}</div>
-        <div><strong>Plant:</strong> {moc.mocPlant}</div>
-        <div><strong>Department:</strong> {moc.mocDepartment}</div>
-        <div><strong>Financial Year:</strong> {moc.mocFinancialYear || "N/A"}</div>
-      </div>
-    ))
-  ) : (
-    <p>No MOC details available.</p>
-  )}
-</div>
-)}
 
         <div className="table-section">
           <div className="table-header">
@@ -349,13 +321,12 @@ useEffect(() => {
                   <th>Pressure</th>
                   <th>Quantity Flow Rate</th>
                   <th>Completion Status</th>
-                  <th>Action</th>
                 </tr>
               </thead>
               <tbody>
                 {nodes.length === 0 ? (
                   <tr>
-                    <td colSpan="12" className="no-data">
+                    <td colSpan="11" className="no-data">
                       No nodes added yet.
                     </td>
                   </tr>
@@ -384,14 +355,15 @@ useEffect(() => {
                             n.completionStatus === true
                               ? "status-completed"
                               : n.completionStatus === false
-                                ? "status-pending"
-                                : "status-pending"
+                              ? "status-pending"
+                              : "status-pending"
                           }
                         >
-                          {n.completionStatus === true ? "Completed" : "Pending"}
+                          {n.completionStatus === true
+                            ? "Completed"
+                            : "Pending"}
                         </span>
                       </td>
-                      <td onClick={(e) => e.stopPropagation()} >{renderDropdown(n)}</td>
                     </tr>
                   ))
                 )}
@@ -399,83 +371,15 @@ useEffect(() => {
             </table>
           </div>
         </div>
-        <div className="card table-card">
-          <table>
-            <thead>
-              <tr>
-                <th>Sr. No.</th>
-                <th>Node No.</th>
-                <th>Registration Date</th>
-                <th>Design Intent</th>
-                <th>Title</th>
-                <th>Equipment</th>
-                <th>Controls</th>
-                <th>Temperature</th>
-                <th>Pressure</th>
-                <th>Quantity Flow Rate</th>
-                <th>Completion Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {nodes.length === 0 ? (
-                <tr>
-                  <td colSpan="11" className="no-data">
-                    No nodes added yet.
-                  </td>
-                </tr>
-              ) : (
-                nodes.map((n, idx) => (
-                  <tr
-                    key={n.id}
-                    style={{ cursor: "pointer" }}
-                    onClick={() =>
-                      navigate(`/NodeDetails`, { state: { id: n.id } })
-                    }
-                  >
-                    <td>{idx + 1}</td>
-                    <td>{n.nodeNumber}</td>
-                    <td>{formatDate(n.registrationDate)}</td>
-                    <td>{n.designIntent}</td>
-                    <td>{n.title}</td>
-                    <td>{n.equipment}</td>
-                    <td>{n.controls}</td>
-                    <td>{n.temperature}</td>
-                    <td>{n.pressure}</td>
-                    <td>{n.quantityFlowRate}</td>
-                    <td>
-                      <span
-                        className={
-                          n.completionStatus === true
-                            ? "status-completed"
-                            : n.completionStatus === false
-                            ? "status-pending"
-                            : "status-pending"
-                        }
-                      >
-                        {n.completionStatus === true ? "Completed" : "Pending"}
-                      </span>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+
+        {showPopup && (
+          <NodePopup
+            onClose={() => setShowPopup(false)}
+            onSave={handleSaveNode}
+            hazopData={hazopData}
+          />
+        )}
       </div>
-
-        {
-          showPopup && (
-            <NodePopup
-              onClose={() => setShowPopup(false)}
-              onSave={handleSaveNode}
-              hazopData={hazopData}
-            />
-          )
-        }
-      </div>
-    </div>
-
-
   );
 };
 

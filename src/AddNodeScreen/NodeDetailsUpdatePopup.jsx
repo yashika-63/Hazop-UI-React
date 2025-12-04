@@ -69,36 +69,35 @@ const NodeDetailsUpdatePopup = ({ onClose, nodeID, detail }) => {
     });
   };
 
-useEffect(() => {
-  const fetchDetail = async () => {
-    try {
-      const res = await fetch(
-        `http://localhost:5559/api/hazopNodeDetail/${detail.id}`
-      );
+  useEffect(() => {
+    const fetchDetail = async () => {
+      try {
+        const res = await fetch(
+          `http://${strings.localhost}/api/hazopNodeDetail/${detail.id}`
+        );
 
-      if (!res.ok) return;
+        if (!res.ok) return;
 
-      const data = await res.json();
+        const data = await res.json();
 
-      const detailData = Array.isArray(data) ? data[0] : data;
+        const detailData = Array.isArray(data) ? data[0] : data;
 
-      const filled = {
-        ...initialState,
-        ...detailData,
-        id: detailData.id,
-      };
+        const filled = {
+          ...initialState,
+          ...detailData,
+          id: detailData.id,
+        };
 
-      setForm(filled);
-      setOriginalForm(filled);
-      setNodeDetailId(detailData.id);
+        setForm(filled);
+        setOriginalForm(filled);
+        setNodeDetailId(detailData.id);
+      } catch (err) {
+        showToast("Failed to load details for update.", "error");
+      }
+    };
 
-    } catch (err) {
-      showToast("Failed to load details for update.", "error");
-    }
-  };
-
-  if (detail?.id) fetchDetail();
-}, [detail]);
+    if (detail?.id) fetchDetail();
+  }, [detail]);
 
   const openRecommendations = () => {
     setShowRecommendations(true);
@@ -150,16 +149,20 @@ useEffect(() => {
       );
 
       if (response.ok) {
-  await response.text(); // read and ignore
-  showToast("Details updated successfully!", "success");
-  onClose();
-} else {
-  const errorText = await response.text();
-  showToast("Failed to update details.", "error");
-}
-
+        await response.text(); 
+        showToast("Details updated successfully!", "success");
+        try {
+          onSave?.(form);
+        } catch (e) {
+          console.error("onSave failed:", e);
+        }
+        onClose();
+      } else {
+        const errorText = await response.text();
+        showToast("Failed to update details.", "error");
+      }
     } catch (error) {
-      showToast("Error updating details.", "error");
+      // showToast("Error updating details.", "error");
     } finally {
       setLoading(false);
     }
@@ -295,8 +298,8 @@ useEffect(() => {
                       name="riskRating"
                       value={form.riskRating ?? ""}
                       onChange={handleChange}
-                    readOnly
-                    className="readonly"
+                      readOnly
+                      className="readonly"
                     />
                   </div>
                 </div>
@@ -306,7 +309,7 @@ useEffect(() => {
                 <div className="form-group existing-control">
                   <label>
                     {isAdditionalRequired() && (
-                      <span className="required">*</span>
+                      <span className="required-marker">*</span>
                     )}
                     Additional Control
                     <button
@@ -329,10 +332,10 @@ useEffect(() => {
                 <div className="existing-metrics">
                   <div className="form-group">
                     <label>
-                      Additional Probability (1–5)
                       {isAdditionalRequired() && (
-                        <span className="required">*</span>
+                        <span className="required-marker">*</span>
                       )}
+                      Additional Probability (1–5)
                     </label>
                     {renderScaleSelect(
                       "additionalProbability",
@@ -341,10 +344,10 @@ useEffect(() => {
                   </div>
                   <div className="form-group">
                     <label>
-                      Additional Severity (1–5)
                       {isAdditionalRequired() && (
-                        <span className="required">*</span>
+                        <span className="required-marker">*</span>
                       )}
+                      Additional Severity (1–5)
                     </label>
                     {renderScaleSelect(
                       "additionalSeverity",
@@ -353,18 +356,18 @@ useEffect(() => {
                   </div>
                   <div className="form-group">
                     <label>
-                      Additional Risk Rating
                       {isAdditionalRequired() && (
-                        <span className="required">*</span>
+                        <span className="required-marker">*</span>
                       )}
+                      Additional Risk Rating
                     </label>
                     <input
                       type="text"
                       name="additionalRiskRating"
                       value={form.additionalRiskRating ?? ""}
                       onChange={handleChange}
-                    readOnly
-                    className="readonly"
+                      readOnly
+                      className="readonly"
                     />
                   </div>
                 </div>

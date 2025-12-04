@@ -3,11 +3,13 @@ import axios from "axios";
 import { FaSearch, FaTimes } from "react-icons/fa";
 import "../HazopEntry/HazopRegistration.css";
 import { showToast } from "../CommonUI/CommonUI";
+import { strings } from "../string";
 
 const HazopRevision = ({ hazopId, onClose }) => {
   const [formData, setFormData] = useState({
     hazopDate: "",
     site: "",
+    title: "",
     department: "",
     description: "",
     verificationStatus: false,
@@ -22,6 +24,8 @@ const HazopRevision = ({ hazopId, onClose }) => {
   const [hazopTeam, setHazopTeam] = useState([]);
   const [showTeamSearch, setShowTeamSearch] = useState(false);
   const [confirmPopup, setConfirmPopup] = useState(null);
+
+  const companyId = localStorage.getItem("companyId");
 
   useEffect(() => {
     if (loading) {
@@ -43,6 +47,13 @@ const HazopRevision = ({ hazopId, onClose }) => {
       showToast("Site is required.", "warn");
     } else if (!/^[A-Za-z0-9\s,-]+$/.test(formData.site)) {
       newErrors.site = "Only letters, numbers, commas & hyphens allowed.";
+    }
+
+    if (!formData.title.trim()) {
+      newErrors.title = "Title is required.";
+      showToast("Title is required.", "warn");
+    } else if (!/^[A-Za-z0-9\s,-]+$/.test(formData.title)) {
+      newErrors.title = "Only letters, numbers, commas & hyphens allowed.";
     }
 
     if (!formData.department.trim()) {
@@ -81,7 +92,7 @@ const HazopRevision = ({ hazopId, onClose }) => {
 
     try {
       const response = await axios.get(
-        `http://localhost:5559/api/employee/search?search=${encodeURIComponent(
+        `http://${strings.localhost}/api/employee/search?search=${encodeURIComponent(
           value
         )}`
       );
@@ -140,7 +151,7 @@ const saveHazop = async () => {
   try {
     // 1️⃣ Save new HAZOP entry
     const hazopResponse = await axios.post(
-      `http://localhost:5559/api/hazopRegistration/saveByCompany/1`,
+      `http://${strings.localhost}/api/hazopRegistration/saveByCompany/${companyId}`,
       formData
     );
 
@@ -149,13 +160,13 @@ const saveHazop = async () => {
 
     if (hazopTeam.length > 0) {
       await axios.post(
-        `http://localhost:5559/api/hazopTeam/saveTeam/${newHazopId}`,
+        `http://${strings.localhost}/api/hazopTeam/saveTeam/${newHazopId}`,
         hazopTeam.map((m) => m.empCode)
       );
     }
 
     await axios.post(
-      `http://localhost:5559/revision/saveRevision?oldHazopId=${oldHazopId}&newHazopId=${newHazopId}`, 
+      `http://${strings.localhost}/revision/saveRevision?oldHazopId=${oldHazopId}&newHazopId=${newHazopId}`, 
       { params: { oldHazopId, newHazopId } }
     );
 
@@ -217,6 +228,18 @@ const saveHazop = async () => {
               />
             </div>
 
+             <div className="form-group">
+              <label><span className="required-marker">*</span>
+              Title</label>
+              <input
+                type="text"
+                name="title"
+                value={formData.title}
+                onChange={handleChange}
+                disabled={loading}
+              />
+            </div>
+
             <div className="form-group">
               <label><span className="required-marker">*</span>
               Site</label>
@@ -228,6 +251,7 @@ const saveHazop = async () => {
                 disabled={loading}
               />
             </div>
+            
 
             <div className="form-group">
               <label><span className="required-marker">*</span>
@@ -251,6 +275,7 @@ const saveHazop = async () => {
                 value={formData.description}
                 onChange={handleChange}
                 disabled={loading}
+                className="textareaFont"
               ></textarea>
             </div>
           </div>

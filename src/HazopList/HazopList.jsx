@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { FaEllipsisV, FaFilePdf, FaHistory } from "react-icons/fa";
-import { FaEllipsisV, FaFilePdf, FaLink, FaSearch } from "react-icons/fa";
+import { FaEllipsisV, FaFilePdf, FaHistory, FaLink, FaSearch } from "react-icons/fa";
 import HazopReport from "../Reports/HazopReport";
 import { strings } from "../string";
 import HazopRevision from "./HazopRevision";

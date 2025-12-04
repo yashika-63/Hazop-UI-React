@@ -22,7 +22,7 @@ const initialState = {
   additionalRiskRating: "",
 };
 
-const NodeDetailsPopup = ({ onClose, nodeID }) => {
+const NodeDetailsPopup = ({ onClose, nodeID, onSave }) => {
   const [form, setForm] = useState(initialState);
   const [rows, setRows] = useState(6);
   const [smallRows, setSmallRows] = useState(3);
@@ -66,8 +66,82 @@ const NodeDetailsPopup = ({ onClose, nodeID }) => {
     });
   };
 
+  const validate = () => {
+  // Required fields
+  if (!form.generalParameter.trim()) {
+    showToast("General Parameter is required.", "warn");
+    return false;
+  }
+  if (!form.specificParameter.trim()) {
+    showToast("Specific Parameter is required.", "warn");
+    return false;
+  }
+  if (!form.guidWord.trim()) {
+    showToast("Guide Word is required.", "warn");
+    return false;
+  }
+  if (!form.causes.trim()) {
+    showToast("Causes is required.", "warn");
+    return false;
+  }
+  if (!form.consequences.trim()) {
+    showToast("Consequences is required.", "warn");
+    return false;
+  }
+  if (!form.deviation.trim()) {
+    showToast("Deviation is required.", "warn");
+    return false;
+  }
+  if (!form.existineControl.trim()) {
+    showToast("Existing Control is required.", "warn");
+    return false;
+  }
+  if (!form.existineProbability) {
+    showToast("Existing Probability is required.", "warn");
+    return false;
+  }
+  if (!form.existingSeverity) {
+    showToast("Existing Severity is required.", "warn");
+    return false;
+  }
+  if (!form.riskRating) {
+    showToast("Risk Rating is required.", "warn");
+    return false;
+  }
+
+  // Additional controls required when riskRating ≥ 12
+  if (isAdditionalRequired()) {
+    if (!form.additionalControl.trim()) {
+      showToast(
+        "Additional Control is required when Risk Rating is 12 or higher.",
+        "warn"
+      );
+      return false;
+    }
+    if (!form.additionalProbability) {
+      showToast(
+        "Additional Probability is required when Risk Rating is 12 or higher.",
+        "warn"
+      );
+      return false;
+    }
+    if (!form.additionalSeverity) {
+      showToast(
+        "Additional Severity is required when Risk Rating is 12 or higher.",
+        "warn"
+      );
+      return false;
+    }
+  }
+
+  return true;
+};
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+     if (!validate()) return;
+
     const additionalRequired = isAdditionalRequired();
 
     if (
@@ -87,7 +161,7 @@ const NodeDetailsPopup = ({ onClose, nodeID }) => {
       setLoading(true);
       // Save node detail first
       const nodeDetailResponse = await fetch(
-        `http://localhost:5559/api/hazopNodeDetail/saveDetails/${nodeID}`,
+        `http://${strings.localhost}/api/hazopNodeDetail/saveDetails/${nodeID}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -105,7 +179,7 @@ const NodeDetailsPopup = ({ onClose, nodeID }) => {
 
         if (tempRecommendations.length > 0 && nodeDetailId) {
           await fetch(
-            `http://localhost:5559/api/nodeRecommendation/save/${nodeID}/${nodeDetailId}`,
+            `http://${strings.localhost}/api/nodeRecommendation/save/${nodeID}/${nodeDetailId}`,
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -115,14 +189,10 @@ const NodeDetailsPopup = ({ onClose, nodeID }) => {
                   remarkbyManagement: item.remarkbyManagement,
                 }))
               ),
-                tempRecommendations.map((item) => ({
-                  recommendation: item.recommendation,
-                  remarkbyManagement: item.remarkbyManagement,
-                }))
-              ),
             }
           );
         }
+ onSave(savedDetail);
 
         showToast("Details saved successfully!", "success");
         setForm(initialState);
@@ -148,12 +218,20 @@ const NodeDetailsPopup = ({ onClose, nodeID }) => {
     setShowRecommendations(true);
   };
 
-  const saveRecommendations = (recs) => {
-    const bulletText = recs.map((r) => `• ${r.recommendation}`).join("\n");
+const saveRecommendations = (recs) => {
+ setTempRecommendations(
+  recs.map((r) => ({
+    recommendation: r.recommendation,
+    remarkbyManagement: r.remarkbyManagement,
+  }))
+);
 
-    setForm((prev) => ({ ...prev, additionalControl: bulletText }));
-    setShowRecommendations(false);
-  };
+  const bulletText = recs.map((r) => `• ${r.recommendation ?? r}`).join("\n");
+
+  setForm((prev) => ({ ...prev, additionalControl: bulletText }));
+
+  setShowRecommendations(false);
+};
 
   const renderScaleSelect = (name, value) => (
     <select
@@ -186,91 +264,151 @@ const NodeDetailsPopup = ({ onClose, nodeID }) => {
             <div>
               <div className="grid-row">
                 <div className="form-group">
-                  <label>General Parameter</label>
+                  <label> <span className="required-marker">*</span>General Parameter</label>
                   <input
                     type="text"
                     name="generalParameter"
                     value={form.generalParameter}
                     onChange={handleChange}
+                    maxLength={1000}
                   />
+                  <small
+                  className={`char-count ${
+                    form.generalParameter.length >= 1000 ? "limit-reached" : ""
+                  }`}
+                >
+                  {form.generalParameter.length}/1000
+                </small>
                 </div>
                 <div className="form-group">
-                  <label>Specific Parameter</label>
+                  <label> <span className="required-marker">*</span>Specific Parameter</label>
                   <input
                     type="text"
                     name="specificParameter"
                     value={form.specificParameter}
                     onChange={handleChange}
+                    maxLength={1000}
                   />
+                  <small
+                  className={`char-count ${
+                    form.specificParameter.length >= 1000 ? "limit-reached" : ""
+                  }`}
+                >
+                  {form.specificParameter.length}/1000
+                </small>
                 </div>
                 <div className="form-group">
-                  <label>Guide Word</label>
+                  <label> <span className="required-marker">*</span>Guide Word</label>
                   <input
                     type="text"
                     name="guidWord"
                     value={form.guidWord}
                     onChange={handleChange}
+                    maxLength={1000}
                   />
+                  <small
+                  className={`char-count ${
+                    form.guidWord.length >= 1000 ? "limit-reached" : ""
+                  }`}
+                >
+                  {form.guidWord.length}/1000
+                </small>
                 </div>
               </div>
 
               <div className="grid-row">
                 <div className="form-group">
-                  <label>Causes</label>
+                  <label> <span className="required-marker">*</span>Causes</label>
                   <textarea
                     name="causes"
                     rows={rows}
                     value={form.causes}
                     onChange={handleChange}
+                    className="textareaFont"
+                    maxLength={5000}
                   />
+                  <small
+                  className={`char-count ${
+                    form.causes.length >= 5000 ? "limit-reached" : ""
+                  }`}
+                >
+                  {form.causes.length}/5000
+                </small>
                 </div>
                 <div className="form-group">
-                  <label>Consequences</label>
+                  <label> <span className="required-marker">*</span>Consequences</label>
                   <textarea
                     name="consequences"
                     rows={rows}
                     value={form.consequences}
                     onChange={handleChange}
+                    className="textareaFont"
+                    maxLength={5000}
                   />
+                  <small
+                  className={`char-count ${
+                    form.consequences.length >= 5000 ? "limit-reached" : ""
+                  }`}
+                >
+                  {form.consequences.length}/5000
+                </small>
                 </div>
                 <div className="form-group">
-                  <label>Deviation</label>
+                  <label> <span className="required-marker">*</span>Deviation</label>
                   <textarea
                     name="deviation"
                     rows={rows}
                     value={form.deviation}
                     onChange={handleChange}
+                    className="textareaFont"
+                    maxLength={5000}
                   />
+                  <small
+                  className={`char-count ${
+                    form.deviation.length >= 5000 ? "limit-reached" : ""
+                  }`}
+                >
+                  {form.deviation.length}/5000
+                </small>
                 </div>
               </div>
 
               <div className="grid-row">
                 <div className="form-group existing-control">
-                  <label>Existing Control</label>
+                  <label> <span className="required-marker">*</span>Existing Control</label>
                   <textarea
                     name="existineControl"
                     rows={smallRows}
                     value={form.existineControl}
                     onChange={handleChange}
+                    className="textareaFont"
+                    maxLength={5000}
                   />
+                  <small
+                  className={`char-count ${
+                    form.existineControl.length >= 5000 ? "limit-reached" : ""
+                  }`}
+                >
+                  {form.existineControl.length}/5000
+                </small>
                 </div>
                 <div className="existing-metrics">
                   <div className="form-group">
-                    <label>Existing Probability (1–5)</label>
+                    <label> <span className="required-marker">*</span>Existing Probability (1–5)</label>
                     {renderScaleSelect(
                       "existineProbability",
                       form.existineProbability
                     )}
                   </div>
                   <div className="form-group">
-                    <label>Existing Severity (1–5)</label>
+                    <label> <span className="required-marker">*</span>Existing Severity (1–5)</label>
                     {renderScaleSelect(
                       "existingSeverity",
                       form.existingSeverity
                     )}
                   </div>
                   <div className="form-group">
-                    <label>Risk Rating</label>
+                    <label> <span className="required-marker">*</span>Risk Rating</label>
                     <input
                       type="text"
                       name="riskRating"
@@ -304,7 +442,7 @@ const NodeDetailsPopup = ({ onClose, nodeID }) => {
                     value={form.additionalControl}
                     onChange={handleChange}
                     readOnly
-                    className="readonly"
+                    className="readonly textareaFont"
                   />
                 </div>
                 <div className="existing-metrics">
@@ -376,6 +514,11 @@ const NodeDetailsPopup = ({ onClose, nodeID }) => {
           />
         )}
       </div>
+      {loading && (
+  <div className="loading-overlay">
+    <div className="loading-spinner"></div>
+  </div>
+)}
     </div>
   );
 };

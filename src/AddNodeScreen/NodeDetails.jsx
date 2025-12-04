@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
 import NodeDetailsPopup from "./NodeDetailsPopup";
-import { formatDate } from "../CommonUI/CommonUI";
+import { formatDate, showToast } from "../CommonUI/CommonUI";
 import NodeDetailsUpdatePopup from "./NodeDetailsUpdatePopup";
 import { FaEdit, FaEllipsisV } from "react-icons/fa";
 import TextareaAutosize from "react-textarea-autosize";
@@ -24,6 +24,7 @@ const NodeDetails = () => {
   const [showCompletePopup, setShowCompletePopup] = useState(false);
   const [recommendationsMap, setRecommendationsMap] = useState({});
   const [expandedDetailId, setExpandedDetailId] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const root = document.documentElement;
   const trivial = getComputedStyle(root).getPropertyValue("--trivial").trim();
@@ -62,9 +63,12 @@ const NodeDetails = () => {
   const fetchDetails = async () => {
     if (!id) return;
     try {
+      setLoading(true);
+
       const response = await fetch(
         `http://${strings.localhost}/api/hazopNodeDetail/node/${id}`
       );
+
       if (!response.ok) {
         const text = await response.text();
         console.error("Failed to fetch node details:", text);
@@ -85,8 +89,11 @@ const NodeDetails = () => {
     } catch (error) {
       console.error("Error fetching node details:", error);
       setDetails([]);
+    } finally {
+      setLoading(false);
     }
   };
+
   useEffect(() => {
     if (id) fetchNode();
     fetchDetails();
@@ -179,7 +186,10 @@ const NodeDetails = () => {
   const fetchNode = async () => {
     if (!id) return;
     try {
-      const response = await fetch(`http://localhost:5559/api/hazopNode/${id}`);
+      setLoading(true);
+      const response = await fetch(
+        `http://${strings.localhost}/api/hazopNode/${id}`
+      );
       if (!response.ok) {
         const text = await response.text();
         console.error("Failed to fetch node:", text);
@@ -192,33 +202,41 @@ const NodeDetails = () => {
     } catch (error) {
       console.error("Error fetching node:", error);
       setNode(null);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleCompleteNode = async () => {
     try {
+      setLoading(true);
+
       const response = await fetch(
-        `http://localhost:5559/api/hazopNode/complete/${id}`,
+        `http://${strings.localhost}/api/hazopNode/complete/${id}`,
         { method: "PUT" }
       );
 
       if (!response.ok) {
-        alert("Failed to complete node");
+        showToast("Failed to complete node", "error");
         return;
       }
 
-      alert("Node marked as complete!");
+      showToast("Node marked as complete!", "success");
       setShowCompletePopup(false);
     } catch (error) {
       console.error("Error:", error);
-      alert("Something went wrong");
+      showToast("Something went wrong", "error");
+    } finally {
+      setLoading(false);
     }
   };
 
   const fetchRecommendations = async (detailId) => {
     try {
+      setLoading(true);
+
       const response = await fetch(
-        `http://localhost:5559/api/nodeRecommendation/getByDetailId/${detailId}`
+        `http://${strings.localhost}/api/nodeRecommendation/getByDetailId/${detailId}`
       );
 
       if (!response.ok) {
@@ -234,6 +252,8 @@ const NodeDetails = () => {
       }));
     } catch (error) {
       console.error("Error fetching recommendations:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -355,14 +375,14 @@ const NodeDetails = () => {
       </div>
 
       <div className="rightbtn-controls">
-        <button className="add-btn" onClick={() => setShowDetailPopup(true)}>
-          + Create Node Detail
-        </button>
         <button className="add-btn" onClick={() => setShowRiskPopup(true)}>
           View Risk Levels
         </button>
         <button className="add-btn" onClick={() => setShowCompletePopup(true)}>
           Complete Node
+        </button>
+        <button className="add-btn" onClick={() => setShowDetailPopup(true)}>
+          + Create Node Detail
         </button>
       </div>
 
@@ -587,6 +607,11 @@ const NodeDetails = () => {
           onConfirm={handleCompleteNode}
           onCancel={() => setShowCompletePopup(false)}
         />
+      )}
+      {loading && (
+        <div className="loading-overlay">
+          <div className="loading-spinner"></div>
+        </div>
       )}
     </div>
   );

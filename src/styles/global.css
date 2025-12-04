@@ -157,6 +157,34 @@ h6 {
   box-shadow: 0 1px 3px rgba(101, 102, 178, 0.1);
 }
 
+.form-group small {
+  display: block;
+  text-align: right;
+  font-size: 12px;
+  color: #555;
+}
+
+.char-count {
+  display: block;
+  text-align: right;
+  font-size: 12px;
+  color: #555;
+  margin-top: 3px;
+}
+
+.char-count.limit-reached {
+  color: red;
+  font-weight: bold;
+  animation: shake 0.2s ease-in-out;
+}
+
+@keyframes shake {
+  0% { transform: translateX(0px); }
+  25% { transform: translateX(-2px); }
+  50% { transform: translateX(2px); }
+  75% { transform: translateX(-2px); }
+  100% { transform: translateX(0px); }
+}
 
 
 .form-controls {
@@ -330,8 +358,8 @@ button:focus, button:focus-visible {
   margin-bottom: 30px;
   flex-wrap: wrap;
   height: 30px;
-  padding-right: 30px;
   margin-top: 10px;
+  gap: 10px;
 }
 
 .center-controls {

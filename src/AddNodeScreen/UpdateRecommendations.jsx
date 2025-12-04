@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaTimes } from "react-icons/fa";
+import { FaTimes, FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { showToast } from "../CommonUI/CommonUI";
 import { strings } from "../string";
@@ -32,7 +32,7 @@ const UpdateRecommendations = ({
     const fetchRecommendations = async () => {
       try {
         const res = await fetch(
-          `http://localhost:5559/api/nodeRecommendation/getByDetailId/${nodeDetailId}`
+          `http://${strings.localhost}/api/nodeRecommendation/getByDetailId/${nodeDetailId}`
         );
         if (res.ok) {
           const data = await res.json();
@@ -91,12 +91,49 @@ const UpdateRecommendations = ({
     setRecommendations(updated);
   };
 
+const handleDelete = async (index) => {
+  const rec = recommendations[index];
+
+  if (recommendations.length === 1) {
+    showToast("At least one recommendation is required", "warn");
+    return;
+  }
+
+  // If record has no ID → means it's a new unsaved record → delete only from UI
+  if (!rec.id) {
+    const updated = recommendations.filter((_, i) => i !== index);
+    setRecommendations(updated);
+    showToast("Recommendation deleted successfully", "success");
+    return;
+  }
+
+  try {
+    const res = await fetch(
+      `http://${strings.localhost}/api/nodeRecommendation/delete/${rec.id}`,
+      {
+        method: "DELETE",
+      }
+    );
+
+    if (res.ok) {
+      const updated = recommendations.filter((_, i) => i !== index);
+      setRecommendations(updated);
+      showToast("Recommendation deleted successfully", "success");
+    } else {
+      showToast("Failed to delete recommendation!", "error");
+    }
+  } catch (err) {
+    console.error("Delete error:", err);
+    showToast("Error deleting recommendation!", "error");
+  }
+};
+
   const handleIndividualUpdate = async (index) => {
     try {
       const rec = recommendations[index];
 
       const res = await fetch(
-        `http://localhost:5559/api/nodeRecommendation/update/${rec.id}`,
+        `http://${strings.localhost}/api/nodeRecommendation/update/${rec.id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -124,6 +161,12 @@ const UpdateRecommendations = ({
   return (
     <div className="modal-overlay">
       <div className="modal-box">
+        {loading && (
+          <div className="loading-overlay">
+            <div className="loading-spinner"></div>
+          </div>
+        )}
+
         <div className="modal-content">
           <button className="close-btn" onClick={onClose}>
             <FaTimes />
@@ -147,11 +190,19 @@ const UpdateRecommendations = ({
                 rows={5}
                 value={rec.recommendation}
                 readOnly={editIndex !== index}
-                className={editIndex !== index ? "readonly" : ""}
+                className={`textareaFont ${editIndex !== index ? "readonly" : ""}`}
                 onChange={(e) =>
                   handleChange(index, "recommendation", e.target.value)
                 }
+                maxLength={3000}
               />
+              <small
+                  className={`char-count ${
+                    rec.recommendation.length >= 3000 ? "limit-reached" : ""
+                  }`}
+                >
+                  {rec.recommendation.length}/3000
+                </small>
               <label>
                 {" "}
                 <span className="required-marker">* </span>Remarks by Management
@@ -163,8 +214,15 @@ const UpdateRecommendations = ({
                   handleChange(index, "remarkbyManagement", e.target.value)
                 }
                 readOnly={editIndex !== index}
-                className={editIndex !== index ? "readonly" : ""}
+                className={`textareaFont ${editIndex !== index ? "readonly" : ""}`}
               />
+              <small
+                  className={`char-count ${
+                    rec.remarkbyManagement.length >= 3000 ? "limit-reached" : ""
+                  }`}
+                >
+                  {rec.remarkbyManagement.length}/3000
+                </small>
 
               <div className="rightbtn-controls">
                 <button
@@ -180,8 +238,14 @@ const UpdateRecommendations = ({
                 >
                   {editIndex === index ? "Save Update" : "Update"}
                 </button>
+              <button
+                className="required-marker"
+                onClick={() => handleDelete(index)}
+                title="Delete Recommendation"
+              >
+                <FaTrash />
+              </button>
               </div>
-
               <div className="underline"></div>
             </div>
           ))}
