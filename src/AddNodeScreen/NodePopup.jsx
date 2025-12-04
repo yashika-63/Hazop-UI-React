@@ -238,6 +238,7 @@ const NodePopup = ({ onClose, onSaved, hazopData }) => {
                     onChange={handleChange}
                     max={new Date().toISOString().split("T")[0]}
                   />
+
                 </div>
 
                 <div className="form-group">
@@ -264,75 +265,75 @@ const NodePopup = ({ onClose, onSaved, hazopData }) => {
                   />
                 </div>
               </div>
+            </div>
 
-              {/* Equipment / controls */}
+            {/* Equipment / controls */}
+            <div className="input-row">
+              <div className="form-group">
+                <label>
+                  <span className="required-marker">* </span>Equipment
+                </label>
+                <input
+                  type="text"
+                  name="equipment"
+                  value={form.equipment}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>
+                  <span className="required-marker">* </span>Controls
+                </label>
+                <input
+                  type="text"
+                  name="controls"
+                  value={form.controls}
+                  onChange={handleChange}
+                />
+              </div>
+
+              {/* Chemicals */}
+              <div className="form-group full-width">
+                <label>
+                  <span className="required-marker">* </span>Chemicals and
+                  utilities
+                </label>
+                <input
+                  type="text"
+                  name="chemicalAndUtilities"
+                  value={form.chemicalAndUtilities}
+                  rows={2}
+                  onChange={handleChange}
+                />
+              </div>
+
+              {/* Process conditions */}
               <div className="input-row">
                 <div className="form-group">
                   <label>
-                    <span className="required-marker">* </span>Equipment
+                    <span className="required-marker">* </span>Quantity
                   </label>
                   <input
                     type="text"
-                    name="equipment"
-                    value={form.equipment}
+                    name="quantityFlowRate"
+                    value={form.quantityFlowRate}
                     onChange={handleChange}
                   />
-                </div>
-
-                <div className="form-group">
-                  <label>
-                    <span className="required-marker">* </span>Controls
-                  </label>
-                  <input
-                    type="text"
-                    name="controls"
-                    value={form.controls}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                {/* Chemicals */}
-                <div className="form-group full-width">
-                  <label>
-                    <span className="required-marker">* </span>Chemicals and
-                    utilities
-                  </label>
-                  <input
-                    type="text"
-                    name="chemicalAndUtilities"
-                    value={form.chemicalAndUtilities}
-                    rows={2}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                {/* Process conditions */}
-                <div className="input-row">
-                  <div className="form-group">
-                    <label>
-                      <span className="required-marker">* </span>Quantity
-                    </label>
-                    <input
-                      type="text"
-                      name="quantityFlowRate"
-                      value={form.quantityFlowRate}
-                      onChange={handleChange}
-                    />
-                  </div>
                 </div>
               </div>
             </div>
           </div>
+        </div>
 
-          <div className="center-controls">
-            <button
-              className="save-btn"
-              onClick={handleSave}
-              disabled={loading}
-            >
-              {loading ? "Saving..." : "Save Node"}
-            </button>
-          </div>
+        <div className="center-controls">
+          <button
+            className="save-btn"
+            onClick={handleSave}
+            disabled={loading}
+          >
+            {loading ? "Saving..." : "Save Node"}
+          </button>
         </div>
       </div>
     </div>

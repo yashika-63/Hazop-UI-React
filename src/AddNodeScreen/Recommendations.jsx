@@ -3,7 +3,7 @@ import { FaTimes } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { showToast } from "../CommonUI/CommonUI";
 import { strings } from "../string";
-
+ 
 const Recommendations = ({ onClose, onSave, initialRecommendations = [], nodeID, nodeDetailId }) => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -12,7 +12,7 @@ const Recommendations = ({ onClose, onSave, initialRecommendations = [], nodeID,
       ? initialRecommendations
       : [{ recommendation: "", remarkbyManagement: "" }]
   );
-
+ 
  useEffect(() => {
   if (!nodeDetailId) {
     console.log("nodeDetailId is null or undefined, not fetching recommendations.");
@@ -34,21 +34,21 @@ const Recommendations = ({ onClose, onSave, initialRecommendations = [], nodeID,
   };
   fetchRecommendations();
 }, [nodeDetailId]);
-
-
+ 
+ 
   const handleAdd = () => {
     setRecommendations([
       ...recommendations,
       { recommendation: "", remarkbyManagement: "" },
     ]);
   };
-
+ 
   const handleChange = (index, field, value) => {
     const updated = [...recommendations];
     updated[index][field] = value;
     setRecommendations(updated);
   };
-
+ 
   const validate = () => {
     const newErrors = {};
     recommendations.forEach((rec, index) => {
@@ -87,7 +87,7 @@ const handleSave = () => {
               Add Recommendation
             </button>
           </div>
-
+ 
           {recommendations.map((rec, index) => (
             <div key={index} className="form-group">
               <label> <span className="required-marker">* </span>Recommendation</label>
@@ -109,7 +109,7 @@ const handleSave = () => {
               <div className="underline"></div>
             </div>
           ))}
-
+ 
           <div className="center-controls">
             <button type="button" className="outline-btn" onClick={onClose}>
               Close
@@ -123,5 +123,7 @@ const handleSave = () => {
     </div>
   );
 };
-
+ 
 export default Recommendations;
+ 
+ 

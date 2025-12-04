@@ -325,7 +325,7 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
             {/* Not Assigned */}
             <div className="section-block">
                 <h5>Not Assigned</h5>
-                <table className="recommendation-table">
+                <table className="recommendation-table not-assigned">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -360,7 +360,7 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
             <div className="section-block">
                 <h5>Assigned</h5>
 
-                <table className="recommendation-table">
+                <table className="recommendation-table assigned">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -400,7 +400,7 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
             <div className="section-block">
                 <h5>Accepted</h5>
 
-                <table className="recommendation-table">
+                <table className="recommendation-table accepted">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -436,10 +436,9 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
             </div>
 
             {/* Rejected */}
-            <div className="section-block">
+            <div>
                 <h5>Rejected</h5>
-
-                <table className="recommendation-table">
+                <table className="recommendation-table rejected">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -449,7 +448,6 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
                             <th>Assigned To</th>
                             <th>Rejected By</th>
                             <th>Assign Date</th>
-
                         </tr>
                     </thead>
                     <tbody>

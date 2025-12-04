@@ -76,44 +76,64 @@
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-    border-radius: 16px;
-    overflow: hidden;
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(12px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    background: #f1f1f1; /* white base */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
 }
 
-.recommendation-table thead {
-    background: rgba(255, 255, 255, 0.6);
-    color: #1f2937;
-    font-weight: 600;
-    font-size: 14px;
-}
-
-.recommendation-table th {
-    padding: 14px 16px;
-    text-align: left;
-    border-bottom: 1px solid rgba(200, 200, 200, 0.4);
-}
-
+.recommendation-table th,
 .recommendation-table td {
-    padding: 12px 16px;
-    font-size: 13px;
-    color: #334155;
-    border-bottom: 1px solid rgba(200, 200, 200, 0.2);
+    padding: 8px 12px;
+    text-align: left;
+    font-size: 14px;
+    color: #1f2937;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
 }
 
 .recommendation-table tbody tr:nth-child(odd) {
-    background: rgba(255, 255, 255, 0.3);
+    background: #f9f9f9;
 }
 
 .recommendation-table tbody tr:nth-child(even) {
-    background: rgba(255, 255, 255, 0.1);
+    background: #ffffff;
 }
 
 .recommendation-table tbody tr:hover {
-    background: rgba(255, 255, 255, 0.5);
+    background: rgba(0, 0, 0, 0.03);
 }
+
+/* Status-based headers */
+.recommendation-table.not-assigned thead {
+    background: #e2e8f0; /* light grey */
+    color: #1f2937;
+}
+
+.recommendation-table.assigned thead {
+    background: #e3ae69; /* soft orange */
+    color: #b45309;
+}
+
+.recommendation-table.accepted thead {
+    background: #dcfce7; /* soft green */
+    color: #15803d;
+}
+
+.recommendation-table.rejected thead {
+    background: #fee2e2; /* soft red */
+    color: #b91c1c;
+}
+
+/* Rounded corners for headers */
+.recommendation-table th:first-child {
+    border-top-left-radius: 12px;
+}
+
+.recommendation-table th:last-child {
+    border-top-right-radius: 12px;
+}
+
+
 
 
 .status-na {
@@ -121,9 +141,7 @@
 }
 
 
-.recommendation-table .dropdown-content {
-    left: 20px;
-}
+
 
 .badge {
     display: inline-block;

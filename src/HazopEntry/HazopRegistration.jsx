@@ -33,6 +33,7 @@ const location = useLocation();
             fetchHazopById(hazopId);
         }
     }, [hazopId]);
+  const companyId = localStorage.getItem("companyId");
 
   useEffect(() => {
     if (loading) {
@@ -148,7 +149,7 @@ const location = useLocation();
 
     try {
       const hazopResponse = await axios.post(
-        `http://${strings.localhost}/api/hazopRegistration/saveByCompany/1`,
+        `http://${strings.localhost}/api/hazopRegistration/saveByCompany/${companyId}`,
         formData
       );
 

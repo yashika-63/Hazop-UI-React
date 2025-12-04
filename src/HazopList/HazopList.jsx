@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { FaEllipsisV, FaFilePdf, FaHistory } from "react-icons/fa";
+import { FaEllipsisV, FaFilePdf, FaLink, FaSearch } from "react-icons/fa";
 import HazopReport from "../Reports/HazopReport";
 import { strings } from "../string";
 import HazopRevision from "./HazopRevision";
+import MocPopup from "./MocPopup";
 
 const HazopList = () => {
   const [hazopData, setHazopData] = useState([]);
@@ -18,6 +20,9 @@ const HazopList = () => {
     setOpenDropdown(null);
   };
 
+
+  const [openMocPopup, setOpenMocPopup] = useState(false);
+  const companyId = localStorage.getItem("companyId");
   const toggleDropdown = (id) => {
     setOpenDropdown(openDropdown === id ? null : id);
   };
@@ -43,16 +48,40 @@ const HazopList = () => {
     const words = description.split(" ");
     return words.length > 3 ? words.slice(0, 3).join(" ") + "..." : description;
   };
+  useEffect(() => {
+    const fetchHazopData = async () => {
+      try {
+        const response = await axios.get(
+          `http://${strings.localhost}/api/hazopRegistration/filter?companyId=${companyId}&status=true&completionStatus=true&sendForVerification=false`
+        );
+        setHazopData(response.data);
+        setLoading(false);
+      } catch (err) {
+        setError("Error fetching HAZOP data");
+        setLoading(false);
+      }
+    };
+    fetchHazopData();
+  }, []);
+
 
   const renderDropdown = (item) => (
     <div className="dropdown">
       <button className="dots-button" onClick={() => toggleDropdown(item.id)}>
         <FaEllipsisV />
       </button>
+
       {openDropdown === item.id && (
         <div className="dropdown-content">
-          <button type="button" onClick={() => setSelectedHazopId(item.id)}>
-            <FaFilePdf /> Report
+          <button onClick={() => setSelectedHazopId(item.id)}> <FaFilePdf /> Report</button>
+
+          <button
+            onClick={() => {
+              setOpenMocPopup(item.id);
+              setOpenDropdown(null);
+            }}
+          >
+            <FaLink />  Link MOC
           </button>
           <button type="button" onClick={() => setSelectedRevisionId(item.id)}>
             <FaHistory /> Hazop Revision
@@ -104,6 +133,7 @@ const HazopList = () => {
         </table>
       </div>
 
+
       {selectedHazopId && (
         <HazopReport
           hazopId={selectedHazopId}
@@ -115,6 +145,13 @@ const HazopList = () => {
         <HazopRevision
           hazopId={selectedRevisionId}
           onClose={() => setSelectedRevisionId(null)}
+        />
+      )}
+
+      {openMocPopup && (
+        <MocPopup
+          hazopId={openMocPopup}
+          onClose={() => setOpenMocPopup(null)}
         />
       )}
     </div>

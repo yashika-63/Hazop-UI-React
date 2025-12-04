@@ -330,7 +330,8 @@ button:focus, button:focus-visible {
   margin-bottom: 30px;
   flex-wrap: wrap;
   height: 30px;
-  gap: 20px;
+  padding-right: 30px;
+  margin-top: 10px;
 }
 
 .center-controls {
@@ -516,6 +517,12 @@ p {
   align-items: flex-end;
   font-size: 12px;
 }
+
+ 
+
+
+
+
 
 /* Search Bar CSS */
 .search-container {

@@ -6,6 +6,7 @@ import NodeDetailsUpdatePopup from "./NodeDetailsUpdatePopup";
 import { FaEdit, FaEllipsisV } from "react-icons/fa";
 import TextareaAutosize from "react-textarea-autosize";
 import RiskLevelPopup from "./RiskLevelPopup";
+import { strings } from "../string";
 
 const NodeDetails = () => {
   const location = useLocation();
@@ -62,7 +63,7 @@ const NodeDetails = () => {
     if (!id) return;
     try {
       const response = await fetch(
-        `http://localhost:5559/api/hazopNodeDetail/node/${id}`
+        `http://${strings.localhost}/api/hazopNodeDetail/node/${id}`
       );
       if (!response.ok) {
         const text = await response.text();

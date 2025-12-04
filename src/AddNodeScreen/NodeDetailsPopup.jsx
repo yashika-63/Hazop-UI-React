@@ -115,6 +115,11 @@ const NodeDetailsPopup = ({ onClose, nodeID }) => {
                   remarkbyManagement: item.remarkbyManagement,
                 }))
               ),
+                tempRecommendations.map((item) => ({
+                  recommendation: item.recommendation,
+                  remarkbyManagement: item.remarkbyManagement,
+                }))
+              ),
             }
           );
         }
