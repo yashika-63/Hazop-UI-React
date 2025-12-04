@@ -11,6 +11,7 @@ const HazopApprovalPage = () => {
     const [openDropdown, setOpenDropdown] = useState(null);
     const [selectedHazop, setSelectedHazop] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedRecord, setSelectedRecord] = useState(null);
 
     const toggleDropdown = (id) => {
         setOpenDropdown(openDropdown === id ? null : id);
@@ -19,8 +20,9 @@ const HazopApprovalPage = () => {
 
 
 
-    const openUpdatePopup = (hazop) => {
-        setSelectedHazop(hazop);
+    const openUpdatePopup = (hazop , record) => {
+        setSelectedHazop({ ...hazop, approvalRequestId: record.id }); 
+        setSelectedRecord(record); 
         setIsModalOpen(true);
     };
 
@@ -56,7 +58,7 @@ const HazopApprovalPage = () => {
         return words.slice(0, wordLimit).join(" ") + "...";
     };
 
-    const renderDropdown = (hazop) => (
+    const renderDropdown = (hazop, rec) => (
         <div className="dropdown">
             <button className="dots-button" onClick={() => toggleDropdown(hazop.id)}>
                 <FaEllipsisV />
@@ -64,7 +66,7 @@ const HazopApprovalPage = () => {
 
             {openDropdown === hazop.id && (
                 <div className="dropdown-content">
-                    <button onClick={() => openUpdatePopup(hazop)}>
+                    <button onClick={() => openUpdatePopup(hazop , rec)}>
                         <FaEye /> View
                     </button>
                 </div>
@@ -82,8 +84,8 @@ const HazopApprovalPage = () => {
                 <table className="hazoplist-table">
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Hazop Name</th>
+                            <th>Sr.No</th>
+                            <th>Hazop Title</th>
                             <th>Site</th>
                             <th>Status</th>
                             <th>Action</th>
@@ -101,7 +103,7 @@ const HazopApprovalPage = () => {
                                 return (
                                     <tr key={rec.id}>
                                         <td>{index+1}</td>
-                                        <td title={hazop.description}>{truncateWords(hazop.description, 4)}</td>
+                                        <td title={hazop.title}>{truncateWords(hazop.title, 4)}</td>
                                         <td title={hazop.site}>{truncateWords(hazop.site, 4)}</td>
                                         <td>
                                             <span className={hazop.completionStatus ? "status-completed" : "status-pending"}>
@@ -110,7 +112,7 @@ const HazopApprovalPage = () => {
                                         </td>
 
                                         <td>
-                                            {renderDropdown(hazop)}
+                                            {renderDropdown(hazop , rec)}
                                         </td>
                                     </tr>
                                 );
@@ -127,6 +129,8 @@ const HazopApprovalPage = () => {
                         <CompleteHazopView
                             hazopId={selectedHazop.id}
                             onClose={closeModal}
+                            mode="approval"
+                            approvalRequestId={selectedHazop.approvalRequestId}
                         />
                     </div>
                 </div>

@@ -22,7 +22,8 @@ const HazopRevision = ({ hazopId, onClose }) => {
   const [hazopTeam, setHazopTeam] = useState([]);
   const [showTeamSearch, setShowTeamSearch] = useState(false);
   const [confirmPopup, setConfirmPopup] = useState(null);
-
+ const companyId = localStorage.getItem("companyId");
+ 
   useEffect(() => {
     if (loading) {
       document.body.classList.add("loading");
@@ -140,7 +141,7 @@ const saveHazop = async () => {
   try {
     // 1️⃣ Save new HAZOP entry
     const hazopResponse = await axios.post(
-      `http://localhost:5559/api/hazopRegistration/saveByCompany/1`,
+      `http://localhost:5559/api/hazopRegistration/saveByCompany/${companyId}`,
       formData
     );
 

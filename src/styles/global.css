@@ -253,7 +253,7 @@ button:focus, button:focus-visible {
 
 .dropdown-content button:hover {
   background-color: #f0f0f0;
-  color: #77aee4;
+  color: #4178b0;
   border-radius: 4px;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
   transform: scale(1.05);
@@ -347,6 +347,7 @@ button:focus, button:focus-visible {
 /* Required Marker */
 .required-marker {
   color: red;
+  
 }
 
 /* Save button */

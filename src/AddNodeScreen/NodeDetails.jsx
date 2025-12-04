@@ -20,7 +20,7 @@ const NodeDetails = () => {
   const [showUpdatePopup, setShowUpdatePopup] = useState(false);
   const [selectedDetail, setSelectedDetail] = useState(null);
   const [openDropdown, setOpenDropdown] = useState(null);
-const [showRiskPopup, setShowRiskPopup] = useState(false);
+  const [showRiskPopup, setShowRiskPopup] = useState(false);
 
   const root = document.documentElement;
   const trivial = getComputedStyle(root).getPropertyValue("--trivial").trim();
@@ -245,8 +245,8 @@ const [showRiskPopup, setShowRiskPopup] = useState(false);
           + Create Node Detail
         </button>
         <button className="add-btn" onClick={() => setShowRiskPopup(true)}>
-    View Risk Levels
-  </button>
+          View Risk Levels
+        </button>
       </div>
 
       <div className="nd-details-wrapper">
@@ -443,8 +443,8 @@ const [showRiskPopup, setShowRiskPopup] = useState(false);
       )}
 
       {showRiskPopup && (
-  <RiskLevelPopup onClose={() => setShowRiskPopup(false)} />
-)}
+        <RiskLevelPopup onClose={() => setShowRiskPopup(false)} />
+      )}
 
     </div>
   );

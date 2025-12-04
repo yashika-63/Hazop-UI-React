@@ -4,7 +4,7 @@ import { strings } from "../string";
 import '../styles/global.css';
 import { showToast } from "../CommonUI/CommonUI";
 
-const CompleteHazopView = ({ hazopId, onClose }) => {
+const CompleteHazopView = ({ hazopId, onClose, mode = "approval", approvalRequestId }) => {
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
 
@@ -119,51 +119,76 @@ const CompleteHazopView = ({ hazopId, onClose }) => {
 
 
 
-    const handleApprovalSubmit = async () => {
+    const handleApprovalSubmit = async (enteredComment) => {
         if (!approvalAction) return;
 
-        const empCode = localStorage.getItem('empCode');
+        const empCode = localStorage.getItem("empCode");
         const approvedBy = localStorage.getItem("fullName");
-
-        const actionTaken = approvalAction === "accept";
+        const approve = approvalAction === "accept";   // true or false
 
         try {
-            await axios.post(
-                `http://${strings.localhost}/hazopApproval/action`,
-                null,
-                {
-                    params: {
-                        empCode,
-                        actionTaken,
-                        approvedBy,
-                        comment
+            if (mode === "approval") {
+                // Existing Approval API
+                await axios.post(
+                    `http://${strings.localhost}/hazopApproval/action`,
+                    null,
+                    {
+                        params: {
+                            approvalRequestId,
+                            empCode,
+                            actionTaken: approve,
+                            approvedBy,
+                            comment: enteredComment
+                        }
                     }
-                }
+                );
+            }
+            else if (mode === "confirmation") {
+                // NEW Confirmation API
+                await axios.put(
+                    `http://${strings.localhost}/api/hazopRegistration/verify`,
+                    null,
+                    {
+                        params: {
+                            id: hazopId,
+                            verificationEmpCode: approvedBy,
+                            approve
+                        }
+                    }
+                );
+            }
+
+            showToast(
+                `Successfully ${approve ? "Approved" : "Rejected"}`,
+                "success"
             );
 
-            showToast(`Successfully ${approvalAction === "accept" ? "Approved" : "Rejected"}`, 'success');
             setShowConfirm(false);
             setComment("");
             setApprovalAction(null);
         } catch (err) {
             console.error(err);
-            showToast("Something went wrong", 'error');
+            const errorMessage = err?.response?.data?.error || "Something went wrong";
+            showToast(errorMessage, "error");
+
         }
     };
+
     const ConfirmationPopup = ({ message, onConfirm, onCancel, disableYes }) => {
+        const [localComment, setLocalComment] = useState("");
         return (
             <div className="confirm-overlay">
                 <div className="confirm-box">
-                    <h4>Confirmation</h4>
+                    {/* <h4>Confirmation</h4> */}
                     <p>{message}</p>
-
-                    <textarea
-                        placeholder="Enter comment..."
-                        value={comment}
-                        onChange={(e) => setComment(e.target.value)}
-                        className="comment-input"
-                    ></textarea>
-
+                    {mode === "approval" && (
+                        <textarea
+                            placeholder="Enter comment..."
+                            value={localComment}
+                            onChange={(e) => setLocalComment(e.target.value)}
+                            className="comment-input"
+                        ></textarea>
+                    )}
                     <div className="confirm-buttons">
                         <button type="button" onClick={onCancel} className="cancel-btn">Cancel</button>
                         <button
@@ -196,6 +221,7 @@ const CompleteHazopView = ({ hazopId, onClose }) => {
                             <div>
                                 <h2>HAZOP Info</h2>
                                 <p><strong>Description:</strong> {hazop.description}</p>
+                                <p><strong>Title:</strong> {hazop.title}</p>
                                 <p><strong>Site:</strong> {hazop.site}</p>
                                 <p><strong>Department:</strong> {hazop.department}</p>
                                 <p><strong>Revision:</strong> {hazop.hazopRevisionNo}</p>
@@ -265,19 +291,80 @@ const CompleteHazopView = ({ hazopId, onClose }) => {
 
                         {step === 3 && (
                             <div>
-                                <h2>Node Recommendations</h2>
-                                {nodes.map(node => (
-                                    <div key={node.id} className="node-card">
-                                        <p><strong>Node #{node.nodeNumber}</strong></p>
-                                        {(nodeRecommendations[node.id] || []).map((recs, idx) => (
-                                            <ul key={idx}>
-                                                {recs.map(r => <li key={r.id}>{r.recommendation}</li>)}
-                                            </ul>
-                                        ))}
-                                    </div>
-                                ))}
+                                <h2>Node Details & Recommendations</h2>
+                                {nodes.map(node => {
+                                    const details = nodeDetails[node.id] || [];
+                                    const recsMap = nodeRecommendations[node.id] || [];
+
+                                    if (details.length === 0 && recsMap.length === 0) return null;
+
+                                    return (
+                                        <div key={node.id} className="node-card">
+                                            {/* Node Header */}
+                                            <div className="node-header">
+                                                <h3>Node #{node.nodeNumber}</h3>
+                                            </div>
+
+                                            {/* Node Details */}
+                                            {details.length > 0 && details.map((detail, idx) => (
+                                                <div key={detail.id} className="node-detail-section">
+                                                    <div className="node-detail-label">
+                                                        {idx + 1}. Node Detail
+                                                    </div>
+                                                    <table className="node-details-table">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Param</th>
+                                                                <th>Deviation</th>
+                                                                <th>Causes</th>
+                                                                <th>Consequences</th>
+                                                                <th>Existing Control</th>
+                                                                <th>Risk</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr>
+                                                                <td>{detail.generalParameter}/{detail.specificParameter}</td>
+                                                                <td>{detail.deviation}</td>
+                                                                <td>{detail.causes}</td>
+                                                                <td>{detail.consequences}</td>
+                                                                <td>{detail.existineControl}</td>
+                                                                <td>{detail.riskRating}</td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+
+                                                    {/* Recommendations */}
+                                                    {recsMap[idx] && recsMap[idx].length > 0 && (
+                                                        <div className="node-recommendations">
+                                                            <div className="rec-label">Recommendations:</div>
+                                                            <ul>
+                                                                {recsMap[idx].map(rec => (
+                                                                    <li key={rec.id}>{rec.recommendation}</li>
+                                                                ))}
+                                                            </ul>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ))}
+
+                                            {/* If node has no details but recommendations */}
+                                            {details.length === 0 && recsMap.length > 0 && recsMap.map((recs, i) => (
+                                                recs.length > 0 && (
+                                                    <div key={i} className="node-recommendations">
+                                                        <div className="rec-label">Recommendations:</div>
+                                                        <ul>
+                                                            {recs.map(r => <li key={r.id}>{r.recommendation}</li>)}
+                                                        </ul>
+                                                    </div>
+                                                )
+                                            ))}
+                                        </div>
+                                    )
+                                })}
                             </div>
                         )}
+
 
                         {step === 4 && (
                             <div>
@@ -387,7 +474,8 @@ const CompleteHazopView = ({ hazopId, onClose }) => {
                             setComment("");
                             setApprovalAction(null);
                         }}
-                        disableYes={comment.trim().length === 0}
+                        disableYes={mode === "approval" && comment.trim().length === 0}
+
                     />
                 )}
 

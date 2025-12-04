@@ -190,6 +190,7 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
                     {hazopData ? (
                         <div className="hazop-info-grid">
                             <div><strong>ID:</strong> {hazopData.id}</div>
+                            <div><strong>Hazop Title:</strong> {hazopData.title || '-'}</div>
                             <div><strong>Site:</strong> {hazopData.site}</div>
                             <div><strong>Department:</strong> {hazopData.department}</div>
                             <div><strong>HAZOP Date:</strong> {hazopData.hazopDate}</div>

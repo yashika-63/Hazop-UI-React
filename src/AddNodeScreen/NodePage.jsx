@@ -72,7 +72,7 @@ const NodePage = ({ hazopData: propHazopData, hazopTeam: propHazopTeam }) => {
       const response = await axios.get(
         `http://localhost:5559/api/hazopTeam/teamByHazop/${hazopId}?status=true`
       );
-      setHazopTeam(response.data || []); // Use setHazopTeam, not hazopTeam
+      setHazopTeam(response.data || []); 
       setOriginalTeam(response.data || []);
     } catch (err) {
       console.error("Error fetching team:", err);
@@ -110,7 +110,6 @@ const NodePage = ({ hazopData: propHazopData, hazopTeam: propHazopTeam }) => {
 
   return (
     <div>
-      {/* HAZOP INFO CARD */}
       <div className="node-header">
         <button className="nd-back-btn" onClick={() => navigate(-1)}>
           ← Back

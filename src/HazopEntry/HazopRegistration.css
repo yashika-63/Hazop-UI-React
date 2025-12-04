@@ -61,72 +61,84 @@
   color: white;
 }
 
-
 /* ------------------------------------------------------
-   HAZOP LIST TABLE – Professional UI
+   HAZOP LIST TABLE – Glass Look with Animated Header
 -------------------------------------------------------*/
+
+.hazoplist-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  padding: 20px;
+  background: #ffffff; 
+  border-radius: 12px;
+}
 
 .hazoplist-table {
   width: 100%;
   border-collapse: separate;
-  border-spacing: 0 6px;
-  margin-top: 20px;
-  background: transparent;
+  border-spacing: 0 12px;
   font-size: 14px;
-  transition: width 0.3s ease;
-  font-family: "Segoe UI", "Inter", sans-serif;
+  transition: all 0.3s ease;
+}
+.hazoplist-table thead {
+  border-radius: 12px;
+  background: linear-gradient(270deg, #4b6cb7, #182848, #4b6cb7);
+  background-size: 600% 600%;
+  animation: gradientAnimation 8s ease infinite;
+  color: #fff;
+  backdrop-filter: blur(8px);
 }
 
-/* --------- Table Header (CORPORATE BLUE) --------- */
-.hazoplist-table thead {
-  background: linear-gradient(90deg, #6b788a, #3e4f63);
-
-
+@keyframes gradientAnimation {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 .hazoplist-table th {
-  color: #fff;
-  padding: 10px 14px;
+  padding: 8px 14px;
   text-align: left;
-  white-space: nowrap;
   font-weight: 600;
-  border-bottom: 2px solid #2f3c4b;
-  letter-spacing: 0.4px;
+  letter-spacing: 0.6px;
+  border-bottom: none;
 }
 
-/* --------- Body rows --------- */
 .hazoplist-table tbody tr {
-  background: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
-  transition: 0.12s ease;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  transition: all 0.25s ease;
+  backdrop-filter: blur(6px);
 }
 
 .hazoplist-table tbody tr:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
-  background-color: #eaeaea !important;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  background: rgba(75, 108, 183, 0.1); 
   cursor: pointer;
 }
 
-/* --------- Table Cells --------- */
 .hazoplist-table td {
-  padding: 10px 14px;
-  color: #333;
+  padding: 8px 18px;
+  color: #333; 
   white-space: nowrap;
-  border-top: 1px solid #eee;
-  border-bottom: 1px solid #eee;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  transition: background 0.25s ease, color 0.25s ease;
 }
 
-/* first cell border highlight */
 .hazoplist-table td:first-child {
-  border-left: 4px solid #556a84;
-  border-radius: 6px 0 0 6px;
+  border-left: 4px solid #4b6cb7;
+  border-radius: 12px 0 0 12px;
+  font-weight: 500;
 }
 
-/* last cell rounded edge */
 .hazoplist-table td:last-child {
-  border-radius: 0 6px 6px 0;
+  border-radius: 0 12px 12px 0;
+}
+
+.hazoplist-table tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.55);
 }
 
 /* --------- Description Cell --------- */

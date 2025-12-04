@@ -10,6 +10,7 @@ const HazopRegistration = ({ closePopup }) => {
   const [formData, setFormData] = useState({
     hazopDate: "",
     site: "",
+    title:'',
     department: "",
     description: "",
     verificationStatus: false,
@@ -24,15 +25,15 @@ const HazopRegistration = ({ closePopup }) => {
   const [hazopTeam, setHazopTeam] = useState([]);
   const [showTeamSearch, setShowTeamSearch] = useState(false);
   const [confirmPopup, setConfirmPopup] = useState(null);
-const location = useLocation();
-    const hazopId = location.state?.hazopId;
+  const location = useLocation();
+  const hazopId = location.state?.hazopId;
 
-    useEffect(() => {
-        if (hazopId) {
-            // Fetch the single HAZOP data for editing
-            fetchHazopById(hazopId);
-        }
-    }, [hazopId]);
+  useEffect(() => {
+    if (hazopId) {
+      // Fetch the single HAZOP data for editing
+      fetchHazopById(hazopId);
+    }
+  }, [hazopId]);
   const companyId = localStorage.getItem("companyId");
 
   useEffect(() => {
@@ -56,7 +57,12 @@ const location = useLocation();
     } else if (!/^[A-Za-z0-9\s,-]+$/.test(formData.site)) {
       newErrors.site = "Only letters, numbers, commas & hyphens allowed.";
     }
-
+    if (!formData.title.trim()) {
+      newErrors.title = "Title is required.";
+      showToast("Title is required.", "warn");
+    } else if (!/^[A-Za-z0-9\s,-]+$/.test(formData.title)) {
+      newErrors.title = "Only letters, numbers, commas & hyphens allowed.";
+    }
     if (!formData.department.trim()) {
       newErrors.department = "Department is required.";
       showToast("Department is required.", "warn");
@@ -218,7 +224,17 @@ const location = useLocation();
               disabled={loading}
             />
           </div>
-
+          <div className="form-group">
+            <span className="required-marker">*</span>
+            <label>Title</label>
+            <input
+              type="text"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              disabled={loading}
+            />
+          </div>
           <div className="form-group">
             <span className="required-marker">*</span>
             <label>Site</label>

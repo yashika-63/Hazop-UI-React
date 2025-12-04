@@ -116,6 +116,7 @@ const HazopTeamAcceptanceApproval = () => {
                 <thead>
                     <tr>
                         <th>Sr.No</th>
+                        <th>Hazop Title</th>
                         <th>Hazop Site</th>
                         <th>Department</th>
                         <th>Hazop Creation Date</th>
@@ -132,7 +133,8 @@ const HazopTeamAcceptanceApproval = () => {
                     ) : (
                         teamData.map((item, idx) => (
                             <tr key={idx}>
-                                <td>{idx+1}</td>
+                                <td>{idx + 1}</td>
+                                <td>{item.javaHazopRegistration?.title || '-'}</td>
                                 <td>{item.javaHazopRegistration?.site || '-'}</td>
                                 <td>{item.javaHazopRegistration?.department || "-"}</td>
                                 <td>{formatDate(item.javaHazopRegistration?.hazopCreationDate) || "-"}</td>
@@ -157,6 +159,10 @@ const HazopTeamAcceptanceApproval = () => {
                         ) : teamData ? (
                             <div className="details-container">
 
+                                <div className="details-row">
+                                    <span className="label">Title:</span>
+                                    <span className="value">{selectedRecord.javaHazopRegistration?.title || "-"}</span>
+                                </div>
                                 <div className="details-row">
                                     <span className="label">Site:</span>
                                     <span className="value">{selectedRecord.javaHazopRegistration?.site || "-"}</span>
@@ -183,7 +189,7 @@ const HazopTeamAcceptanceApproval = () => {
                         )}
 
                         <div className="details-container">
-                         
+
                             <div className="details-row">
                                 <span className="label">Team Member:</span>
                                 <span className="value">{selectedRecord.employeeName || selectedRecord.empCode}</span>
@@ -226,7 +232,7 @@ const HazopTeamAcceptanceApproval = () => {
                                     <p>Are you sure you want to {confirmAction ? "APPROVE" : "REJECT"} this record?</p>
                                     <div className="confirm-buttons">
                                         <button
-                                        type="button"
+                                            type="button"
                                             disabled={processing}
                                             onClick={() => setShowConfirm(false)}
                                             className="cancel-btn"
@@ -235,7 +241,7 @@ const HazopTeamAcceptanceApproval = () => {
                                         </button>
 
                                         <button
-                                        type="button"
+                                            type="button"
                                             disabled={processing}
                                             onClick={confirmActionApi}
                                             className="confirm-btn"
