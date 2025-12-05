@@ -500,23 +500,23 @@
 
 /* A very light border tint based on risk */
 .risk-trivial {
-  border-color: var(--trivial);
+  border-color: var(--trivial) !important;
 }
 
 .risk-tolerable {
-  border-color: var(--tolerable);
+  border-color: var(--tolerable) !important;
 }
 
 .risk-moderate {
-  border-color: var(--moderate);
+  border-color: var(--moderate) !important;
 }
 
 .risk-substantial {
-  border-color: var(--substantial);
+  border-color: var(--substantial) !important;
 }
 
 .risk-intolerable {
-  border-color: var(--intolerable);
+  border-color: var(--intolerable) !important;
 }
 
 .nd-detail-header {

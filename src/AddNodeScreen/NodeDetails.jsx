@@ -647,12 +647,12 @@ const NodeDetails = () => {
       )}
 
       {showDeletePopup && (
-  <ConfirmationPopup
-    message="Are you sure you want to delete this node?"
-    onConfirm={handleDeleteNode}
-    onCancel={() => setShowDeletePopup(false)}
-  />
-)}
+        <ConfirmationPopup
+          message="Are you sure you want to delete this node?"
+          onConfirm={handleDeleteNode}
+          onCancel={() => setShowDeletePopup(false)}
+        />
+      )}
 
       {loading && (
         <div className="loading-overlay">

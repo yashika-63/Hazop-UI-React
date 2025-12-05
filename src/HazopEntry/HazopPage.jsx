@@ -209,9 +209,6 @@ const HazopPage = () => {
           <button type="button" onClick={() => handleUpdate(item)}>
             <FaEdit /> Add Team
           </button>
-          <button type="button" onClick={() => handleOpenNode(item)}>
-            <FaEye /> Open Node
-          </button>
           <button type="button" onClick={() => handleRecommendation(item)}>
             <FaLightbulb /> Recommendation
           </button>
