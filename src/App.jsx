@@ -12,6 +12,8 @@ import { ToastContainer } from 'react-toastify';
 import './App.css';
 import "./styles/global.css";
 import RecommandationHandler from './HazopRecommandation/RecommandationHandler';
+import HazopApprovalViewPage from './ApprovalRequest/HazopApprovalViewPage';
+import HazopConfirmationViewPage from './ApprovalRequest/HazopConfirmationViewPage';
 
 const App = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -57,7 +59,9 @@ const App = () => {
                     <Route path="/HazopList" element={<HazopList />} />
                     <Route path="/RequestHandler" element={<RequestHandler />} />
                     <Route path="/NodeDetails" element={<NodeDetails />} />
-                    <Route path='/RecommandationHandler' element={<RecommandationHandler/>}/>
+                    <Route path='/RecommandationHandler' element={<RecommandationHandler />} />
+                    <Route path="/hazop-approval-view" element={<HazopApprovalViewPage />} />
+                    <Route path="/hazop-confirmation-view" element={<HazopConfirmationViewPage />} />
                     <Route path="*" element={<Navigate to="/HazopPage" />} />
                   </Routes>
                 </div>
@@ -69,7 +73,7 @@ const App = () => {
           }
         />
       </Routes>
-      </Router>
+    </Router>
   );
 };
 

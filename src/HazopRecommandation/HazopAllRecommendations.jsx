@@ -142,7 +142,7 @@ const HazopAllRecommendations = ({ hazopId }) => {
             <table className="premium-table table-not-assigned">
                 <thead>
                     <tr>
-                        <th>ID</th>
+                        <th>Sr.No</th>
                         <th>Recommendation</th>
                         <th>Status</th>
                         <th>Action</th>
@@ -154,9 +154,9 @@ const HazopAllRecommendations = ({ hazopId }) => {
                             <td colSpan="4" className="no-data1">No recommendation data found</td>
                         </tr>
                     ) : (
-                        recommendations.map((rec) => (
+                        recommendations.map((rec, index) => (
                             <tr key={rec.id}>
-                                <td>{rec.id}</td>
+                                <td>{index + 1}</td>
                                 <td>{rec.recommendation}</td>
                                 <td>
                                     {rec.sendForVerification && !rec.sendForVerificationActionStatus ? (
@@ -177,6 +177,7 @@ const HazopAllRecommendations = ({ hazopId }) => {
                     )}
                 </tbody>
             </table>
+
             {/* Employee selection popup */}
             {popupOpen && (
                 <div className="modal-overlay">

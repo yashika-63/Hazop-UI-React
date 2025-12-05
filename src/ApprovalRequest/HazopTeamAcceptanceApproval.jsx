@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FaEllipsisV, FaEye, FaTimes } from "react-icons/fa";
 import './Approval.css';
-import { formatDate, showToast } from "../CommonUI/CommonUI";
+import { formatDate, showToast, truncateWords } from "../CommonUI/CommonUI";
 import { strings } from "../string";
 
 const HazopTeamAcceptanceApproval = () => {
@@ -134,8 +134,8 @@ const HazopTeamAcceptanceApproval = () => {
                         teamData.map((item, idx) => (
                             <tr key={idx}>
                                 <td>{idx + 1}</td>
-                                <td>{item.javaHazopRegistration?.title || '-'}</td>
-                                <td>{item.javaHazopRegistration?.site || '-'}</td>
+                                <td>{truncateWords(item.javaHazopRegistration?.title || '-')}</td>
+                                <td>{truncateWords(item.javaHazopRegistration?.site || '-')}</td>
                                 <td>{item.javaHazopRegistration?.department || "-"}</td>
                                 <td>{formatDate(item.javaHazopRegistration?.hazopCreationDate) || "-"}</td>
                                 <td>{renderDropdown(item)}</td>
@@ -151,7 +151,7 @@ const HazopTeamAcceptanceApproval = () => {
 
                         <div className="modal-header">
                             <buttton type="button" className="close-btn" onClick={closeModal}><FaTimes /></buttton>
-                            <h4 className="centerText">HAZOP  Details</h4>
+                            <div className="centerText">HAZOP  Details</div>
                         </div>
 
                         {hazopLoading ? (

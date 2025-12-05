@@ -11,6 +11,7 @@ const MocPopup = ({ hazopId, onClose }) => {
     const [showConfirm, setShowConfirm] = useState(false);
     const [noData, setNoData] = useState(false);
     const [loading, setLoading] = useState(false);
+    const companyId = localStorage.getItem("companyId");
 
     const handleSearchMoc = async (e) => {
         const value = e.target.value;
@@ -45,7 +46,8 @@ const MocPopup = ({ hazopId, onClose }) => {
                 {
                     params: {
                         mocId: selectedMoc.MOCID,
-                        hazopRegistrationId: hazopId
+                        hazopRegistrationId: hazopId,
+                        companyId 
                     }
                 }
             );

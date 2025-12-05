@@ -46,11 +46,58 @@ KANBAN COLUMN
 ===================================*/
 .kanban-column {
   width: 33%;
-  background: #eceff7;
-  padding: 18px;
-  border-radius: 16px;
-  box-shadow: 0px 6px 24px rgba(0,0,0,0.06);
+  background: #edf0fc;
+  padding: 20px;
+  border-radius: 20px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05), 0 2px 6px rgba(0, 0, 0, 0.03);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
+
+.kanban-column:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.08), 0 4px 8px rgba(0, 0, 0, 0.04);
+}
+
+.kanban-column::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 6px;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  background: linear-gradient(135deg, #a0c4ff, #bdb2ff);
+  box-shadow: 0 0 10px rgba(160, 196, 255, 0.6),
+    0 0 14px rgba(189, 178, 255, 0.7);
+  animation: glowPulse 3s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0%, 100% {
+    opacity: 0.8;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+.kanban-column::-webkit-scrollbar {
+  width: 6px;
+}
+
+.kanban-column::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 3px;
+}
+
+.kanban-column::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 
 .column-header {
   font-size: 18px;
@@ -71,7 +118,7 @@ CARD DESIGN MATCHING UI
   border-radius: 14px;
   padding: 15px;
   margin-bottom: 18px;
-  box-shadow: 0px 6px 20px rgba(0,0,0,0.08);
+  box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.08);
   border-left: 6px solid #7a6ff0;
   transition: .25s;
 }
@@ -91,12 +138,42 @@ CARD DESIGN MATCHING UI
   gap: 6px;
 }
 
+.card-date {
+  font-size: 11px;
+  font-weight: 500;
+  color: #254693;
+  background: rgba(75, 108, 183, 0.12);
+  padding: 3px 10px;
+  border-radius: 8px;
+  display: inline-block;
+  margin-right: auto;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(75, 108, 183, 0.2);
+}
+
 .verified-badge {
-  background: #06c66f;
-  color: #fff;
-  font-size: 10px;
-  padding: 1px 4px;
-  border-radius: 3px;
+  background: #28a745;
+  color: white;
+  padding: 4px 10px;
+  font-size: 11px;
+  border-radius: 12px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  animation: pop 0.3s ease;
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 /* Title */
@@ -149,18 +226,63 @@ CARD DESIGN MATCHING UI
 }
 
 /* Priority border colors */
-.priority-high { border-left-color: #740404 !important; }
-.priority-medium { border-left-color: #0791d6 !important; }
-.priority-low { border-left-color: #2ecc71 !important; }
+.priority-pending {
+  border-left-color: #e9771a !important;
+}
+
+.priority-medium {
+  border-left-color: #0791d6 !important;
+}
+
+.priority-low {
+  border-left-color: #2ecc71 !important;
+}
 
 /* Expand/Collapse button */
 .toggle-btn {
-  font-size: 22px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 32px;
+  height: 32px;
+  font-size: 20px;
   font-weight: 700;
   cursor: pointer;
-  padding: 0 6px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #a870e4, #9fb7e2);
+  /* purple-blue gradient */
+  color: #fff;
+  transition: all 0.3s ease;
   user-select: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
+
+.toggle-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+
+.toggle-btn:active {
+  transform: scale(0.95);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* subtle floating/bounce animation */
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+.toggle-btn {
+  animation: bounce 2s infinite ease-in-out;
+}
+
+
 .top-menu {
   display: flex;
   justify-content: space-between;
@@ -191,6 +313,7 @@ CARD DESIGN MATCHING UI
 .card-sub a:hover {
   text-decoration: underline;
 }
+
 /* Modal Styles */
 .modal-overlay {
   position: fixed;
@@ -207,14 +330,16 @@ CARD DESIGN MATCHING UI
   padding: 10px;
   backdrop-filter: blur(6px);
   z-index: 1000;
-  overflow-y: auto; /* allow scrolling if modal is taller than viewport */
+  overflow-y: auto;
+  /* allow scrolling if modal is taller than viewport */
 }
 
 .modal-body {
   background: #fff;
   border-radius: 10px;
   width: 40%;
-  max-width: 600px; /* optional max width for large screens */
+  max-width: 600px;
+  /* optional max width for large screens */
   padding: 30px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   position: relative;
@@ -222,8 +347,10 @@ CARD DESIGN MATCHING UI
   flex-direction: column;
 
   /* Scrollable content */
-  max-height: 75vh; /* max height relative to viewport */
-  overflow-y: auto; /* scroll if content exceeds max height */
+  max-height: 75vh;
+  /* max height relative to viewport */
+  overflow-y: auto;
+  /* scroll if content exceeds max height */
 }
 
 /* Optional: Smooth fade-in animation */
@@ -232,6 +359,7 @@ CARD DESIGN MATCHING UI
     opacity: 0;
     transform: translateY(-10px);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0);

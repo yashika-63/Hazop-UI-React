@@ -3,12 +3,13 @@ import axios from "axios";
 import "../styles/global.css";
 import { strings } from "../string";
 import { FaEllipsisV, FaEye, FaTimes } from "react-icons/fa";
+import { truncateWords } from "../CommonUI/CommonUI";
 
 const ConfirmationPopup = ({ message, onConfirm, onCancel }) => {
     return (
         <div className="confirm-overlay">
             <div className="confirm-box">
-            <h4>Confirmation</h4>
+                <h4>Confirmation</h4>
                 <p>{message}</p>
                 <div className="confirm-buttons">
                     <button type="button" onClick={onCancel} className="cancel-btn">No</button>
@@ -25,7 +26,7 @@ const HazopRecommendationApproval = () => {
     const [selectedRecord, setSelectedRecord] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [openDropdown, setOpenDropdown] = useState(null);
-    const [showConfirmation, setShowConfirmation] = useState(false); 
+    const [showConfirmation, setShowConfirmation] = useState(false);
     const [actionToTake, setActionToTake] = useState(null);
     const empCode = localStorage.getItem("empCode");
 
@@ -72,7 +73,7 @@ const HazopRecommendationApproval = () => {
     };
 
     const handleCancel = () => {
-        setShowModal(false); 
+        setShowModal(false);
     };
 
     const confirmAction = async () => {
@@ -87,18 +88,18 @@ const HazopRecommendationApproval = () => {
                 `http://${strings.localhost}/api/nodeRecommendation/verify/${selectedRecord.id}/${empCode}/${actionStatus}`
             );
             console.log("Action successful:", response.data);
-            setShowModal(false); 
-            setShowConfirmation(false); 
-            fetchRecommendations(); 
+            setShowModal(false);
+            setShowConfirmation(false);
+            fetchRecommendations();
         } catch (error) {
             console.error("Error during approval/rejection:", error);
         } finally {
-            setLoading(false); 
+            setLoading(false);
         }
     };
 
     const handleConfirmationCancel = () => {
-        setShowConfirmation(false); 
+        setShowConfirmation(false);
     };
 
     const renderDropdown = (item) => (
@@ -125,38 +126,40 @@ const HazopRecommendationApproval = () => {
                 </div>
             )}
 
-            {recommendations.length === 0 ? (
-                <p>No recommendations found.</p>
-            ) : (
-                <table className="hazoplist-table">
-                    <thead>
-                        <tr>
-                            <th>Sr.No</th>
-                            <th>Recommendation</th>
-                            <th>Department</th>
-                            <th>Remark</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {recommendations.map((rec, index) => (
+
+            <table className="hazoplist-table">
+                <thead>
+                    <tr>
+                        <th>Sr.No</th>
+                        <th>Recommendation</th>
+                        <th>Department</th>
+                        <th>Remark</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {recommendations.length === 0 ? (
+                        <tr><td>No recommendations found.</td></tr>
+                    ) : (
+                        recommendations.map((rec, index) => (
                             <tr key={rec.id}>
                                 <td>{index + 1}</td>
-                                <td>{rec.recommendation}</td>
+                                <td>{truncateWords(rec.recommendation)}</td>
                                 <td>{rec.department || "N/A"}</td>
-                                <td>{rec.remarkbyManagement || "N/A"}</td>
+                                <td>{truncateWords(rec.remarkbyManagement || "N/A")}</td>
                                 <td>{renderDropdown(rec)}</td>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
-            )}
+                        ))
+                    )}
+                </tbody>
+            </table>
+
 
             {showModal && selectedRecord && (
                 <div className="modal-overlay">
                     <div className="modal-body">
                         <div className="modal-header">
-                            <h4 className="centerText">Recommendation Details</h4>
+                            <div className="centerText">Recommendation Details</div>
                             <button className="close-btn" onClick={handleCancel}>
                                 <FaTimes />
                             </button>

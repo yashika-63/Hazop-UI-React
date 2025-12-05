@@ -119,7 +119,7 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
             <table className="premium-table table-not-assigned">
                 <thead>
                     <tr>
-                        <th>ID</th>
+                        <th>Sr.No</th>
                         <th>Recommendation</th>
                         <th>Management Remark</th>
                         <th>Verified By</th>
@@ -134,9 +134,9 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
                             <td colSpan="7" className="no-data1">No Data Available</td>
                         </tr>
                     ) : (
-                        records.map(item => (
+                        records.map((item, index) => (
                             <tr key={item.id}>
-                                <td>{item.id}</td>
+                                <td>{index+ 1}</td>
                                 <td>{item.recommendation}</td>
                                 <td>{item.remarkbyManagement || "-"}</td>
                                 <td>{item.verificationResponsibleEmployeeName || "-"}</td>

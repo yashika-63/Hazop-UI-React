@@ -376,6 +376,49 @@
   vertical-align: top;
   word-break: break-word;
 }
+.table-scroll-wrapper {
+  max-height: 60vh; /* adjust as needed */
+  overflow-y: auto;
+  border: 1px solid #e1e7ef;
+  border-radius: 8px;
+}
+
+.table-scroll-wrapper table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed; /* important for custom column widths */
+}
+.table-scroll-wrapper th,
+.table-scroll-wrapper td {
+    padding: 0.5rem;
+    border: 1px solid #e2e8f0;
+    vertical-align: top;
+    word-break: break-word; /* wrap long text */
+}
+
+/* Numeric columns */
+.table-scroll-wrapper td.numeric,
+.table-scroll-wrapper th.numeric {
+    width: 50px; /* small fixed width */
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* Medium width columns */
+.table-scroll-wrapper td.medium,
+.table-scroll-wrapper th.medium {
+    width: 120px;
+    text-align: left;
+}
+
+/* Long text columns */
+.table-scroll-wrapper td.long,
+.table-scroll-wrapper th.long {
+    width: auto;
+    text-align: left;
+    white-space: normal;
+}
+
 
 /* Responsive */
 @media (max-width: 768px) {
