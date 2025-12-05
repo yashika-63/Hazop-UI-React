@@ -10,7 +10,7 @@
 
 
 .table-wrapper {
-  max-height: 300px;
+  max-height: 500px;
   overflow-y: auto;
   margin-top: 10px;
   position: relative;
@@ -270,4 +270,28 @@
   .hazop-info-grid div strong {
     min-width: 100px;
   }
+}
+
+
+
+
+.pagination-btn {
+  background: linear-gradient(270deg, #4b6cb7, #182848, #4b6cb7);
+  background-size: 600% 600%;
+  animation: gradientAnimation 8s ease infinite;
+  color: #fff;
+  backdrop-filter: blur(8px);
+  padding: 6px 10px;
+}
+
+.pagination-btn:disabled {
+  background: #a5a5a5;
+  cursor: not-allowed;
+}
+
+.page-info {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  padding-top: 4px;
 }

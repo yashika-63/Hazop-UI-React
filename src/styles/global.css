@@ -19,13 +19,14 @@
 .add-btn {
   background: linear-gradient(135deg, #5062b9, #0e1e59);
   border: none;
-  padding: 6px 10px;
+  padding: 5px 10px;
   font-weight: 600;
   border-radius: 10px;
   cursor: pointer;
   font-size: 13px;
   color: #ffffff;
   box-shadow: 0 10px 20px rgba(79, 70, 229, 0.35);
+  margin-bottom: 5px;
 }
 
 .create-btn {
@@ -126,6 +127,13 @@ h6 {
   color: #374151;
   text-transform: capitalize;
   transition: color 0.2s ease;
+}
+
+.label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
 }
 
 .form-group input,

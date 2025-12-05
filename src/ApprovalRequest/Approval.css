@@ -360,6 +360,7 @@
   border-collapse: collapse;
   font-size: 0.9rem;
   margin-top: 0.4rem;
+  margin-bottom: 20px;
 }
 
 .node-details-table th {
@@ -391,7 +392,7 @@
 .table-scroll-wrapper th,
 .table-scroll-wrapper td {
     padding: 0.5rem;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #e2e8f0 !important; 
     vertical-align: top;
     word-break: break-word; /* wrap long text */
 }
@@ -418,6 +419,38 @@
     text-align: left;
     white-space: normal;
 }
+
+/* Force text color inside the table cells */
+.node-details-table td.risk-trivial-text {
+  color: var(--trivial) !important;
+  font-weight: 600;
+}
+
+.node-details-table td.risk-tolerable-text {
+  color: var(--tolerable) !important;
+  font-weight: 600;
+}
+
+.node-details-table td.risk-moderate-text {
+  color: var(--moderate) !important;
+  font-weight: 600;
+}
+
+.node-details-table td.risk-substantial-text {
+  color: var(--substantial) !important;
+  font-weight: 600;
+}
+
+.node-details-table td.risk-intolerable-text {
+  color: var(--intolerable) !important;
+  font-weight: 600;
+}
+
+.node-details-table td.risk-default {
+  color: #555 !important;
+}
+
+
 
 
 /* Responsive */

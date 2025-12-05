@@ -14,13 +14,6 @@ const HazopConfirmationViewPage = () => {
 
     return (
         <div className="hazop-view-page">
-            <button className="close-btn" onClick={() => {
-                localStorage.removeItem("selectedHazopConfirmation");
-                setSelectedHazop(null);
-                window.history.back();
-            }}>
-                <FaTimes />
-            </button>
 
             <CompleteHazopView
                 hazopId={selectedHazop.hazopId}

@@ -247,7 +247,15 @@ const HazopRegistration = ({ closePopup, onSaveSuccess }) => {
               value={formData.title}
               onChange={handleChange}
               disabled={loading}
-            />
+            maxLength={1000}
+                  />
+                  <small
+                    className={`char-count ${
+                      formData.title.length >= 1000 ? "limit-reached" : ""
+                    }`}
+                  >
+                    {formData.title.length}/1000
+                  </small>
           </div>
           <div className="form-group">
             <span className="required-marker">*</span>
@@ -283,7 +291,17 @@ const HazopRegistration = ({ closePopup, onSaveSuccess }) => {
               value={formData.description}
               onChange={handleChange}
               disabled={loading}
-            ></textarea>
+              rows={6}
+              className="textareaFont"
+            maxLength={5000}
+                  />
+                  <small
+                    className={`char-count ${
+                      formData.description.length >= 5000 ? "limit-reached" : ""
+                    }`}
+                  >
+                    {formData.description.length}/5000
+                  </small>
           </div>
         </div>
 

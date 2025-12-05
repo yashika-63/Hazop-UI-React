@@ -14,13 +14,6 @@ const HazopApprovalViewPage = () => {
 
     return (
         <div>
-            <button className="close-btn" onClick={() => {
-                localStorage.removeItem("selectedHazopApproval");
-                setSelectedHazop(null);
-                window.history.back();
-            }}>
-                <FaTimes />
-            </button>
 
             <CompleteHazopView
                 hazopId={selectedHazop.hazopId}
