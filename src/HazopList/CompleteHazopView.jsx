@@ -2,12 +2,13 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { strings } from "../string";
 import '../styles/global.css';
-import { showToast } from "../CommonUI/CommonUI";
+import { formatDate, showToast } from "../CommonUI/CommonUI";
+import { useNavigate } from "react-router-dom";
 
 const CompleteHazopView = ({ hazopId, onClose, mode = "approval", approvalRequestId }) => {
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
-
+    const navigate = useNavigate();
     const [hazop, setHazop] = useState({});
     const [team, setTeam] = useState([]);
     const [nodes, setNodes] = useState([]);
@@ -16,7 +17,8 @@ const CompleteHazopView = ({ hazopId, onClose, mode = "approval", approvalReques
     const [allRecommendations, setAllRecommendations] = useState([]);
     const [assignData, setAssignData] = useState({ rejected: [], accepted: [], assigned: [], notAssigned: [] });
     const [showConfirm, setShowConfirm] = useState(false);
-    const [approvalAction, setApprovalAction] = useState(null); // "accept" or "reject"
+    const [approvalAction, setApprovalAction] = useState(null);
+    const [verificationRecords, setVerificationRecords] = useState([]);
     const [comment, setComment] = useState("");
 
     useEffect(() => {
@@ -106,10 +108,25 @@ const CompleteHazopView = ({ hazopId, onClose, mode = "approval", approvalReques
         }
     };
 
+
+    const loadVerificationRecords = async () => {
+        try {
+            const res = await axios.get(
+                `http://${strings.localhost}/api/nodeRecommendation/getVerificationActionRecords/${hazopId}`
+            );
+            setVerificationRecords(Array.isArray(res.data) ? res.data : []);
+        } catch (err) {
+            console.error("Error loading verification action records:", err);
+        }
+    };
+
     const handleNext = async () => {
         if (step === 1) await loadNodes();
         if (step === 2) await loadNodeRecommendations();
-        if (step === 3) await loadAllRecommendations();
+        if (step === 3) {
+            await loadAllRecommendations();
+            await loadVerificationRecords();
+        }
         setStep(prev => prev + 1);
     };
 
@@ -164,6 +181,7 @@ const CompleteHazopView = ({ hazopId, onClose, mode = "approval", approvalReques
             );
 
             setShowConfirm(false);
+            onClose();
             setComment("");
             setApprovalAction(null);
         } catch (err) {
@@ -193,7 +211,7 @@ const CompleteHazopView = ({ hazopId, onClose, mode = "approval", approvalReques
                         <button type="button" onClick={onCancel} className="cancel-btn">Cancel</button>
                         <button
                             type="button"
-                            onClick={onConfirm}
+                            onClick={() => onConfirm(localComment)}
                             className="confirm-btn"
                             disabled={disableYes}
                         >
@@ -207,8 +225,8 @@ const CompleteHazopView = ({ hazopId, onClose, mode = "approval", approvalReques
 
 
     return (
-        <div className="modal-container">
-            <div className="modal-content1">
+        <div>
+            <div>
                 {loading && (
                     <div className="loading-overlay">
                         <div className="loading-spinner"></div>
@@ -218,7 +236,9 @@ const CompleteHazopView = ({ hazopId, onClose, mode = "approval", approvalReques
                 {!loading && (
                     <>
                         {step === 1 && (
+
                             <div>
+                                <button className="nd-back-btn" onClick={() => navigate(-1)}>← Back </button>
                                 <h2>HAZOP Info</h2>
                                 <p><strong>Description:</strong> {hazop.description}</p>
                                 <p><strong>Title:</strong> {hazop.title}</p>
@@ -241,7 +261,7 @@ const CompleteHazopView = ({ hazopId, onClose, mode = "approval", approvalReques
                                                 <tr key={m.id}>
                                                     <td>{m.empCode}</td>
                                                     <td>{m.emailId}</td>
-                                                    <td>{m.name}</td>
+                                                    <td>{m.firstName || '-'} {m.lastName || '-'}</td>
                                                 </tr>
                                             ))}
                                         </tbody>
@@ -252,38 +272,19 @@ const CompleteHazopView = ({ hazopId, onClose, mode = "approval", approvalReques
 
                         {step === 2 && (
                             <div>
-                                <h2>Nodes & Details</h2>
+                                <h2>Nodes</h2>
                                 {nodes.map(node => (
                                     <div key={node.id} className="node-card">
-                                        <p><strong>Node #{node.nodeNumber}</strong></p>
-                                        {(nodeDetails[node.id] || []).length === 0 ? (
-                                            <p>No details available</p>
-                                        ) : (
-                                            <table className="node-details-table">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Param</th>
-                                                        <th>Deviation</th>
-                                                        <th>Causes</th>
-                                                        <th>Consequences</th>
-                                                        <th>Existing Control</th>
-                                                        <th>Risk</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {(nodeDetails[node.id] || []).map(d => (
-                                                        <tr key={d.id}>
-                                                            <td>{d.generalParameter}/{d.specificParameter}</td>
-                                                            <td>{d.deviation}</td>
-                                                            <td>{d.causes}</td>
-                                                            <td>{d.consequences}</td>
-                                                            <td>{d.existineControl}</td>
-                                                            <td>{d.riskRating}</td>
-                                                        </tr>
-                                                    ))}
-                                                </tbody>
-                                            </table>
-                                        )}
+                                        <p><strong>Node #{node.nodeNumber} - {node.title}</strong></p>
+                                        <p><strong>Design Intent:</strong> {node.designIntent}</p>
+                                        <p><strong>Equipment:</strong> {node.equipment}</p>
+                                        <p><strong>Controls:</strong> {node.controls}</p>
+                                        <p><strong>Temperature:</strong> {node.temprature}</p>
+                                        <p><strong>Pressure:</strong> {node.pressure}</p>
+                                        <p><strong>Flow/Quantity:</strong> {node.quantityFlowRate}</p>
+                                        <p><strong>Chemical & Utilities:</strong> {node.chemicalAndUtilities}</p>
+                                        <p><strong>Completion Status:</strong> {node.completionStatus ? "Completed" : "Pending"}</p>
+                                        <p><strong>Completion Date:</strong> {node.completionDate || "-"}</p>
                                     </div>
                                 ))}
                             </div>
@@ -300,41 +301,58 @@ const CompleteHazopView = ({ hazopId, onClose, mode = "approval", approvalReques
 
                                     return (
                                         <div key={node.id} className="node-card">
-                                            {/* Node Header */}
                                             <div className="node-header">
-                                                <h3>Node #{node.nodeNumber}</h3>
+                                                <h3>Node #{node.nodeNumber} - {node.title || '-'}</h3>
                                             </div>
 
-                                            {/* Node Details */}
                                             {details.length > 0 && details.map((detail, idx) => (
                                                 <div key={detail.id} className="node-detail-section">
                                                     <div className="node-detail-label">
                                                         {idx + 1}. Node Detail
                                                     </div>
-                                                    <table className="node-details-table">
-                                                        <thead>
-                                                            <tr>
-                                                                <th>Param</th>
-                                                                <th>Deviation</th>
-                                                                <th>Causes</th>
-                                                                <th>Consequences</th>
-                                                                <th>Existing Control</th>
-                                                                <th>Risk</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            <tr>
-                                                                <td>{detail.generalParameter}/{detail.specificParameter}</td>
-                                                                <td>{detail.deviation}</td>
-                                                                <td>{detail.causes}</td>
-                                                                <td>{detail.consequences}</td>
-                                                                <td>{detail.existineControl}</td>
-                                                                <td>{detail.riskRating}</td>
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
+                                                    <div className="table-wrapper">
+                                                        <table className="node-details-table">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>General Param</th>
+                                                                    <th>Specific Param</th>
+                                                                    <th>Guid Word</th>
+                                                                    <th>Deviation</th>
+                                                                    <th>Causes</th>
+                                                                    <th>Consequences</th>
+                                                                    <th>Existing Control</th>
+                                                                    <th>Existing Probability</th>
+                                                                    <th>Existing Severity</th>
+                                                                    <th>Risk Rating</th>
+                                                                    <th>Additional Control</th>
+                                                                    <th>Additional Probability</th>
+                                                                    <th>Additional Severity</th>
+                                                                    <th>Additional Risk Rating</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {(nodeDetails[node.id] || []).map(detail => (
+                                                                    <tr key={detail.id}>
+                                                                        <td>{detail.generalParameter}</td>
+                                                                        <td>{detail.specificParameter}</td>
+                                                                        <td>{detail.guidWord}</td>
+                                                                        <td>{detail.deviation}</td>
+                                                                        <td>{detail.causes}</td>
+                                                                        <td>{detail.consequences}</td>
+                                                                        <td>{detail.existineControl}</td>
+                                                                        <td>{detail.existineProbability}</td>
+                                                                        <td>{detail.existingSeverity}</td>
+                                                                        <td>{detail.riskRating}</td>
+                                                                        <td>{detail.additionalControl}</td>
+                                                                        <td>{detail.additionalProbability}</td>
+                                                                        <td>{detail.additionalSeverity}</td>
+                                                                        <td>{detail.additionalRiskRating}</td>
+                                                                    </tr>
+                                                                ))}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
 
-                                                    {/* Recommendations */}
                                                     {recsMap[idx] && recsMap[idx].length > 0 && (
                                                         <div className="node-recommendations">
                                                             <div className="rec-label">Recommendations:</div>
@@ -354,11 +372,19 @@ const CompleteHazopView = ({ hazopId, onClose, mode = "approval", approvalReques
                                                     <div key={i} className="node-recommendations">
                                                         <div className="rec-label">Recommendations:</div>
                                                         <ul>
-                                                            {recs.map(r => <li key={r.id}>{r.recommendation}</li>)}
+                                                            {recs.map(r => (
+                                                                <li key={r.id}>
+                                                                    <span className="recommendation-text">{r.recommendation}</span>
+                                                                    {r.remarkbyManagement && (
+                                                                        <span className="remark-by-management"> — Remark: {r.remarkbyManagement}</span>
+                                                                    )}
+                                                                </li>
+                                                            ))}
                                                         </ul>
                                                     </div>
                                                 )
                                             ))}
+
                                         </div>
                                     )
                                 })}
@@ -368,66 +394,219 @@ const CompleteHazopView = ({ hazopId, onClose, mode = "approval", approvalReques
 
                         {step === 4 && (
                             <div>
-                                <h2>All Recommendations & Assignments</h2>
+                                <h2>All Recommendations</h2>
 
                                 <div className="recommendation-card">
-                                    <h3>Recommendations</h3>
-                                    <table className="confirm-table-custom">
-                                        <thead>
-                                            <tr>
-                                                <th>Recommendation</th>
-                                                <th>Remark</th>
-                                                <th>Responsibility</th>
-                                                <th>Status</th>
-                                                <th>Verification</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {allRecommendations.map(rec => (
-                                                <tr key={rec.id}>
-                                                    <td>{rec.recommendation || "-"}</td>
-                                                    <td>{rec.remarkbyManagement || "-"}</td>
-                                                    <td>{rec.responsibility || "-"}</td>
-                                                    <td>{rec.completionStatus ? "Completed" : "Pending"}</td>
-                                                    <td>{rec.verificationResponsibleEmployeeName || "-"}</td>
+                                    <h3>All Recommendations</h3>
+
+                                    <div className="table-wrapper">
+                                        <table className="node-details-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Recommendation</th>
+                                                    <th>Remark</th>
+                                                    <th>Responsibility</th>
+                                                    <th>Department</th>
+                                                    <th>Completion Status</th>
+                                                    <th>Completion Date</th>
+                                                    <th>Send For Verification</th>
+                                                    <th>Verification Action</th>
+                                                    <th>Verification Status</th>
+                                                    <th>Verified By</th>
+                                                    <th>Verifier Email</th>
+                                                    <th>Verification Date</th>
                                                 </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
+                                            </thead>
+
+                                            <tbody>
+                                                {allRecommendations.map(rec => (
+                                                    <tr key={rec.id}>
+                                                        <td>{rec.recommendation || "-"}</td>
+
+                                                        <td>{rec.remarkbyManagement || "-"}</td>
+
+                                                        <td>{rec.responsibility || "-"}</td>
+                                                        <td>{rec.department || "-"}</td>
+
+                                                        <td>
+                                                            {rec.completionStatus ? (
+                                                                <span style={{ color: "green", fontWeight: "600" }}>Completed</span>
+                                                            ) : (
+                                                                <span style={{ color: "red", fontWeight: "600" }}>Pending</span>
+                                                            )}
+                                                        </td>
+
+                                                        <td>{rec.completionDate ? formatDate(rec.completionDate) : "-"}</td>
+
+                                                        <td>{rec.sendForVerification ? "Yes" : "No"}</td>
+
+                                                        <td>{rec.sendForVerificationAction ? "Action Taken" : "No Action"}</td>
+
+                                                        <td>
+                                                            {rec.sendForVerificationActionStatus ? (
+                                                                <span style={{ color: "green" }}>Approved</span>
+                                                            ) : (
+                                                                <span style={{ color: "red" }}>Rejected</span>
+                                                            )}
+                                                        </td>
+
+                                                        <td>{rec.verificationResponsibleEmployeeName || "-"}</td>
+
+                                                        <td>{rec.verificationResponsibleEmployeeEmail || "-"}</td>
+
+                                                        <td>{rec.verificationDate ? formatDate(rec.verificationDate) : "-"}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
 
                                 <div className="recommendation-card">
                                     <h3>Assignments Summary</h3>
-                                    {["assigned", "accepted", "rejected", "notAssigned"].map(type => (
+
+                                    {["notAssigned", "assigned", "accepted", "rejected"].map(type => (
                                         <div key={type}>
                                             <h4>{type.charAt(0).toUpperCase() + type.slice(1)}</h4>
-                                            {assignData[type].length === 0 ? <p>No data</p> :
-                                                <table className="assignment-table-custom">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>Assigned To</th>
-                                                            <th>Assigned Date</th>
-                                                            <th>Completion Date</th>
-                                                            <th>Acceptance</th>
-                                                            <th>Recommendation</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        {assignData[type].map(a => (
-                                                            <tr key={a.id}>
-                                                                <td>{a.assignToEmpCode || "-"}</td>
-                                                                <td>{a.assignWorkDate || "-"}</td>
-                                                                <td>{a.completionDate || "-"}</td>
-                                                                <td>{a.assignworkAcceptance ? "Accepted" : "Pending"}</td>
-                                                                <td>{a.javaHazopNodeRecommendation?.recommendation || "-"}</td>
+
+                                            {assignData[type].length === 0 ? (
+                                                <p>No data</p>
+                                            ) : (
+                                                <div className="table-wrapper">
+                                                    <table className="node-details-table">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Assigned To</th>
+                                                                <th>Assigned By</th>
+                                                                <th>Assigned Date</th>
+                                                                <th>Completion Status</th>
+                                                                <th>Completion Date</th>
+                                                                <th>Acceptance Status</th>
+                                                                <th>Accepted By</th>
+                                                                <th>Recommendation</th>
+                                                                <th>Remark</th>
+                                                                <th>Verification Action</th>
+                                                                <th>Verification Status</th>
+                                                                <th>Verified By</th>
+                                                                <th>Verification Date</th>
                                                             </tr>
-                                                        ))}
-                                                    </tbody>
-                                                </table>
-                                            }
+                                                        </thead>
+
+                                                        <tbody>
+                                                            {assignData[type].map(a => {
+                                                                const rec = a.javaHazopNodeRecommendation || a;
+
+                                                                return (
+                                                                    <tr key={a.id}>
+                                                                        <td>{a.assignToEmpCode || "-"}</td>
+                                                                        <td>{a.createdByName || a.createdByEmpCode || "-"}</td>
+                                                                        <td>{formatDate(a.assignWorkDate) || "-"}</td>
+                                                                        <td style={{ fontWeight: 600, color: a.completionStatus ? "green" : "red" }}>
+                                                                            {a.completionStatus ? "Completed" : "Pending"}
+                                                                        </td>
+                                                                        <td>{a.completionDate ? formatDate(a.completionDate) : "-"}</td>
+                                                                        <td>
+                                                                            {a.assignworkAcceptance
+                                                                                ? "Accepted"
+                                                                                : a.assignWorkSendForAcceptance
+                                                                                    ? "Waiting for Acceptance"
+                                                                                    : "Not Sent"}
+                                                                        </td>
+
+                                                                        <td>{a.acceptedByEmployeeName || "-"}</td>
+                                                                        <td>{rec.recommendation || "-"}</td>
+                                                                        <td>{rec.remarkbyManagement || "-"}</td>
+                                                                        <td>{rec.sendForVerificationAction ? "Action Taken" : "No Action"}</td>
+                                                                        <td style={{ color: rec.sendForVerificationActionStatus ? "green" : "red" }}>
+                                                                            {rec.sendForVerificationActionStatus ? "Approved" : "Rejected"}
+                                                                        </td>
+                                                                        <td>{rec.verificationResponsibleEmployeeName || "-"}</td>
+                                                                        <td>
+                                                                            {rec.verificationDate ? formatDate(rec.verificationDate) : "-"}
+                                                                        </td>
+                                                                    </tr>
+                                                                );
+                                                            })}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            )}
                                         </div>
                                     ))}
                                 </div>
+
+                                <div className="recommendation-card">
+                                    <h3>Verification Action Records</h3>
+
+                                    {verificationRecords.length === 0 ? (
+                                        <p>No verification actions found.</p>
+                                    ) : (
+                                        <table className="node-details-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Recommendation</th>
+                                                    <th>Remark by Management</th>
+                                                    <th>Completion Status</th>
+                                                    <th>Send for Verification</th>
+                                                    <th>Verification Action</th>
+                                                    <th>Verification Status</th>
+                                                    <th>Verified By</th>
+                                                    <th>Email</th>
+                                                    <th>Verification Date</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {verificationRecords.map(r => (
+                                                    <tr key={r.id}>
+                                                        <td>{r.recommendation || "-"}</td>
+
+                                                        <td>{r.remarkbyManagement || "-"}</td>
+
+                                                        {/* Completion Status */}
+                                                        <td>
+                                                            {r.completionStatus ? (
+                                                                <span style={{ color: "green", fontWeight: "600" }}>Completed</span>
+                                                            ) : (
+                                                                <span style={{ color: "red", fontWeight: "600" }}>Pending</span>
+                                                            )}
+                                                        </td>
+
+                                                        {/* Send for verification */}
+                                                        <td>
+                                                            {r.sendForVerification ? "Yes" : "No"}
+                                                        </td>
+
+                                                        {/* Was verification action triggered */}
+                                                        <td>
+                                                            {r.sendForVerificationAction ?
+                                                                <span style={{ color: "blue" }}>Action Taken</span>
+                                                                :
+                                                                <span>No Action</span>
+                                                            }
+                                                        </td>
+
+                                                        {/* Status of verification action */}
+                                                        <td>
+                                                            {r.sendForVerificationActionStatus ? (
+                                                                <span style={{ color: "green", fontWeight: "600" }}>Approved</span>
+                                                            ) : (
+                                                                <span style={{ color: "red", fontWeight: "600" }}>Rejected</span>
+                                                            )}
+                                                        </td>
+
+                                                        <td>{r.verificationResponsibleEmployeeName || "-"}</td>
+
+                                                        <td>{r.verificationResponsibleEmployeeEmail || "-"}</td>
+
+                                                        <td>{formatDate(r.verificationDate) || "-"}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    )}
+                                </div>
+
+
 
                                 {/* APPROVAL BUTTONS */}
                                 <div className="confirm-buttons">
@@ -456,6 +635,9 @@ const CompleteHazopView = ({ hazopId, onClose, mode = "approval", approvalReques
                                     </button>
                                 </div>
                             </div>
+
+
+
                         )}
 
 
@@ -468,13 +650,12 @@ const CompleteHazopView = ({ hazopId, onClose, mode = "approval", approvalReques
                 {showConfirm && (
                     <ConfirmationPopup
                         message={`Are you sure you want to ${approvalAction === "accept" ? "Approve" : "Reject"}?`}
-                        onConfirm={handleApprovalSubmit}
+                        onConfirm={(enteredComment) => handleApprovalSubmit(enteredComment)}
                         onCancel={() => {
                             setShowConfirm(false);
-                            setComment("");
                             setApprovalAction(null);
                         }}
-                        disableYes={mode === "approval" && comment.trim().length === 0}
+                        mode="approval"
 
                     />
                 )}

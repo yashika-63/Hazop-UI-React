@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { pdf } from "@react-pdf/renderer";
-import { Document, Page, Text, View, StyleSheet, PDFViewer, Image } from "@react-pdf/renderer";
+import { Document, Page, Text, View, StyleSheet, PDFViewer, Image  , Link} from "@react-pdf/renderer";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { strings } from "../string";
@@ -21,20 +21,81 @@ const styles = StyleSheet.create({
     footerContainer: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 50, paddingHorizontal: 40, borderTopWidth: 1, borderTopColor: '#ccc', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
     footerText: { fontSize: 9, color: '#888' },
     section: { marginBottom: 20 },
-    sectionTitle: { fontSize: 12, fontWeight: 'bold', color: '#0056b3', marginBottom: 10, borderBottomWidth: 1, borderBottomColor: '#ddd', paddingBottom: 4 },
-    infoCard: { backgroundColor: '#f1f3f5', padding: 12, borderRadius: 6, marginBottom: 15 },
-    infoItem: { marginBottom: 6 }, infoCard: {
-        backgroundColor: '#f1f3f5',
-        padding: 12,
-        borderRadius: 6,
-        marginBottom: 15
+
+
+    sectionTitle: {
+        fontSize: 12,
+        fontWeight: 'bold',
+        color: '#0056b3',
+        marginBottom: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#ddd',
+        paddingBottom: 4
     },
 
-    // Ensure that infoItem uses a row-based layout
+    card: {
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 6,
+        padding: 10,
+        marginBottom: 10,
+        backgroundColor: '#f9f9f9'
+    },
+
+    cardTitle: {
+        fontSize: 11,
+        fontWeight: 'bold',
+        marginBottom: 6,
+        color: '#003366'
+    },
+
+    cardRow: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        marginBottom: 3
+    },
+
+    cardLabel: {
+        fontWeight: 'bold',
+        width: '35%',
+        fontSize: 10,
+        color: '#495057'
+    },
+
+    cardValue: {
+        width: '65%',
+        fontSize: 10,
+        color: '#212529'
+    },
+
+    completed: {
+        color: '#28a745',
+        fontWeight: '600'
+    },
+
+    pending: {
+        color: '#dc3545',
+        fontWeight: '600'
+    },
+    actionTaken: { color: '#007bff', fontWeight: '600' },
+
+    verificationCard: {
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 6,
+        padding: 10,
+        marginBottom: 10,
+        backgroundColor: '#f9f9f9'
+    },
+
+
+    sectionTitle: { fontSize: 12, fontWeight: 'bold', color: '#0056b3', marginBottom: 10, borderBottomWidth: 1, borderBottomColor: '#ddd', paddingBottom: 4 },
+    infoCard: { backgroundColor: '#f1f3f5', padding: 12, borderRadius: 6, marginBottom: 15 },
     infoItem: {
-        flexDirection: 'row',  // This will align label and value horizontally
-        justifyContent: 'space-between', // This ensures the label and value are spaced out
-        marginBottom: 6
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 6,
+        flexWrap: 'wrap', // Allow content to wrap to next line
     },
 
     infoLabel: {
@@ -42,15 +103,24 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: '#495057',
         marginBottom: 2,
-        width: '30%' // Fixed width for labels, adjust as needed
+        width: '30%', // Label width
     },
 
     infoValue: {
         fontSize: 10,
         color: '#212529',
-        flex: 1,  // This ensures the value takes up the remaining space
-        textAlign: 'right'  // Optional, to align the value to the right side
+        flex: 1,
+        textAlign: 'right',
+        // Remove nowrap so long text can wrap
+        // Optional: add maxWidth if needed
     },
+    descriptionValue: {
+        fontSize: 10,
+        color: '#212529',
+        width: '100%', // take full width
+        marginTop: 2,
+    },
+
     infoLabel: { fontSize: 9, fontWeight: 'bold', color: '#495057', marginBottom: 2 },
     infoValue: { fontSize: 10, fontWeight: 'normal', color: '#212529' },
     table: { width: '100%', borderStyle: 'solid', borderWidth: 1, borderColor: '#bfbfbf', borderRightWidth: 0, borderBottomWidth: 0, marginBottom: 15 },
@@ -63,11 +133,57 @@ const styles = StyleSheet.create({
     nodeContainer: { borderWidth: 1, borderColor: '#dee2e6', borderRadius: 6, marginBottom: 15 },
     nodeHeader: { backgroundColor: '#e9ecef', padding: 8, borderBottomWidth: 1, borderBottomColor: '#ced4da', flexDirection: 'row', justifyContent: 'space-between' },
     nodeTitle: { fontSize: 11, fontWeight: 'bold' },
-    nodeBody: { padding: 10 },
+    nodeBody: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',        // allow items to wrap
+        padding: 10,
+        justifyContent: 'space-between',
+    },
+
+    nodeField: {
+        width: '48%',            // two columns if space allows
+        marginBottom: 8,
+    },
+
+    nodeLabel: {
+        fontWeight: 'bold',
+        marginBottom: 2,
+        fontSize: 10,
+    },
+
+    nodeValue: {
+        width: '100%',           // ensures long text wraps
+        fontSize: 10,
+        color: '#212529',
+    },
+
+
     badge: { borderRadius: 8, paddingHorizontal: 6, paddingVertical: 2, fontSize: 8, color: 'white' },
     bgGreen: { backgroundColor: '#28a745' },
     bgRed: { backgroundColor: '#dc3545' },
     bgBlue: { backgroundColor: '#007bff' },
+    assignmentHeader: { fontSize: 10, fontWeight: 'bold', color: '#007bff', marginBottom: 6 },
+
+    assignmentCard: {
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 6,
+        padding: 10,
+        marginBottom: 10,
+        backgroundColor: '#f9f9f9'
+    },
+
+    cardTitle: { fontSize: 11, fontWeight: 'bold', color: '#003366', marginBottom: 6 },
+
+    cardRow: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: 3 },
+
+    cardLabel: { fontWeight: 'bold', width: '35%', fontSize: 10, color: '#495057' },
+
+    cardValue: { width: '65%', fontSize: 10, color: '#212529' },
+
+    completed: { color: '#28a745', fontWeight: '600' },
+    pending: { color: '#dc3545', fontWeight: '600' }
+
 });
 
 const Header = ({ hazop }) => (
@@ -79,7 +195,7 @@ const Header = ({ hazop }) => (
         </View>
         <View style={styles.headerMeta}>
             {/* <Text style={styles.metaText}>Ref: {hazop?.hazopId || '-'}</Text> */}
-            <Text style={styles.metaText}>Date: {hazop?.hazopDate || '-'}</Text>
+            <Text style={styles.metaText}>Date: {formatDate(hazop?.hazopDate || '-')}</Text>
         </View>
     </View>
 );
@@ -131,8 +247,8 @@ const MyDocument = ({
                         <Text style={styles.infoValue}>{hazop?.hazopRevisionNo || '-'}</Text>
                     </View>
                     <View style={styles.infoItem}>
-                        <Text style={styles.infoLabel}>Hazop Creation Date</Text>
-                        <Text style={styles.infoValue}>{hazop?.hazopCreationDate || '-'}</Text>
+                        <Text style={styles.infoLabel}>Hazop Start Date</Text>
+                        <Text style={styles.infoValue}>{formatDate(hazop?.hazopCreationDate || '-')}</Text>
                     </View>
                     <View style={styles.infoItem}>
                         <Text style={styles.infoLabel}>Completion Status</Text>
@@ -141,6 +257,10 @@ const MyDocument = ({
                     <View style={styles.infoItem}>
                         <Text style={styles.infoLabel}>Created By</Text>
                         <Text style={styles.infoValue}>{hazop?.createdBy || '-'}</Text>
+                    </View>
+                    <View style={styles.infoItem}>
+                        <Text style={styles.infoLabel}>Completed / Approved By</Text>
+                        <Text style={styles.infoValue}>{hazop?.verificationemployeeName || '-'}</Text>
                     </View>
                     <View style={styles.infoItem}>
                         <Text style={styles.infoLabel}>Description</Text>
@@ -189,101 +309,97 @@ const MyDocument = ({
                     </View>
                     {team?.map((m, i) => (
                         <View key={i} style={[styles.tableRow, i % 2 !== 0 ? styles.tableRowEven : {}]}>
-                            <View style={styles.tableCol}><Text style={styles.tableCell}>{m?.firstName || ''} {m?.lastName || ''}</Text></View>
+                            <View style={styles.tableCol}><Text style={styles.tableCell}>{m?.firstName || ''} {m?.middleName || ''} {m?.lastName || ''}</Text></View>
                             <View style={styles.tableCol}><Text style={styles.tableCell}>{m?.dimension3 || '-'}</Text></View>
                             <View style={styles.tableCol}><Text style={styles.tableCell}>{m?.emailId || '-'}</Text></View>
                         </View>
                     ))}
                 </View>
             </View>
-
-
-
             <Footer downloadDate={downloadDate} />
         </Page>
 
 
+        <Page size="A4" style={styles.page}>
+            <Header hazop={hazop} />
+            <Text style={styles.sectionTitle}>Index of Hazop Nodes</Text>
 
+            <View style={{ marginTop: 10 }}>
+                {nodes?.map((node, idx) => (
+                    <View
+                        key={node.id}
+                        style={{
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                            marginBottom: 5,
+                            borderBottomWidth: 0.5,
+                            borderBottomColor: '#ccc',
+                            paddingBottom: 2,
+                        }}
+                    >
+                        <Text style={{ fontSize: 10, fontWeight: 'bold' }}>
+                            Node {node.nodeNumber || '-'}
+                        </Text>
 
+                        {/* LINK to node section */}
+                        <Link
+                            src={`#node-${node.id}`}
+                            style={{ fontSize: 10, color: '#007bff', textDecoration: 'underline' }}
+                        >
+                            {node.title || '-'}
+                        </Link>
+                    </View>
+                ))}
+            </View>
+
+            <Footer downloadDate={downloadDate} />
+        </Page>
         {/* Page 2: Node Overview */}
         <Page size="A4" style={styles.page}>
             <Header hazop={hazop} />
-            <Text style={styles.sectionTitle}>All Nodes</Text>
+            <Text style={styles.sectionTitle}>Hazop Nodes</Text>
             {nodes?.map((node, index) => (
                 <View key={node.id} style={styles.nodeContainer} wrap={false}>
-                    <View style={styles.nodeHeader}>{node.title || '-'}-{node.nodeNumber || '-'}</View>
-                    <View style={{ flexDirection: 'row', padding: 10 }}>
-                        <View style={{ flex: 1, paddingRight: 10 }}>
-                            <View style={{ flexDirection: 'row', marginBottom: 6 }}>
-                                <Text style={{ fontWeight: 'bold', width: '40%' }}>Design Intent:</Text>
-                                <Text>{node?.designIntent || '-'}</Text>
-                            </View>
-                            <View style={{ flexDirection: 'row', marginBottom: 6 }}>
-                                <Text style={{ fontWeight: 'bold', width: '40%' }}>P&ID Revision:</Text>
-                                <Text>{node?.pIdRevision || '-'}</Text>
-                            </View>
-                            <View style={{ flexDirection: 'row', marginBottom: 6 }}>
-                                <Text style={{ fontWeight: 'bold', width: '40%' }}>SOP No.:</Text>
-                                <Text>{node?.sopNo || '-'}</Text>
-                            </View>
-                            <View style={{ flexDirection: 'row', marginBottom: 6 }}>
-                                <Text style={{ fontWeight: 'bold', width: '40%' }}>SOP Date:</Text>
-                                <Text>{formatDate(node?.sopDate || '-')}</Text>
-                            </View>
-                            <View style={{ flexDirection: 'row', marginBottom: 6 }}>
-                                <Text style={{ fontWeight: 'bold', width: '40%' }}>Creation Date:</Text>
-                                <Text>{formatDate(node?.creationDate || '-')}</Text>
-                            </View>
-                            <View style={{ flexDirection: 'row', marginBottom: 6 }}>
-                                <Text style={{ fontWeight: 'bold', width: '40%' }}>Completion Date:</Text>
-                                <Text>{formatDate(node?.completionDate || '-')}</Text>
-                            </View>
-                        </View>
-                        <View style={{ flex: 1, paddingLeft: 10 }}>
-                            <View style={{ flexDirection: 'row', marginBottom: 6 }}>
-                                <Text style={{ fontWeight: 'bold', width: '40%' }}>Equipment:</Text>
-                                <Text>{node?.equipment || '-'}</Text>
-                            </View>
-                            <View style={{ flexDirection: 'row', marginBottom: 6 }}>
-                                <Text style={{ fontWeight: 'bold', width: '40%' }}>Controls:</Text>
-                                <Text>{node?.controls || '-'}</Text>
-                            </View>
-                            <View style={{ flexDirection: 'row', marginBottom: 6 }}>
-                                <Text style={{ fontWeight: 'bold', width: '40%' }}>Temperature:</Text>
-                                <Text>{node?.temperature || '-'}</Text>
-                            </View>
-                            <View style={{ flexDirection: 'row', marginBottom: 6 }}>
-                                <Text style={{ fontWeight: 'bold', width: '40%' }}>Pressure:</Text>
-                                <Text>{node?.pressure || '-'}</Text>
-                            </View>
-                            <View style={{ flexDirection: 'row', marginBottom: 6 }}>
-                                <Text style={{ fontWeight: 'bold', width: '40%' }}>Quantity / Flow Rate:</Text>
-                                <Text>{node?.quantityFlowRate || '-'}</Text>
-                            </View>
-                            <View style={{ flexDirection: 'row', marginBottom: 6 }}>
-                                <Text style={{ fontWeight: 'bold', width: '40%' }}>Chemical & Utilities:</Text>
-                                <Text>{node?.chemicalAndUtilities || '-'}</Text>
-                            </View>
-                            <View style={{ flexDirection: 'row', marginBottom: 6 }}>
-                                <Text style={{ fontWeight: 'bold', width: '40%' }}>Registration Date:</Text>
-                                <Text>{formatDate(node?.registrationDate || '-')}</Text>
-                            </View>
-                        </View>
+                    <View style={[styles.nodeHeader, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }]}>
+                        <Text>{node.title || '-'} - {node.nodeNumber || '-'}</Text>
+                        <Text>Creation Date: {formatDate(node?.registrationDate) || '-'}</Text>
                     </View>
 
+                    <View style={styles.nodeBody}>
+                        {[
+                            { label: 'Design Intent', value: node?.designIntent },
+                            { label: 'P&ID Revision', value: node?.pIdRevision },
+                            { label: 'SOP No.', value: node?.sopNo },
+                            { label: 'SOP Date', value: formatDate(node?.sopDate) },
+                            { label: 'Creation Date', value: formatDate(node?.creationDate) },
+                            { label: 'Completion Date', value: formatDate(node?.completionDate) },
+                            { label: 'Equipment', value: node?.equipment },
+                            { label: 'Controls', value: node?.controls },
+                            { label: 'Temperature', value: node?.temperature },
+                            { label: 'Pressure', value: node?.pressure },
+                            { label: 'Quantity / Flow Rate', value: node?.quantityFlowRate },
+                            { label: 'Chemical & Utilities', value: node?.chemicalAndUtilities },
+                            
+                        ].map((item, idx) => (
+                            <View key={idx} style={styles.nodeField}>
+                                <Text style={styles.nodeLabel}>{item.label}:</Text>
+                                <Text style={styles.nodeValue}>{item.value || '-'}</Text>
+                            </View>
+                        ))}
+                    </View>
                 </View>
-
             ))}
+
             <Footer downloadDate={downloadDate} />
         </Page>
 
 
         {/* Pages 4+: Node Details + Recommendations */}
         {nodes?.map((node) => (
-            <Page size="A4" style={styles.page} key={`node-${node?.id}`}>
+            <Page size="A4" style={styles.page} key={node.id}>
+                    <View id={`node-${node.id}`} />
                 <Header hazop={hazop} />
-
-                {/* Node Card for Each Node */}
+                <Text style={styles.sectionTitle}>Hazop Node Details</Text>
                 <View style={styles.nodeContainer}>
                     {/* Node Information (Title & Number) */}
                     <View style={styles.nodeHeader}>
@@ -296,45 +412,114 @@ const MyDocument = ({
                     </View>
 
                     {/* Node Details Section */}
-                    <View style={styles.nodeBody}>
-                        <Text style={styles.sectionTitle}>Node Details</Text>
+                    {nodeDetails?.[node?.id]?.map((detail, index) => (
+                        <View key={index} style={{ marginBottom: 15 }}>
+                            {/* Card for general parameters */}
+                            <View style={styles.infoCard}>
+                                {[
+                                    { label: "General Param", value: detail?.generalParameter },
+                                    { label: "Specific Param", value: detail?.specificParameter },
+                                    { label: "Guid Word", value: detail?.guidWord },
+                                    { label: "Deviation", value: detail?.deviation },
+                                    { label: "Causes", value: detail?.causes },
+                                    { label: "Consequences", value: detail?.consequences },
+                                ].map((item, idx) => {
+                                    const isLong = item.value && item.value.length > 30; // adjust threshold as needed
+                                    return (
+                                        <View
+                                            key={idx}
+                                            style={{
+                                                flexDirection: isLong ? "column" : "row",
+                                                marginBottom: 5,
+                                            }}
+                                        >
+                                            <Text style={[styles.nodeLabel, { width: isLong ? "100%" : "30%" }]}>
+                                                {item.label}:
+                                            </Text>
+                                            <Text style={[styles.nodeValue, { width: isLong ? "100%" : "70%" }]}>
+                                                {item.value || "-"}
+                                            </Text>
+                                        </View>
+                                    );
+                                })}
+                            </View>
 
-                        <View style={styles.table}>
-                            {/* Table Header */}
-                            <View style={[styles.tableRow, styles.tableRowHeader]}>
-                                <View style={{ ...styles.tableCol, width: '25%' }}>
-                                    <Text style={styles.tableCellHeader}>Deviation</Text>
-                                </View>
-                                <View style={{ ...styles.tableCol, width: '25%' }}>
-                                    <Text style={styles.tableCellHeader}>Causes</Text>
-                                </View>
-                                <View style={{ ...styles.tableCol, width: '25%' }}>
-                                    <Text style={styles.tableCellHeader}>Consequences</Text>
-                                </View>
-                                <View style={{ ...styles.tableCol, width: '25%' }}>
-                                    <Text style={styles.tableCellHeader}>Risk Rating</Text>
+                            {/* Table for Existing Controls */}
+                            <View wrap={false} style={{ marginBottom: 10 }}>
+                                <Text style={[styles.sectionTitle, { marginTop: 5 }]}>Existing Controls</Text>
+                                <View style={styles.table}>
+                                    {/* Table Header */}
+                                    <View style={[styles.tableRow, styles.tableRowHeader]}>
+                                        <View style={{ ...styles.tableCol, width: '50%' }}>
+                                            <Text style={styles.tableCellHeader}>Control</Text>
+                                        </View>
+                                        <View style={{ ...styles.tableCol, width: '16.66%' }}>
+                                            <Text style={styles.tableCellHeader}>Probability</Text>
+                                        </View>
+                                        <View style={{ ...styles.tableCol, width: '16.66%' }}>
+                                            <Text style={styles.tableCellHeader}>Severity</Text>
+                                        </View>
+                                        <View style={{ ...styles.tableCol, width: '16.66%' }}>
+                                            <Text style={styles.tableCellHeader}>Risk Rating</Text>
+                                        </View>
+                                    </View>
+
+                                    {/* Table Body */}
+                                    <View style={styles.tableRow}>
+                                        <View style={{ ...styles.tableCol, width: '50%' }}>
+                                            <Text style={styles.tableCell}>{detail?.existineControl || '-'}</Text>
+                                        </View>
+                                        <View style={{ ...styles.tableCol, width: '16.66%' }}>
+                                            <Text style={styles.tableCell}>{detail?.existineProbability || '-'}</Text>
+                                        </View>
+                                        <View style={{ ...styles.tableCol, width: '16.66%' }}>
+                                            <Text style={styles.tableCell}>{detail?.existingSeverity || '-'}</Text>
+                                        </View>
+                                        <View style={{ ...styles.tableCol, width: '16.66%' }}>
+                                            <Text style={styles.tableCell}>{detail?.riskRating || '-'}</Text>
+                                        </View>
+                                    </View>
                                 </View>
                             </View>
 
-                            {/* Table Body */}
-                            {nodeDetails?.[node?.id]?.map((detail, index) => (
-                                <View key={index} style={styles.tableRow}>
-                                    <View style={{ ...styles.tableCol, width: '25%' }}>
-                                        <Text style={styles.tableCell}>{detail?.deviation || '-'}</Text>
+                            {/* Additional Controls table */}
+                            <View wrap={false} style={{ marginBottom: 10 }}>
+                                <Text style={[styles.sectionTitle, { marginTop: 5 }]}>Additional Controls</Text>
+                                <View style={styles.table}>
+                                    <View style={[styles.tableRow, styles.tableRowHeader]}>
+                                        <View style={{ ...styles.tableCol, width: '50%' }}>
+                                            <Text style={styles.tableCellHeader}>Control</Text>
+                                        </View>
+                                        <View style={{ ...styles.tableCol, width: '16.66%' }}>
+                                            <Text style={styles.tableCellHeader}>Probability</Text>
+                                        </View>
+                                        <View style={{ ...styles.tableCol, width: '16.66%' }}>
+                                            <Text style={styles.tableCellHeader}>Severity</Text>
+                                        </View>
+                                        <View style={{ ...styles.tableCol, width: '16.66%' }}>
+                                            <Text style={styles.tableCellHeader}>Risk Rating</Text>
+                                        </View>
                                     </View>
-                                    <View style={{ ...styles.tableCol, width: '25%' }}>
-                                        <Text style={styles.tableCell}>{detail?.causes || '-'}</Text>
-                                    </View>
-                                    <View style={{ ...styles.tableCol, width: '25%' }}>
-                                        <Text style={styles.tableCell}>{detail?.consequences || '-'}</Text>
-                                    </View>
-                                    <View style={{ ...styles.tableCol, width: '25%' }}>
-                                        <Text style={styles.tableCell}>{detail?.riskRating || '-'}</Text>
+                                    <View style={styles.tableRow}>
+                                        <View style={{ ...styles.tableCol, width: '50%' }}>
+                                            <Text style={styles.tableCell}>{detail?.additionalControl || '-'}</Text>
+                                        </View>
+                                        <View style={{ ...styles.tableCol, width: '16.66%' }}>
+                                            <Text style={styles.tableCell}>{detail?.additionalProbability || '-'}</Text>
+                                        </View>
+                                        <View style={{ ...styles.tableCol, width: '16.66%' }}>
+                                            <Text style={styles.tableCell}>{detail?.additionalSeverity || '-'}</Text>
+                                        </View>
+                                        <View style={{ ...styles.tableCol, width: '16.66%' }}>
+                                            <Text style={styles.tableCell}>{detail?.additionalRiskRating || '-'}</Text>
+                                        </View>
                                     </View>
                                 </View>
-                            ))}
+                            </View>
+
                         </View>
-                    </View>
+                    ))}
+
 
 
                     {/* Recommendations for Node Details */}
@@ -403,142 +588,255 @@ const MyDocument = ({
             </Page>
         ))}
 
-
-
         {/* Page 3: All Recommendations */}
         <Page size="A4" style={styles.page}>
             <Header hazop={hazop} />
+
             <Text style={styles.sectionTitle}>All Recommendations for HAZOP</Text>
 
-            <View style={styles.table}>
-                <View style={[styles.tableRow, styles.tableRowHeader]}>
-                    <View style={{ ...styles.tableCol, width: '30%' }}><Text style={styles.tableCellHeader}>Node</Text></View>
-                    <View style={{ ...styles.tableCol, width: '40%' }}><Text style={styles.tableCellHeader}>Recommendation</Text></View>
-                    <View style={{ ...styles.tableCol, width: '15%' }}><Text style={styles.tableCellHeader}>Remark</Text></View>
-                    <View style={{ ...styles.tableCol, width: '15%' }}><Text style={styles.tableCellHeader}>Status</Text></View>
-                </View>
+            {allRecommendations?.length > 0 ? (
+                allRecommendations.map((rec, idx) => (
+                    <View key={idx} style={styles.card} wrap={false}>
+                        <Text style={styles.cardTitle}>Recommendation {idx + 1}</Text>
 
-                {allRecommendations?.length > 0 ? (
-                    allRecommendations.map((r, i) => (
-                        <View key={i} style={styles.tableRow}>
-                            <View style={{ ...styles.tableCol, width: '30%' }}>
-                                <Text style={styles.tableCell}>{r?.id || 'N/A'}</Text>
-                            </View>
-                            <View style={{ ...styles.tableCol, width: '40%' }}>
-                                <Text style={styles.tableCell}>{r?.recommendation || 'No recommendation available'}</Text>
-                            </View>
-                            <View style={{ ...styles.tableCol, width: '15%' }}>
-                                <Text style={styles.tableCell}>{r?.remarkbyManagement || 'No remarks'}</Text>
-                            </View>
-                            <View style={{ ...styles.tableCol, width: '15%' }}>
-                                <Text style={styles.tableCell}>{r?.responsibility || 'No responsibility assigned'}</Text>
-                            </View>
+                        <View style={styles.cardRow}>
+                            <Text style={styles.cardLabel}>Node:</Text>
+                            <Text style={styles.cardValue}>{rec.id || '-'}</Text>
                         </View>
-                    ))
-                ) : (
-                    <Text>No recommendations found for this HAZOP.</Text>
-                )}
-            </View>
 
+                        <View style={styles.cardRow}>
+                            <Text style={styles.cardLabel}>Recommendation:</Text>
+                            <Text style={styles.cardValue}>{rec.recommendation || '-'}</Text>
+                        </View>
+
+                        <View style={styles.cardRow}>
+                            <Text style={styles.cardLabel}>Remark:</Text>
+                            <Text style={styles.cardValue}>{rec.remarkbyManagement || '-'}</Text>
+                        </View>
+
+                        <View style={styles.cardRow}>
+                            <Text style={styles.cardLabel}>Responsibility:</Text>
+                            <Text style={styles.cardValue}>{rec.responsibility || '-'}</Text>
+                        </View>
+
+                        <View style={styles.cardRow}>
+                            <Text style={styles.cardLabel}>Department:</Text>
+                            <Text style={styles.cardValue}>{rec.department || '-'}</Text>
+                        </View>
+
+                        <View style={styles.cardRow}>
+                            <Text style={styles.cardLabel}>Completion Status:</Text>
+                            <Text style={[styles.cardValue, rec.completionStatus ? styles.completed : styles.pending]}>
+                                {rec.completionStatus ? "Completed" : "Pending"}
+                            </Text>
+                        </View>
+
+                        <View style={styles.cardRow}>
+                            <Text style={styles.cardLabel}>Completion Date:</Text>
+                            <Text style={styles.cardValue}>{rec.completionDate ? formatDate(rec.completionDate) : '-'}</Text>
+                        </View>
+
+                        <View style={styles.cardRow}>
+                            <Text style={styles.cardLabel}>Send for Verification:</Text>
+                            <Text style={styles.cardValue}>{rec.sendForVerification ? "Yes" : "No"}</Text>
+                        </View>
+
+                        <View style={styles.cardRow}>
+                            <Text style={styles.cardLabel}>Verification Action:</Text>
+                            <Text style={styles.cardValue}>{rec.sendForVerificationAction ? "Action Taken" : "No Action"}</Text>
+                        </View>
+
+                        <View style={styles.cardRow}>
+                            <Text style={styles.cardLabel}>Verification Status:</Text>
+                            <Text style={[styles.cardValue, rec.sendForVerificationActionStatus ? styles.completed : styles.pending]}>
+                                {rec.sendForVerificationActionStatus ? "Approved" : "Rejected"}
+                            </Text>
+                        </View>
+
+                        <View style={styles.cardRow}>
+                            <Text style={styles.cardLabel}>Verified By:</Text>
+                            <Text style={styles.cardValue}>{rec.verificationResponsibleEmployeeName || '-'}</Text>
+                        </View>
+
+                        <View style={styles.cardRow}>
+                            <Text style={styles.cardLabel}>Verifier Email:</Text>
+                            <Text style={styles.cardValue}>{rec.verificationResponsibleEmployeeEmail || '-'}</Text>
+                        </View>
+
+                        <View style={styles.cardRow}>
+                            <Text style={styles.cardLabel}>Verification Date:</Text>
+                            <Text style={styles.cardValue}>{rec.verificationDate ? formatDate(rec.verificationDate) : '-'}</Text>
+                        </View>
+                    </View>
+                ))
+            ) : (
+                <Text>No recommendations found for this HAZOP.</Text>
+            )}
 
             <Footer downloadDate={downloadDate} />
         </Page>
+
 
         {/* Last Page: Assignment Summary */}
         <Page size="A4" style={styles.page}>
             <Header hazop={hazop} />
             <Text style={styles.sectionTitle}>Assignment Summary</Text>
-            {['assigned', 'notAssigned', 'accepted', 'rejected',].map((key) => (
-                (assignData?.[key] || [])?.length > 0 && (
+
+            {["notAssigned", "assigned", "accepted", "rejected"].map((key) => {
+                const data = assignData?.[key] || [];
+                if (!data.length) return null;
+
+                return (
                     <View key={key} style={{ marginBottom: 15 }}>
-                        <Text style={{ fontSize: 10, fontWeight: 'bold', color: '#007bff', marginBottom: 5 }}>{key.toUpperCase()}</Text>
-                        <View style={styles.table}>
-                            <View style={[styles.tableRow, styles.tableRowHeader]}>
-                                <View style={{ ...styles.tableCol, width: '70%' }}><Text style={styles.tableCellHeader}>Recommendation</Text></View>
-                                <View style={{ ...styles.tableCol, width: '70%' }}><Text style={styles.tableCellHeader}>Remark</Text></View>
-                                <View style={{ ...styles.tableCol, width: '30%' }}><Text style={styles.tableCellHeader}>Assigned To</Text></View>
-                                <View style={{ ...styles.tableCol, width: '30%' }}><Text style={styles.tableCellHeader}>Assigned Date</Text></View>
+                        <Text style={styles.assignmentHeader}>{key.toUpperCase()}</Text>
 
-                            </View>
-                            {(assignData?.[key] || []).map((item, i) => (
-                                <View key={i} style={styles.tableRow}>
-                                    <View style={{ ...styles.tableCol, width: '70%' }}><Text style={styles.tableCell}>{item?.javaHazopNodeRecommendation?.recommendation || '-'}</Text></View>
-                                    <View style={{ ...styles.tableCol, width: '70%' }}><Text style={styles.tableCell}>{item?.javaHazopNodeRecommendation?.remarkbyManagement || '-'}</Text></View>
-                                    <View style={{ ...styles.tableCol, width: '30%' }}><Text style={styles.tableCell}>{item?.acceptedByEmployeeName || '-'}</Text></View>
-                                    <View style={{ ...styles.tableCol, width: '30%' }}><Text style={styles.tableCell}>{formatDate(item?.assignWorkDate || '-')}</Text></View>
+                        {data.map((item, idx) => {
+                            const rec = item.javaHazopNodeRecommendation || item;
 
+                            return (
+                                <View key={idx} style={styles.assignmentCard} wrap={false}>
+                                    <Text style={styles.cardTitle}> {idx + 1}</Text>
+
+                                    <View style={styles.cardRow}>
+                                        <Text style={styles.cardLabel}>Recommendation:</Text>
+                                        <Text style={styles.cardValue}>{rec.recommendation || '-'}</Text>
+                                    </View>
+
+                                    <View style={styles.cardRow}>
+                                        <Text style={styles.cardLabel}>Remark:</Text>
+                                        <Text style={styles.cardValue}>{rec.remarkbyManagement || '-'}</Text>
+                                    </View>
+
+                                    <View style={styles.cardRow}>
+                                        <Text style={styles.cardLabel}>Assigned To:</Text>
+                                        <Text style={styles.cardValue}>{item.assignToEmpCode || item.acceptedByEmployeeName || '-'}</Text>
+                                    </View>
+
+                                    <View style={styles.cardRow}>
+                                        <Text style={styles.cardLabel}>Assigned By:</Text>
+                                        <Text style={styles.cardValue}>{item.createdByName || item.createdByEmpCode || '-'}</Text>
+                                    </View>
+
+                                    <View style={styles.cardRow}>
+                                        <Text style={styles.cardLabel}>Assigned Date:</Text>
+                                        <Text style={styles.cardValue}>{formatDate(item.assignWorkDate) || '-'}</Text>
+                                    </View>
+
+                                    <View style={styles.cardRow}>
+                                        <Text style={styles.cardLabel}>Completion Status:</Text>
+                                        <Text style={[styles.cardValue, item.completionStatus ? styles.completed : styles.pending]}>
+                                            {item.completionStatus ? "Completed" : "Pending"}
+                                        </Text>
+                                    </View>
+
+                                    <View style={styles.cardRow}>
+                                        <Text style={styles.cardLabel}>Completion Date:</Text>
+                                        <Text style={styles.cardValue}>{item.completionDate ? formatDate(item.completionDate) : '-'}</Text>
+                                    </View>
+
+                                    <View style={styles.cardRow}>
+                                        <Text style={styles.cardLabel}>Acceptance Status:</Text>
+                                        <Text style={styles.cardValue}>
+                                            {item.assignworkAcceptance
+                                                ? "Accepted"
+                                                : item.assignWorkSendForAcceptance
+                                                    ? "Waiting for Acceptance"
+                                                    : "Not Sent"}
+                                        </Text>
+                                    </View>
+
+                                    <View style={styles.cardRow}>
+                                        <Text style={styles.cardLabel}>Accepted By:</Text>
+                                        <Text style={styles.cardValue}>{item.acceptedByEmployeeName || '-'}</Text>
+                                    </View>
+
+                                    <View style={styles.cardRow}>
+                                        <Text style={styles.cardLabel}>Verification Action:</Text>
+                                        <Text style={styles.cardValue}>{rec.sendForVerificationAction ? "Action Taken" : "No Action"}</Text>
+                                    </View>
+
+                                    <View style={styles.cardRow}>
+                                        <Text style={styles.cardLabel}>Verification Status:</Text>
+                                        <Text style={[styles.cardValue, rec.sendForVerificationActionStatus ? styles.completed : styles.pending]}>
+                                            {rec.sendForVerificationActionStatus ? "Approved" : "Rejected"}
+                                        </Text>
+                                    </View>
+
+                                    <View style={styles.cardRow}>
+                                        <Text style={styles.cardLabel}>Verified By:</Text>
+                                        <Text style={styles.cardValue}>{rec.verificationResponsibleEmployeeName || '-'}</Text>
+                                    </View>
+
+                                    <View style={styles.cardRow}>
+                                        <Text style={styles.cardLabel}>Verification Date:</Text>
+                                        <Text style={styles.cardValue}>{rec.verificationDate ? formatDate(rec.verificationDate) : '-'}</Text>
+                                    </View>
                                 </View>
-                            ))}
-                        </View>
+                            );
+                        })}
                     </View>
-                )
-            ))}
+                );
+            })}
+
             <Footer downloadDate={downloadDate} />
         </Page>
+
+
         <Page size="A4" style={styles.page}>
             <Text style={styles.sectionTitle}>Verification Summary</Text>
+
             {(verificationData || []).length === 0 ? (
                 <Text style={{ fontSize: 10, marginBottom: 10 }}>No verification records available</Text>
             ) : (
-                <View style={{ marginBottom: 15 }}>
-                    <View style={styles.table}>
-                        <View style={[styles.tableRow, styles.tableRowHeader]}>
-                            <View style={{ ...styles.tableCol, width: '40%' }}>
-                                <Text style={styles.tableCellHeader}>Recommendation</Text>
-                            </View>
-                            <View style={{ ...styles.tableCol, width: '30%' }}>
-                                <Text style={styles.tableCellHeader}>Remark</Text>
-                            </View>
-                            <View style={{ ...styles.tableCol, width: '30%' }}>
-                                <Text style={styles.tableCellHeader}>department</Text>
-                            </View>
-                            <View style={{ ...styles.tableCol, width: '30%' }}>
-                                <Text style={styles.tableCellHeader}>Completion Status</Text>
-                            </View>
-                            <View style={{ ...styles.tableCol, width: '30%' }}>
-                                <Text style={styles.tableCellHeader}>Completion Date</Text>
-                            </View>
-                            <View style={{ ...styles.tableCol, width: '30%' }}>
-                                <Text style={styles.tableCellHeader}>Verification Date</Text>
-                            </View>
-                        </View>
-                        {verificationData.map((item, i) => (
-                            <View key={i} style={styles.tableRow}>
-                                <View style={{ ...styles.tableCol, width: '40%' }}>
-                                    <Text style={styles.tableCell}>{item.recommendation || '-'}</Text>
-                                </View>
-                                <View style={{ ...styles.tableCol, width: '30%' }}>
-                                    <Text style={styles.tableCell}>{item.remarkbyManagement || '-'}</Text>
-                                </View>
-                                <View style={{ ...styles.tableCol, width: '30%' }}>
-                                    <Text style={styles.tableCell}>
-                                        {item.verificationDate ? formatDate(item.department) : '-'}
-                                    </Text>
-                                </View>
-                                <View style={{ ...styles.tableCol, width: '30%' }}>
-                                    <Text style={styles.tableCell}>
-                                        {item.verificationDate ? (item.completionStatus ? 'Completed' : 'Pending') : '-'}
-                                    </Text>
-                                </View>
-                                <View style={{ ...styles.tableCol, width: '30%' }}>
-                                    <Text style={styles.tableCell}>
-                                        {item.verificationDate ? formatDate(item.completionDate) : '-'}
-                                    </Text>
-                                </View>
-                                <View style={{ ...styles.tableCol, width: '30%' }}>
-                                    <Text style={styles.tableCell}>
-                                        {item.verificationDate ? formatDate(item.verificationDate) : '-'}
-                                    </Text>
-                                </View>
+                (verificationData || []).map((item, i) => (
+                    <View key={i} style={styles.verificationCard} wrap={false}>
+                        <Text style={styles.cardTitle}>Record {i + 1}</Text>
 
-                            </View>
-                        ))}
+                        <View style={styles.cardRow}>
+                            <Text style={styles.cardLabel}>Recommendation:</Text>
+                            <Text style={styles.cardValue}>{item.recommendation || '-'}</Text>
+                        </View>
+
+                        <View style={styles.cardRow}>
+                            <Text style={styles.cardLabel}>Remark by Management:</Text>
+                            <Text style={styles.cardValue}>{item.remarkbyManagement || '-'}</Text>
+                        </View>
+
+                        <View style={styles.cardRow}>
+                            <Text style={styles.cardLabel}>Completion Status:</Text>
+                            <Text style={[styles.cardValue, item.completionStatus ? styles.completed : styles.pending]}>
+                                {item.completionStatus ? 'Completed' : 'Pending'}
+                            </Text>
+                        </View>
+
+
+                        <View style={styles.cardRow}>
+                            <Text style={styles.cardLabel}>Verification Action:</Text>
+                            <Text style={[styles.cardValue, item.sendForVerificationAction ? styles.actionTaken : {}]}>
+                                {item.sendForVerificationAction ? 'Approved' : 'Rejected'}
+                            </Text>
+                        </View>
+                        <View style={styles.cardRow}>
+                            <Text style={styles.cardLabel}>Verified By:</Text>
+                            <Text style={styles.cardValue}>{item.verificationResponsibleEmployeeName || '-'}</Text>
+                        </View>
+
+                        <View style={styles.cardRow}>
+                            <Text style={styles.cardLabel}>Email:</Text>
+                            <Text style={styles.cardValue}>{item.verificationResponsibleEmployeeEmail || '-'}</Text>
+                        </View>
+
+                        <View style={styles.cardRow}>
+                            <Text style={styles.cardLabel}>Verification Date:</Text>
+                            <Text style={styles.cardValue}>{item.verificationDate ? formatDate(item.verificationDate) : '-'}</Text>
+                        </View>
                     </View>
-                </View>
+                ))
             )}
 
             <Footer downloadDate={downloadDate} />
         </Page>
+
 
 
     </Document>

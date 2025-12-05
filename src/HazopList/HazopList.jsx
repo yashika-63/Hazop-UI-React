@@ -31,7 +31,7 @@ const HazopList = () => {
     const fetchHazopData = async () => {
       try {
         const response = await axios.get(
-          `http://${strings.localhost}/api/hazopRegistration/filter?companyId=${companyId}&status=true&completionStatus=true&sendForVerification=false`
+          `http://${strings.localhost}/api/hazopRegistration/filter?companyId=${companyId}&status=true&completionStatus=false&sendForVerification=false`
         );
         setHazopData(response.data);
         setLoading(false);
@@ -52,7 +52,7 @@ const HazopList = () => {
     const fetchHazopData = async () => {
       try {
         const response = await axios.get(
-          `http://${strings.localhost}/api/hazopRegistration/filter?companyId=${companyId}&status=true&completionStatus=true&sendForVerification=false`
+          `http://${strings.localhost}/api/hazopRegistration/filter?companyId=${companyId}&status=true&completionStatus=true &sendForVerification=false`
         );
         setHazopData(response.data);
         setLoading(false);

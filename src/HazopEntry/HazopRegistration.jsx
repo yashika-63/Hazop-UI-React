@@ -6,11 +6,11 @@ import { showToast } from "../CommonUI/CommonUI";
 import { strings } from "../string";
 import { useLocation } from "react-router-dom";
 
-const HazopRegistration = ({ closePopup }) => {
+const HazopRegistration = ({ closePopup, onSaveSuccess }) => {
   const [formData, setFormData] = useState({
     hazopDate: "",
     site: "",
-    title:'',
+    title: '',
     department: "",
     description: "",
     verificationStatus: false,
@@ -154,9 +154,20 @@ const HazopRegistration = ({ closePopup }) => {
     setLoading(true);
 
     try {
+      const createdBy = localStorage.getItem("fullName") || "";
+      const empCode = localStorage.getItem("empCode") || "";
+      const createdByEmail = localStorage.getItem("email") || "";
+
+      const payload = {
+        ...formData,
+        createdBy,
+        empCode,
+        createdByEmail
+      };
+
       const hazopResponse = await axios.post(
         `http://${strings.localhost}/api/hazopRegistration/saveByCompany/${companyId}`,
-        formData
+        payload
       );
 
       const hazopId = hazopResponse.data.id;
@@ -169,6 +180,8 @@ const HazopRegistration = ({ closePopup }) => {
       }
 
       showToast("HAZOP saved successfully!", "success");
+
+      if (onSaveSuccess) onSaveSuccess(); 
       closePopup();
 
     } catch (err) {
@@ -178,6 +191,7 @@ const HazopRegistration = ({ closePopup }) => {
 
     setLoading(false);
   };
+
 
 
 

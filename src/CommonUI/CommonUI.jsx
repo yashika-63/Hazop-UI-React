@@ -4,12 +4,16 @@ import "react-toastify/dist/ReactToastify.css";
 
 export const formatDate = (dateString) => {
   if (!dateString) return "N/A";
+
   const date = new Date(dateString);
+  if (isNaN(date)) return "N/A";  // <-- prevents NaN-NaN-NaN
   const day = String(date.getDate()).padStart(2, "0");
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const year = date.getFullYear();
+
   return `${day}-${month}-${year}`;
 };
+
 
 export const formatDateToBackend = (dateString) => {
   if (!dateString) return null;
@@ -26,10 +30,10 @@ export const showToast = (message, type) => {
       type === "success"
         ? "my-toast my-toast-success"
         : type === "error"
-        ? "my-toast my-toast-error"
-        : type === "warn"
-        ? "my-toast my-toast-warn"
-        : "my-toast my-toast-info",
+          ? "my-toast my-toast-error"
+          : type === "warn"
+            ? "my-toast my-toast-warn"
+            : "my-toast my-toast-info",
     position: "top-right",
     autoClose: 3000,
     hideProgressBar: false,
@@ -52,3 +56,12 @@ function ScrollableViewer({ content }) {
     </div>
   );
 }
+
+
+
+export const truncateWords = (text, wordLimit = 4) => {
+  if (!text) return "-";
+  const words = text.split(" ");
+  if (words.length <= wordLimit) return text;
+  return words.slice(0, wordLimit).join(" ") + "...";
+};

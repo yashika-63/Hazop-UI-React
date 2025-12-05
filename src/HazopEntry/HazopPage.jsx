@@ -14,7 +14,6 @@ const HazopPage = () => {
   const [newRegistered, setNewRegistered] = useState([]);
   const [pending, setPending] = useState([]);
   const [completed, setCompleted] = useState([]);
-  const navigate = useNavigate();
   const [showPopup, setShowPopup] = useState(false);
   const [activeTab, setActiveTab] = useState("NewCreated");
   const openPopup = () => setShowPopup(true);
@@ -58,20 +57,41 @@ const HazopPage = () => {
   const fetchColumns = async () => {
     try {
       const col1 = await axios.get(
-        `http://${strings.localhost}/api/hazopRegistration/filter?companyId=1&status=true&completionStatus=false&sendForVerification=false`
+        `http://${strings.localhost}/api/hazopRegistration/filter?companyId=${companyId}&status=true&completionStatus=false&sendForVerification=false`
       );
       console.log("response,", col1);
       const col2 = await axios.get(
-        `http://${strings.localhost}/api/hazopRegistration/filter?companyId=${companyId}&status=true&completionStatus=true&sendForVerification=true`
+        `http://${strings.localhost}/api/hazopRegistration/filter?companyId=${companyId}&status=true&completionStatus=false&sendForVerification=true`
       );
 
       const col3 = await axios.get(
-        `http://${strings.localhost}/api/hazopRegistration/filter?companyId=1&status=true&completionStatus=true&sendForVerification=false`
+        `http://${strings.localhost}/api/hazopRegistration/filter?companyId=${companyId}&status=true&completionStatus=true&sendForVerification=false`
+      );
+      const col1WithCount = await Promise.all(
+        col1.data.map(async (item) => ({
+          ...item,
+          peopleCount: await fetchTeamCount(item.id)
+        }))
       );
 
-      setNewRegistered(col1.data);
-      setPending(col2.data);
-      setCompleted(col3.data);
+      const col2WithCount = await Promise.all(
+        col2.data.map(async (item) => ({
+          ...item,
+          peopleCount: await fetchTeamCount(item.id)
+        }))
+      );
+
+      const col3WithCount = await Promise.all(
+        col3.data.map(async (item) => ({
+          ...item,
+          peopleCount: await fetchTeamCount(item.id)
+        }))
+      );
+
+      setNewRegistered(col1WithCount);
+      setPending(col2WithCount);
+      setCompleted(col3WithCount);
+
     } catch (err) {
       console.error("Error loading HAZOP data:", err);
     }
@@ -161,6 +181,19 @@ const HazopPage = () => {
   };
 
 
+  const fetchTeamCount = async (hazopId) => {
+    try {
+      const res = await axios.get(
+        `http://${strings.localhost}/api/hazopTeam/count/${hazopId}`
+      );
+
+      return Number(res.data) || 0;  // API returns raw number
+    } catch (err) {
+      console.error("Error fetching team count:", err);
+      return 0;
+    }
+  };
+
 
   const renderDropdown = (item, isNewRegistered) => (
     <div className="dropdown">
@@ -171,13 +204,13 @@ const HazopPage = () => {
       {openDropdown === item.id && (
         <div className="dropdown-content">
           <button type="button" onClick={() => handleUpdate(item)}>
-            <FaEdit /> Update
-          </button>
-          <button type="button" onClick={() => handleRecommendation(item)}>
-            <FaLightbulb /> Recommendation
+            <FaEdit /> Add Team
           </button>
           <button type="button" onClick={() => handleOpenNode(item)}>
             <FaEye /> Open Node
+          </button>
+          <button type="button" onClick={() => handleRecommendation(item)}>
+            <FaLightbulb /> Recommendation
           </button>
           {isNewRegistered && (
             <button type="button" onClick={() => openSendCompletionPopup(item)}>
@@ -194,6 +227,18 @@ const HazopPage = () => {
     const words = text.split(" ");
     if (words.length <= wordLimit) return text;
     return words.slice(0, wordLimit).join(" ") + "...";
+  };
+
+
+  const getInitial = (name) => {
+    if (!name || typeof name !== "string") return null;
+
+    return name.trim().charAt(0).toUpperCase();
+  };
+
+
+  const refreshHazopData = () => {
+    fetchColumns(); // This already fetches all columns
   };
 
   return (
@@ -220,22 +265,37 @@ const HazopPage = () => {
                   key={idx}
                 >
                   <div className="card-top">
-                    {item.isVerified && <span className="verified-badge">✔</span>}
+                    {item.verificationActionTaken === true && (
+                      <span className="verified-badge">✔ Verified</span>
+                    )}
                     <span className="card-date">{formatDate(item.hazopCreationDate)}</span>
-                    {renderDropdown(item, false)}
+                    {renderDropdown(item, true)}
                   </div>
 
                   <div className="card-title">{truncateWords(item.title || "Untitled", 4)}</div>
                   <div className="card-sub">{truncateWords(item.description, 6)}</div>
 
                   <div className="card-footer">
-                    <span className="people-count">👥 {item.peopleCount || 2} working</span>
+                    <span className="people-count">👥 {item.peopleCount || 0} working</span>
 
                     <div className="avatar-group">
-                      {(item.createdByInitials || ["A", "B"]).map((i, x) => (
-                        <span className="avatar" key={x}>{i}</span>
-                      ))}
+                      {(() => {
+                        const initials = [];
+
+                        const createdInitial = getInitial(item.createdBy);
+                        const verifierInitial = getInitial(item.verificationemployeeName);
+
+                        if (createdInitial) initials.push(createdInitial);
+                        if (verifierInitial) initials.push(verifierInitial);
+
+                        return initials.length > 0 ? (
+                          initials.map((i, index) => (
+                            <span className="avatar" key={index}>{i}</span>
+                          ))
+                        ) : null;
+                      })()}
                     </div>
+
                   </div>
                 </div>
               ))}
@@ -252,9 +312,11 @@ const HazopPage = () => {
 
             {expanded.pending &&
               pending.map((item, idx) => (
-                <div className="kanban-card priority-medium" key={idx}>
+                <div className="kanban-card priority-pending" key={idx}>
                   <div className="card-top">
-                    {item.isVerified && <span className="verified-badge">✔</span>}
+                    {item.verificationActionTaken === true && (
+                      <span className="verified-badge">✔ Verified</span>
+                    )}
                     <span className="card-date">{formatDate(item.hazopCreationDate)}</span>
                     {renderDropdown(item, false)}
                   </div>
@@ -263,12 +325,25 @@ const HazopPage = () => {
                   <div className="card-sub">{truncateWords(item.description, 6)}</div>
 
                   <div className="card-footer">
-                    <span className="people-count">👥 {item.peopleCount || 2} working</span>
+                    <span className="people-count">👥 {item.peopleCount || 0} working</span>
                     <div className="avatar-group">
-                      {(item.createdByInitials || ["A", "B"]).map((i, x) => (
-                        <span className="avatar" key={x}>{i}</span>
-                      ))}
+                      {(() => {
+                        const initials = [];
+
+                        const createdInitial = getInitial(item.createdBy);
+                        const verifierInitial = getInitial(item.verificationemployeeName);
+
+                        if (createdInitial) initials.push(createdInitial);
+                        if (verifierInitial) initials.push(verifierInitial);
+
+                        return initials.length > 0 ? (
+                          initials.map((i, index) => (
+                            <span className="avatar" key={index}>{i}</span>
+                          ))
+                        ) : null;
+                      })()}
                     </div>
+
                   </div>
                 </div>
               ))}
@@ -287,7 +362,9 @@ const HazopPage = () => {
               completed.map((item, idx) => (
                 <div className="kanban-card priority-low" key={idx}>
                   <div className="card-top">
-                    {item.isVerified && <span className="verified-badge">✔</span>}
+                    {item.verificationActionTaken === true && (
+                      <span className="verified-badge">✔ Verified</span>
+                    )}
                     <span className="card-date">{formatDate(item.hazopCreationDate)}</span>
                     {renderDropdown(item, false)}
                   </div>
@@ -296,12 +373,25 @@ const HazopPage = () => {
                   <div className="card-sub">{truncateWords(item.description, 6)}</div>
 
                   <div className="card-footer">
-                    <span className="people-count">👥 {item.peopleCount || 2} working</span>
+                    <span className="people-count">👥 {item.peopleCount || 0} working</span>
                     <div className="avatar-group">
-                      {(item.createdByInitials || ["A", "B"]).map((i, x) => (
-                        <span className="avatar" key={x}>{i}</span>
-                      ))}
+                      {(() => {
+                        const initials = [];
+
+                        const createdInitial = getInitial(item.createdBy);
+                        const verifierInitial = getInitial(item.verificationemployeeName);
+
+                        if (createdInitial) initials.push(createdInitial);
+                        if (verifierInitial) initials.push(verifierInitial);
+
+                        return initials.length > 0 ? (
+                          initials.map((i, index) => (
+                            <span className="avatar" key={index}>{i}</span>
+                          ))
+                        ) : null;
+                      })()}
                     </div>
+
                   </div>
                 </div>
               ))}
@@ -314,7 +404,7 @@ const HazopPage = () => {
       {showPopup && (
         <div className="modal-overlay">
           <div className="modal-box">
-            <HazopRegistration closePopup={closePopup} />
+            <HazopRegistration closePopup={closePopup} onSaveSuccess={refreshHazopData} />
           </div>
         </div>
       )}
@@ -352,6 +442,11 @@ const HazopPage = () => {
       {showConfirmPopup && (
         <div className="confirm-overlay">
           <div className="confirm-box">
+            {loading && (
+              <div className="loading-overlay">
+                <div className="loading-spinner"></div>
+              </div>
+            )}
             <h3>Are you sure?</h3>
             <p>Do you want to send {selectedHazopForSend.title}HAZOP for completion?</p>
             <div className="confirm-buttons">
@@ -364,11 +459,7 @@ const HazopPage = () => {
       {showSendCompletionPopup && (
         <div className="modal-overlay">
           <div className="modal-body">
-            {loading && (
-              <div className="loading-overlay">
-                <div className="loading-spinner"></div>
-              </div>
-            )}
+
             <div className="search-container">
               <div className="search-bar-wrapper">
                 <input

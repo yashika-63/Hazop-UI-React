@@ -178,7 +178,7 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
                 <table className="recommendation-table not-assigned">
                     <thead>
                         <tr>
-                            <th>ID</th>
+                            <th>Sr.No</th>
                             <th>Recommendation</th>
                             <th>Remark</th>
                             <th>Verification By</th>
@@ -190,9 +190,9 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
                         {data.notAssigned.length === 0 ? (
                             <td colSpan='6' className="no-data1">No data available</td>
                         ) : (
-                            data.notAssigned.map(item => (
+                            data.notAssigned.map((item , index) => (
                                 <tr key={item.id}>
-                                    <td>{item.id}</td>
+                                    <td>{index + 1}</td>
                                     <td>{item.recommendation ?? "-"}</td>
                                     <td>{item.remarkbyManagement ?? "-"}</td>
                                     <td>{item.verificationResponsibleEmployeeName ?? "-"}</td>
@@ -213,7 +213,7 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
                 <table className="recommendation-table assigned">
                     <thead>
                         <tr>
-                            <th>ID</th>
+                            <th>Sr.No</th>
                             <th>Recommendation</th>
                             <th>Remark </th>
                             <th>Created By</th>
@@ -228,9 +228,9 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
                             <td colSpan='6' className="no-data1">No Data Available</td>
                         ) : (
 
-                            data.assigned.map(item => (
+                            data.assigned.map((item , index) => (
                                 <tr key={item.id}>
-                                    <td>{item.id}</td>
+                                    <td>{index + 1}</td>
                                     <td>{item.javaHazopNodeRecommendation?.recommendation ?? "-"}</td>
                                     <td>{item.javaHazopNodeRecommendation?.remarkbyManagement ?? "-"}</td>
                                     <td>{item.createdByName || '-'}</td>
@@ -253,7 +253,7 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
                 <table className="recommendation-table accepted">
                     <thead>
                         <tr>
-                            <th>ID</th>
+                            <th>Sr.No</th>
                             <th>Recommendation</th>
                             <th>Remark </th>
                             <th>Created By</th>
@@ -267,9 +267,9 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
                         {data.accepted.length === 0 ? (
                             <td colSpan="6" className="no-data1">No Data Available</td>
                         ) : (
-                            data.accepted.map(item => (
+                            data.accepted.map((item, index) => (
                                 <tr key={item.id}>
-                                    <td>{item.id}</td>
+                                    <td>{index + 1}</td>
                                     <td>{item.javaHazopNodeRecommendation?.recommendation ?? "-"}</td>
                                     <td>{item.javaHazopNodeRecommendation?.remarkbyManagement ?? "-"}</td>
                                     <td>{item.createdByName || '-'}</td>
@@ -291,7 +291,7 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
                 <table className="recommendation-table rejected">
                     <thead>
                         <tr>
-                            <th>ID</th>
+                            <th>Sr.No</th>
                             <th>Recommendation</th>
                             <th>Remark </th>
                             <th>Created By</th>
@@ -304,9 +304,9 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
                         {data.rejected.length === 0 ? (
                             <td colSpan="6" className="no-data1">No Data Available</td>
                         ) : (
-                            data.rejected.map(item => (
+                            data.rejected.map((item, index) => (
                                 <tr key={item.id}>
-                                    <td>{item.id}</td>
+                                    <td>{index+ 1}</td>
                                     <td>{item.javaHazopNodeRecommendation?.recommendation ?? "-"}</td>
                                     <td>{item.javaHazopNodeRecommendation?.remarkbyManagement ?? "-"}</td>
                                     <td>{item.createdByName || '-'}</td>
@@ -326,8 +326,6 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
                 <div className="modal-overlay">
                     <div className="modal-body">
                         <h3 className="centerText">Assign Employee</h3>
-
-
                         <div className="search-container">
                             <div className="search-bar-wrapper">
                                 <input
