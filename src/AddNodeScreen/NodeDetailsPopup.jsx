@@ -67,80 +67,80 @@ const NodeDetailsPopup = ({ onClose, nodeID, onSave }) => {
   };
 
   const validate = () => {
-  // Required fields
-  if (!form.generalParameter.trim()) {
-    showToast("General Parameter is required.", "warn");
-    return false;
-  }
-  if (!form.specificParameter.trim()) {
-    showToast("Specific Parameter is required.", "warn");
-    return false;
-  }
-  if (!form.guidWord.trim()) {
-    showToast("Guide Word is required.", "warn");
-    return false;
-  }
-  if (!form.causes.trim()) {
-    showToast("Causes is required.", "warn");
-    return false;
-  }
-  if (!form.consequences.trim()) {
-    showToast("Consequences is required.", "warn");
-    return false;
-  }
-  if (!form.deviation.trim()) {
-    showToast("Deviation is required.", "warn");
-    return false;
-  }
-  if (!form.existineControl.trim()) {
-    showToast("Existing Control is required.", "warn");
-    return false;
-  }
-  if (!form.existineProbability) {
-    showToast("Existing Probability is required.", "warn");
-    return false;
-  }
-  if (!form.existingSeverity) {
-    showToast("Existing Severity is required.", "warn");
-    return false;
-  }
-  if (!form.riskRating) {
-    showToast("Risk Rating is required.", "warn");
-    return false;
-  }
+    // Required fields
+    if (!form.generalParameter.trim()) {
+      showToast("General Parameter is required.", "warn");
+      return false;
+    }
+    if (!form.specificParameter.trim()) {
+      showToast("Specific Parameter is required.", "warn");
+      return false;
+    }
+    if (!form.guidWord.trim()) {
+      showToast("Guide Word is required.", "warn");
+      return false;
+    }
+    if (!form.causes.trim()) {
+      showToast("Causes is required.", "warn");
+      return false;
+    }
+    if (!form.consequences.trim()) {
+      showToast("Consequences is required.", "warn");
+      return false;
+    }
+    if (!form.deviation.trim()) {
+      showToast("Deviation is required.", "warn");
+      return false;
+    }
+    if (!form.existineControl.trim()) {
+      showToast("Existing Control is required.", "warn");
+      return false;
+    }
+    if (!form.existineProbability) {
+      showToast("Existing Probability is required.", "warn");
+      return false;
+    }
+    if (!form.existingSeverity) {
+      showToast("Existing Severity is required.", "warn");
+      return false;
+    }
+    if (!form.riskRating) {
+      showToast("Risk Rating is required.", "warn");
+      return false;
+    }
 
-  // Additional controls required when riskRating ≥ 12
-  if (isAdditionalRequired()) {
-    if (!form.additionalControl.trim()) {
-      showToast(
-        "Additional Control is required when Risk Rating is 12 or higher.",
-        "warn"
-      );
-      return false;
+    // Additional controls required when riskRating ≥ 12
+    if (isAdditionalRequired()) {
+      if (!form.additionalControl.trim()) {
+        showToast(
+          "Additional Control is required when Risk Rating is 12 or higher.",
+          "warn"
+        );
+        return false;
+      }
+      if (!form.additionalProbability) {
+        showToast(
+          "Additional Probability is required when Risk Rating is 12 or higher.",
+          "warn"
+        );
+        return false;
+      }
+      if (!form.additionalSeverity) {
+        showToast(
+          "Additional Severity is required when Risk Rating is 12 or higher.",
+          "warn"
+        );
+        return false;
+      }
     }
-    if (!form.additionalProbability) {
-      showToast(
-        "Additional Probability is required when Risk Rating is 12 or higher.",
-        "warn"
-      );
-      return false;
-    }
-    if (!form.additionalSeverity) {
-      showToast(
-        "Additional Severity is required when Risk Rating is 12 or higher.",
-        "warn"
-      );
-      return false;
-    }
-  }
 
-  return true;
-};
+    return true;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-     if (!validate()) return;
+    if (!validate()) return;
 
     const additionalRequired = isAdditionalRequired();
 
@@ -192,7 +192,7 @@ const NodeDetailsPopup = ({ onClose, nodeID, onSave }) => {
             }
           );
         }
- onSave(savedDetail);
+        onSave(savedDetail);
 
         showToast("Details saved successfully!", "success");
         setForm(initialState);
@@ -218,20 +218,20 @@ const NodeDetailsPopup = ({ onClose, nodeID, onSave }) => {
     setShowRecommendations(true);
   };
 
-const saveRecommendations = (recs) => {
- setTempRecommendations(
-  recs.map((r) => ({
-    recommendation: r.recommendation,
-    remarkbyManagement: r.remarkbyManagement,
-  }))
-);
+  const saveRecommendations = (recs) => {
+    setTempRecommendations(
+      recs.map((r) => ({
+        recommendation: r.recommendation,
+        remarkbyManagement: r.remarkbyManagement,
+      }))
+    );
 
-  const bulletText = recs.map((r) => `• ${r.recommendation ?? r}`).join("\n");
+    const bulletText = recs.map((r) => `• ${r.recommendation ?? r}`).join("\n");
 
-  setForm((prev) => ({ ...prev, additionalControl: bulletText }));
+    setForm((prev) => ({ ...prev, additionalControl: bulletText }));
 
-  setShowRecommendations(false);
-};
+    setShowRecommendations(false);
+  };
 
   const renderScaleSelect = (name, value) => (
     <select
@@ -264,7 +264,10 @@ const saveRecommendations = (recs) => {
             <div>
               <div className="grid-row">
                 <div className="form-group">
-                  <label> <span className="required-marker">*</span>General Parameter</label>
+                  <label>
+                    {" "}
+                    <span className="required-marker">*</span>General Parameter
+                  </label>
                   <input
                     type="text"
                     name="generalParameter"
@@ -273,15 +276,20 @@ const saveRecommendations = (recs) => {
                     maxLength={1000}
                   />
                   <small
-                  className={`char-count ${
-                    form.generalParameter.length >= 1000 ? "limit-reached" : ""
-                  }`}
-                >
-                  {form.generalParameter.length}/1000
-                </small>
+                    className={`char-count ${
+                      form.generalParameter.length >= 1000
+                        ? "limit-reached"
+                        : ""
+                    }`}
+                  >
+                    {form.generalParameter.length}/1000
+                  </small>
                 </div>
                 <div className="form-group">
-                  <label> <span className="required-marker">*</span>Specific Parameter</label>
+                  <label>
+                    {" "}
+                    <span className="required-marker">*</span>Specific Parameter
+                  </label>
                   <input
                     type="text"
                     name="specificParameter"
@@ -290,15 +298,20 @@ const saveRecommendations = (recs) => {
                     maxLength={1000}
                   />
                   <small
-                  className={`char-count ${
-                    form.specificParameter.length >= 1000 ? "limit-reached" : ""
-                  }`}
-                >
-                  {form.specificParameter.length}/1000
-                </small>
+                    className={`char-count ${
+                      form.specificParameter.length >= 1000
+                        ? "limit-reached"
+                        : ""
+                    }`}
+                  >
+                    {form.specificParameter.length}/1000
+                  </small>
                 </div>
                 <div className="form-group">
-                  <label> <span className="required-marker">*</span>Guide Word</label>
+                  <label>
+                    {" "}
+                    <span className="required-marker">*</span>Guide Word
+                  </label>
                   <input
                     type="text"
                     name="guidWord"
@@ -307,18 +320,21 @@ const saveRecommendations = (recs) => {
                     maxLength={1000}
                   />
                   <small
-                  className={`char-count ${
-                    form.guidWord.length >= 1000 ? "limit-reached" : ""
-                  }`}
-                >
-                  {form.guidWord.length}/1000
-                </small>
+                    className={`char-count ${
+                      form.guidWord.length >= 1000 ? "limit-reached" : ""
+                    }`}
+                  >
+                    {form.guidWord.length}/1000
+                  </small>
                 </div>
               </div>
 
               <div className="grid-row">
                 <div className="form-group">
-                  <label> <span className="required-marker">*</span>Causes</label>
+                  <label>
+                    {" "}
+                    <span className="required-marker">*</span>Causes
+                  </label>
                   <textarea
                     name="causes"
                     rows={rows}
@@ -328,15 +344,18 @@ const saveRecommendations = (recs) => {
                     maxLength={5000}
                   />
                   <small
-                  className={`char-count ${
-                    form.causes.length >= 5000 ? "limit-reached" : ""
-                  }`}
-                >
-                  {form.causes.length}/5000
-                </small>
+                    className={`char-count ${
+                      form.causes.length >= 5000 ? "limit-reached" : ""
+                    }`}
+                  >
+                    {form.causes.length}/5000
+                  </small>
                 </div>
                 <div className="form-group">
-                  <label> <span className="required-marker">*</span>Consequences</label>
+                  <label>
+                    {" "}
+                    <span className="required-marker">*</span>Consequences
+                  </label>
                   <textarea
                     name="consequences"
                     rows={rows}
@@ -346,15 +365,18 @@ const saveRecommendations = (recs) => {
                     maxLength={5000}
                   />
                   <small
-                  className={`char-count ${
-                    form.consequences.length >= 5000 ? "limit-reached" : ""
-                  }`}
-                >
-                  {form.consequences.length}/5000
-                </small>
+                    className={`char-count ${
+                      form.consequences.length >= 5000 ? "limit-reached" : ""
+                    }`}
+                  >
+                    {form.consequences.length}/5000
+                  </small>
                 </div>
                 <div className="form-group">
-                  <label> <span className="required-marker">*</span>Deviation</label>
+                  <label>
+                    {" "}
+                    <span className="required-marker">*</span>Deviation
+                  </label>
                   <textarea
                     name="deviation"
                     rows={rows}
@@ -364,18 +386,21 @@ const saveRecommendations = (recs) => {
                     maxLength={5000}
                   />
                   <small
-                  className={`char-count ${
-                    form.deviation.length >= 5000 ? "limit-reached" : ""
-                  }`}
-                >
-                  {form.deviation.length}/5000
-                </small>
+                    className={`char-count ${
+                      form.deviation.length >= 5000 ? "limit-reached" : ""
+                    }`}
+                  >
+                    {form.deviation.length}/5000
+                  </small>
                 </div>
               </div>
 
               <div className="grid-row">
                 <div className="form-group existing-control">
-                  <label> <span className="required-marker">*</span>Existing Control</label>
+                  <label>
+                    {" "}
+                    <span className="required-marker">*</span>Existing Control
+                  </label>
                   <textarea
                     name="existineControl"
                     rows={smallRows}
@@ -385,30 +410,41 @@ const saveRecommendations = (recs) => {
                     maxLength={5000}
                   />
                   <small
-                  className={`char-count ${
-                    form.existineControl.length >= 5000 ? "limit-reached" : ""
-                  }`}
-                >
-                  {form.existineControl.length}/5000
-                </small>
+                    className={`char-count ${
+                      form.existineControl.length >= 5000 ? "limit-reached" : ""
+                    }`}
+                  >
+                    {form.existineControl.length}/5000
+                  </small>
                 </div>
                 <div className="existing-metrics">
                   <div className="form-group">
-                    <label> <span className="required-marker">*</span>Existing Probability (1–5)</label>
+                    <label>
+                      {" "}
+                      <span className="required-marker">*</span>Existing
+                      Probability (1–5)
+                    </label>
                     {renderScaleSelect(
                       "existineProbability",
                       form.existineProbability
                     )}
                   </div>
                   <div className="form-group">
-                    <label> <span className="required-marker">*</span>Existing Severity (1–5)</label>
+                    <label>
+                      {" "}
+                      <span className="required-marker">*</span>Existing
+                      Severity (1–5)
+                    </label>
                     {renderScaleSelect(
                       "existingSeverity",
                       form.existingSeverity
                     )}
                   </div>
                   <div className="form-group">
-                    <label> <span className="required-marker">*</span>Risk Rating</label>
+                    <label>
+                      {" "}
+                      <span className="required-marker">*</span>Risk Rating
+                    </label>
                     <input
                       type="text"
                       name="riskRating"
@@ -423,19 +459,23 @@ const saveRecommendations = (recs) => {
 
               <div className="grid-row">
                 <div className="form-group existing-control">
-                  <label>
-                    {isAdditionalRequired() && (
-                      <span className="required-marker">* </span>
-                    )}
-                    Additional Control
+                  <div className="label-row">
+                    <label>
+                      {isAdditionalRequired() && (
+                        <span className="required-marker">* </span>
+                      )}
+                      Additional Control
+                    </label>
+
                     <button
                       type="button"
                       className="add-btn"
                       onClick={openRecommendations}
                     >
-                      Add
+                     + Add
                     </button>
-                  </label>
+                  </div>
+
                   <textarea
                     name="additionalControl"
                     rows={smallRows}
@@ -515,10 +555,10 @@ const saveRecommendations = (recs) => {
         )}
       </div>
       {loading && (
-  <div className="loading-overlay">
-    <div className="loading-spinner"></div>
-  </div>
-)}
+        <div className="loading-overlay">
+          <div className="loading-spinner"></div>
+        </div>
+      )}
     </div>
   );
 };

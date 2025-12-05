@@ -3,7 +3,7 @@ import { useLocation, useParams, useNavigate } from "react-router-dom";
 import NodeDetailsPopup from "./NodeDetailsPopup";
 import { formatDate, showToast } from "../CommonUI/CommonUI";
 import NodeDetailsUpdatePopup from "./NodeDetailsUpdatePopup";
-import { FaEdit, FaEllipsisV } from "react-icons/fa";
+import { FaEdit, FaEllipsisV, FaTrash } from "react-icons/fa";
 import TextareaAutosize from "react-textarea-autosize";
 import RiskLevelPopup from "./RiskLevelPopup";
 import { strings } from "../string";
@@ -25,6 +25,7 @@ const NodeDetails = () => {
   const [recommendationsMap, setRecommendationsMap] = useState({});
   const [expandedDetailId, setExpandedDetailId] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
 
   const root = document.documentElement;
   const trivial = getComputedStyle(root).getPropertyValue("--trivial").trim();
@@ -45,7 +46,7 @@ const NodeDetails = () => {
   const [showAllRecommendations, setShowAllRecommendations] = useState(false);
 
   const renderDropdown = (item) => (
-    <div className="dropdown">
+    <div className="dropdown top-header">
       <button className="dots-button" onClick={() => toggleDropdown(item.id)}>
         <FaEllipsisV />
       </button>
@@ -104,9 +105,9 @@ const NodeDetails = () => {
     setShowDetailPopup(false);
   };
 
-  const handleUpdateDetail = (updated) => {
-    setDetails((prev) => prev.map((d) => (d.id === updated.id ? updated : d)));
-    setShowUpdatePopup(false);
+  const handleUpdateDetail = async () => {
+    await fetchNode();
+    await fetchDetails();
   };
 
   const openUpdatePopup = (detail) => {
@@ -325,6 +326,31 @@ const NodeDetails = () => {
     );
   };
 
+  const handleDeleteNode = async () => {
+    try {
+      setLoading(true);
+
+      const response = await fetch(
+        `http://${strings.localhost}/api/hazopNode/delete/${id}`,
+        { method: "PUT" }
+      );
+
+      if (!response.ok) {
+        showToast("Failed to delete node", "error");
+        return;
+      }
+
+      showToast("Node deleted successfully!", "success");
+      navigate(-1); // go back to previous page
+    } catch (error) {
+      console.error("Delete error:", error);
+      showToast("Something went wrong", "error");
+    } finally {
+      setLoading(false);
+      setShowDeletePopup(false);
+    }
+  };
+
   return (
     <div>
       <div className="node-header">
@@ -505,7 +531,7 @@ const NodeDetails = () => {
                     <label>Additional Control</label>
                     <ShowMoreText
                       text={d.additionalControl}
-                      borderClass={getBorderClass(d.riskRating)}
+                      borderClass={getBorderClass(d.additionalRiskRating)}
                     />
                   </div>
                   <div className="existing-metrics">
@@ -514,11 +540,11 @@ const NodeDetails = () => {
                       <input
                         value={d.additionalProbability || "-"}
                         style={{
-                          borderColor: getBorderColor(d.riskRating),
+                          borderColor: getBorderColor(d.additionalRiskRating),
                           borderWidth: "2px",
                           borderStyle: "solid",
                           borderLeft: `5px solid ${getBorderColor(
-                            d.riskRating
+                            d.additionalRiskRating
                           )}`,
                         }}
                         readOnly
@@ -529,11 +555,11 @@ const NodeDetails = () => {
                       <input
                         value={d.additionalSeverity || "-"}
                         style={{
-                          borderColor: getBorderColor(d.riskRating),
+                          borderColor: getBorderColor(d.additionalRiskRating),
                           borderWidth: "2px",
                           borderStyle: "solid",
                           borderLeft: `5px solid ${getBorderColor(
-                            d.riskRating
+                            d.additionalRiskRating
                           )}`,
                         }}
                         readOnly
@@ -544,11 +570,11 @@ const NodeDetails = () => {
                       <input
                         value={d.additionalRiskRating || "-"}
                         style={{
-                          borderColor: getBorderColor(d.riskRating),
+                          borderColor: getBorderColor(d.additionalRiskRating),
                           borderWidth: "2px",
                           borderStyle: "solid",
                           borderLeft: `5px solid ${getBorderColor(
-                            d.riskRating
+                            d.additionalRiskRating
                           )}`,
                         }}
                         readOnly
@@ -578,6 +604,17 @@ const NodeDetails = () => {
             ))
           )}
         </div>
+
+        <div className="center-controls">
+          <button
+            type="button"
+            className="rejectBtn"
+            disabled={loading}
+            onClick={() => setShowDeletePopup(true)}
+          >
+            <FaTrash /> {loading ? "Deleting Node..." : "Delete Node"}
+          </button>
+        </div>
       </div>
 
       {showDetailPopup && (
@@ -600,8 +637,6 @@ const NodeDetails = () => {
       {showRiskPopup && (
         <RiskLevelPopup onClose={() => setShowRiskPopup(false)} />
       )}
-        <RiskLevelPopup onClose={() => setShowRiskPopup(false)} />
-      )}
 
       {showCompletePopup && (
         <ConfirmationPopup
@@ -610,6 +645,15 @@ const NodeDetails = () => {
           onCancel={() => setShowCompletePopup(false)}
         />
       )}
+
+      {showDeletePopup && (
+  <ConfirmationPopup
+    message="Are you sure you want to delete this node?"
+    onConfirm={handleDeleteNode}
+    onCancel={() => setShowDeletePopup(false)}
+  />
+)}
+
       {loading && (
         <div className="loading-overlay">
           <div className="loading-spinner"></div>

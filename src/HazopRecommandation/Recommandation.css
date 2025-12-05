@@ -136,6 +136,165 @@
 
 
 
+
+
+
+
+
+/* Common Table Styles */
+.table-not-assigned,
+.table-assigned,
+.table-accepted,
+.table-rejected {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    font-size: 14px;
+}
+
+/* Table Head Styling */
+.table-not-assigned thead th,
+.table-assigned thead th,
+.table-accepted thead th,
+.table-rejected thead th {
+    padding: 5px 16px;
+    font-weight: 700;
+    text-align: left;
+}
+
+/* Status-Based Head Gradients */
+.table-not-assigned thead th {
+    background: linear-gradient(to bottom, #232ead, #1e1e71);
+    color: white;
+}
+
+.table-assigned thead th {
+background: linear-gradient(to bottom, var(--substantial), #f8be7c);    
+color: white;
+}
+
+.table-accepted thead th {
+    background: linear-gradient(to bottom, var(--trivial), var(--tolerable));
+    color: white;
+}
+
+.table-rejected thead th {
+    background: linear-gradient(to bottom, var(--intolerable),#b91c1c);
+    color: white;
+}
+
+/* Table Body */
+.table-not-assigned tbody tr,
+.table-assigned tbody tr,
+.table-accepted tbody tr,
+.table-rejected tbody tr {
+    border-bottom: 1px solid;
+    transition: background 0.2s, transform 0.15s;
+}
+
+.table-not-assigned tbody tr:nth-child(even),
+.table-assigned tbody tr:nth-child(even),
+.table-accepted tbody tr:nth-child(even),
+.table-rejected tbody tr:nth-child(even) {
+    background: #f9fafb;
+}
+
+.table-not-assigned tbody tr:hover,
+.table-assigned tbody tr:hover,
+.table-accepted tbody tr:hover,
+.table-rejected tbody tr:hover {
+    background: rgba(59, 130, 246, 0.05);
+    transform: translateY(-1px);
+}
+
+/* Table Cells */
+.table-not-assigned td,
+.table-assigned td,
+.table-accepted td,
+.table-rejected td {
+    padding: 6px 10px;
+    color: #374151;
+    vertical-align: middle;
+}
+
+/* No Data Message */
+.no-data1 {
+    text-align: center;
+    font-style: italic;
+    color: #9ca3af;
+    padding: 20px;
+}
+
+/* Action Dropdown Styling */
+td > .dropdown {
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: #f3f4f6;
+    color: #374151;
+    transition: all 0.2s;
+}
+
+td > .dropdown:hover {
+    background: #e5e7eb;
+}
+
+/* Optional: Status Badges inside table (if you want) */
+.badge {
+    padding: 3px 8px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: white;
+    display: inline-block;
+    text-align: center;
+}
+
+/* Status Badge Colors */
+.badge-not-assigned { background: #3b82f6; }
+.badge-assigned { background: #f59e0b; }
+.badge-accepted { background: #10b981; }
+.badge-rejected { background: #ef4444; }
+
+/* Responsive Table for Small Screens */
+@media screen and (max-width: 1024px) {
+    .table-not-assigned,
+    .table-assigned,
+    .table-accepted,
+    .table-rejected {
+        font-size: 13px;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .table-not-assigned,
+    .table-assigned,
+    .table-accepted,
+    .table-rejected {
+        display: block;
+        overflow-x: auto;
+    }
+
+    thead tr {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+    }
+
+    tbody tr {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+    }
+}
+
+
+
+
+
 .status-na {
     color: #475569;
 }

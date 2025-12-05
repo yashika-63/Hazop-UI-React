@@ -13,6 +13,8 @@ const Recommendations = ({
 }) => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
+  const [deleteIndex, setDeleteIndex] = useState(null);
   const [recommendations, setRecommendations] = useState(
     Array.isArray(initialRecommendations) && initialRecommendations.length > 0
       ? initialRecommendations
@@ -94,6 +96,41 @@ const Recommendations = ({
     setRecommendations(updated);
   };
 
+  const confirmDeleteRecommendation = () => {
+    if (deleteIndex === null) return;
+
+    if (recommendations.length === 1) {
+      showToast("At least one recommendation is required", "warn");
+      setShowDeletePopup(false);
+      return;
+    }
+
+    const updated = recommendations.filter((_, i) => i !== deleteIndex);
+    setRecommendations(updated);
+    showToast("Recommendation deleted successfully", "success");
+
+    setShowDeletePopup(false);
+    setDeleteIndex(null);
+  };
+
+    const ConfirmationPopup = ({ message, onConfirm, onCancel }) => {
+    return (
+      <div className="confirm-overlay">
+        <div className="confirm-box">
+          <p>{message}</p>
+          <div className="confirm-buttons">
+            <button type="button" onClick={onCancel} className="cancel-btn">
+              No
+            </button>
+            <button type="button" onClick={onConfirm} className="confirm-btn">
+              Yes
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="modal-overlay">
       <div className="modal-box">
@@ -132,12 +169,12 @@ const Recommendations = ({
                 maxLength={3000}
               />
               <small
-                  className={`char-count ${
-                    rec.recommendation.length >= 3000 ? "limit-reached" : ""
-                  }`}
-                >
-                  {rec.recommendation.length}/3000
-                </small>
+                className={`char-count ${
+                  rec.recommendation.length >= 3000 ? "limit-reached" : ""
+                }`}
+              >
+                {rec.recommendation.length}/3000
+              </small>
               <label>
                 {" "}
                 <span className="required-marker">* </span>Remarks by Management
@@ -152,16 +189,19 @@ const Recommendations = ({
                 maxLength={3000}
               />
               <small
-                  className={`char-count ${
-                    rec.remarkbyManagement.length >= 3000 ? "limit-reached" : ""
-                  }`}
-                >
-                  {rec.remarkbyManagement.length}/3000
-                </small>
+                className={`char-count ${
+                  rec.remarkbyManagement.length >= 3000 ? "limit-reached" : ""
+                }`}
+              >
+                {rec.remarkbyManagement.length}/3000
+              </small>
               <div className="rightbtn-controls">
                 <button
                   className="required-marker"
-                  onClick={() => handleDelete(index)}
+                  onClick={() => {
+                    setDeleteIndex(index);
+                    setShowDeletePopup(true);
+                  }}
                   title="Delete Recommendation"
                 >
                   <FaTrash />
@@ -179,6 +219,13 @@ const Recommendations = ({
               Save
             </button>
           </div>
+          {showDeletePopup && (
+            <ConfirmationPopup
+              message="Are you sure you want to delete this recommendation?"
+              onConfirm={confirmDeleteRecommendation}
+              onCancel={() => setShowDeletePopup(false)}
+            />
+          )}
         </div>
       </div>
     </div>

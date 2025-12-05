@@ -116,7 +116,7 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
                 </div>
             )}
 
-            <table className="recommendation-table">
+            <table className="premium-table table-not-assigned">
                 <thead>
                     <tr>
                         <th>ID</th>

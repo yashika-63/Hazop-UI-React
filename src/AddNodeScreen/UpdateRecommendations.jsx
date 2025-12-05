@@ -15,6 +15,8 @@ const UpdateRecommendations = ({
   const [loading, setLoading] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
   const [pendingUpdates, setPendingUpdates] = useState({});
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
+  const [deleteIndex, setDeleteIndex] = useState(null);
 
   const [recommendations, setRecommendations] = useState(
     Array.isArray(initialRecommendations) && initialRecommendations.length > 0
@@ -47,10 +49,31 @@ const UpdateRecommendations = ({
   }, [nodeDetailId]);
 
   const handleAdd = () => {
-    setRecommendations([
-      ...recommendations,
-      { recommendation: "", remarkbyManagement: "" },
-    ]);
+      const newList = [
+    ...recommendations,
+    { recommendation: "", remarkbyManagement: "" },
+  ];
+
+  setRecommendations(newList);
+  setEditIndex(newList.length - 1);
+  };
+
+  const ConfirmationPopup = ({ message, onConfirm, onCancel }) => {
+    return (
+      <div className="confirm-overlay">
+        <div className="confirm-box">
+          <p>{message}</p>
+          <div className="confirm-buttons">
+            <button type="button" onClick={onCancel} className="cancel-btn">
+              No
+            </button>
+            <button type="button" onClick={onConfirm} className="confirm-btn">
+              Yes
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   const validate = () => {
@@ -91,72 +114,120 @@ const UpdateRecommendations = ({
     setRecommendations(updated);
   };
 
-const handleDelete = async (index) => {
-  const rec = recommendations[index];
+  const handleDelete = async () => {
+    const index = deleteIndex; // <-- YOU GET THE INDEX TO DELETE
+    const rec = recommendations[index]; // <-- THE EXACT RECORD
 
-  if (recommendations.length === 1) {
-    showToast("At least one recommendation is required", "warn");
-    return;
-  }
+    // 1️⃣ Prevent deleting if only one left
+    if (recommendations.length === 1) {
+      showToast("At least one recommendation is required", "warn");
+      setShowDeletePopup(false);
+      return;
+    }
 
-  // If record has no ID → means it's a new unsaved record → delete only from UI
-  if (!rec.id) {
-    const updated = recommendations.filter((_, i) => i !== index);
-    setRecommendations(updated);
-    showToast("Recommendation deleted successfully", "success");
-    return;
-  }
-
-  try {
-    const res = await fetch(
-      `http://${strings.localhost}/api/nodeRecommendation/delete/${rec.id}`,
-      {
-        method: "DELETE",
-      }
-    );
-
-    if (res.ok) {
+    // 2️⃣ DELETE FROM UI ONLY (if record is new and has NO id)
+    if (!rec.id) {
       const updated = recommendations.filter((_, i) => i !== index);
       setRecommendations(updated);
+      setShowDeletePopup(false);
       showToast("Recommendation deleted successfully", "success");
-    } else {
-      showToast("Failed to delete recommendation!", "error");
+      return;
     }
-  } catch (err) {
-    console.error("Delete error:", err);
-    showToast("Error deleting recommendation!", "error");
-  }
-};
 
-  const handleIndividualUpdate = async (index) => {
+    // 3️⃣ DELETE FROM DATABASE (if has ID)
     try {
-      const rec = recommendations[index];
-
       const res = await fetch(
-        `http://${strings.localhost}/api/nodeRecommendation/update/${rec.id}`,
+        `http://${strings.localhost}/api/nodeRecommendation/delete/${rec.id}`,
+        { method: "DELETE" }
+      );
+
+      if (res.ok) {
+        const updated = recommendations.filter((_, i) => i !== index);
+        setRecommendations(updated);
+        showToast("Recommendation deleted successfully", "success");
+      } else {
+        showToast("Failed to delete recommendation!", "error");
+      }
+    } catch (err) {
+      console.error("Delete error:", err);
+      showToast("Error deleting recommendation!", "error");
+    }
+
+    // 4️⃣ Close popup and reset
+    setShowDeletePopup(false);
+    setDeleteIndex(null);
+  };
+
+const handleIndividualUpdate = async (index) => {
+  try {
+    const rec = recommendations[index];
+
+    if (!rec.id) {
+      const res = await fetch(
+        `http://${strings.localhost}/api/nodeRecommendation/save/${nodeID}/${nodeDetailId}`,
         {
-          method: "PUT",
+          method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(rec),
+          body: JSON.stringify([
+            {
+              recommendation: rec.recommendation,
+              remarkbyManagement: rec.remarkbyManagement,
+            },
+          ]),
         }
       );
 
       if (res.ok) {
-        showToast("Updated successfully!", "success");
+        const createdList = await res.json();
+        const createdRec = createdList[0]; 
+
+        const updated = [...recommendations];
+        updated[index] = createdRec; 
+        setRecommendations(updated);
+
+        showToast("Recommendation added successfully!", "success");
+
         setPendingUpdates((prev) => {
-          const clone = { ...prev };
-          delete clone[index];
-          return clone;
+          const p = { ...prev };
+          delete p[index];
+          return p;
         });
+
         setEditIndex(null);
       } else {
-        showToast("Failed to update!", "error");
+        showToast("Failed to add recommendation!", "error");
       }
-    } catch (err) {
-      console.error(err);
-      showToast("Error updating record!", "error");
+
+      return;
     }
-  };
+
+    const res = await fetch(
+      `http://${strings.localhost}/api/nodeRecommendation/update/${rec.id}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(rec),
+      }
+    );
+
+    if (res.ok) {
+      showToast("Updated successfully!", "success");
+
+      setPendingUpdates((prev) => {
+        const p = { ...prev };
+        delete p[index];
+        return p;
+      });
+
+      setEditIndex(null);
+    } else {
+      showToast("Failed to update!", "error");
+    }
+  } catch (err) {
+    console.error(err);
+    showToast("Error updating record!", "error");
+  }
+};
 
   return (
     <div className="modal-overlay">
@@ -190,19 +261,21 @@ const handleDelete = async (index) => {
                 rows={5}
                 value={rec.recommendation}
                 readOnly={editIndex !== index}
-                className={`textareaFont ${editIndex !== index ? "readonly" : ""}`}
+                className={`textareaFont ${
+                  editIndex !== index ? "readonly" : ""
+                }`}
                 onChange={(e) =>
                   handleChange(index, "recommendation", e.target.value)
                 }
                 maxLength={3000}
               />
               <small
-                  className={`char-count ${
-                    rec.recommendation.length >= 3000 ? "limit-reached" : ""
-                  }`}
-                >
-                  {rec.recommendation.length}/3000
-                </small>
+                className={`char-count ${
+                  rec.recommendation.length >= 3000 ? "limit-reached" : ""
+                }`}
+              >
+                {rec.recommendation.length}/3000
+              </small>
               <label>
                 {" "}
                 <span className="required-marker">* </span>Remarks by Management
@@ -214,15 +287,17 @@ const handleDelete = async (index) => {
                   handleChange(index, "remarkbyManagement", e.target.value)
                 }
                 readOnly={editIndex !== index}
-                className={`textareaFont ${editIndex !== index ? "readonly" : ""}`}
+                className={`textareaFont ${
+                  editIndex !== index ? "readonly" : ""
+                }`}
               />
               <small
-                  className={`char-count ${
-                    rec.remarkbyManagement.length >= 3000 ? "limit-reached" : ""
-                  }`}
-                >
-                  {rec.remarkbyManagement.length}/3000
-                </small>
+                className={`char-count ${
+                  rec.remarkbyManagement.length >= 3000 ? "limit-reached" : ""
+                }`}
+              >
+                {rec.remarkbyManagement.length}/3000
+              </small>
 
               <div className="rightbtn-controls">
                 <button
@@ -238,13 +313,16 @@ const handleDelete = async (index) => {
                 >
                   {editIndex === index ? "Save Update" : "Update"}
                 </button>
-              <button
-                className="required-marker"
-                onClick={() => handleDelete(index)}
-                title="Delete Recommendation"
-              >
-                <FaTrash />
-              </button>
+                <button
+                  className="required-marker"
+                  onClick={() => {
+                    setDeleteIndex(index);
+                    setShowDeletePopup(true);
+                  }}
+                  title="Delete Recommendation"
+                >
+                  <FaTrash />
+                </button>
               </div>
               <div className="underline"></div>
             </div>
@@ -258,6 +336,13 @@ const handleDelete = async (index) => {
               Save
             </button>
           </div>
+          {showDeletePopup && (
+            <ConfirmationPopup
+              message="Are you sure you want to delete this recommendation?"
+              onConfirm={handleDelete}
+              onCancel={() => setShowDeletePopup(false)}
+            />
+          )}
         </div>
       </div>
     </div>

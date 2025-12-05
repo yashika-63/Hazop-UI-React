@@ -14,7 +14,6 @@ const HazopPage = () => {
   const [newRegistered, setNewRegistered] = useState([]);
   const [pending, setPending] = useState([]);
   const [completed, setCompleted] = useState([]);
-  const navigate = useNavigate();
   const [showPopup, setShowPopup] = useState(false);
   const [activeTab, setActiveTab] = useState("NewCreated");
   const openPopup = () => setShowPopup(true);
@@ -170,14 +169,14 @@ const HazopPage = () => {
 
       {openDropdown === item.id && (
         <div className="dropdown-content">
+          <button type="button" onClick={() => handleOpenNode(item)}>
+            <FaEye /> Open Node
+          </button>
           <button type="button" onClick={() => handleUpdate(item)}>
             <FaEdit /> Update
           </button>
           <button type="button" onClick={() => handleRecommendation(item)}>
             <FaLightbulb /> Recommendation
-          </button>
-          <button type="button" onClick={() => handleOpenNode(item)}>
-            <FaEye /> Open Node
           </button>
           {isNewRegistered && (
             <button type="button" onClick={() => openSendCompletionPopup(item)}>
