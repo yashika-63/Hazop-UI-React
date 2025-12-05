@@ -241,6 +241,7 @@ button:focus, button:focus-visible {
   cursor: pointer;
   padding: 5px;
   display: inline-block;
+  z-index: 999;
 }
 
 .dots-button:hover {
@@ -447,7 +448,9 @@ button:focus, button:focus-visible {
   color: green;
   font-weight: bold;
 }
-
+.status-notMarked{
+  color: #858585;
+}
 .status-pending {
   color: orange;
   font-weight: bold;

@@ -56,6 +56,7 @@ const HazopTeamAcceptanceApproval = () => {
                     <button type="button" onClick={() => openRecordModal(item)}>
                         <FaEye /> View
                     </button>
+
                 </div>
             )}
         </div>

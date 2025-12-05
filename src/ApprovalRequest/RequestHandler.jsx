@@ -4,9 +4,10 @@ import './Approval.css';
 
 import HazopTeamAcceptanceApproval from "./HazopTeamAcceptanceApproval";
 import HazopRecommendationApproval from "./HazopRecommandationApproval";
-import { FaCalendarDay, FaCheckCircle, FaLightbulb , FaList } from "react-icons/fa";
+import { FaCalendarDay, FaCheckCircle, FaLightbulb , FaList , FaCheckDouble  } from "react-icons/fa";
 import HazopApprovalPage from "./HazopApprovalPage";
 import HazopConfirmationApproval from "./HazopConfirmationApproval";
+import RecommendationApproval from "./RecommendationApproval";
 
 const RequestHandler = () => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -60,8 +61,16 @@ const RequestHandler = () => {
                         className={activeSection === 'HazopConfirmationApproval' ? 'active' : ''}
                         onClick={() => handleButtonClick('HazopConfirmationApproval')}
                     >
-                        <FaCheckCircle />
+                        <FaCheckDouble  />
                         Hazop Completion
+                    </button>
+                    <button
+                        type="button"
+                        className={activeSection === 'RecommendationApproval' ? 'active' : ''}
+                        onClick={() => handleButtonClick('RecommendationApproval')}
+                    >
+                        <FaCheckCircle />
+                        Recommendation Approval 
                     </button>
                 </div>
 
@@ -70,6 +79,8 @@ const RequestHandler = () => {
                     {activeSection === 'HazopRecommendationApproval' && <HazopRecommendationApproval />}
                     {activeSection === 'HazopApprove' && <HazopApprovalPage />}
                     {activeSection === 'HazopConfirmationApproval' && <HazopConfirmationApproval />}
+                    {activeSection === 'RecommendationApproval' && <RecommendationApproval />}
+
                 </div>
             </div>
         </div>

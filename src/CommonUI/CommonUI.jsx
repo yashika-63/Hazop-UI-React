@@ -65,3 +65,16 @@ export const truncateWords = (text, wordLimit = 4) => {
   if (words.length <= wordLimit) return text;
   return words.slice(0, wordLimit).join(" ") + "...";
 };
+
+
+export const getRiskColor = (risk) => {
+  if (!risk) return '#fff';
+  const r = Number(risk);
+
+  if ([1, 2, 3, 4, 5].includes(r)) return '#207229';        // Trivial
+  if ([6, 8, 9, 10].includes(r)) return '#56a744';          // Tolerable
+  if ([12, 15].includes(r)) return '#fef65e';              // Moderate
+  if ([16, 18].includes(r)) return '#fa9201';              // Substantial
+  if ([20, 25].includes(r)) return '#f91111';              // Intolerable
+  return '#fff';
+};

@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { pdf } from "@react-pdf/renderer";
-import { Document, Page, Text, View, StyleSheet, PDFViewer, Image  , Link} from "@react-pdf/renderer";
+import { Document, Page, Text, View, StyleSheet, PDFViewer, Image, Link } from "@react-pdf/renderer";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { strings } from "../string";
-import { formatDate } from "../CommonUI/CommonUI";
+import { formatDate, getRiskColor } from "../CommonUI/CommonUI";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     },
 
     pending: {
-        color: '#dc3545',
+        color: '#ffa500',
         fontWeight: '600'
     },
     actionTaken: { color: '#007bff', fontWeight: '600' },
@@ -156,7 +156,14 @@ const styles = StyleSheet.create({
         fontSize: 10,
         color: '#212529',
     },
-
+    indexRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    indexCol: {
+        fontSize: 10,
+        paddingHorizontal: 5,
+    },
 
     badge: { borderRadius: 8, paddingHorizontal: 6, paddingVertical: 2, fontSize: 8, color: 'white' },
     bgGreen: { backgroundColor: '#28a745' },
@@ -206,6 +213,9 @@ const Footer = ({ downloadDate }) => (
         <Text style={styles.footerText} render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`} />
     </View>
 );
+
+// Compute page numbers for nodes
+
 
 // Updated MyDocument with default props and safe optional chaining
 const MyDocument = ({
@@ -299,7 +309,7 @@ const MyDocument = ({
                 </View>
             )}
             {/* HAZOP Team */}
-            <View style={styles.section}>
+            <View style={styles.section} wrap={false}>
                 <Text style={styles.sectionTitle}>HAZOP Team</Text>
                 <View style={styles.table}>
                     <View style={[styles.tableRow, styles.tableRowHeader]}>
@@ -325,35 +335,47 @@ const MyDocument = ({
             <Text style={styles.sectionTitle}>Index of Hazop Nodes</Text>
 
             <View style={{ marginTop: 10 }}>
+                {/* Table Header */}
+                <View style={[styles.indexRow, { backgroundColor: '#f0f0f0', paddingVertical: 4 }]}>
+                    <Text style={[styles.indexCol, { width: '20%', fontWeight: 'bold' }]}>Node No.</Text>
+                    <Text style={[styles.indexCol, { width: '60%', fontWeight: 'bold' }]}>Title</Text>
+                    <Text style={[styles.indexCol, { width: '20%', fontWeight: 'bold', textAlign: 'right' }]}>
+                        Page
+                    </Text>
+                </View>
+
+                {/* Table Body */}
                 {nodes?.map((node, idx) => (
                     <View
                         key={node.id}
-                        style={{
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            marginBottom: 5,
-                            borderBottomWidth: 0.5,
-                            borderBottomColor: '#ccc',
-                            paddingBottom: 2,
-                        }}
+                        style={[
+                            styles.indexRow,
+                            { borderBottomWidth: 0.5, borderBottomColor: '#ccc', paddingVertical: 4 },
+                        ]}
                     >
-                        <Text style={{ fontSize: 10, fontWeight: 'bold' }}>
+                        <Text style={[styles.indexCol, { width: '20%' }]}>
                             Node {node.nodeNumber || '-'}
                         </Text>
-
-                        {/* LINK to node section */}
                         <Link
                             src={`#node-${node.id}`}
-                            style={{ fontSize: 10, color: '#007bff', textDecoration: 'underline' }}
+                            style={[styles.indexCol, { width: '60%', color: '#007bff', textDecoration: 'underline' }]}
                         >
                             {node.title || '-'}
                         </Link>
+
+                        <Text
+                            style={[styles.indexCol, { width: '20%', textAlign: 'right' }]}
+                            render={({ pageNumber }) => `${pageNumber}`}
+                            fixed
+                        />
+
                     </View>
                 ))}
             </View>
 
             <Footer downloadDate={downloadDate} />
         </Page>
+
         {/* Page 2: Node Overview */}
         <Page size="A4" style={styles.page}>
             <Header hazop={hazop} />
@@ -379,7 +401,7 @@ const MyDocument = ({
                             { label: 'Pressure', value: node?.pressure },
                             { label: 'Quantity / Flow Rate', value: node?.quantityFlowRate },
                             { label: 'Chemical & Utilities', value: node?.chemicalAndUtilities },
-                            
+
                         ].map((item, idx) => (
                             <View key={idx} style={styles.nodeField}>
                                 <Text style={styles.nodeLabel}>{item.label}:</Text>
@@ -397,11 +419,12 @@ const MyDocument = ({
         {/* Pages 4+: Node Details + Recommendations */}
         {nodes?.map((node) => (
             <Page size="A4" style={styles.page} key={node.id}>
-                    <View id={`node-${node.id}`} />
+                <View id={`node-${node.id}`} />
                 <Header hazop={hazop} />
                 <Text style={styles.sectionTitle}>Hazop Node Details</Text>
+
                 <View style={styles.nodeContainer}>
-                    {/* Node Information (Title & Number) */}
+                    {/* Node Information */}
                     <View style={styles.nodeHeader}>
                         <Text style={styles.title}>Node {node?.nodeNumber}: {node?.title || '-'}</Text>
                         <View style={[styles.badge, node?.completionStatus ? styles.bgGreen : styles.bgRed]}>
@@ -411,125 +434,139 @@ const MyDocument = ({
                         </View>
                     </View>
 
-                    {/* Node Details Section */}
-                    {nodeDetails?.[node?.id]?.map((detail, index) => (
-                        <View key={index} style={{ marginBottom: 15 }}>
-                            {/* Card for general parameters */}
-                            <View style={styles.infoCard}>
-                                {[
-                                    { label: "General Param", value: detail?.generalParameter },
-                                    { label: "Specific Param", value: detail?.specificParameter },
-                                    { label: "Guid Word", value: detail?.guidWord },
-                                    { label: "Deviation", value: detail?.deviation },
-                                    { label: "Causes", value: detail?.causes },
-                                    { label: "Consequences", value: detail?.consequences },
-                                ].map((item, idx) => {
-                                    const isLong = item.value && item.value.length > 30; // adjust threshold as needed
-                                    return (
-                                        <View
-                                            key={idx}
-                                            style={{
-                                                flexDirection: isLong ? "column" : "row",
-                                                marginBottom: 5,
-                                            }}
-                                        >
-                                            <Text style={[styles.nodeLabel, { width: isLong ? "100%" : "30%" }]}>
-                                                {item.label}:
-                                            </Text>
-                                            <Text style={[styles.nodeValue, { width: isLong ? "100%" : "70%" }]}>
-                                                {item.value || "-"}
-                                            </Text>
-                                        </View>
-                                    );
-                                })}
-                            </View>
+                    {/* Loop over node details */}
+                    {nodeDetails?.[node?.id]?.map((detail, index) => {
+                        const recs = nodeRecommendations?.[node?.id]?.[detail?.id] || [];
 
-                            {/* Table for Existing Controls */}
-                            <View wrap={false} style={{ marginBottom: 10 }}>
-                                <Text style={[styles.sectionTitle, { marginTop: 5 }]}>Existing Controls</Text>
-                                <View style={styles.table}>
-                                    {/* Table Header */}
-                                    <View style={[styles.tableRow, styles.tableRowHeader]}>
-                                        <View style={{ ...styles.tableCol, width: '50%' }}>
-                                            <Text style={styles.tableCellHeader}>Control</Text>
+                        return (
+                            <View key={index} style={{ marginBottom: 15 }} >
+                                {/* Node Detail Card */}
+                                <View style={styles.infoCard}>
+                                    {[
+                                        { label: "General Param", value: detail?.generalParameter },
+                                        { label: "Specific Param", value: detail?.specificParameter },
+                                        { label: "Guid Word", value: detail?.guidWord },
+                                        { label: "Deviation", value: detail?.deviation },
+                                        { label: "Causes", value: detail?.causes },
+                                        { label: "Consequences", value: detail?.consequences },
+                                    ].map((item, idx) => {
+                                        const isLong = item.value && item.value.length > 30;
+                                        return (
+                                            <View
+                                                key={idx}
+                                                style={{
+                                                    flexDirection: isLong ? "column" : "row",
+                                                    marginBottom: 5,
+                                                }}
+                                            >
+                                                <Text style={[styles.nodeLabel, { width: isLong ? "100%" : "30%" }]}>
+                                                    {item.label}:
+                                                </Text>
+                                                <Text style={[styles.nodeValue, { width: isLong ? "100%" : "70%" }]}>
+                                                    {item.value || "-"}
+                                                </Text>
+                                            </View>
+                                        );
+                                    })}
+                                </View>
+                                {/* Existing Controls Table */}
+                                <View wrap={false} style={{ marginBottom: 10 }}>
+                                    <Text style={[styles.sectionTitle, { marginTop: 5 }]}>Existing Controls</Text>
+                                    <View style={styles.table}>
+                                        {/* Table Header */}
+                                        <View style={[styles.tableRow, styles.tableRowHeader]}>
+                                            <View style={{ ...styles.tableCol, width: '50%' }}>
+                                                <Text style={styles.tableCellHeader}>Control</Text>
+                                            </View>
+                                            <View style={{ ...styles.tableCol, width: '16.66%' }}>
+                                                <Text style={styles.tableCellHeader}>Probability</Text>
+                                            </View>
+                                            <View style={{ ...styles.tableCol, width: '16.66%' }}>
+                                                <Text style={styles.tableCellHeader}>Severity</Text>
+                                            </View>
+                                            <View style={{ ...styles.tableCol, width: '16.66%' }}>
+                                                <Text style={styles.tableCellHeader}>Risk Rating</Text>
+                                            </View>
                                         </View>
-                                        <View style={{ ...styles.tableCol, width: '16.66%' }}>
-                                            <Text style={styles.tableCellHeader}>Probability</Text>
-                                        </View>
-                                        <View style={{ ...styles.tableCol, width: '16.66%' }}>
-                                            <Text style={styles.tableCellHeader}>Severity</Text>
-                                        </View>
-                                        <View style={{ ...styles.tableCol, width: '16.66%' }}>
-                                            <Text style={styles.tableCellHeader}>Risk Rating</Text>
-                                        </View>
-                                    </View>
 
-                                    {/* Table Body */}
-                                    <View style={styles.tableRow}>
-                                        <View style={{ ...styles.tableCol, width: '50%' }}>
-                                            <Text style={styles.tableCell}>{detail?.existineControl || '-'}</Text>
-                                        </View>
-                                        <View style={{ ...styles.tableCol, width: '16.66%' }}>
-                                            <Text style={styles.tableCell}>{detail?.existineProbability || '-'}</Text>
-                                        </View>
-                                        <View style={{ ...styles.tableCol, width: '16.66%' }}>
-                                            <Text style={styles.tableCell}>{detail?.existingSeverity || '-'}</Text>
-                                        </View>
-                                        <View style={{ ...styles.tableCol, width: '16.66%' }}>
-                                            <Text style={styles.tableCell}>{detail?.riskRating || '-'}</Text>
+                                        {/* Table Body */}
+                                        <View style={styles.tableRow}>
+                                            <View style={{ ...styles.tableCol, width: '50%' }}>
+                                                <Text style={styles.tableCell}>{detail?.existineControl || '-'}</Text>
+                                            </View>
+                                            <View style={{ ...styles.tableCol, width: '16.66%' }}>
+                                                <Text style={styles.tableCell}>{detail?.existineProbability || '-'}</Text>
+                                            </View>
+                                            <View style={{ ...styles.tableCol, width: '16.66%' }}>
+                                                <Text style={styles.tableCell}>{detail?.existingSeverity || '-'}</Text>
+                                            </View>
+                                            <View
+                                                style={{
+                                                    ...styles.tableCol,
+                                                    width: '16.66%',
+                                                    backgroundColor: getRiskColor(detail?.riskRating),
+                                                    paddingVertical: 2,
+                                                    borderRadius: 2,
+                                                }}
+                                            >
+                                                <Text style={[styles.tableCell, { textAlign: 'center', color: '#000' }]}>
+                                                    {detail?.riskRating || '-'}
+                                                </Text>
+                                            </View>
                                         </View>
                                     </View>
                                 </View>
-                            </View>
 
-                            {/* Additional Controls table */}
-                            <View wrap={false} style={{ marginBottom: 10 }}>
-                                <Text style={[styles.sectionTitle, { marginTop: 5 }]}>Additional Controls</Text>
-                                <View style={styles.table}>
-                                    <View style={[styles.tableRow, styles.tableRowHeader]}>
-                                        <View style={{ ...styles.tableCol, width: '50%' }}>
-                                            <Text style={styles.tableCellHeader}>Control</Text>
+                                {/* Additional Controls Table */}
+                                <View wrap={false} style={{ marginBottom: 10 }}>
+                                    <Text style={[styles.sectionTitle, { marginTop: 5 }]}>Additional Controls</Text>
+                                    <View style={styles.table}>
+                                        {/* Table Header */}
+                                        <View style={[styles.tableRow, styles.tableRowHeader]}>
+                                            <View style={{ ...styles.tableCol, width: '50%' }}>
+                                                <Text style={styles.tableCellHeader}>Control</Text>
+                                            </View>
+                                            <View style={{ ...styles.tableCol, width: '16.66%' }}>
+                                                <Text style={styles.tableCellHeader}>Probability</Text>
+                                            </View>
+                                            <View style={{ ...styles.tableCol, width: '16.66%' }}>
+                                                <Text style={styles.tableCellHeader}>Severity</Text>
+                                            </View>
+                                            <View style={{ ...styles.tableCol, width: '16.66%' }}>
+                                                <Text style={styles.tableCellHeader}>Risk Rating</Text>
+                                            </View>
                                         </View>
-                                        <View style={{ ...styles.tableCol, width: '16.66%' }}>
-                                            <Text style={styles.tableCellHeader}>Probability</Text>
-                                        </View>
-                                        <View style={{ ...styles.tableCol, width: '16.66%' }}>
-                                            <Text style={styles.tableCellHeader}>Severity</Text>
-                                        </View>
-                                        <View style={{ ...styles.tableCol, width: '16.66%' }}>
-                                            <Text style={styles.tableCellHeader}>Risk Rating</Text>
-                                        </View>
-                                    </View>
-                                    <View style={styles.tableRow}>
-                                        <View style={{ ...styles.tableCol, width: '50%' }}>
-                                            <Text style={styles.tableCell}>{detail?.additionalControl || '-'}</Text>
-                                        </View>
-                                        <View style={{ ...styles.tableCol, width: '16.66%' }}>
-                                            <Text style={styles.tableCell}>{detail?.additionalProbability || '-'}</Text>
-                                        </View>
-                                        <View style={{ ...styles.tableCol, width: '16.66%' }}>
-                                            <Text style={styles.tableCell}>{detail?.additionalSeverity || '-'}</Text>
-                                        </View>
-                                        <View style={{ ...styles.tableCol, width: '16.66%' }}>
-                                            <Text style={styles.tableCell}>{detail?.additionalRiskRating || '-'}</Text>
+
+                                        {/* Table Body */}
+                                        <View style={styles.tableRow}>
+                                            <View style={{ ...styles.tableCol, width: '50%' }}>
+                                                <Text style={styles.tableCell}>{detail?.additionalControl || '-'}</Text>
+                                            </View>
+                                            <View style={{ ...styles.tableCol, width: '16.66%' }}>
+                                                <Text style={styles.tableCell}>{detail?.additionalProbability || '-'}</Text>
+                                            </View>
+                                            <View style={{ ...styles.tableCol, width: '16.66%' }}>
+                                                <Text style={styles.tableCell}>{detail?.additionalSeverity || '-'}</Text>
+                                            </View>
+                                            <View
+                                                style={{
+                                                    ...styles.tableCol,
+                                                    width: '16.66%',
+                                                    backgroundColor: getRiskColor(detail?.additionalRiskRating),
+                                                    paddingVertical: 2,
+                                                    borderRadius: 2,
+                                                }}
+                                            >
+                                                <Text style={[styles.tableCell, { textAlign: 'center', color: '#000' }]}>
+                                                    {detail?.additionalRiskRating || '-'}
+                                                </Text>
+                                            </View>
                                         </View>
                                     </View>
                                 </View>
-                            </View>
 
-                        </View>
-                    ))}
-
-
-
-                    {/* Recommendations for Node Details */}
-                    <View style={styles.nodeBody}>
-                        {nodeDetails?.[node?.id]?.map((detail, index) => {
-                            // Safely get recommendations for this detail
-                            const recs = nodeRecommendations?.[node?.id]?.[detail?.id] || [];
-
-                            return (
-                                <View key={index} style={styles.detailCard}>
+                                {/* Recommendations for this detail */}
+                                <View style={styles.detailCard} wrap={false}>
                                     <Text style={{ fontSize: 10, fontWeight: 'bold', color: '#d63384', marginBottom: 5 }}>
                                         Recommendations for {detail?.designIntent || 'Detail ' + (index + 1)}
                                     </Text>
@@ -569,7 +606,9 @@ const MyDocument = ({
                                                         <Text style={styles.tableCell}>{formatDate(r?.completionDate)}</Text>
                                                     </View>
                                                     <View style={{ ...styles.tableCol, width: '20%' }}>
-                                                        <Text style={styles.tableCell}>{r?.completionStatus ? 'Completed' : 'Pending'}</Text>
+                                                        <Text style={styles.tableCell}>
+                                                            {r?.completionStatus ? 'Completed' : 'Pending'}
+                                                        </Text>
                                                     </View>
                                                 </View>
                                             ))}
@@ -578,15 +617,15 @@ const MyDocument = ({
                                         <Text>No recommendations available for this detail.</Text>
                                     )}
                                 </View>
-                            );
-                        })}
-                    </View>
-
+                            </View>
+                        );
+                    })}
                 </View>
 
                 <Footer downloadDate={downloadDate} />
             </Page>
         ))}
+
 
         {/* Page 3: All Recommendations */}
         <Page size="A4" style={styles.page}>
@@ -599,10 +638,6 @@ const MyDocument = ({
                     <View key={idx} style={styles.card} wrap={false}>
                         <Text style={styles.cardTitle}>Recommendation {idx + 1}</Text>
 
-                        <View style={styles.cardRow}>
-                            <Text style={styles.cardLabel}>Node:</Text>
-                            <Text style={styles.cardValue}>{rec.id || '-'}</Text>
-                        </View>
 
                         <View style={styles.cardRow}>
                             <Text style={styles.cardLabel}>Recommendation:</Text>
@@ -676,7 +711,6 @@ const MyDocument = ({
             <Footer downloadDate={downloadDate} />
         </Page>
 
-
         {/* Last Page: Assignment Summary */}
         <Page size="A4" style={styles.page}>
             <Header hazop={hazop} />
@@ -695,7 +729,7 @@ const MyDocument = ({
 
                             return (
                                 <View key={idx} style={styles.assignmentCard} wrap={false}>
-                                    <Text style={styles.cardTitle}> {idx + 1}</Text>
+                                    <Text style={styles.cardTitle}>Recommendation {idx + 1}</Text>
 
                                     <View style={styles.cardRow}>
                                         <Text style={styles.cardLabel}>Recommendation:</Text>
@@ -713,11 +747,6 @@ const MyDocument = ({
                                     </View>
 
                                     <View style={styles.cardRow}>
-                                        <Text style={styles.cardLabel}>Assigned By:</Text>
-                                        <Text style={styles.cardValue}>{item.createdByName || item.createdByEmpCode || '-'}</Text>
-                                    </View>
-
-                                    <View style={styles.cardRow}>
                                         <Text style={styles.cardLabel}>Assigned Date:</Text>
                                         <Text style={styles.cardValue}>{formatDate(item.assignWorkDate) || '-'}</Text>
                                     </View>
@@ -727,11 +756,6 @@ const MyDocument = ({
                                         <Text style={[styles.cardValue, item.completionStatus ? styles.completed : styles.pending]}>
                                             {item.completionStatus ? "Completed" : "Pending"}
                                         </Text>
-                                    </View>
-
-                                    <View style={styles.cardRow}>
-                                        <Text style={styles.cardLabel}>Completion Date:</Text>
-                                        <Text style={styles.cardValue}>{item.completionDate ? formatDate(item.completionDate) : '-'}</Text>
                                     </View>
 
                                     <View style={styles.cardRow}>
@@ -745,32 +769,6 @@ const MyDocument = ({
                                         </Text>
                                     </View>
 
-                                    <View style={styles.cardRow}>
-                                        <Text style={styles.cardLabel}>Accepted By:</Text>
-                                        <Text style={styles.cardValue}>{item.acceptedByEmployeeName || '-'}</Text>
-                                    </View>
-
-                                    <View style={styles.cardRow}>
-                                        <Text style={styles.cardLabel}>Verification Action:</Text>
-                                        <Text style={styles.cardValue}>{rec.sendForVerificationAction ? "Action Taken" : "No Action"}</Text>
-                                    </View>
-
-                                    <View style={styles.cardRow}>
-                                        <Text style={styles.cardLabel}>Verification Status:</Text>
-                                        <Text style={[styles.cardValue, rec.sendForVerificationActionStatus ? styles.completed : styles.pending]}>
-                                            {rec.sendForVerificationActionStatus ? "Approved" : "Rejected"}
-                                        </Text>
-                                    </View>
-
-                                    <View style={styles.cardRow}>
-                                        <Text style={styles.cardLabel}>Verified By:</Text>
-                                        <Text style={styles.cardValue}>{rec.verificationResponsibleEmployeeName || '-'}</Text>
-                                    </View>
-
-                                    <View style={styles.cardRow}>
-                                        <Text style={styles.cardLabel}>Verification Date:</Text>
-                                        <Text style={styles.cardValue}>{rec.verificationDate ? formatDate(rec.verificationDate) : '-'}</Text>
-                                    </View>
                                 </View>
                             );
                         })}
@@ -781,16 +779,15 @@ const MyDocument = ({
             <Footer downloadDate={downloadDate} />
         </Page>
 
-
         <Page size="A4" style={styles.page}>
-            <Text style={styles.sectionTitle}>Verification Summary</Text>
+            <Text style={styles.sectionTitle}>Confirmation Summary</Text>
 
             {(verificationData || []).length === 0 ? (
                 <Text style={{ fontSize: 10, marginBottom: 10 }}>No verification records available</Text>
             ) : (
                 (verificationData || []).map((item, i) => (
                     <View key={i} style={styles.verificationCard} wrap={false}>
-                        <Text style={styles.cardTitle}>Record {i + 1}</Text>
+                        <Text style={styles.cardTitle}>Recommendation {i + 1}</Text>
 
                         <View style={styles.cardRow}>
                             <Text style={styles.cardLabel}>Recommendation:</Text>
@@ -836,8 +833,6 @@ const MyDocument = ({
 
             <Footer downloadDate={downloadDate} />
         </Page>
-
-
 
     </Document>
 );

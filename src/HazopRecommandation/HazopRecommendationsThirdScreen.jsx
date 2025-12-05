@@ -108,7 +108,6 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
 
     return (
         <div className="third-screen-container">
-            <h5>Verification Action Records</h5>
 
             {loading && (
                 <div className="loading-overlay">
@@ -136,7 +135,7 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
                     ) : (
                         records.map((item, index) => (
                             <tr key={item.id}>
-                                <td>{index+ 1}</td>
+                                <td>{index + 1}</td>
                                 <td>{item.recommendation}</td>
                                 <td>{item.remarkbyManagement || "-"}</td>
                                 <td>{item.verificationResponsibleEmployeeName || "-"}</td>

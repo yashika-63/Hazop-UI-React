@@ -22,20 +22,22 @@ const HazopAllRecommendations = ({ hazopId }) => {
         setOpenDropdown(openDropdown === id ? null : id);
     };
     console.log("hazopId", hazopId);
-    useEffect(() => {
+
+    const fetchRecommendations = async () => {
         if (!hazopId) return;
-        const fetchRecommendations = async () => {
-            try {
-                const res = await axios.get(
-                    `http://${strings.localhost}/api/nodeRecommendation/getByHazopRegistration/${hazopId}`
-                );
-                setRecommendations(res.data);
-            } catch (err) {
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
-        };
+
+        try {
+            const res = await axios.get(
+                `http://${strings.localhost}/api/nodeRecommendation/getByHazopRegistration/${hazopId}`
+            );
+            setRecommendations(res.data);
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+    useEffect(() => {
         fetchRecommendations();
     }, [hazopId]);
 
@@ -80,6 +82,7 @@ const HazopAllRecommendations = ({ hazopId }) => {
                 `http://${strings.localhost}/api/nodeRecommendation/sendForVerification/${selectedRecommendation.id}/${selectedEmployee.empCode}`
             );
             showToast("Recommendation sent successfully!", 'success');
+            fetchRecommendations();
             setPopupOpen(false);
         } catch (err) {
             console.error(err);
@@ -107,7 +110,8 @@ const HazopAllRecommendations = ({ hazopId }) => {
 
 
     const renderDropdown = (rec) => {
-        const isDisabled = rec.sendForVerificationActionStatus;
+        // ENABLE only for "Not Marked"
+        const isNotMarked = !rec.sendForVerification && !rec.sendForVerificationActionStatus;
 
         return (
             <div className="dropdown">
@@ -118,10 +122,10 @@ const HazopAllRecommendations = ({ hazopId }) => {
                 {openDropdown === rec.id && (
                     <div className="dropdown-content">
                         <button
-                            disabled={isDisabled}
-                            className={isDisabled ? "disabled-option" : ""}
-                            onClick={() => !isDisabled && handleOpenPopup(rec)}
-                            title={isDisabled ? "Already approved, no need to send for verification" : ""}
+                            disabled={!isNotMarked}
+                            className={!isNotMarked ? "disabled-option" : ""}
+                            onClick={() => isNotMarked && handleOpenPopup(rec)}
+                            title={!isNotMarked ? "Cannot send. Already marked or pending approval." : ""}
                         >
                             <FaPaperPlane /> Send For Verification
                         </button>
@@ -165,7 +169,7 @@ const HazopAllRecommendations = ({ hazopId }) => {
                                     ) : !rec.sendForVerification && rec.sendForVerificationActionStatus ? (
                                         <span className="status-completed">Action Taken</span>
                                     ) : (
-                                        <span className="status-pending">N/A</span>
+                                        <span className="status-notMarked">Not Marked</span>
                                     )}
                                 </td>
 

@@ -171,11 +171,6 @@
 
 
 
-.hazoplist-table td .dropdown {
-  z-index: 100;
-  position: relative;
-  
-}
 
 /* Optional: buttons inside dropdown more visible */
 .dropdown-content button {
