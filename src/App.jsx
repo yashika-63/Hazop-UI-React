@@ -14,6 +14,8 @@ import "./styles/global.css";
 import RecommandationHandler from './HazopRecommandation/RecommandationHandler';
 import HazopApprovalViewPage from './ApprovalRequest/HazopApprovalViewPage';
 import HazopConfirmationViewPage from './ApprovalRequest/HazopConfirmationViewPage';
+import CreateNodeDetails from './AddNodeScreen/CreateNodeDetails';
+import UpdateNodeDetails from './AddNodeScreen/UpdateNodeDetails';
 import HazopWorkflow from './HazopWorkflow/HazopStatus';
 import MOCList from './MOC/MOCList';
 import HazopStatusPage from './HazopList/HazopStatusPage';
@@ -66,6 +68,8 @@ const App = () => {
                     <Route path='/RecommandationHandler' element={<RecommandationHandler />} />
                     <Route path="/hazop-approval-view" element={<HazopApprovalViewPage />} />
                     <Route path="/hazop-confirmation-view" element={<HazopConfirmationViewPage />} />
+                    <Route path='/CreateNodeDetails' element={<CreateNodeDetails />} />
+                    <Route path='/UpdateNodeDetails' element={<UpdateNodeDetails />} />
                     <Route path="/complete-hazop-view" element={<HazopView />} />
                     <Route path="/MOCList" element={<MOCList />} />
                     <Route path="/HazopWorkflow" element={<HazopWorkflow />} />

@@ -51,6 +51,8 @@ const NodePopup = ({ onClose, onSave, hazopData }) => {
     }
     if (!form.hazopTitle.trim()) {
       newErrors.hazopTitle = "Node title is required.";
+    if (!form.hazopTitle.trim()) {
+      newErrors.hazopTitle = "Node title is required.";
       showToast("Node title is required", "warn");
     }
     if (!form.sopNo.trim()) {
@@ -104,6 +106,7 @@ const NodePopup = ({ onClose, onSave, hazopData }) => {
           date: formatDateToBackend(form.date),
           designIntent: form.designIntent,
           pIdRevision: form.pIdRevision,
+          hazopTitle: form.hazopTitle,
           hazopTitle: form.hazopTitle,
           sopNo: form.sopNo,
           sopDate: formatDateToBackend(form.sopDate),

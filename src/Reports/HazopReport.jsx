@@ -258,6 +258,7 @@ const MyDocument = ({
                     <View style={styles.infoItem}>
                         <Text style={styles.infoLabel}>Title</Text>
                         <Text style={styles.infoValue}>{hazop?.hazopTitle || '-'}</Text>
+                        <Text style={styles.infoValue}>{hazop?.hazopTitle || '-'}</Text>
                     </View>
                     <View style={styles.infoItem}>
                         <Text style={styles.infoLabel}>Site</Text>
@@ -375,7 +376,7 @@ const MyDocument = ({
                             src={`#node-${node.id}`}
                             style={[styles.indexCol, { width: '80%', color: '#007bff', textDecoration: 'underline' }]}
                         >
-                            {node.title || '-'}
+                            {node.hazopTitle || '-'}
                         </Link>
 
 
@@ -394,7 +395,7 @@ const MyDocument = ({
             {nodes?.map((node, index) => (
                 <View key={node.id} style={styles.nodeContainer} wrap={false}>
                     <View style={[styles.nodeHeader, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }]}>
-                        <Text>{node.title || '-'} - {node.nodeNumber || '-'}</Text>
+                        <Text>{node.hazopTitle || '-'} - {node.nodeNumber || '-'}</Text>
                         <Text>Creation Date: {formatDate(node?.registrationDate) || '-'}</Text>
                     </View>
 

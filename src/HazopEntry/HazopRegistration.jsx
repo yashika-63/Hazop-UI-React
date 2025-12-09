@@ -73,7 +73,11 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
     }
     if (!formData.hazopTitle.trim()) {
       newErrors.hazopTitle = "Title is required.";
+    if (!formData.hazopTitle.trim()) {
+      newErrors.hazopTitle = "Title is required.";
       showToast("Title is required.", "warn");
+    } else if (!/^[A-Za-z0-9\s,-]+$/.test(formData.hazopTitle)) {
+      newErrors.hazopTitle = "Only letters, numbers, commas & hyphens allowed.";
     } else if (!/^[A-Za-z0-9\s,-]+$/.test(formData.hazopTitle)) {
       newErrors.hazopTitle = "Only letters, numbers, commas & hyphens allowed.";
     }
