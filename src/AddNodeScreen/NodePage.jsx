@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import "./Node.css";
-import NodePopup from "./NodePopup";
 import { formatDate, showToast } from "../CommonUI/CommonUI";
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
@@ -8,22 +7,22 @@ import axios from "axios";
 import { strings } from "../string";
 import { FaEllipsisV } from "react-icons/fa";
 import { FaSquareCheck } from "react-icons/fa6";
+import NodePopup from "./NodePopup";
 
-const NodePage = ({ hazopData: propHazopData, hazopTeam: propHazopTeam }) => {
+const NodePage = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [nodes, setNodes] = useState([]);
   const [showAllMembers, setShowAllMembers] = useState(false);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const location = useLocation();
-  const { hazopData, hazopTeam: stateTeam } = location.state || {};
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [hazopTeam, setHazopTeam] = useState([]);
   const [originalTeam, setOriginalTeam] = useState([]);
   const [openDropdown, setOpenDropdown] = useState(null);
   const [mocDetails, setMocDetails] = useState(null);
   const [hasMoc, setHasMoc] = useState(false);
-
+  const [hazopData , setHazopData] = useState();
   const toggleDropdown = (id) => {
     setOpenDropdown(openDropdown === id ? null : id);
   };
@@ -33,15 +32,36 @@ const NodePage = ({ hazopData: propHazopData, hazopTeam: propHazopTeam }) => {
     // Add your completion logic here later
   };
 
+
+
+
+  
   useEffect(() => {
-    if (stateTeam) {
-      setHazopTeam(stateTeam);
-      setOriginalTeam(stateTeam);
+    // Retrieve the data from localStorage
+    const storedHazopData = localStorage.getItem("hazopData");
+    const storedHazopTeam = localStorage.getItem("hazopTeam");
+
+    if (storedHazopData) {
+      setHazopData(JSON.parse(storedHazopData));
     }
-  }, [stateTeam]);
+
+    if (storedHazopTeam) {
+      setHazopTeam(JSON.parse(storedHazopTeam));
+    }
+  }, []);
+
+  // useEffect(() => {
+  //   if (stateTeam) {
+  //     setHazopTeam(stateTeam);
+  //     setOriginalTeam(stateTeam);
+  //   }
+  // }, [stateTeam]);
 
   const fetchNodes = async () => {
-    if (!hazopData?.id) return;
+    if (!hazopData?.id) {
+      console.error("No hazopData or hazopData.id available");
+      return;
+    }
     try {
       const response = await axios.get(
         `http://${strings.localhost}/api/hazopNode/by-registration-status?registrationId=${hazopData.id}&status=true`
@@ -52,6 +72,15 @@ const NodePage = ({ hazopData: propHazopData, hazopTeam: propHazopTeam }) => {
     }
   };
 
+
+  useEffect(() => {
+    if (!hazopData?.id) {
+      console.log("No hazopData or hazopData.id is missing");
+      return;
+    }
+      fetchNodes();
+  }, [hazopData]);
+  
   const handleSaveNode = async () => {
     await fetchNodes();
     setShowPopup(false);
@@ -296,9 +325,17 @@ const NodePage = ({ hazopData: propHazopData, hazopTeam: propHazopTeam }) => {
       <div className="table-section">
         <div className="table-header">
           <h1>Nodes</h1>
-          <button className="add-btn" onClick={() => setShowPopup(true)}>
+          <button
+            type="button"
+            className="add-btn"
+            onClick={() => {
+              console.log("Add Node clicked");
+              setShowPopup(true);
+            }}
+          >
             + Add Node
           </button>
+
         </div>
 
         <div className="card table-card">
@@ -338,8 +375,8 @@ const NodePage = ({ hazopData: propHazopData, hazopTeam: propHazopTeam }) => {
                           n.completionStatus === true
                             ? "status-completed"
                             : n.completionStatus === false
-                            ? "status-pending"
-                            : "status-pending"
+                              ? "status-pending"
+                              : "status-pending"
                         }
                       >
                         {n.completionStatus === true ? "Completed" : "Ongoing"}

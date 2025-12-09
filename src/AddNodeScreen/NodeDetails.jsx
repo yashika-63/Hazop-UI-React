@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
-import NodeDetailsPopup from "./CreateNodeDetails";
 import { formatDate, showToast } from "../CommonUI/CommonUI";
 import NodeDetailsUpdatePopup from "./UpdateNodeDetails";
 import { FaEdit, FaEllipsisV, FaTrash } from "react-icons/fa";
@@ -415,6 +414,7 @@ const NodeDetails = () => {
             navigate("/CreateNodeDetails", {
               state: { nodeID: id },
             })
+            
           }
         >
           + Add Discussion
