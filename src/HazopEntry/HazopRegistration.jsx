@@ -61,38 +61,45 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
   const validate = () => {
     const newErrors = {};
 
+    // Check Hazop Date
     if (!formData.hazopDate) {
       newErrors.hazopDate = "Date is required.";
-      showToast("Date is required", "warn");
+      showToast("Date is required.", "warn");
     }
+
+    // Check Site
     if (!formData.site.trim()) {
       newErrors.site = "Site is required.";
       showToast("Site is required.", "warn");
     } else if (!/^[A-Za-z0-9\s,-]+$/.test(formData.site)) {
-      newErrors.site = "Only letters, numbers, commas & hyphens allowed.";
+      newErrors.site = "Only letters, numbers, commas & hyphens allowed in site.";
+      showToast("Only letters, numbers, commas & hyphens allowed in site.", "warn");
     }
-    if (!formData.hazopTitle.trim()) {
-      newErrors.hazopTitle = "Title is required.";
+
+    // Check Hazop Title
     if (!formData.hazopTitle.trim()) {
       newErrors.hazopTitle = "Title is required.";
       showToast("Title is required.", "warn");
     } else if (!/^[A-Za-z0-9\s,-]+$/.test(formData.hazopTitle)) {
-      newErrors.hazopTitle = "Only letters, numbers, commas & hyphens allowed.";
-    } else if (!/^[A-Za-z0-9\s,-]+$/.test(formData.hazopTitle)) {
-      newErrors.hazopTitle = "Only letters, numbers, commas & hyphens allowed.";
+      newErrors.hazopTitle = "Only letters, numbers, commas & hyphens allowed in title.";
+      showToast("Only letters, numbers, commas & hyphens allowed in title.", "warn");
     }
+
+    // Check Department
     if (!formData.department.trim()) {
       newErrors.department = "Department is required.";
       showToast("Department is required.", "warn");
     } else if (!/^[A-Za-z\s]+$/.test(formData.department)) {
-      newErrors.department = "Only alphabets allowed.";
+      newErrors.department = "Only alphabets allowed in department.";
       showToast("Only alphabets are allowed in department.", "warn");
     }
 
+    // Check Description
     if (!formData.description.trim()) {
       newErrors.description = "Description is required.";
       showToast("Description is required.", "warn");
     }
+
     console.log("Validation errors", newErrors);
 
     setErrors(newErrors);
@@ -366,7 +373,7 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
 
       <div className="modal-header">
         HAZOP Registration
-        <button className="close-btn" onClick={closePopup} disabled={loading}>
+        <button type="button" className="close-btn" onClick={closePopup} disabled={loading}>
           <FaTimes />
         </button>
       </div>
@@ -535,6 +542,7 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
       </div>
     </div>
   );
+
 };
 
 export default HazopRegistration;

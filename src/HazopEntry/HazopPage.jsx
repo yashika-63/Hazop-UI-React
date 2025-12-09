@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios, { formToJSON } from "axios";
 import "./HazopPage.css";
-import HazopRegistration from "./HazopRegistration";
 import { FaEllipsisV, FaEye, FaEdit, FaTrash, FaTimes, FaLightbulb, FaSearch, FaCheckCircle } from "react-icons/fa";
 import AddHazopTeamPopup from "./AddHazopTeamPopup";
 import { strings } from "../string";
@@ -9,6 +8,7 @@ import "../styles/global.css";
 import { formatDate, showToast } from "../CommonUI/CommonUI";
 import NodePage from "../AddNodeScreen/NodePage";
 import { useNavigate } from "react-router-dom";
+import HazopRegistration from "./HazopRegistration";
 
 const HazopPage = () => {
   const [newRegistered, setNewRegistered] = useState([]);
@@ -111,10 +111,12 @@ const HazopPage = () => {
   };
 
   const handleOpenNode = (item) => {
-    navigate(`/NodePage`, {
-      state: { hazopData: item, hazopTeam: item.team || [] },
-    });
+    // Save the data to localStorage before navigation
+    localStorage.setItem("hazopData", JSON.stringify(item));
+    localStorage.setItem("hazopTeam", JSON.stringify(item.team || []));
+    navigate(`/NodePage`);
   };
+  
 
   const closeNodePopup = (item) => {
     setShowNodePopup(false);
@@ -524,5 +526,6 @@ const HazopPage = () => {
     </div>
   );
 };
+
 
 export default HazopPage;

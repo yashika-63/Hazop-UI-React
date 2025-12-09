@@ -32,7 +32,7 @@ const NodePopup = ({ onClose, onSave, hazopData }) => {
 
   const validate = () => {
     const newErrors = {};
-
+  
     if (!form.nodeNumber) {
       newErrors.nodeNumber = "Node number is required.";
       showToast("Node number is required", "warn");
@@ -49,8 +49,6 @@ const NodePopup = ({ onClose, onSave, hazopData }) => {
       newErrors.pIdRevision = "P&ID No. & Revision is required.";
       showToast("P&ID No. is required", "warn");
     }
-    if (!form.hazopTitle.trim()) {
-      newErrors.hazopTitle = "Node title is required.";
     if (!form.hazopTitle.trim()) {
       newErrors.hazopTitle = "Node title is required.";
       showToast("Node title is required", "warn");
@@ -87,11 +85,11 @@ const NodePopup = ({ onClose, onSave, hazopData }) => {
       newErrors.quantityFlowRate = "Quantity is required.";
       showToast("Quantity is required", "warn");
     }
-
+  
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return Object.keys(newErrors).length === 0; // returns false if there are errors, true if no errors
   };
-
+  
   const handleSave = async () => {
     if (!validate()) return;
 
@@ -268,12 +266,11 @@ const NodePopup = ({ onClose, onSave, hazopData }) => {
                     maxLength={1000}
                   />
                   <small
-                  className={`char-count ${
-                    form.temperature.length >= 1000 ? "limit-reached" : ""
-                  }`}
-                >
-                  {form.temperature.length}/1000
-                </small>
+                    className={`char-count ${form.temperature.length >= 1000 ? "limit-reached" : ""
+                      }`}
+                  >
+                    {form.temperature.length}/1000
+                  </small>
                 </div>
 
                 <div className="form-group">
@@ -289,12 +286,11 @@ const NodePopup = ({ onClose, onSave, hazopData }) => {
                     maxLength={1000}
                   />
                   <small
-                  className={`char-count ${
-                    form.pressure.length >= 1000 ? "limit-reached" : ""
-                  }`}
-                >
-                  {form.pressure.length}/1000
-                </small>
+                    className={`char-count ${form.pressure.length >= 1000 ? "limit-reached" : ""
+                      }`}
+                  >
+                    {form.pressure.length}/1000
+                  </small>
                 </div>
               </div>
             </div>
@@ -314,9 +310,8 @@ const NodePopup = ({ onClose, onSave, hazopData }) => {
                   maxLength={2000}
                 />
                 <small
-                  className={`char-count ${
-                    form.equipment.length >= 2000 ? "limit-reached" : ""
-                  }`}
+                  className={`char-count ${form.equipment.length >= 2000 ? "limit-reached" : ""
+                    }`}
                 >
                   {form.equipment.length}/2000
                 </small>
@@ -335,9 +330,8 @@ const NodePopup = ({ onClose, onSave, hazopData }) => {
                   maxLength={2000}
                 />
                 <small
-                  className={`char-count ${
-                    form.controls.length >= 2000 ? "limit-reached" : ""
-                  }`}
+                  className={`char-count ${form.controls.length >= 2000 ? "limit-reached" : ""
+                    }`}
                 >
                   {form.controls.length}/2000
                 </small>
@@ -359,9 +353,8 @@ const NodePopup = ({ onClose, onSave, hazopData }) => {
                   maxLength={1000}
                 />
                 <small
-                  className={`char-count ${
-                    form.chemicalAndUtilities.length >= 1000 ? "limit-reached" : ""
-                  }`}
+                  className={`char-count ${form.chemicalAndUtilities.length >= 1000 ? "limit-reached" : ""
+                    }`}
                 >
                   {form.chemicalAndUtilities.length}/1000
                 </small>
@@ -382,12 +375,11 @@ const NodePopup = ({ onClose, onSave, hazopData }) => {
                     maxLength={1000}
                   />
                   <small
-                  className={`char-count ${
-                    form.quantityFlowRate.length >= 1000 ? "limit-reached" : ""
-                  }`}
-                >
-                  {form.quantityFlowRate.length}/1000
-                </small>
+                    className={`char-count ${form.quantityFlowRate.length >= 1000 ? "limit-reached" : ""
+                      }`}
+                  >
+                    {form.quantityFlowRate.length}/1000
+                  </small>
                 </div>
               </div>
             </div>
@@ -404,13 +396,15 @@ const NodePopup = ({ onClose, onSave, hazopData }) => {
             Close
           </button>
 
-          <button className="save-btn" onClick={handleSave} disabled={loading}>
+          <button type="button" className="save-btn" onClick={handleSave} disabled={loading}>
             {loading ? "Saving..." : "Save Node"}
           </button>
         </div>
       </div>
     </div>
   );
+
 };
+
 
 export default NodePopup;

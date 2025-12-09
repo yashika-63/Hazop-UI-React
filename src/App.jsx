@@ -20,6 +20,7 @@ import MOCList from './MOC/MOCList';
 import HazopStatusPage from './HazopList/HazopStatusPage';
 import HazopView from './HazopList/HazopView';
 import CreateNodeDetails from './AddNodeScreen/CreateNodeDetails';
+import NodePopup from './AddNodeScreen/NodePopup';
 
 const App = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -72,10 +73,11 @@ const App = () => {
                     <Route path='/UpdateNodeDetails' element={<UpdateNodeDetails />} />
                     <Route path="/complete-hazop-view" element={<HazopView />} />
                     <Route path="/MOCList" element={<MOCList />} />
+                    <Route path="/NodePopup/:id" element={<NodePopup />} />
                     <Route path="/HazopWorkflow" element={<HazopWorkflow />} />
                     <Route path="/HazopStatusPage" element={<HazopStatusPage />} />
 
-                    <Route path="*" element={<Navigate to="/HazopPage" />} />
+                    {/* <Route path="*" element={<Navigate to="/HazopPage" />} /> */}
                   </Routes>
                 </div>
                 <ToastContainer />

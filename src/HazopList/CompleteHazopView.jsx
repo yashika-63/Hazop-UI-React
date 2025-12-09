@@ -390,7 +390,7 @@ const CompleteHazopView = ({
 
             {step === 3 && (
               <div>
-                <h2>Node Details & Recommendations</h2>
+                <h2>Discussions & Recommendations</h2>
                 {nodes.map((node) => {
                   const details = nodeDetails[node.id] || [];
                   const recsMap = nodeRecommendations[node.id] || [];
@@ -409,7 +409,7 @@ const CompleteHazopView = ({
                         details.map((detail, idx) => (
                           <div key={detail.id} className="node-detail-section">
                             <div className="node-detail-label">
-                              {idx + 1}. Node Detail
+                              {idx + 1}. Node Discussion
                             </div>
                             <div className="table-wrapper">
                               <table className="node-details-table">
