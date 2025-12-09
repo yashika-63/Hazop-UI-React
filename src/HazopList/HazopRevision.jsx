@@ -379,10 +379,11 @@ const saveHazop = async () => {
               {loading ? "Saving..." : "Save"}
             </button>
           </div>
-        </div>{" "}
+        </div>
       </div>
     </div>
   );
 };
+}
 
 export default HazopRevision;

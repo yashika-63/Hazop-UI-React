@@ -14,12 +14,12 @@ import "./styles/global.css";
 import RecommandationHandler from './HazopRecommandation/RecommandationHandler';
 import HazopApprovalViewPage from './ApprovalRequest/HazopApprovalViewPage';
 import HazopConfirmationViewPage from './ApprovalRequest/HazopConfirmationViewPage';
-import CreateNodeDetails from './AddNodeScreen/CreateNodeDetails';
 import UpdateNodeDetails from './AddNodeScreen/UpdateNodeDetails';
 import HazopWorkflow from './HazopWorkflow/HazopStatus';
 import MOCList from './MOC/MOCList';
 import HazopStatusPage from './HazopList/HazopStatusPage';
 import HazopView from './HazopList/HazopView';
+import CreateNodeDetails from './AddNodeScreen/CreateNodeDetails';
 
 const App = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
