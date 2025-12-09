@@ -98,8 +98,7 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
-
+  }
 
   useEffect(() => {
     const fetchDropdowns = async () => {

@@ -518,27 +518,6 @@ const CreateNodeDetails = () => {
               <div className="form-group">
                 <label>
                   {" "}
-                  <span className="required-marker">*</span>Consequences
-                </label>
-                <textarea
-                  name="consequences"
-                  rows={rows}
-                  value={form.consequences}
-                  onChange={handleChange}
-                  className="textareaFont"
-                  maxLength={5000}
-                />
-                <small
-                  className={`char-count ${
-                    form.consequences.length >= 5000 ? "limit-reached" : ""
-                  }`}
-                >
-                  {form.consequences.length}/5000
-                </small>
-              </div>
-              <div className="form-group">
-                <label>
-                  {" "}
                   <span className="required-marker">*</span>Causes
                 </label>
                 <textarea
@@ -555,6 +534,27 @@ const CreateNodeDetails = () => {
                   }`}
                 >
                   {form.causes.length}/5000
+                </small>
+              </div>
+              <div className="form-group">
+                <label>
+                  {" "}
+                  <span className="required-marker">*</span>Consequences
+                </label>
+                <textarea
+                  name="consequences"
+                  rows={rows}
+                  value={form.consequences}
+                  onChange={handleChange}
+                  className="textareaFont"
+                  maxLength={5000}
+                />
+                <small
+                  className={`char-count ${
+                    form.consequences.length >= 5000 ? "limit-reached" : ""
+                  }`}
+                >
+                  {form.consequences.length}/5000
                 </small>
               </div>
 

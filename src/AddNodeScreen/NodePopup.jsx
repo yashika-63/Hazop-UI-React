@@ -90,6 +90,7 @@ const NodePopup = ({ onClose, onSave, hazopData }) => {
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  }
   };
 
   const handleSave = async () => {
