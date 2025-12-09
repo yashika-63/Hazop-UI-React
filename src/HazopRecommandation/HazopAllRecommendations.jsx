@@ -143,7 +143,8 @@ const HazopAllRecommendations = ({ hazopId }) => {
                     <div className="loading-spinner"></div>
                 </div>
             )}
-            <table className="premium-table table-not-assigned">
+
+            <table className="assigned-table">
                 <thead>
                     <tr>
                         <th>Sr.No</th>

@@ -1,25 +1,34 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
-import {
-  FaHome,
-  FaUser,
-  FaProjectDiagram,
-  FaFileArchive,
-  FaFileAlt,
-  FaList,
-} from "react-icons/fa";
+import { FaChartLine, FaClipboardCheck, FaCogs, FaHome, FaList, FaListAlt, FaListUl, FaRegListAlt, FaTasks } from "react-icons/fa";
+import { FaDiagramProject, FaPeopleGroup, FaShield } from "react-icons/fa6";
 import "./CommonCss/Sidebar.css";
-import { FaPeopleGroup } from "react-icons/fa6";
 
 const Sidebar = ({ isOpen }) => {
+  const [totalPendingCount, setTotalPendingCount] = useState(0);
+
+  useEffect(() => {
+    fetch("http://localhost:5559/api/hazop-dashboard/total-pending-count?empCode=Rohan Kaitake")
+      .then(res => res.json())
+      .then(data => {
+        setTotalPendingCount(data.totalPendingCount || 0);
+      })
+      .catch(err => console.error(err));
+  }, []);
+
   const menuItems = [
     { name: "HazopPage", path: "/HazopPage", icon: <FaHome /> },
-    { name: "HazopList", path: "/HazopList", icon: <FaList /> },
+    { name: "HazopList", path: "/HazopList", icon: <FaListUl /> },
+    { name: "MOCList", path: "/MOCList", icon: <FaTasks /> },
     {
       name: "ApprovalRequest",
       path: "/RequestHandler",
-      icon: <FaPeopleGroup />,
+      icon: <FaClipboardCheck />,
+      badge: totalPendingCount,
     },
+    { name: "All Hazop's", path: "/HazopStatusPage", icon: <FaChartLine /> },
+    { name: "HazopWorkflow", path: "/HazopWorkflow", icon: <FaDiagramProject /> },
+
   ];
 
   return (
@@ -35,6 +44,7 @@ const Sidebar = ({ isOpen }) => {
             >
               <span className="icon">{item.icon}</span>
               {isOpen && <span className="text">{item.name}</span>}
+              {item.badge > 0 && <span className="sidebar-badge">{item.badge}</span>}
             </NavLink>
           </li>
         ))}

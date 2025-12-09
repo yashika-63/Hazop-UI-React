@@ -135,7 +135,7 @@ const HazopTeamAcceptanceApproval = () => {
                         teamData.map((item, idx) => (
                             <tr key={idx}>
                                 <td>{idx + 1}</td>
-                                <td>{truncateWords(item.javaHazopRegistration?.title || '-')}</td>
+                                <td>{truncateWords(item.javaHazopRegistration?.hazopTitle || '-')}</td>
                                 <td>{truncateWords(item.javaHazopRegistration?.site || '-')}</td>
                                 <td>{item.javaHazopRegistration?.department || "-"}</td>
                                 <td>{formatDate(item.javaHazopRegistration?.hazopCreationDate) || "-"}</td>
@@ -162,7 +162,7 @@ const HazopTeamAcceptanceApproval = () => {
 
                                 <div className="details-row">
                                     <span className="label">Title:</span>
-                                    <span className="value">{selectedRecord.javaHazopRegistration?.title || "-"}</span>
+                                    <span className="value">{selectedRecord.javaHazopRegistration?.hazopTitle || "-"}</span>
                                 </div>
                                 <div className="details-row">
                                     <span className="label">Site:</span>

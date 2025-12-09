@@ -210,9 +210,9 @@ CARD DESIGN MATCHING UI
 }
 
 .avatar {
-  width: 26px;
-  height: 26px;
-  background: #598de0;
+  width: 30px;
+  height: 30px;
+  background: #59ace0;
   color: #fff;
   font-size: 10px;
   font-weight: bold;
@@ -278,9 +278,6 @@ CARD DESIGN MATCHING UI
   }
 }
 
-.toggle-btn {
-  animation: bounce 2s infinite ease-in-out;
-}
 
 
 .top-menu {
@@ -468,3 +465,6 @@ body.modal-open {
     font-size: 14px;
   }
 }
+
+
+

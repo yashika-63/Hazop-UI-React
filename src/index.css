@@ -1,5 +1,6 @@
 :root {
-  font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+  /* font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif; */
+  font-family: sans-serif;
   line-height: 1.5;
   font-weight: 400;
   color-scheme: light dark;

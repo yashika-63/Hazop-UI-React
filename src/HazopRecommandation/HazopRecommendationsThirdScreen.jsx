@@ -107,7 +107,7 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
     };
 
     return (
-        <div className="third-screen-container">
+        <div>
 
             {loading && (
                 <div className="loading-overlay">
@@ -115,7 +115,7 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
                 </div>
             )}
 
-            <table className="premium-table table-not-assigned">
+            <table className="assigned-table">
                 <thead>
                     <tr>
                         <th>Sr.No</th>
@@ -140,7 +140,19 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
                                 <td>{item.remarkbyManagement || "-"}</td>
                                 <td>{item.verificationResponsibleEmployeeName || "-"}</td>
                                 <td>{item.responsibility || "-"}</td>
-                                <td>{item.completionStatus === true ? "Completed" : "Pending"}</td>
+                                <td>
+                                    <span
+                                        className={
+                                            item.completionStatus === true
+                                                ? "status-completed"
+                                                : item.completionStatus === false
+                                                    ? "status-pending"
+                                                    : "status-pending"
+                                        }
+                                    >
+                                        {item.completionStatus === true ? "Completed" : "Pending"}
+                                    </span>
+                                </td>
                                 <td>{item.CompletionDate || "-"}</td>
                             </tr>
                         ))

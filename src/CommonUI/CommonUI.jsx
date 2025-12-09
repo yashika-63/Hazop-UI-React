@@ -1,6 +1,10 @@
 import { FaEdit, FaEllipsisV, FaEye, FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { strings } from "../string";
+import axios from "axios";
+import { useEffect } from "react";
+const companyId= localStorage.getItem("companyId");
 
 export const formatDate = (dateString) => {
   if (!dateString) return "N/A";
@@ -59,7 +63,7 @@ function ScrollableViewer({ content }) {
 
 
 
-export const truncateWords = (text, wordLimit = 4) => {
+export const truncateWords = (text, wordLimit = 3) => {
   if (!text) return "-";
   const words = text.split(" ");
   if (words.length <= wordLimit) return text;
@@ -78,3 +82,45 @@ export const getRiskColor = (risk) => {
   if ([20, 25].includes(r)) return '#f91111';              // Intolerable
   return '#fff';
 };
+
+
+
+
+
+
+
+export const fetchDataByKey = async (keyvalue) => {
+  try {
+    const response = await axios.get(`http://${strings.localhost}/api/JavaMasterData/getByKey/${companyId}/${keyvalue}`);
+    if (response.data && Array.isArray(response.data)) {
+      return response.data.map(item => ({
+        masterId: item.masterId,
+        data: item.data || '',
+        category: item.category || '',
+      }));
+    }
+    console.error(`Invalid data structure or empty response for ${keyvalue}`);
+    return [];
+  } catch (error) {
+    console.error(`Error fetching data for ${keyvalue}:`, error);
+    throw error;
+  }
+};
+
+
+
+export const fetchSitesByDepartment = async (departmentKey, setSiteOptions) => {
+  try {
+    if (!departmentKey) {
+      setSiteOptions([]);
+      return;
+    }
+
+    const siteData = await fetchDataByKey(departmentKey); // call fetchDataByKey
+    setSiteOptions(siteData);
+  } catch (err) {
+    console.error("Error fetching sites for department", err);
+    setSiteOptions([]);
+  }
+};
+

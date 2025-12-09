@@ -45,7 +45,7 @@
   background-color: #f1f1f1;
 }
 
-.team-table button {
+.remove-button {
   padding: 4px 8px;
   font-size: 0.85rem;
   color: red;
@@ -56,9 +56,30 @@
   transition: background 0.2s;
 }
 
-.team-table button:hover {
+.remove-button:hover {
   background-color: red;
   color: white;
+  border: red;
+}
+
+
+
+.role-change-btn {
+  background-color: #ce8c2f;
+  margin-left: 10px;
+  color: white;
+  border: none;
+  padding: 5px 8px;
+  cursor: pointer;
+}
+
+.role-change-btn:hover {
+  background-color: #ec971f;
+}
+
+.role-change-btn:disabled {
+  background-color: #d9534f;
+  cursor: not-allowed;
 }
 
 /* ------------------------------------------------------
@@ -96,18 +117,21 @@
 }
 
 .hazoplist-table th {
-  padding: 8px 14px;
+  padding: 8px 12px;
   text-align: left;
   font-weight: 600;
   letter-spacing: 0.6px;
   border-bottom: none;
+
 }
 
 .hazoplist-table tbody tr {
   background: rgba(255, 255, 255, 0.6);
   border-radius: 12px;
+  position: relative;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
   transition: all 0.25s ease;
+  z-index: 1;
   /* backdrop-filter: blur(6px); */
 }
 
@@ -116,6 +140,7 @@
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
   background: rgba(75, 108, 183, 0.1); 
   cursor: pointer;
+  z-index: 5;
 }
 
 .hazoplist-table td {

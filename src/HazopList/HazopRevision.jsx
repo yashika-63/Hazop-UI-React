@@ -9,7 +9,7 @@ const HazopRevision = ({ hazopId, onClose }) => {
   const [formData, setFormData] = useState({
     hazopDate: "",
     site: "",
-    title: "",
+    hazopTitle: "",
     department: "",
     description: "",
     verificationStatus: false,
@@ -49,11 +49,11 @@ const HazopRevision = ({ hazopId, onClose }) => {
       newErrors.site = "Only letters, numbers, commas & hyphens allowed.";
     }
 
-    if (!formData.title.trim()) {
-      newErrors.title = "Title is required.";
+    if (!formData.hazopTitle.trim()) {
+      newErrors.hazopTitle = "Title is required.";
       showToast("Title is required.", "warn");
-    } else if (!/^[A-Za-z0-9\s,-]+$/.test(formData.title)) {
-      newErrors.title = "Only letters, numbers, commas & hyphens allowed.";
+    } else if (!/^[A-Za-z0-9\s,-]+$/.test(formData.hazopTitle)) {
+      newErrors.hazopTitle = "Only letters, numbers, commas & hyphens allowed.";
     }
 
     if (!formData.department.trim()) {
@@ -233,8 +233,8 @@ const saveHazop = async () => {
               Title</label>
               <input
                 type="text"
-                name="title"
-                value={formData.title}
+                name="hazopTitle"
+                value={formData.hazopTitle}
                 onChange={handleChange}
                 disabled={loading}
               />

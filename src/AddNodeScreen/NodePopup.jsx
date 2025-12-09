@@ -11,7 +11,7 @@ const NodePopup = ({ onClose, onSave, hazopData }) => {
     date: "",
     designIntent: "",
     pIdRevision: "",
-    title: "",
+    hazopTitle: "",
     sopNo: "",
     sopDate: "",
     equipment: "",
@@ -49,8 +49,8 @@ const NodePopup = ({ onClose, onSave, hazopData }) => {
       newErrors.pIdRevision = "P&ID No. & Revision is required.";
       showToast("P&ID No. is required", "warn");
     }
-    if (!form.title.trim()) {
-      newErrors.title = "Node title is required.";
+    if (!form.hazopTitle.trim()) {
+      newErrors.hazopTitle = "Node title is required.";
       showToast("Node title is required", "warn");
     }
     if (!form.sopNo.trim()) {
@@ -104,7 +104,7 @@ const NodePopup = ({ onClose, onSave, hazopData }) => {
           date: formatDateToBackend(form.date),
           designIntent: form.designIntent,
           pIdRevision: form.pIdRevision,
-          title: form.title,
+          hazopTitle: form.hazopTitle,
           sopNo: form.sopNo,
           sopDate: formatDateToBackend(form.sopDate),
           equipment: form.equipment,
@@ -200,8 +200,8 @@ const NodePopup = ({ onClose, onSave, hazopData }) => {
                   </label>
                   <input
                     type="text"
-                    name="title"
-                    value={form.title}
+                    name="hazopTitle"
+                    value={form.hazopTitle}
                     onChange={handleChange}
                     disabled={loading}
                   />

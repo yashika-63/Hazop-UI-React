@@ -62,7 +62,7 @@
  
 
 /* Base content area */
-.content-area {
+/* .content-area {
   padding: 40px;
   transition: margin-left 0.3s ease, padding 0.3s ease;
   margin: 60px 0px 0px 60px;
@@ -72,5 +72,5 @@
 .content-area.shifted {
   margin-left: 200px;
   padding: 30px;
-}
+} */
 

@@ -94,7 +94,7 @@ const HazopApprovalPage = () => {
                                 return (
                                     <tr key={rec.id}>
                                         <td>{index + 1}</td>
-                                        <td title={hazop.title}>{truncateWords(hazop.title)}</td>
+                                        <td title={hazop.hazopTitle}>{truncateWords(hazop.hazopTitle)}</td>
                                         <td title={hazop.site}>{truncateWords(hazop.site)}</td>
                                         <td>
                                             <span className={hazop.completionStatus ? "status-completed" : "status-pending"}>

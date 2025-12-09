@@ -170,27 +170,25 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
     );
 
     return (
-        <div className="second-screen-container">
+        <div>
 
             {/* Not Assigned */}
-            <div className="section-block">
-                <h5>Not Assigned</h5>
-                <table className="premium-table table-not-assigned">
-                    <thead>
-                        <tr>
-                            <th>Sr.No</th>
-                            <th>Recommendation</th>
-                            <th>Remark</th>
-                            <th>Verification By</th>
-                            <th>Verification Date</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {data.notAssigned.length === 0 ? (
-                            <td colSpan='6' className="no-data1">No data available</td>
-                        ) : (
-                            data.notAssigned.map((item , index) => (
+            {data.notAssigned.length > 0 && (
+                <div className="assigned-table-wrapper not-assigned">
+                    <h5>Not Assigned</h5>
+                    <table className="assigned-table">
+                        <thead>
+                            <tr>
+                                <th>Sr.No</th>
+                                <th>Recommendation</th>
+                                <th>Remark</th>
+                                <th>Verification By</th>
+                                <th>Verification Date</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {data.notAssigned.map((item, index) => (
                                 <tr key={item.id}>
                                     <td>{index + 1}</td>
                                     <td>{item.recommendation ?? "-"}</td>
@@ -199,36 +197,29 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
                                     <td>{item.verificationDate ? formatDate(item.verificationDate) : "-"}</td>
                                     <td>{renderDropdown(item)}</td>
                                 </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
-
-            </div>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
 
             {/* Assigned */}
-            <div className="section-block">
-                <h5>Assigned</h5>
-
-                <table className="table-assigned">
-                    <thead>
-                        <tr>
-                            <th>Sr.No</th>
-                            <th>Recommendation</th>
-                            <th>Remark </th>
-                            <th>Created By</th>
-                            <th>Assigned To</th>
-                            <th>Assigned Date</th>
-
-
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {data.assigned.length === 0 ? (
-                            <td colSpan='6' className="no-data1">No Data Available</td>
-                        ) : (
-
-                            data.assigned.map((item , index) => (
+            {data.assigned.length > 0 && (
+                <div className="assigned-table-wrapper assigned">
+                    <h5>Assigned</h5>
+                    <table className="assigned-table">
+                        <thead>
+                            <tr>
+                                <th>Sr.No</th>
+                                <th>Recommendation</th>
+                                <th>Remark </th>
+                                <th>Created By</th>
+                                <th>Assigned To</th>
+                                <th>Assigned Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {data.assigned.map((item, index) => (
                                 <tr key={item.id}>
                                     <td>{index + 1}</td>
                                     <td>{item.javaHazopNodeRecommendation?.recommendation ?? "-"}</td>
@@ -236,38 +227,31 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
                                     <td>{item.createdByName || '-'}</td>
                                     <td>{item.assignToEmpCode || '-'}</td>
                                     <td>{item.assignWorkDate ? formatDate(item.assignWorkDate) : "-"}</td>
-
-
                                 </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
-
-            </div>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
 
             {/* Accepted */}
-            <div className="section-block">
-                <h5>Accepted</h5>
-
-                <table className="table-accepted">
-                    <thead>
-                        <tr>
-                            <th>Sr.No</th>
-                            <th>Recommendation</th>
-                            <th>Remark </th>
-                            <th>Created By</th>
-                            <th>Assigned To</th>
-                            <th>Accepted By</th>
-                            <th>Assign Date</th>
-
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {data.accepted.length === 0 ? (
-                            <td colSpan="6" className="no-data1">No Data Available</td>
-                        ) : (
-                            data.accepted.map((item, index) => (
+            {data.accepted.length > 0 && (
+                <div className="assigned-table-wrapper accepted">
+                    <h5>Accepted</h5>
+                    <table className="assigned-table">
+                        <thead>
+                            <tr>
+                                <th>Sr.No</th>
+                                <th>Recommendation</th>
+                                <th>Remark </th>
+                                <th>Created By</th>
+                                <th>Assigned To</th>
+                                <th>Accepted By</th>
+                                <th>Assign Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {data.accepted.map((item, index) => (
                                 <tr key={item.id}>
                                     <td>{index + 1}</td>
                                     <td>{item.javaHazopNodeRecommendation?.recommendation ?? "-"}</td>
@@ -276,51 +260,46 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
                                     <td>{item.assignToEmpCode}</td>
                                     <td>{item.acceptedByEmployeeName}</td>
                                     <td>{item.assignWorkDate ? formatDate(item.assignWorkDate) : "-"}</td>
-
                                 </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
-
-            </div>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
 
             {/* Rejected */}
-            <div>
-                <h5>Rejected</h5>
-                <table className="table-rejected">
-                    <thead>
-                        <tr>
-                            <th>Sr.No</th>
-                            <th>Recommendation</th>
-                            <th>Remark </th>
-                            <th>Created By</th>
-                            <th>Assigned To</th>
-                            <th>Rejected By</th>
-                            <th>Assign Date</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {data.rejected.length === 0 ? (
-                            <td colSpan="6" className="no-data1">No Data Available</td>
-                        ) : (
-                            data.rejected.map((item, index) => (
+            {data.rejected.length > 0 && (
+                <div className="assigned-table-wrapper rejected">
+                    <h5>Rejected</h5>
+                    <table className="assigned-table">
+                        <thead>
+                            <tr>
+                                <th>Sr.No</th>
+                                <th>Recommendation</th>
+                                <th>Remark </th>
+                                <th>Created By</th>
+                                <th>Assigned To</th>
+                                <th>Rejected By</th>
+                                <th>Assign Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {data.rejected.map((item, index) => (
                                 <tr key={item.id}>
-                                    <td>{index+ 1}</td>
+                                    <td>{index + 1}</td>
                                     <td>{item.javaHazopNodeRecommendation?.recommendation ?? "-"}</td>
                                     <td>{item.javaHazopNodeRecommendation?.remarkbyManagement ?? "-"}</td>
                                     <td>{item.createdByName || '-'}</td>
                                     <td>{item.assignToEmpCode}</td>
                                     <td>{item.acceptedByEmployeeName}</td>
                                     <td>{item.assignWorkDate ? formatDate(item.assignWorkDate) : "-"}</td>
-
                                 </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
 
-            </div>
             {/* Assign Employee Popup */}
             {assignPopupOpen && (
                 <div className="modal-overlay">

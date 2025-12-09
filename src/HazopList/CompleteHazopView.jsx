@@ -20,6 +20,8 @@ const CompleteHazopView = ({
   const [nodeDetails, setNodeDetails] = useState({});
   const [nodeRecommendations, setNodeRecommendations] = useState({});
   const [allRecommendations, setAllRecommendations] = useState([]);
+  const [teamComments, setTeamComments] = useState([]);
+
   const [assignData, setAssignData] = useState({
     rejected: [],
     accepted: [],
@@ -156,6 +158,14 @@ const CompleteHazopView = ({
       console.error("Error loading verification action records:", err);
     }
   };
+  const loadTeamComments = async () => {
+    try {
+      const res = await axios.get(`http://localhost:5559/api/team-comments/getByHazop/${hazopId}`);
+      setTeamComments(Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
+      console.error("Error loading team comments:", err);
+    }
+  };
 
   const handleNext = async () => {
     if (step === 1) await loadNodes();
@@ -163,6 +173,9 @@ const CompleteHazopView = ({
     if (step === 3) {
       await loadAllRecommendations();
       await loadVerificationRecords();
+    }
+    if (step === 4) {
+      await loadTeamComments(); // Load comments for last page
     }
     setStep((prev) => prev + 1);
   };
@@ -271,7 +284,7 @@ const CompleteHazopView = ({
 
   return (
     <div>
-      <div>
+      <div className="hazop-view-page">
         {loading && (
           <div className="loading-overlay">
             <div className="loading-spinner"></div>
@@ -290,7 +303,7 @@ const CompleteHazopView = ({
                   <strong>Description:</strong> {hazop.description}
                 </p>
                 <p>
-                  <strong>Title:</strong> {hazop.title}
+                  <strong>Title:</strong> {hazop.hazopTitle}
                 </p>
                 <p>
                   <strong>Site:</strong> {hazop.site}
@@ -337,7 +350,7 @@ const CompleteHazopView = ({
                   <div key={node.id} className="node-card">
                     <p>
                       <strong>
-                        Node #{node.nodeNumber} - {node.title}
+                        Node #{node.nodeNumber} - {node.hazopTitle}
                       </strong>
                     </p>
                     <p>
@@ -368,7 +381,7 @@ const CompleteHazopView = ({
                     </p>
                     <p>
                       <strong>Completion Date:</strong>{" "}
-                      {node.completionDate || "-"}
+                      {formatDate(node.completionDate || "-")}
                     </p>
                   </div>
                 ))}
@@ -388,7 +401,7 @@ const CompleteHazopView = ({
                     <div key={node.id} className="node-card">
                       <div className="node-header">
                         <h3>
-                          Node #{node.nodeNumber} - {node.title || "-"}
+                          Node #{node.nodeNumber} - {node.hazopTitle || "-"}
                         </h3>
                       </div>
 
@@ -446,61 +459,60 @@ const CompleteHazopView = ({
                                 </tbody>
                               </table>
 
-                                <div>
-                                  <div className="input-row">
-                                    <div className="form-group">
-                                      <span>Deviation</span>
-                                      <textarea
-                                        className="textareaFont"
-                                        value={detail.deviation}
-                                        readOnly
-                                        rows={10}
-                                      ></textarea>
-                                    </div>
-
-                                    <div className="form-group">
-                                      <span>Causes</span>
-                                      <textarea
-                                        className="textareaFont"
-                                        value={detail.causes}
-                                        readOnly
-                                        rows={10}
-                                      ></textarea>
-                                    </div>
-
-                                    <div className="form-group">
-                                      <span>Consequences</span>
-                                      <textarea
-                                        className="textareaFont"
-                                        value={detail.consequences}
-                                        readOnly
-                                        rows={10}
-                                      ></textarea>
-                                    </div>
+                              <div>
+                                <div className="input-row">
+                                  <div className="form-group">
+                                    <span>Deviation</span>
+                                    <textarea
+                                      className="textareaFont"
+                                      value={detail.deviation}
+                                      readOnly
+                                      rows={10}
+                                    ></textarea>
                                   </div>
 
-                                  <div className="input-row">
+                                  <div className="form-group">
+                                    <span>Causes</span>
+                                    <textarea
+                                      className="textareaFont"
+                                      value={detail.causes}
+                                      readOnly
+                                      rows={10}
+                                    ></textarea>
+                                  </div>
+
+                                  <div className="form-group">
+                                    <span>Consequences</span>
+                                    <textarea
+                                      className="textareaFont"
+                                      value={detail.consequences}
+                                      readOnly
+                                      rows={10}
+                                    ></textarea>
+                                  </div>
                                   <div className="form-group">
                                     <span>Existing Control</span>
                                     <textarea
                                       className="textareaFont"
                                       value={detail.existineControl}
                                       readOnly
-                                      rows={8}
+                                      rows={10}
                                     ></textarea>
                                   </div>
 
                                   <div className="form-group">
-                                  <span>Additional Control</span>
-                                  <textarea
-                                    className="textareaFont"
-                                    value={detail.additionalControl}
-                                    readOnly
-                                    rows={8}
-                                  ></textarea>
+                                    <span>Additional Control</span>
+                                    <textarea
+                                      className="textareaFont"
+                                      value={detail.additionalControl}
+                                      readOnly
+                                      rows={10}
+                                    ></textarea>
                                   </div>
                                 </div>
-                                </div>
+
+
+                              </div>
                             </div>
 
                             {recsMap[idx] && recsMap[idx].length > 0 && (
@@ -569,12 +581,8 @@ const CompleteHazopView = ({
                           <th>Department</th>
                           <th>Completion Status</th>
                           <th>Completion Date</th>
-                          <th>Send For Verification</th>
-                          <th>Verification Action</th>
-                          <th>Verification Status</th>
-                          <th>Verified By</th>
-                          <th>Verifier Email</th>
-                          <th>Verification Date</th>
+
+
                         </tr>
                       </thead>
 
@@ -610,35 +618,6 @@ const CompleteHazopView = ({
                                 : "-"}
                             </td>
 
-                            <td>{rec.sendForVerification ? "Yes" : "No"}</td>
-
-                            <td>
-                              {rec.sendForVerificationAction
-                                ? "Action Taken"
-                                : "No Action"}
-                            </td>
-
-                            <td>
-                              {rec.sendForVerificationActionStatus ? (
-                                <span style={{ color: "green" }}>Approved</span>
-                              ) : (
-                                <span style={{ color: "red" }}>Rejected</span>
-                              )}
-                            </td>
-
-                            <td>
-                              {rec.verificationResponsibleEmployeeName || "-"}
-                            </td>
-
-                            <td>
-                              {rec.verificationResponsibleEmployeeEmail || "-"}
-                            </td>
-
-                            <td>
-                              {rec.verificationDate
-                                ? formatDate(rec.verificationDate)
-                                : "-"}
-                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -661,6 +640,8 @@ const CompleteHazopView = ({
                             <table className="node-details-table">
                               <thead>
                                 <tr>
+                                  <th>Recommendation</th>
+                                  <th>Remark</th>
                                   <th>Assigned To</th>
                                   <th>Assigned By</th>
                                   <th>Assigned Date</th>
@@ -668,12 +649,8 @@ const CompleteHazopView = ({
                                   <th>Completion Date</th>
                                   <th>Acceptance Status</th>
                                   <th>Accepted By</th>
-                                  <th>Recommendation</th>
-                                  <th>Remark</th>
-                                  <th>Verification Action</th>
-                                  <th>Verification Status</th>
-                                  <th>Verified By</th>
-                                  <th>Verification Date</th>
+
+
                                 </tr>
                               </thead>
 
@@ -684,6 +661,8 @@ const CompleteHazopView = ({
 
                                   return (
                                     <tr key={a.id}>
+                                      <td>{rec.recommendation || "-"}</td>
+                                      <td>{rec.remarkbyManagement || "-"}</td>
                                       <td>{a.assignToEmpCode || "-"}</td>
                                       <td>
                                         {a.createdByName ||
@@ -714,39 +693,13 @@ const CompleteHazopView = ({
                                         {a.assignworkAcceptance
                                           ? "Accepted"
                                           : a.assignWorkSendForAcceptance
-                                          ? "Waiting for Acceptance"
-                                          : "Not Sent"}
+                                            ? "Waiting for Acceptance"
+                                            : "Not Sent"}
                                       </td>
 
                                       <td>{a.acceptedByEmployeeName || "-"}</td>
-                                      <td>{rec.recommendation || "-"}</td>
-                                      <td>{rec.remarkbyManagement || "-"}</td>
-                                      <td>
-                                        {rec.sendForVerificationAction
-                                          ? "Action Taken"
-                                          : "No Action"}
-                                      </td>
-                                      <td
-                                        style={{
-                                          color:
-                                            rec.sendForVerificationActionStatus
-                                              ? "green"
-                                              : "red",
-                                        }}
-                                      >
-                                        {rec.sendForVerificationActionStatus
-                                          ? "Approved"
-                                          : "Rejected"}
-                                      </td>
-                                      <td>
-                                        {rec.verificationResponsibleEmployeeName ||
-                                          "-"}
-                                      </td>
-                                      <td>
-                                        {rec.verificationDate
-                                          ? formatDate(rec.verificationDate)
-                                          : "-"}
-                                      </td>
+
+
                                     </tr>
                                   );
                                 })}
@@ -769,7 +722,7 @@ const CompleteHazopView = ({
                       <thead>
                         <tr>
                           <th>Recommendation</th>
-                          <th>Remark by Management</th>
+                          <th>Remark</th>
                           <th>Completion Status</th>
                           <th>Send for Verification</th>
                           <th>Verification Action</th>
@@ -878,18 +831,44 @@ const CompleteHazopView = ({
                 </div>
               </div>
             )}
+            {step === 5 && (
+              <div>
+                <h2>Team Comments</h2>
+                {teamComments.length === 0 ? (
+                  <p>No comments available.</p>
+                ) : (
+                  <table className="node-details-table">
+                    <thead>
+                      <tr>
+                        <th>Team Member</th>
+                        <th>Comment</th>
+                        <th>Date</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {teamComments.map((comment) => (
+                        <tr key={comment.id}>
+                          <td>{comment.empCode || "-"}</td>
+                          <td>{comment.comment || "-"}</td>
+                          <td>{formatDate(comment.commentDate) || "-"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            )}
 
             <div className="modal-actions">
               {step > 1 && <button onClick={handlePrev}>Previous</button>}
-              {step < 4 && <button onClick={handleNext}>Next</button>}
+              {step < 5 && <button onClick={handleNext}>Next</button>}
             </div>
           </>
         )}
         {showConfirm && (
           <ConfirmationPopup
-            message={`Are you sure you want to ${
-              approvalAction === "accept" ? "Approve" : "Reject"
-            }?`}
+            message={`Are you sure you want to ${approvalAction === "accept" ? "Approve" : "Reject"
+              }?`}
             onConfirm={(enteredComment) => handleApprovalSubmit(enteredComment)}
             onCancel={() => {
               setShowConfirm(false);

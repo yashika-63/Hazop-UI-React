@@ -7,7 +7,7 @@ import { strings } from "../string";
 const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
     const [teamSearch, setTeamSearch] = useState("");
     const [searchResults, setSearchResults] = useState([]);
-    const [hazopTeam, setHazopTeam] = useState(existingTeam || []); 
+    const [hazopTeam, setHazopTeam] = useState(existingTeam || []);
     const [loading, setLoading] = useState(false);
     const [confirmPopup, setConfirmPopup] = useState(null);
     const [originalTeam, setOriginalTeam] = useState([]);
@@ -58,13 +58,26 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
             showToast("This employee is already added.", "warn");
             return;
         }
-        setHazopTeam([...hazopTeam, member]);
-        setTeamSearch("");
+
+        setHazopTeam([...hazopTeam, { ...member, role: "Team Member" }]); setTeamSearch("");
         setSearchResults([]);
+    };
+
+    const toggleRole = (empCode) => {
+        setHazopTeam(hazopTeam.map((member) =>
+            member.empCode === empCode
+                ? { ...member, role: member.role === "Team Member" ? "Team Lead" : "Team Member" }
+                : member
+        ));
     };
 
     const removeTeamMember = (empCode) => {
         const member = hazopTeam.find(m => m.empCode === empCode);
+
+        if (!member) {
+            showToast("Member not found in the team.", "error");
+            return;
+        }
 
         setRemoveConfirmationPopup({
             message: `Do you want to remove ${member.firstName} ${member.lastName}?`,
@@ -73,13 +86,15 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
                 setLoading(true);
 
                 try {
-                    // backend call to deactivate ONLY THIS MEMBER
-                    await axios.put(
-                        `http://${strings.localhost}/api/hazopTeam/updateStatusToFalse?empCode=${empCode}&hazopId=${hazopData.id}`
-                    );
-
+                    if (originalTeam.some((m) => m.empCode === empCode)) {
+                        await axios.put(
+                            `http://${strings.localhost}/api/hazopTeam/updateStatusToFalse?empCode=${empCode}&hazopId=${hazopData.id}`
+                        );
+                        showToast("Team member removed from backend!", "success");
+                    } else {
+                        showToast("Team member removed!", "success");
+                    }
                     setHazopTeam(hazopTeam.filter((m) => m.empCode !== empCode));
-                    showToast("Team member removed!", "success");
                 } catch (err) {
                     console.error("Error removing team member:", err);
                     showToast("Failed to remove team member.", "error");
@@ -90,6 +105,7 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
             no: () => setRemoveConfirmationPopup(null)
         });
     };
+
     const RemoveConfirmationPopup = ({ message, onConfirm, onCancel }) => {
         return (
             <div className="confirm-overlay">
@@ -138,10 +154,18 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
         try {
             const hazopId = hazopData.id;
 
-            if (hazopTeam.length > 0) {
+            // Send the new members and their roles to the backend
+            if (newMembers.length > 0) {
                 await axios.post(
                     `http://${strings.localhost}/api/hazopTeam/saveTeam/${hazopId}`,
-                    newMembers.map((m) => m.empCode)
+                    newMembers.map((m) => ({ empCode: m.empCode, role: m.role }))  // Sending role along with empCode
+                );
+            }
+
+            // Send roles for existing members
+            for (const member of hazopTeam) {
+                await axios.post(
+                    `http://${strings.localhost}/api/hazopTeamRole/save?companyId=${companyId}&empCode=${member.empCode}&hazopRole=${member.role}`
                 );
             }
 
@@ -154,6 +178,7 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
 
         setLoading(false);
     };
+
 
     // Confirmation Popup component
     const ConfirmationPopup = ({ message, onConfirm, onCancel }) => {
@@ -190,7 +215,7 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
                     {hazopData ? (
                         <div className="hazop-info-grid">
                             <div><strong>ID:</strong> {hazopData.id}</div>
-                            <div><strong>Hazop Title:</strong> {hazopData.title || '-'}</div>
+                            <div><strong>Hazop Title:</strong> {hazopData.hazopTitle || '-'}</div>
                             <div><strong>Site:</strong> {hazopData.site}</div>
                             <div><strong>Department:</strong> {hazopData.department}</div>
                             <div><strong>HAZOP Date:</strong> {hazopData.hazopDate}</div>
@@ -236,6 +261,7 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
                                     <th>Employee Code</th>
                                     <th>Employee Name</th>
                                     <th>Email Id</th>
+                                    <th>Role</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
@@ -246,7 +272,21 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
                                         <td>{member.firstName} {member.lastName}</td>
                                         <td>{member.emailId || "NA"}</td>
                                         <td>
+                                            {member.role}
                                             <button
+                                                type="button"
+                                                onClick={() => toggleRole(member.empCode)}
+                                                disabled={loading}
+                                                className="role-change-btn"
+                                            >
+                                                {member.role === "Team Lead" ? "✔ Team Lead" : "Set as Team Lead"}
+                                            </button>
+                                        </td>
+
+                                        <td>
+                                            <button
+                                                type="button"
+                                                className="remove-button"
                                                 onClick={() => removeTeamMember(member.empCode)}
                                                 disabled={loading}
                                             >

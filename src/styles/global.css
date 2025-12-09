@@ -268,7 +268,7 @@ button:focus, button:focus-visible {
   min-width: 150px;
   border-radius: 8px;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.6);
-  z-index: 9999;
+  z-index: 9999 !important;
   overflow: hidden;
   opacity: 1;
   pointer-events: auto;
@@ -391,6 +391,7 @@ button:focus, button:focus-visible {
   justify-content: center;
   margin: 2%;
   gap: 15px;
+  padding: 10px;
 }
 
 
@@ -456,12 +457,24 @@ button:focus, button:focus-visible {
   color: green;
   font-weight: bold;
 }
-.status-notMarked{
+
+.status-notMarked {
   color: #858585;
 }
+
 .status-pending {
   color: orange;
   font-weight: bold;
+}
+
+.status-active {
+  color: green;
+  font-weight: 600;
+}
+
+.status-inactive {
+  color: red;
+  font-weight: 600;
 }
 
 /* --------------------------- */
@@ -542,7 +555,6 @@ p {
 }
 
 .textareaFont {
-  font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
   font-size: 13px;
   line-height: 20px;
   max-height: 200px;
@@ -736,7 +748,7 @@ p {
 }
 
 .confirm-btn:hover {
-  background: #4f9df0;
+  background: #79b0ea;
 }
 
 .confirm-btn:disabled {

@@ -1,20 +1,38 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import './Approval.css';
-
+import { FaCalendarDay, FaCheckCircle, FaLightbulb, FaList, FaCheckDouble } from "react-icons/fa";
 import HazopTeamAcceptanceApproval from "./HazopTeamAcceptanceApproval";
-import HazopRecommendationApproval from "./HazopRecommandationApproval";
-import { FaCalendarDay, FaCheckCircle, FaLightbulb , FaList , FaCheckDouble  } from "react-icons/fa";
+import { strings } from "../string";
 import HazopApprovalPage from "./HazopApprovalPage";
 import HazopConfirmationApproval from "./HazopConfirmationApproval";
 import RecommendationApproval from "./RecommendationApproval";
+import HazopRecommendationApproval from "./HazopRecommandationApproval";
 
 const RequestHandler = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const defaultTab = searchParams.get('tab') || 'HazopTeamAcceptance';
     const [activeSection, setActiveSection] = useState(defaultTab);
-
     const [loadedTabs, setLoadedTabs] = useState([defaultTab]);
+    const empCode = localStorage.getItem("empCode");
+    // state for counts
+    const [counts, setCounts] = useState({
+        teamAcceptancePending: 0,
+        recommendationVerificationPending: 0,
+        registrationVerificationPending: 0
+    });
+
+    useEffect(() => {
+        fetch(`http://${strings.localhost}/api/hazop-dashboard/total-pending-count?empCode=${empCode}`)
+            .then(res => res.json())
+            .then(data => {
+                setCounts({
+                    teamAcceptancePending: data.teamAcceptancePending,
+                    recommendationVerificationPending: data.recommendationVerificationPending,
+                    registrationVerificationPending: data.registrationVerificationPending
+                });
+            })
+            .catch(err => console.error(err));
+    }, []);
 
     const handleButtonClick = (section) => {
         setActiveSection(section);
@@ -37,6 +55,9 @@ const RequestHandler = () => {
                     >
                         <FaCalendarDay />
                         Team Member Acceptance
+                        {counts.teamAcceptancePending > 0 && (
+                            <span className="badge">{counts.teamAcceptancePending}</span>
+                        )}
                     </button>
 
                     <button
@@ -46,6 +67,9 @@ const RequestHandler = () => {
                     >
                         <FaLightbulb />
                         Hazop Recommendation
+                        {counts.recommendationVerificationPending > 0 && (
+                            <span className="badge">{counts.recommendationVerificationPending}</span>
+                        )}
                     </button>
 
                     <button
@@ -54,23 +78,34 @@ const RequestHandler = () => {
                         onClick={() => handleButtonClick('HazopApprove')}
                     >
                         <FaList />
-                        Hazop Review / Approve
+                        Hazop Verify
+                        {counts.registrationVerificationPending > 0 && (
+                            <span className="badge">{counts.registrationVerificationPending}</span>
+                        )}
                     </button>
+
                     <button
                         type="button"
                         className={activeSection === 'HazopConfirmationApproval' ? 'active' : ''}
                         onClick={() => handleButtonClick('HazopConfirmationApproval')}
                     >
-                        <FaCheckDouble  />
+                        <FaCheckDouble />
                         Hazop Completion
+                        {counts.approvalPending > 0 && (
+                            <span className="badge">{counts.approvalPending}</span>
+                        )}
                     </button>
+
                     <button
                         type="button"
                         className={activeSection === 'RecommendationApproval' ? 'active' : ''}
                         onClick={() => handleButtonClick('RecommendationApproval')}
                     >
                         <FaCheckCircle />
-                        Recommendation Approval 
+                        Recommendation Approval
+                        {counts.assignmentPending > 0 && (
+                            <span className="badge">{counts.assignmentPending}</span>
+                        )}
                     </button>
                 </div>
 
@@ -80,7 +115,6 @@ const RequestHandler = () => {
                     {activeSection === 'HazopApprove' && <HazopApprovalPage />}
                     {activeSection === 'HazopConfirmationApproval' && <HazopConfirmationApproval />}
                     {activeSection === 'RecommendationApproval' && <RecommendationApproval />}
-
                 </div>
             </div>
         </div>

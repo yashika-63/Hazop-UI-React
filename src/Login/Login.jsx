@@ -54,7 +54,7 @@ const Login = ({ setToken }) => {
       <div className="form-container">
         <div className="login-container">
           <div className="logo">
-            <img src="/assets/Pristine.png" alt="Pristine Logo" style={{ width: '90%' }} />
+            <img src="/assets/Pristine-SunBpm.png" alt="Pristine Logo" style={{ width: '90%' }} />
           </div>
         </div>
 

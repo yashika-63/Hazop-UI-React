@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { formatDate } from "../CommonUI/CommonUI";
+import { formatDate, truncateWords } from "../CommonUI/CommonUI";
 import { FaEllipsisV, FaEye } from "react-icons/fa";
 import { strings } from "../string";
 import { useNavigate } from "react-router-dom";
@@ -89,8 +89,8 @@ const HazopConfirmationApproval = () => {
                         hazopList.map((item, idx) => (
                             <tr key={idx}>
                                 <td>{idx + 1}</td>
-                                <td>{item.title || '-'}</td>
-                                <td>{item.site || "-"}</td>
+                                <td>{truncateWords(item.hazopTitle || '-')}</td>
+                                <td>{truncateWords(item.site || "-")}</td>
                                 <td>{item.department || '-'}</td>
                                 <td>{formatDate(item.hazopCreationDate || '-')}</td>
                                 <td>{item.createdBy || "-"}</td>

@@ -144,86 +144,119 @@
 
 
 
+.assigned-table-wrapper {
+    margin-bottom: 25px;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
+    padding: 15px;
+    position: relative;
+}
 
+.assigned-table-wrapper h5 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    padding-left: 20px;
+    color: #2d3748;
+    position: relative;
+}
 
-/* Common Table Styles */
-.table-not-assigned,
-.table-assigned,
-.table-accepted,
-.table-rejected {
+/* Bookmark style for each type */
+.assigned-table-wrapper.not-assigned h5::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 8px;
+    height: 100%;
+    border-radius: 3px;
+    background: #8591fa;
+    /* Blue */
+}
+
+.assigned-table-wrapper.assigned h5::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 8px;
+    height: 100%;
+    border-radius: 3px;
+    background: #ed8936;
+    /* Orange */
+}
+
+.assigned-table-wrapper.accepted h5::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 10px;
+    height: 100%;
+    border-radius: 3px;
+    background: #319795;
+    /* Teal */
+}
+
+.assigned-table-wrapper.rejected h5::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 8px;
+    height: 100%;
+    border-radius: 3px;
+    background: #c53030;
+    /* Red */
+}
+
+/* Table */
+.assigned-table {
     width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    border-collapse: collapse;
     font-size: 14px;
 }
 
-/* Table Head Styling */
-.table-not-assigned thead th,
-.table-assigned thead th,
-.table-accepted thead th,
-.table-rejected thead th {
-    padding: 5px 16px;
-    font-weight: 700;
+/* Header */
+.assigned-table thead th {
     text-align: left;
+    padding: 12px;
+    font-weight: 600;
+    color: #2d3748;
+    background: #f5f7fa;
+    /* light consistent header */
+    border-bottom: 1px solid #e0e4ea;
 }
 
-/* Status-Based Head Gradients */
-.table-not-assigned thead th {
-    background: linear-gradient(to bottom, #232ead, #1e1e71);
-    color: white;
+/* Body */
+.assigned-table tbody tr {
+    background: #fff;
+    transition: all 0.2s ease;
+    z-index: 1;
+    position: relative;
 }
 
-.table-assigned thead th {
-background: linear-gradient(to bottom, var(--substantial), #f8be7c);    
-color: white;
+.assigned-table tbody tr:nth-child(even) {
+    background-color: #f9fafc;
 }
 
-.table-accepted thead th {
-    background: linear-gradient(to bottom, var(--trivial), var(--tolerable));
-    color: white;
+.assigned-table tbody tr:hover {
+    background-color: #eef1f7;
+    transform: scale(1.003);
+    z-index: 5;
 }
 
-.table-rejected thead th {
-    background: linear-gradient(to bottom, var(--intolerable),#b91c1c);
-    color: white;
+.assigned-table td {
+    padding: 10px;
+    color: #4a5265;
+    border-bottom: 1px solid #e0e4ea;
 }
 
-/* Table Body */
-.table-not-assigned tbody tr,
-.table-assigned tbody tr,
-.table-accepted tbody tr,
-.table-rejected tbody tr {
-    border-bottom: 1px solid;
-    transition: background 0.2s, transform 0.15s;
+.assigned-table tbody tr:last-child td {
+    border-bottom: none;
 }
 
-.table-not-assigned tbody tr:nth-child(even),
-.table-assigned tbody tr:nth-child(even),
-.table-accepted tbody tr:nth-child(even),
-.table-rejected tbody tr:nth-child(even) {
-    background: #f9fafb;
-}
-
-.table-not-assigned tbody tr:hover,
-.table-assigned tbody tr:hover,
-.table-accepted tbody tr:hover,
-.table-rejected tbody tr:hover {
-    background: rgba(59, 130, 246, 0.05);
-    transform: translateY(-1px);
-}
-
-/* Table Cells */
-.table-not-assigned td,
-.table-assigned td,
-.table-accepted td,
-.table-rejected td {
-    padding: 6px 10px;
-    color: #374151;
-    vertical-align: middle;
-}
 
 /* No Data Message */
 .no-data1 {
@@ -233,19 +266,19 @@ color: white;
     padding: 20px;
 }
 
-/* Action Dropdown Styling */
-td > .dropdown {
+/* td > .dropdown {
     cursor: pointer;
     padding: 6px 10px;
     border-radius: 6px;
     background: #f3f4f6;
     color: #374151;
     transition: all 0.2s;
+    z-index: 999;
 }
 
 td > .dropdown:hover {
     background: #e5e7eb;
-}
+} */
 
 /* Optional: Status Badges inside table (if you want) */
 .badge {
@@ -259,13 +292,25 @@ td > .dropdown:hover {
 }
 
 /* Status Badge Colors */
-.badge-not-assigned { background: #3b82f6; }
-.badge-assigned { background: #f59e0b; }
-.badge-accepted { background: #10b981; }
-.badge-rejected { background: #ef4444; }
+.badge-not-assigned {
+    background: #9bbff9;
+}
+
+.badge-assigned {
+    background: #f59e0b;
+}
+
+.badge-accepted {
+    background: #10b981;
+}
+
+.badge-rejected {
+    background: #ef4444;
+}
 
 /* Responsive Table for Small Screens */
 @media screen and (max-width: 1024px) {
+
     .table-not-assigned,
     .table-assigned,
     .table-accepted,
@@ -275,6 +320,7 @@ td > .dropdown:hover {
 }
 
 @media screen and (max-width: 768px) {
+
     .table-not-assigned,
     .table-assigned,
     .table-accepted,

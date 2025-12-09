@@ -149,7 +149,7 @@ const NodePage = ({ hazopData: propHazopData, hazopTeam: propHazopTeam }) => {
               <strong>ID:</strong> {hazopData.id}
             </div>
             <div>
-              <strong>Title:</strong> {hazopData.title}
+              <strong>Title:</strong> {hazopData.hazopTitle}
             </div>
             <div>
               <strong>Site:</strong> {hazopData.site}
@@ -341,7 +341,7 @@ const NodePage = ({ hazopData: propHazopData, hazopTeam: propHazopTeam }) => {
                     <td>{n.nodeNumber}</td>
                     <td>{formatDate(n.registrationDate)}</td>
                     <td>{n.designIntent}</td>
-                    <td>{n.title}</td>
+                    <td>{n.hazopTitle}</td>
                     <td>{n.equipment}</td>
                     <td>{n.controls}</td>
                     <td>{n.temperature}</td>

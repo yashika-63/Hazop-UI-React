@@ -13,7 +13,7 @@ const HazopConfirmationViewPage = () => {
     if (!selectedHazop) return <div>No HAZOP selected</div>;
 
     return (
-        <div className="hazop-view-page">
+        <div>
 
             <CompleteHazopView
                 hazopId={selectedHazop.hazopId}

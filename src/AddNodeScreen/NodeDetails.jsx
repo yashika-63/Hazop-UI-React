@@ -371,7 +371,7 @@ const NodeDetails = () => {
           </div>
           <div>
             <strong>Title:</strong>
-            {node?.title}
+            {node?.hazopTitle}
           </div>
           <div>
             <strong>Design Intent:</strong>

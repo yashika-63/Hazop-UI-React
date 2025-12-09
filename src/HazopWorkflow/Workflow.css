@@ -1,0 +1,81 @@
+.workflow-container {
+    width: 100%;
+    min-height: 100vh;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: linear-gradient(135deg, #f8fbff, #eef4ff);
+  }
+   
+  .workflow-title {
+    font-size: 28px;
+    font-weight: 800;
+    color: #2e3a59;
+    margin-bottom: 40px;
+  }
+   
+  .workflow-horizontal {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 10px;
+  }
+   
+  .workflow-step-horizontal {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    gap: 8px;
+  }
+   
+  .step-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 3px solid #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+   
+  .step-circle.completed {
+    color: #fff;
+  }
+   
+  .step-circle.pending {
+    background-color: #fff;
+  }
+   
+  .step-circle:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+  }
+   
+  .step-label {
+    text-align: center;
+    max-width: 120px;
+    font-weight: 600;
+    font-size: 14px;
+    color: #2e3a59;
+  }
+   
+  .connector {
+    width: 50px;
+    height: 4px;
+    border-radius: 2px;
+    margin-top: 28px; /* Align with center of circle */
+    transition: background-color 0.3s ease;
+  }
+   
+  .loading-screen {
+    font-size: 20px;
+    text-align: center;
+    padding-top: 50px;
+  }
+   

@@ -14,6 +14,10 @@ import "./styles/global.css";
 import RecommandationHandler from './HazopRecommandation/RecommandationHandler';
 import HazopApprovalViewPage from './ApprovalRequest/HazopApprovalViewPage';
 import HazopConfirmationViewPage from './ApprovalRequest/HazopConfirmationViewPage';
+import HazopWorkflow from './HazopWorkflow/HazopStatus';
+import MOCList from './MOC/MOCList';
+import HazopStatusPage from './HazopList/HazopStatusPage';
+import HazopView from './HazopList/HazopView';
 
 const App = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -62,6 +66,11 @@ const App = () => {
                     <Route path='/RecommandationHandler' element={<RecommandationHandler />} />
                     <Route path="/hazop-approval-view" element={<HazopApprovalViewPage />} />
                     <Route path="/hazop-confirmation-view" element={<HazopConfirmationViewPage />} />
+                    <Route path="/complete-hazop-view" element={<HazopView />} />
+                    <Route path="/MOCList" element={<MOCList />} />
+                    <Route path="/HazopWorkflow" element={<HazopWorkflow />} />
+                    <Route path="/HazopStatusPage" element={<HazopStatusPage />} />
+
                     <Route path="*" element={<Navigate to="/HazopPage" />} />
                   </Routes>
                 </div>

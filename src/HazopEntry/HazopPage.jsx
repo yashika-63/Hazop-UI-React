@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios, { formToJSON } from "axios";
 import "./HazopPage.css";
 import HazopRegistration from "./HazopRegistration";
-import { FaEllipsisV, FaEye, FaEdit, FaTrash, FaTimes, FaLightbulb, FaSearch } from "react-icons/fa";
+import { FaEllipsisV, FaEye, FaEdit, FaTrash, FaTimes, FaLightbulb, FaSearch, FaCheckCircle } from "react-icons/fa";
 import AddHazopTeamPopup from "./AddHazopTeamPopup";
 import { strings } from "../string";
 import "../styles/global.css";
@@ -266,13 +266,13 @@ const HazopPage = () => {
                 >
                   <div className="card-top">
                     {item.verificationActionTaken === true && (
-                      <span className="verified-badge">✔ Verified</span>
+                      <span className="verified-badge"><FaCheckCircle /> Verified</span>
                     )}
                     <span className="card-date">{formatDate(item.hazopCreationDate)}</span>
                     {renderDropdown(item, true)}
                   </div>
 
-                  <div className="card-title">{truncateWords(item.title || "Untitled", 4)}</div>
+                  <div className="card-title">{truncateWords(item.hazopTitle || "Untitled", 4)}</div>
                   <div className="card-sub">{truncateWords(item.description, 6)}</div>
 
                   <div className="card-footer">
@@ -304,7 +304,7 @@ const HazopPage = () => {
           {/* Pending */}
           <div className="kanban-column pending-col">
             <div className="column-header">
-              Pending
+              OnGoing
               <span className="toggle-btn" onClick={() => toggleExpand("pending")}>
                 {expanded.pending ? "_" : "+"}
               </span>
@@ -315,13 +315,13 @@ const HazopPage = () => {
                 <div className="kanban-card priority-pending" key={idx}>
                   <div className="card-top">
                     {item.verificationActionTaken === true && (
-                      <span className="verified-badge">✔ Verified</span>
+                      <span className="verified-badge"><FaCheckCircle /> Verified</span>
                     )}
                     <span className="card-date">{formatDate(item.hazopCreationDate)}</span>
                     {renderDropdown(item, false)}
                   </div>
 
-                  <div className="card-title">{truncateWords(item.title, 4)}</div>
+                  <div className="card-title">{truncateWords(item.hazopTitle, 4)}</div>
                   <div className="card-sub">{truncateWords(item.description, 6)}</div>
 
                   <div className="card-footer">
@@ -363,13 +363,13 @@ const HazopPage = () => {
                 <div className="kanban-card priority-low" key={idx}>
                   <div className="card-top">
                     {item.verificationActionTaken === true && (
-                      <span className="verified-badge">✔ Verified</span>
+                      <span className="verified-badge"><FaCheckCircle />  Verified</span>
                     )}
                     <span className="card-date">{formatDate(item.hazopCreationDate)}</span>
                     {renderDropdown(item, false)}
                   </div>
 
-                  <div className="card-title">{truncateWords(item.title, 4)}</div>
+                  <div className="card-title">{truncateWords(item.hazopTitle, 4)}</div>
                   <div className="card-sub">{truncateWords(item.description, 6)}</div>
 
                   <div className="card-footer">
@@ -448,7 +448,7 @@ const HazopPage = () => {
               </div>
             )}
             <h3>Are you sure?</h3>
-            <p>Do you want to send {selectedHazopForSend.title}HAZOP for completion?</p>
+            <p>Do you want to send {selectedHazopForSend.hazopTitle}HAZOP for completion?</p>
             <div className="confirm-buttons">
               <button className="cancel-btn" onClick={() => setShowConfirmPopup(false)}>No</button>
               <button className="confirm-btn" onClick={sendForCompletion}>Yes</button>
