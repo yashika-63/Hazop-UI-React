@@ -290,7 +290,7 @@ const CompleteHazopView = ({
                   <strong>Description:</strong> {hazop.description}
                 </p>
                 <p>
-                  <strong>Title:</strong> {hazop.title}
+                  <strong>Title:</strong> {hazop.hazopTitle}
                 </p>
                 <p>
                   <strong>Site:</strong> {hazop.site}
@@ -337,7 +337,7 @@ const CompleteHazopView = ({
                   <div key={node.id} className="node-card">
                     <p>
                       <strong>
-                        Node #{node.nodeNumber} - {node.title}
+                        Node #{node.nodeNumber} - {node.hazopTitle}
                       </strong>
                     </p>
                     <p>
@@ -388,7 +388,7 @@ const CompleteHazopView = ({
                     <div key={node.id} className="node-card">
                       <div className="node-header">
                         <h3>
-                          Node #{node.nodeNumber} - {node.title || "-"}
+                          Node #{node.nodeNumber} - {node.hazopTitle || "-"}
                         </h3>
                       </div>
 

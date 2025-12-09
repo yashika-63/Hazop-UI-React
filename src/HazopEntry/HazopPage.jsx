@@ -272,7 +272,7 @@ const HazopPage = () => {
                     {renderDropdown(item, true)}
                   </div>
 
-                  <div className="card-title">{truncateWords(item.title || "Untitled", 4)}</div>
+                  <div className="card-title">{truncateWords(item.hazopTitle || "Untitled", 4)}</div>
                   <div className="card-sub">{truncateWords(item.description, 6)}</div>
 
                   <div className="card-footer">
@@ -321,7 +321,7 @@ const HazopPage = () => {
                     {renderDropdown(item, false)}
                   </div>
 
-                  <div className="card-title">{truncateWords(item.title, 4)}</div>
+                  <div className="card-title">{truncateWords(item.hazopTitle, 4)}</div>
                   <div className="card-sub">{truncateWords(item.description, 6)}</div>
 
                   <div className="card-footer">
@@ -369,7 +369,7 @@ const HazopPage = () => {
                     {renderDropdown(item, false)}
                   </div>
 
-                  <div className="card-title">{truncateWords(item.title, 4)}</div>
+                  <div className="card-title">{truncateWords(item.hazopTitle, 4)}</div>
                   <div className="card-sub">{truncateWords(item.description, 6)}</div>
 
                   <div className="card-footer">
@@ -448,7 +448,7 @@ const HazopPage = () => {
               </div>
             )}
             <h3>Are you sure?</h3>
-            <p>Do you want to send {selectedHazopForSend.title}HAZOP for completion?</p>
+            <p>Do you want to send {selectedHazopForSend.hazopTitle}HAZOP for completion?</p>
             <div className="confirm-buttons">
               <button className="cancel-btn" onClick={() => setShowConfirmPopup(false)}>No</button>
               <button className="confirm-btn" onClick={sendForCompletion}>Yes</button>

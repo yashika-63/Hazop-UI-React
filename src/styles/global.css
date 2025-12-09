@@ -1,13 +1,3 @@
-.coreContainer {
-  font-size: 12px;
-  line-height: 1.2;
-  color: #333;
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  max-width: 1090px;
-}
-
 /* Add Node button */
 .btn-container {
   display: flex;
@@ -39,7 +29,6 @@
   font-size: 13px;
   color: black;
   box-shadow: 0 10px 20px rgba(79, 70, 229, 0.35);
-
 }
 
 .add-btn:hover {
@@ -47,7 +36,6 @@
   transform: translateY(-1px);
   box-shadow: 0 14px 26px rgba(79, 70, 229, 0.45);
 }
-
 
 /* Table */
 .table-card {
@@ -208,7 +196,6 @@ h6 {
   }
 }
 
-
 .form-controls {
   display: flex;
   justify-content: flex-end;
@@ -219,21 +206,10 @@ h6 {
   padding-right: 30px;
 }
 
-button:focus, button:focus-visible {
+button:focus,
+button:focus-visible {
   outline: none;
 }
-
-.coreContainer {
-  font-size: 12px;
-  line-height: 1.2;
-  color: #333;
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  max-width: 1090px;
-
-}
-
 
 /*Three Dot menu*/
 
@@ -393,13 +369,9 @@ button:focus, button:focus-visible {
   gap: 15px;
 }
 
-
-
-
 /* Required Marker */
 .required-marker {
   color: red;
-
 }
 
 /* Save button */
@@ -446,8 +418,7 @@ button:focus, button:focus-visible {
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow:
-    0 22px 60px rgba(15, 23, 42, 0.35),
+  box-shadow: 0 22px 60px rgba(15, 23, 42, 0.35),
     0 0 0 1px rgba(148, 163, 184, 0.35);
   animation: fadeIn 0.24s ease-out;
 }
@@ -456,7 +427,7 @@ button:focus, button:focus-visible {
   color: green;
   font-weight: bold;
 }
-.status-notMarked{
+.status-notMarked {
   color: #858585;
 }
 .status-pending {
@@ -473,14 +444,13 @@ button:focus, button:focus-visible {
   position: relative;
   background: #fff !important;
   color: #0a0909 !important;
-  font-family: 'Inter', 'Segoe UI', sans-serif;
+  font-family: "Inter", "Segoe UI", sans-serif;
   font-size: 14px;
   font-weight: 500;
   border-radius: 20px 6px 20px 6px !important;
   /* TL, TR, BR, BL */
   padding: 16px 20px !important;
-  box-shadow:
-    0 6px 18px rgba(0, 0, 0, 0.15),
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15),
     inset 0 2px 6px rgba(255, 255, 255, 0.2);
   border: 1px solid #e0e0e0 !important;
   min-width: 300px;
@@ -491,21 +461,24 @@ button:focus, button:focus-visible {
 
 .my-toast:hover {
   transform: translateY(-3px);
-  box-shadow:
-    0 8px 22px rgba(0, 0, 0, 0.2),
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.2),
     inset 0 2px 6px rgba(255, 255, 255, 0.25);
 }
 
 /* Glossy highlight using pseudo-element */
 .my-toast::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   border-radius: 20px 6px 20px 6px;
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0));
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.3),
+    rgba(255, 255, 255, 0)
+  );
   pointer-events: none;
 }
 
@@ -542,10 +515,9 @@ p {
 }
 
 .textareaFont {
-  font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+  font-family: Cambria, Cochin, Georgia, Times, "Times New Roman", serif;
   font-size: 13px;
   line-height: 20px;
-  max-height: 200px;
   resize: none;
   overflow: auto;
 }
@@ -573,17 +545,10 @@ p {
   font-size: 12px;
 }
 
-
-
-
-
-
-
 /* Search Bar CSS */
 .search-container {
   margin: 15px 0;
   position: relative;
-
 }
 
 .search-bar-wrapper {
@@ -652,10 +617,6 @@ p {
   color: #777;
   padding: 8px 6px;
 }
-
-
-
-
 
 /* Confirmation Popup  */
 
@@ -744,12 +705,6 @@ p {
   cursor: not-allowed;
 }
 
-
-
-
-
-
-
 .no-data1 {
   text-align: center;
   color: #9ca3af;
@@ -757,18 +712,12 @@ p {
   font-size: 12px;
 }
 
-
-
 .form-title {
   text-align: center;
   font-size: 1.8em;
   color: #000000;
   text-decoration: underline;
 }
-
-
-
-
 
 /* Loading spinner css */
 /* Full-screen overlay */

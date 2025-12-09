@@ -89,7 +89,7 @@ const HazopConfirmationApproval = () => {
                         hazopList.map((item, idx) => (
                             <tr key={idx}>
                                 <td>{idx + 1}</td>
-                                <td>{item.title || '-'}</td>
+                                <td>{item.hazopTitle || '-'}</td>
                                 <td>{item.site || "-"}</td>
                                 <td>{item.department || '-'}</td>
                                 <td>{formatDate(item.hazopCreationDate || '-')}</td>

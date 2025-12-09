@@ -58,10 +58,6 @@ const NodePage = ({ hazopData: propHazopData, hazopTeam: propHazopTeam }) => {
   };
 
   useEffect(() => {
-    fetchNodes();
-  }, [hazopData]);
-
-  useEffect(() => {
     setShowFullDescription(false);
   }, [hazopData]);
 
@@ -149,7 +145,7 @@ const NodePage = ({ hazopData: propHazopData, hazopTeam: propHazopTeam }) => {
               <strong>ID:</strong> {hazopData.id}
             </div>
             <div>
-              <strong>Title:</strong> {hazopData.title}
+              <strong>Title:</strong> {hazopData.hazopTitle}
             </div>
             <div>
               <strong>Site:</strong> {hazopData.site}
@@ -162,7 +158,15 @@ const NodePage = ({ hazopData: propHazopData, hazopTeam: propHazopTeam }) => {
             </div>
             <div>
               <strong>Completion Status:</strong>{" "}
-              {hazopData.completionStatus ? "Completed" : "Pending"}
+              <span
+                className={
+                  hazopData?.completionStatus === true
+                    ? "status-completed"
+                    : "status-pending"
+                }
+              >
+                {hazopData.completionStatus ? "Completed" : "Ongoing"}
+              </span>
             </div>
             <div>
               <strong>Status:</strong>{" "}
@@ -254,47 +258,40 @@ const NodePage = ({ hazopData: propHazopData, hazopTeam: propHazopTeam }) => {
             </div>
           </div>
         )}
+        {hasMoc && mocDetails && (
+          <div>
+            <h1>MOC Details</h1>
+
+            {mocDetails.length > 0 ? (
+              mocDetails.map((moc, index) => (
+                <div key={moc.id} className="hazop-info-grid">
+                  <div>
+                    <strong>MOC ID:</strong> {moc.id}
+                  </div>
+                  <div>
+                    <strong>MOC No.:</strong> {moc.mocNo}
+                  </div>
+                  <div>
+                    <strong>Register Date:</strong>{" "}
+                    {formatDate(moc.registerDate)}
+                  </div>
+                  <div>
+                    <strong>MOC Date:</strong> {formatDate(moc.mocDate)}
+                  </div>
+                  <div>
+                    <strong>Title:</strong> {moc.mocTitle}
+                  </div>
+                  <div>
+                    <strong>Plant:</strong> {moc.mocPlant}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p>No MOC details available.</p>
+            )}
+          </div>
+        )}
       </div>
-
-      {hasMoc && mocDetails && (
-        <div className="hazop-info">
-          <h1>MOC Details</h1>
-
-          {mocDetails.length > 0 ? (
-            mocDetails.map((moc, index) => (
-              <div key={moc.id} className="hazop-info-grid">
-                <div>
-                  <strong>MOC ID:</strong> {moc.id}
-                </div>
-                <div>
-                  <strong>MOC No.:</strong> {moc.mocNo}
-                </div>
-                <div>
-                  <strong>Register Date:</strong> {formatDate(moc.registerDate)}
-                </div>
-                <div>
-                  <strong>MOC Date:</strong> {formatDate(moc.mocDate)}
-                </div>
-                <div>
-                  <strong>Title:</strong> {moc.mocTitle}
-                </div>
-                <div>
-                  <strong>Plant:</strong> {moc.mocPlant}
-                </div>
-                <div>
-                  <strong>Department:</strong> {moc.mocDepartment}
-                </div>
-                <div>
-                  <strong>Financial Year:</strong>{" "}
-                  {moc.mocFinancialYear || "N/A"}
-                </div>
-              </div>
-            ))
-          ) : (
-            <p>No MOC details available.</p>
-          )}
-        </div>
-      )}
 
       <div className="table-section">
         <div className="table-header">
@@ -312,12 +309,6 @@ const NodePage = ({ hazopData: propHazopData, hazopTeam: propHazopTeam }) => {
                 <th>Node No.</th>
                 <th>Registration Date</th>
                 <th>Design Intent</th>
-                <th>Title</th>
-                <th>Equipment</th>
-                <th>Controls</th>
-                <th>Temperature</th>
-                <th>Pressure</th>
-                <th>Quantity Flow Rate</th>
                 <th>Completion Status</th>
               </tr>
             </thead>
@@ -341,12 +332,6 @@ const NodePage = ({ hazopData: propHazopData, hazopTeam: propHazopTeam }) => {
                     <td>{n.nodeNumber}</td>
                     <td>{formatDate(n.registrationDate)}</td>
                     <td>{n.designIntent}</td>
-                    <td>{n.title}</td>
-                    <td>{n.equipment}</td>
-                    <td>{n.controls}</td>
-                    <td>{n.temperature}</td>
-                    <td>{n.pressure}</td>
-                    <td>{n.quantityFlowRate}</td>
                     <td>
                       <span
                         className={
@@ -357,7 +342,7 @@ const NodePage = ({ hazopData: propHazopData, hazopTeam: propHazopTeam }) => {
                             : "status-pending"
                         }
                       >
-                        {n.completionStatus === true ? "Completed" : "Pending"}
+                        {n.completionStatus === true ? "Completed" : "Ongoing"}
                       </span>
                     </td>
                   </tr>

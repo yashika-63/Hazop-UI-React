@@ -10,7 +10,7 @@ const HazopRegistration = ({ closePopup, onSaveSuccess }) => {
   const [formData, setFormData] = useState({
     hazopDate: "",
     site: "",
-    title: '',
+    hazopTitle: '',
     department: "",
     description: "",
     verificationStatus: false,
@@ -57,11 +57,11 @@ const HazopRegistration = ({ closePopup, onSaveSuccess }) => {
     } else if (!/^[A-Za-z0-9\s,-]+$/.test(formData.site)) {
       newErrors.site = "Only letters, numbers, commas & hyphens allowed.";
     }
-    if (!formData.title.trim()) {
-      newErrors.title = "Title is required.";
+    if (!formData.hazopTitle.trim()) {
+      newErrors.hazopTitle = "Title is required.";
       showToast("Title is required.", "warn");
-    } else if (!/^[A-Za-z0-9\s,-]+$/.test(formData.title)) {
-      newErrors.title = "Only letters, numbers, commas & hyphens allowed.";
+    } else if (!/^[A-Za-z0-9\s,-]+$/.test(formData.hazopTitle)) {
+      newErrors.hazopTitle = "Only letters, numbers, commas & hyphens allowed.";
     }
     if (!formData.department.trim()) {
       newErrors.department = "Department is required.";
@@ -243,18 +243,18 @@ const HazopRegistration = ({ closePopup, onSaveSuccess }) => {
             <label>Title</label>
             <input
               type="text"
-              name="title"
-              value={formData.title}
+              name="hazopTitle"
+              value={formData.hazopTitle}
               onChange={handleChange}
               disabled={loading}
             maxLength={1000}
                   />
                   <small
                     className={`char-count ${
-                      formData.title.length >= 1000 ? "limit-reached" : ""
+                      formData.hazopTitle.length >= 1000 ? "limit-reached" : ""
                     }`}
                   >
-                    {formData.title.length}/1000
+                    {formData.hazopTitle.length}/1000
                   </small>
           </div>
           <div className="form-group">

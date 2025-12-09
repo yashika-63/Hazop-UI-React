@@ -242,7 +242,7 @@ const MyDocument = ({
                     {/* Hazop Info Items */}
                     <View style={styles.infoItem}>
                         <Text style={styles.infoLabel}>Title</Text>
-                        <Text style={styles.infoValue}>{hazop?.title || '-'}</Text>
+                        <Text style={styles.infoValue}>{hazop?.hazopTitle || '-'}</Text>
                     </View>
                     <View style={styles.infoItem}>
                         <Text style={styles.infoLabel}>Site</Text>
@@ -360,7 +360,7 @@ const MyDocument = ({
                             src={`#node-${node.id}`}
                             style={[styles.indexCol, { width: '60%', color: '#007bff', textDecoration: 'underline' }]}
                         >
-                            {node.title || '-'}
+                            {node.hazopTitle || '-'}
                         </Link>
 
                         <Text
@@ -383,7 +383,7 @@ const MyDocument = ({
             {nodes?.map((node, index) => (
                 <View key={node.id} style={styles.nodeContainer} wrap={false}>
                     <View style={[styles.nodeHeader, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }]}>
-                        <Text>{node.title || '-'} - {node.nodeNumber || '-'}</Text>
+                        <Text>{node.hazopTitle || '-'} - {node.nodeNumber || '-'}</Text>
                         <Text>Creation Date: {formatDate(node?.registrationDate) || '-'}</Text>
                     </View>
 
@@ -426,7 +426,7 @@ const MyDocument = ({
                 <View style={styles.nodeContainer}>
                     {/* Node Information */}
                     <View style={styles.nodeHeader}>
-                        <Text style={styles.title}>Node {node?.nodeNumber}: {node?.title || '-'}</Text>
+                        <Text style={styles.hazopTitle}>Node {node?.nodeNumber}: {node?.hazopTitle || '-'}</Text>
                         <View style={[styles.badge, node?.completionStatus ? styles.bgGreen : styles.bgRed]}>
                             <Text style={{ color: 'white', fontSize: 8 }}>
                                 {node?.completionStatus ? 'Completed' : 'Pending'}

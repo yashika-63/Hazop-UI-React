@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
-import NodeDetailsPopup from "./NodeDetailsPopup";
+import NodeDetailsPopup from "./CreateNodeDetails";
 import { formatDate, showToast } from "../CommonUI/CommonUI";
-import NodeDetailsUpdatePopup from "./NodeDetailsUpdatePopup";
+import NodeDetailsUpdatePopup from "./UpdateNodeDetails";
 import { FaEdit, FaEllipsisV, FaTrash } from "react-icons/fa";
 import TextareaAutosize from "react-textarea-autosize";
 import RiskLevelPopup from "./RiskLevelPopup";
 import { strings } from "../string";
+import CreateNodeDetails from "./CreateNodeDetails";
 
 const NodeDetails = () => {
   const location = useLocation();
@@ -111,8 +112,9 @@ const NodeDetails = () => {
   };
 
   const openUpdatePopup = (detail) => {
-    setSelectedDetail(detail);
-    setShowUpdatePopup(true);
+    navigate("/UpdateNodeDetails", {
+      state: { detail, node: node, nodeID: id },
+    });
   };
 
   const getBorderColor = (risk) => {
@@ -154,13 +156,25 @@ const NodeDetails = () => {
     return "N/A";
   };
 
+  const getRiskTextClass = (risk) => {
+    const r = Number(risk);
+
+    if ([1, 2, 3, 4, 5].includes(r)) return "risk-badge risk-trivial";
+    if ([6, 8, 9, 10].includes(r)) return "risk-badge risk-tolerable";
+    if ([12, 15].includes(r)) return "risk-badge risk-moderate";
+    if ([16, 18].includes(r)) return "risk-badge risk-substantial";
+    if ([20, 25].includes(r)) return "risk-badge risk-intolerable";
+
+    return "risk-default";
+  };
+
   function ShowMoreText({ text, previewLength = 250, borderClass }) {
     const [expanded, setExpanded] = useState(false);
 
     const preview = text?.slice(0, previewLength);
 
     return (
-      <div className={`showmore-wrapper`}>
+      <div>
         <div className={`showmore-text ${borderClass} `}>
           {expanded
             ? text
@@ -361,42 +375,30 @@ const NodeDetails = () => {
       </div>
 
       <div className="hazop-info">
-        <div className="hazop-info-grid">
+        <div className="input-row">
           <div>
-            <strong>Node No.:</strong> {node?.nodeNumber}
+            <strong>Node No.: </strong> {node?.nodeNumber}
           </div>
           <div>
-            <strong>Registration Date:</strong>
+            <strong>Registration Date: </strong>
             {node?.registrationDate && formatDate(node.registrationDate)}
           </div>
           <div>
-            <strong>Title:</strong>
-            {node?.title}
+            <strong>Completion Status: </strong>
+            <span
+              className={
+                node?.completionStatus === true
+                  ? "status-completed"
+                  : "status-pending"
+              }
+            >
+              {node?.completionStatus ? "Completed" : "Ongoing"}
+            </span>
           </div>
-          <div>
-            <strong>Design Intent:</strong>
-            {node?.designIntent}
-          </div>
-          <div>
-            <strong>Equipment:</strong>
-            {node?.equipment}
-          </div>
-          <div>
-            <strong>Controls:</strong>
-            {node?.controls}
-          </div>
-          <div>
-            <strong>Temperature:</strong>
-            {node?.temprature}
-          </div>
-          <div>
-            <strong>Pressure:</strong>
-            {node?.pressure}
-          </div>
-          <div>
-            <strong>Quantity/ Flow Rate:</strong>
-            {node?.quantityFlowRate}
-          </div>
+        </div>
+        <div>
+          <strong>Design Intent:</strong>
+          {node?.designIntent}
         </div>
       </div>
 
@@ -407,8 +409,15 @@ const NodeDetails = () => {
         <button className="add-btn" onClick={() => setShowCompletePopup(true)}>
           Complete Node
         </button>
-        <button className="add-btn" onClick={() => setShowDetailPopup(true)}>
-          + Create Node Detail
+        <button
+          className="add-btn"
+          onClick={() =>
+            navigate("/CreateNodeDetails", {
+              state: { nodeID: id },
+            })
+          }
+        >
+          + Add Discussion
         </button>
       </div>
 
@@ -416,7 +425,7 @@ const NodeDetails = () => {
         <div>
           {details.length === 0 ? (
             <p className="error-text">
-              No node details created yet. Click “Create Node Detail” to add
+              No node details created yet. Click “Add Discussion” to add
               one.
             </p>
           ) : (
@@ -456,66 +465,69 @@ const NodeDetails = () => {
                 </div>
                 <div className="input-row">
                   <div className="form-group">
-                    <span>Causes</span>
-                    <ShowMoreText text={d.causes} />
+                    <span>Deviation</span>
+                    <ShowMoreText text={d.deviation} previewLength={600} />
                   </div>
                   <div className="form-group">
                     <span>Consequences</span>
-                    <ShowMoreText text={d.consequences} />
+                    <ShowMoreText text={d.consequences} previewLength={600} />
                   </div>
                   <div className="form-group">
-                    <span>Deviation</span>
-                    <ShowMoreText text={d.deviation} />
+                    <span>Causes</span>
+                    <ShowMoreText text={d.causes} previewLength={600} />
                   </div>
-                </div>
 
-                <div className="grid-row">
-                  <div className="form-group existing-control">
-                    <label>Existing control</label>
-                    <ShowMoreText
-                      text={d.existineControl}
-                      borderClass={getBorderClass(d.riskRating)}
-                    />
-                  </div>
-                  <div className="existing-metrics">
-                    <div className="form-group">
-                      <label>Existing Probability</label>
-                      <input
-                        value={d.existineProbability || "-"}
-                        style={{
-                          borderColor: getBorderColor(d.riskRating),
-                          borderWidth: "2px",
-                          borderStyle: "solid",
-                          borderLeft: `5px solid ${getBorderColor(
-                            d.riskRating
-                          )}`,
-                        }}
-                        readOnly
+                  <div>
+                    <div className="form-group existing-control">
+                      <label>Existing control</label>
+                      <ShowMoreText
+                        text={d.existineControl}
+                        borderClass={getBorderClass(d.riskRating)}
                       />
                     </div>
-                    <div className="form-group">
-                      <label>Existing Severity</label>
-                      <input
-                        value={d.existingSeverity || "-"}
-                        style={{
-                          borderColor: getBorderColor(d.riskRating),
-                          borderWidth: "2px",
-                          borderStyle: "solid",
-                          borderLeft: `5px solid ${getBorderColor(
-                            d.riskRating
-                          )}`,
-                        }}
-                        readOnly
-                      />
+                    <div className="metric-row">
+                      <div className="form-group">
+                        <label>Probability</label>
+                        <input
+                          value={d.existineProbability || "-"}
+                          style={{
+                            borderColor: getBorderColor(d.riskRating),
+                            borderWidth: "2px",
+                            borderStyle: "solid",
+                            width: '80%',
+                            borderLeft: `5px solid ${getBorderColor(
+                              d.riskRating
+                            )}`,
+                          }}
+                          readOnly
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label>Severity</label>
+                        <input
+                          value={d.existingSeverity || "-"}
+                          style={{
+                            borderColor: getBorderColor(d.riskRating),
+                            borderWidth: "2px",
+                            borderStyle: "solid",
+                            width: '80%',
+                            borderLeft: `5px solid ${getBorderColor(
+                              d.riskRating
+                            )}`,
+                          }}
+                          readOnly
+                        />
+                      </div>
                     </div>
-                    <div className="form-group">
-                      <label>Existing Risk Rating</label>
+                    <div className="form-group metric-single">
+                      <label>Risk Rating</label>
                       <input
                         value={d.riskRating || "-"}
                         style={{
                           borderColor: getBorderColor(d.riskRating),
                           borderWidth: "2px",
                           borderStyle: "solid",
+                          width: '90%',
                           borderLeft: `5px solid ${getBorderColor(
                             d.riskRating
                           )}`,
@@ -523,49 +535,59 @@ const NodeDetails = () => {
                         readOnly
                       />
                     </div>
+                    <small
+                  className={`risk-text ${getRiskTextClass(
+                    d.riskRating
+                  )} center-controls`}
+                  style={{ marginTop: "10px" }}
+                >
+                  {getRiskLevelText(d.riskRating)}
+                </small>
                   </div>
-                </div>
 
-                <div className="grid-row">
-                  <div className="form-group existing-control">
-                    <label>Additional Control</label>
-                    <ShowMoreText
-                      text={d.additionalControl}
-                      borderClass={getBorderClass(d.additionalRiskRating)}
-                    />
-                  </div>
-                  <div className="existing-metrics">
-                    <div className="form-group">
-                      <label>Additional Probability</label>
-                      <input
-                        value={d.additionalProbability || "-"}
-                        style={{
-                          borderColor: getBorderColor(d.additionalRiskRating),
-                          borderWidth: "2px",
-                          borderStyle: "solid",
-                          borderLeft: `5px solid ${getBorderColor(
-                            d.additionalRiskRating
-                          )}`,
-                        }}
-                        readOnly
+                  <div>
+                    <div className="form-group existing-control">
+                      <label>Additional Control</label>
+                      <ShowMoreText
+                        text={d.additionalControl}
+                        borderClass={getBorderClass(d.additionalRiskRating)}
                       />
                     </div>
-                    <div className="form-group">
-                      <label>Additional Severity</label>
-                      <input
-                        value={d.additionalSeverity || "-"}
-                        style={{
-                          borderColor: getBorderColor(d.additionalRiskRating),
-                          borderWidth: "2px",
-                          borderStyle: "solid",
-                          borderLeft: `5px solid ${getBorderColor(
-                            d.additionalRiskRating
-                          )}`,
-                        }}
-                        readOnly
-                      />
+                    <div className="metric-row">
+                      <div className="form-group">
+                        <label>Probability</label>
+                        <input
+                          value={d.additionalProbability || "-"}
+                          style={{
+                            borderColor: getBorderColor(d.additionalRiskRating),
+                            borderWidth: "2px",
+                            borderStyle: "solid",
+                            width: '80%',
+                            borderLeft: `5px solid ${getBorderColor(
+                              d.additionalRiskRating
+                            )}`,
+                          }}
+                          readOnly
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label>Severity</label>
+                        <input
+                          value={d.additionalSeverity || "-"}
+                          style={{
+                            borderColor: getBorderColor(d.additionalRiskRating),
+                            borderWidth: "2px",
+                            borderStyle: "solid",
+                            width: '80%',
+                            borderLeft: `5px solid ${getBorderColor(
+                              d.additionalRiskRating
+                            )}`,
+                          }}
+                          readOnly
+                        />
+                      </div>
                     </div>
-                    <div className="form-group">
+                    <div className="form-group metric-single">
                       <label>Additional Risk Rating</label>
                       <input
                         value={d.additionalRiskRating || "-"}
@@ -573,6 +595,7 @@ const NodeDetails = () => {
                           borderColor: getBorderColor(d.additionalRiskRating),
                           borderWidth: "2px",
                           borderStyle: "solid",
+                          width: '90%',
                           borderLeft: `5px solid ${getBorderColor(
                             d.additionalRiskRating
                           )}`,
@@ -580,6 +603,14 @@ const NodeDetails = () => {
                         readOnly
                       />
                     </div>
+                      <small
+                  className={`risk-text ${getRiskTextClass(
+                    d.additionalRiskRating
+                  )} center-controls`}
+                  style={{ marginTop: "10px" }}
+                >
+                  {getRiskLevelText(d.additionalRiskRating)}
+                </small>
                   </div>
                 </div>
                 <div className="rightbtn-controls">
@@ -618,7 +649,7 @@ const NodeDetails = () => {
       </div>
 
       {showDetailPopup && (
-        <NodeDetailsPopup
+        <CreateNodeDetails
           onClose={() => setShowDetailPopup(false)}
           onSave={handleSaveDetail}
           nodeID={id}

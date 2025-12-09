@@ -14,6 +14,8 @@ import "./styles/global.css";
 import RecommandationHandler from './HazopRecommandation/RecommandationHandler';
 import HazopApprovalViewPage from './ApprovalRequest/HazopApprovalViewPage';
 import HazopConfirmationViewPage from './ApprovalRequest/HazopConfirmationViewPage';
+import CreateNodeDetails from './AddNodeScreen/CreateNodeDetails';
+import UpdateNodeDetails from './AddNodeScreen/UpdateNodeDetails';
 
 const App = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -62,6 +64,8 @@ const App = () => {
                     <Route path='/RecommandationHandler' element={<RecommandationHandler />} />
                     <Route path="/hazop-approval-view" element={<HazopApprovalViewPage />} />
                     <Route path="/hazop-confirmation-view" element={<HazopConfirmationViewPage />} />
+                    <Route path='/CreateNodeDetails' element={<CreateNodeDetails />} />
+                    <Route path='/UpdateNodeDetails' element={<UpdateNodeDetails />} />
                     <Route path="*" element={<Navigate to="/HazopPage" />} />
                   </Routes>
                 </div>
