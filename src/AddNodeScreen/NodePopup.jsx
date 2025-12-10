@@ -195,7 +195,7 @@ const NodePopup = ({ onClose, onSave, hazopData }) => {
                   />
                 </div>
 
-                <div className="form-group ">
+                {/* <div className="form-group ">
                   <label>
                     <span className="required-marker">* </span>Node Title
                   </label>
@@ -206,7 +206,7 @@ const NodePopup = ({ onClose, onSave, hazopData }) => {
                     onChange={handleChange}
                     disabled={loading}
                   />
-                </div>
+                </div> */}
               </div>
 
               {/* Design / P&ID */}
