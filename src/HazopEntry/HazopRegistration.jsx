@@ -558,7 +558,6 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
       </div>
     </div>
   );
-
 };
 
 export default HazopRegistration;

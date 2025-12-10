@@ -45,21 +45,28 @@ const NodeDetails = () => {
   };
   const [showAllRecommendations, setShowAllRecommendations] = useState(false);
 
-  const renderDropdown = (item) => (
-    <div className="dropdown top-header">
-      <button className="dots-button" onClick={() => toggleDropdown(item.id)}>
-        <FaEllipsisV />
-      </button>
+const renderDropdown = (item) => (
+  <div className="dropdown top-header">
+    <button className="dots-button" onClick={() => toggleDropdown(item.id)}>
+      <FaEllipsisV />
+    </button>
 
-      {openDropdown === item.id && (
-        <div className="dropdown-content">
-          <button onClick={() => openUpdatePopup(item)}>
-            <FaEdit /> Update
-          </button>
-        </div>
-      )}
-    </div>
-  );
+    {openDropdown === item.id && (
+      <div className="dropdown-content">
+        <button
+          onClick={() => openUpdatePopup(item)}
+          disabled={node?.completionStatus} // disable if node is completed
+          style={{
+            cursor: node?.completionStatus ? "not-allowed" : "pointer",
+            opacity: node?.completionStatus ? 0.6 : 1,
+          }}
+        >
+          <FaEdit /> Update
+        </button>
+      </div>
+    )}
+  </div>
+);
 
   const fetchDetails = async () => {
     if (!id) return;
@@ -167,20 +174,22 @@ const NodeDetails = () => {
     return "risk-default";
   };
 
-  function ShowMoreText({ text, previewLength = 250, borderClass }) {
+  function ShowMoreText({ text = "", previewLength = 250, borderClass }) {
     const [expanded, setExpanded] = useState(false);
 
-    const preview = text?.slice(0, previewLength);
+    const safeText = text || "";
+
+    const preview = safeText.slice(0, previewLength);
 
     return (
       <div>
-        <div className={`showmore-text ${borderClass} `}>
+        <div className={`showmore-text ${borderClass}`}>
           {expanded
-            ? text
-            : preview + (text.length > previewLength ? "..." : "")}
+            ? safeText
+            : preview + (safeText.length > previewLength ? "..." : "")}
         </div>
 
-        {text.length > previewLength && (
+        {safeText.length > previewLength && (
           <button
             onClick={() => setExpanded(!expanded)}
             className="showmore-btn rightbtn-controls"
@@ -405,28 +414,36 @@ const NodeDetails = () => {
         <button className="add-btn" onClick={() => setShowRiskPopup(true)}>
           View Risk Levels
         </button>
-        <button className="add-btn" onClick={() => setShowCompletePopup(true)}>
-          Complete Node
-        </button>
-        <button
-          className="add-btn"
-          onClick={() =>
-            navigate("/CreateNodeDetails", {
-              state: { nodeID: id },
-            })
-            
-          }
-        >
-          + Add Discussion
-        </button>
+
+        {!node?.completionStatus && (
+          <button
+            className="add-btn"
+            onClick={() => setShowCompletePopup(true)}
+          >
+            Complete Node
+          </button>
+        )}
+
+        {/* Show Add Discussion button only if node is not completed */}
+        {!node?.completionStatus && (
+          <button
+            className="add-btn"
+            onClick={() =>
+              navigate("/CreateNodeDetails", {
+                state: { nodeID: id },
+              })
+            }
+          >
+            + Add Discussion
+          </button>
+        )}
       </div>
 
       <div className="nd-details-wrapper">
         <div>
           {details.length === 0 ? (
             <p className="error-text">
-              No node details created yet. Click “Add Discussion” to add
-              one.
+              No node details created yet. Click “Add Discussion” to add one.
             </p>
           ) : (
             details.map((d, index) => (
@@ -483,6 +500,7 @@ const NodeDetails = () => {
                       <ShowMoreText
                         text={d.existineControl}
                         borderClass={getBorderClass(d.riskRating)}
+                        previewLength={250}
                       />
                     </div>
                     <div className="metric-row">
@@ -494,7 +512,7 @@ const NodeDetails = () => {
                             borderColor: getBorderColor(d.riskRating),
                             borderWidth: "2px",
                             borderStyle: "solid",
-                            width: '80%',
+                            width: "80%",
                             borderLeft: `5px solid ${getBorderColor(
                               d.riskRating
                             )}`,
@@ -510,7 +528,7 @@ const NodeDetails = () => {
                             borderColor: getBorderColor(d.riskRating),
                             borderWidth: "2px",
                             borderStyle: "solid",
-                            width: '80%',
+                            width: "80%",
                             borderLeft: `5px solid ${getBorderColor(
                               d.riskRating
                             )}`,
@@ -527,7 +545,7 @@ const NodeDetails = () => {
                           borderColor: getBorderColor(d.riskRating),
                           borderWidth: "2px",
                           borderStyle: "solid",
-                          width: '90%',
+                          width: "90%",
                           borderLeft: `5px solid ${getBorderColor(
                             d.riskRating
                           )}`,
@@ -536,13 +554,13 @@ const NodeDetails = () => {
                       />
                     </div>
                     <small
-                  className={`risk-text ${getRiskTextClass(
-                    d.riskRating
-                  )} center-controls`}
-                  style={{ marginTop: "10px" }}
-                >
-                  {getRiskLevelText(d.riskRating)}
-                </small>
+                      className={`risk-text ${getRiskTextClass(
+                        d.riskRating
+                      )} center-controls`}
+                      style={{ marginTop: "10px" }}
+                    >
+                      {getRiskLevelText(d.riskRating)}
+                    </small>
                   </div>
 
                   <div>
@@ -551,6 +569,7 @@ const NodeDetails = () => {
                       <ShowMoreText
                         text={d.additionalControl}
                         borderClass={getBorderClass(d.additionalRiskRating)}
+                        previewLength={250}
                       />
                     </div>
                     <div className="metric-row">
@@ -562,7 +581,7 @@ const NodeDetails = () => {
                             borderColor: getBorderColor(d.additionalRiskRating),
                             borderWidth: "2px",
                             borderStyle: "solid",
-                            width: '80%',
+                            width: "80%",
                             borderLeft: `5px solid ${getBorderColor(
                               d.additionalRiskRating
                             )}`,
@@ -578,7 +597,7 @@ const NodeDetails = () => {
                             borderColor: getBorderColor(d.additionalRiskRating),
                             borderWidth: "2px",
                             borderStyle: "solid",
-                            width: '80%',
+                            width: "80%",
                             borderLeft: `5px solid ${getBorderColor(
                               d.additionalRiskRating
                             )}`,
@@ -595,7 +614,7 @@ const NodeDetails = () => {
                           borderColor: getBorderColor(d.additionalRiskRating),
                           borderWidth: "2px",
                           borderStyle: "solid",
-                          width: '90%',
+                          width: "90%",
                           borderLeft: `5px solid ${getBorderColor(
                             d.additionalRiskRating
                           )}`,
@@ -603,14 +622,14 @@ const NodeDetails = () => {
                         readOnly
                       />
                     </div>
-                      <small
-                  className={`risk-text ${getRiskTextClass(
-                    d.additionalRiskRating
-                  )} center-controls`}
-                  style={{ marginTop: "10px" }}
-                >
-                  {getRiskLevelText(d.additionalRiskRating)}
-                </small>
+                    <small
+                      className={`risk-text ${getRiskTextClass(
+                        d.additionalRiskRating
+                      )} center-controls`}
+                      style={{ marginTop: "10px" }}
+                    >
+                      {getRiskLevelText(d.additionalRiskRating)}
+                    </small>
                   </div>
                 </div>
                 <div className="rightbtn-controls">

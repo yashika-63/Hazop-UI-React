@@ -196,64 +196,85 @@ const UpdateNodeDetails = () => {
     return true;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validate()) return;
+  const getRecommendationsFromControl = (controlText) => {
+  return controlText
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.startsWith("•"))
+    .map((line) => ({ recommendation: line.replace("• ", "") }));
+};
 
-    const additionalRequired = isAdditionalRequired();
+  const handleRecommendations = async () => {
+  const recs = getRecommendationsFromControl(form.additionalControl);
 
-    if (
-      additionalRequired &&
-      (!form.additionalControl ||
-        !form.additionalProbability ||
-        !form.additionalSeverity)
-    ) {
-      showToast(
-        "Additional Control, Probability, and Severity are required when Risk Rating is 12 or higher.",
-        "warn"
-      );
-      return;
-    }
-
-    const changedFields = {};
-    Object.keys(form).forEach((key) => {
-      if (form[key] !== originalForm[key]) {
-        changedFields[key] = form[key];
-      }
-    });
-    changedFields.id = form.id;
-
-    try {
-      setLoading(true);
-      const response = await fetch(
-        `http://${strings.localhost}/api/hazopNodeDetail/update/${form.id}`,
+  const promises = recs.map((rec, index) => {
+    if (tempRecommendations[index]?.id) {
+      // Update existing
+      return fetch(
+        `http://${strings.localhost}/api/nodeRecommendation/update/${tempRecommendations[index].id}`,
         {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(changedFields),
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(rec),
         }
       );
-
-      if (response.ok) {
-        await response.text();
-        showToast("Details updated successfully!", "success");
-        navigate("/NodeDetails", {
-          state: {
-            id: node?.id || nodeID || detail?.nodeId,
-          },
-        });
-      } else {
-        const errorText = await response.text();
-        showToast("Failed to update details.", "error");
-      }
-    } catch (error) {
-      // showToast("Error updating details.", "error");
-    } finally {
-      setLoading(false);
+    } else {
+      // Save new
+      return fetch(
+        `http://${strings.localhost}/api/nodeRecommendation/save/${nodeID}/${nodeDetailId}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify([rec]),
+        }
+      );
     }
-  };
+  });
+
+  await Promise.all(promises);
+};
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!validate()) return;
+
+  const changedFields = {};
+  Object.keys(form).forEach((key) => {
+    if (form[key] !== originalForm[key]) {
+      changedFields[key] = form[key];
+    }
+  });
+  changedFields.id = form.id;
+
+  try {
+    setLoading(true);
+
+    // Update Node Details
+    const response = await fetch(
+      `http://${strings.localhost}/api/hazopNodeDetail/update/${form.id}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(changedFields),
+      }
+    );
+
+    if (!response.ok) throw new Error("Failed to update Node Detail");
+
+    // Update/Save Recommendations
+    await handleRecommendations();
+
+    showToast("Details & Recommendations updated successfully!", "success");
+
+    navigate("/NodeDetails", {
+      state: { id: node?.id || nodeID || detail?.nodeId },
+    });
+  } catch (error) {
+    showToast(error.message || "Error updating details.", "error");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const isAdditionalRequired = () => {
     const riskRating = parseInt(form.riskRating, 10) || 0;
@@ -500,27 +521,6 @@ const UpdateNodeDetails = () => {
               <div className="form-group">
                 <label>
                   {" "}
-                  <span className="required-marker">*</span>Consequences
-                </label>
-                <textarea
-                  name="consequences"
-                  rows={rows}
-                  value={form.consequences ?? ""}
-                  onChange={handleChange}
-                  className="textareaFont"
-                  maxLength={5000}
-                />
-                <small
-                  className={`char-count ${
-                    form.consequences.length >= 5000 ? "limit-reached" : ""
-                  }`}
-                >
-                  {form.consequences.length}/5000
-                </small>
-              </div>
-              <div className="form-group">
-                <label>
-                  {" "}
                   <span className="required-marker">*</span>Causes
                 </label>
                 <textarea
@@ -537,6 +537,27 @@ const UpdateNodeDetails = () => {
                   }`}
                 >
                   {form.causes.length}/5000
+                </small>
+              </div>
+              <div className="form-group">
+                <label>
+                  {" "}
+                  <span className="required-marker">*</span>Consequences
+                </label>
+                <textarea
+                  name="consequences"
+                  rows={rows}
+                  value={form.consequences ?? ""}
+                  onChange={handleChange}
+                  className="textareaFont"
+                  maxLength={5000}
+                />
+                <small
+                  className={`char-count ${
+                    form.consequences.length >= 5000 ? "limit-reached" : ""
+                  }`}
+                >
+                  {form.consequences.length}/5000
                 </small>
               </div>
 
