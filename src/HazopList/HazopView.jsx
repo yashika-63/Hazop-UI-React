@@ -2,9 +2,10 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { strings } from "../string";
 import "../styles/global.css";
-import { formatDate, showToast } from "../CommonUI/CommonUI";
+import { formatDate, getBorderColor, getRiskClass, getRiskLevelText, getRiskTextClass, showToast } from "../CommonUI/CommonUI";
 import { useNavigate } from "react-router-dom";
-
+import '../AddNodeScreen/Node.css';
+import './HazopView.css';
 const HazopView = ({ onClose, mode = "view-only" }) => {
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
@@ -182,19 +183,7 @@ const HazopView = ({ onClose, mode = "view-only" }) => {
 
 
 
-    const getRiskClass = (risk) => {
-        if (!risk) return "risk-default";
 
-        const r = Number(risk);
-
-        if ([1, 2, 3, 4, 5].includes(r)) return "risk-trivial-text";
-        if ([6, 8, 9, 10].includes(r)) return "risk-tolerable-text";
-        if ([12, 15].includes(r)) return "risk-moderate-text";
-        if ([16, 18].includes(r)) return "risk-substantial-text";
-        if ([20, 25].includes(r)) return "risk-intolerable-text";
-
-        return "risk-default";
-    };
 
     return (
         <div>
@@ -267,36 +256,59 @@ const HazopView = ({ onClose, mode = "view-only" }) => {
                                                 Node #{node.nodeNumber} - {node.hazopTitle}
                                             </strong>
                                         </p>
-                                        <p>
+
+                                        <div>
                                             <strong>Design Intent:</strong> {node.designIntent}
-                                        </p>
-                                        <p>
-                                            <strong>Equipment:</strong> {node.equipment}
-                                        </p>
-                                        <p>
-                                            <strong>Controls:</strong> {node.controls}
-                                        </p>
-                                        <p>
-                                            <strong>Temperature:</strong> {node.temprature}
-                                        </p>
-                                        <p>
-                                            <strong>Pressure:</strong> {node.pressure}
-                                        </p>
-                                        <p>
-                                            <strong>Flow/Quantity:</strong> {node.quantityFlowRate}
-                                        </p>
-                                        <p>
-                                            <strong>Chemical & Utilities:</strong>{" "}
-                                            {node.chemicalAndUtilities}
-                                        </p>
-                                        <p>
-                                            <strong>Completion Status:</strong>{" "}
-                                            {node.completionStatus ? "Completed" : "Pending"}
-                                        </p>
-                                        <p>
-                                            <strong>Completion Date:</strong>{" "}
-                                            {formatDate(node.completionDate || "-")}
-                                        </p>
+                                        </div>
+
+                                        <div className="input-row">
+                                            <div>
+                                                <strong>Equipment:</strong> {node.equipment}
+                                            </div>
+                                            <div>
+                                                <strong>Controls:</strong> {node.controls}
+                                            </div>
+                                        </div>
+
+                                        <div className="input-row">
+                                            <div>
+                                                <strong>Temperature:</strong> {node.temprature}
+                                            </div>
+                                            <div>
+                                                <strong>Pressure:</strong> {node.pressure}
+                                            </div>
+
+                                        </div>
+
+                                        <div className="input-row">
+                                            <div>
+                                                <strong>Chemical & Utilities:</strong>{" "}
+                                                {node.chemicalAndUtilities}
+                                            </div>
+                                            <div>
+                                                <strong>Flow/Quantity:</strong> {node.quantityFlowRate}
+                                            </div>
+
+                                        </div>
+                                        <div className="input-row">
+                                            <div>
+                                                <strong>Completion Status:</strong>{" "}
+                                                <span
+                                                    className={
+                                                        node?.completionStatus === true
+                                                            ? "status-completed"
+                                                            : "status-pending"
+                                                    }
+                                                >
+                                                    {node?.completionStatus ? "Completed" : "Ongoing"}
+                                                </span>
+                                            </div>
+
+                                            <div>
+                                                <strong>Completion Date:</strong>{" "}
+                                                {formatDate(node.completionDate || "-")}                                            </div>
+                                        </div>
+
                                     </div>
                                 ))}
                             </div>
@@ -325,107 +337,177 @@ const HazopView = ({ onClose, mode = "view-only" }) => {
                                                         <div className="node-detail-label">
                                                             {idx + 1}. Discussion
                                                         </div>
-                                                        <div className="table-wrapper">
-                                                            <table className="node-details-table">
-                                                                <thead>
-                                                                    <tr>
-                                                                        <th>General Param</th>
-                                                                        <th>Specific Param</th>
-                                                                        <th>Guid Word</th>
-                                                                        <th>Existing Probability</th>
-                                                                        <th>Existing Severity</th>
-                                                                        <th>Risk Rating</th>
-                                                                        <th>Additional Probability</th>
-                                                                        <th>Additional Severity</th>
-                                                                        <th>Additional Risk Rating</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    {(nodeDetails[node.id] || []).map(
-                                                                        (detail) => (
-                                                                            <tr key={detail.id}>
-                                                                                <td>{detail.generalParameter}</td>
-                                                                                <td>{detail.specificParameter}</td>
-                                                                                <td>{detail.guidWord}</td>
+                                                        <div >
 
-                                                                                <td>{detail.existineProbability}</td>
-                                                                                <td>{detail.existingSeverity}</td>
-                                                                                <td
-                                                                                    className={getRiskClass(
-                                                                                        detail.riskRating
-                                                                                    )}
-                                                                                >
-                                                                                    {detail.riskRating}
-                                                                                </td>
-
-                                                                                <td>{detail.additionalProbability}</td>
-                                                                                <td>{detail.additionalSeverity}</td>
-                                                                                <td
-                                                                                    className={getRiskClass(
-                                                                                        detail.additionalRiskRating
-                                                                                    )}
-                                                                                >
-                                                                                    {detail.additionalRiskRating}
-                                                                                </td>
-                                                                            </tr>
-                                                                        )
-                                                                    )}
-                                                                </tbody>
-                                                            </table>
 
                                                             <div>
                                                                 <div className="input-row">
                                                                     <div className="form-group">
-                                                                        <span>Deviation</span>
+                                                                        <label>General Parameter</label>
+                                                                        <textarea
+                                                                            className="textareaFont"
+                                                                            value={detail.generalParameter}
+                                                                            readOnly
+                                                                            rows={3}
+                                                                        />
+                                                                    </div>
+
+                                                                    <div className="form-group">
+                                                                        <label>Specific Parameter</label>
+                                                                        <textarea
+                                                                            className="textareaFont"
+                                                                            value={detail.specificParameter}
+                                                                            readOnly
+                                                                            rows={3}
+                                                                        />
+                                                                    </div>
+
+                                                                    <div className="form-group">
+                                                                        <label>Guide Word</label>
+                                                                        <textarea
+                                                                            className="textareaFont"
+                                                                            value={detail.guidWord}
+                                                                            readOnly
+                                                                            rows={3}
+                                                                        />
+                                                                    </div>
+                                                                </div>
+
+                                                                <div className="input-row">
+                                                                    <div className="form-group">
+                                                                        <label>Deviation</label>
                                                                         <textarea
                                                                             className="textareaFont"
                                                                             value={detail.deviation}
                                                                             readOnly
                                                                             rows={10}
-                                                                        ></textarea>
+                                                                        />
                                                                     </div>
 
                                                                     <div className="form-group">
-                                                                        <span>Causes</span>
+                                                                        <label>Causes</label>
                                                                         <textarea
                                                                             className="textareaFont"
                                                                             value={detail.causes}
                                                                             readOnly
                                                                             rows={10}
-                                                                        ></textarea>
+                                                                        />
                                                                     </div>
 
                                                                     <div className="form-group">
-                                                                        <span>Consequences</span>
+                                                                        <label>Consequences</label>
                                                                         <textarea
                                                                             className="textareaFont"
                                                                             value={detail.consequences}
                                                                             readOnly
                                                                             rows={10}
-                                                                        ></textarea>
+                                                                        />
                                                                     </div>
-                                                                    <div className="form-group">
-                                                                        <span>Existing Control</span>
-                                                                        <textarea
-                                                                            className="textareaFont"
-                                                                            value={detail.existineControl}
-                                                                            readOnly
-                                                                            rows={10}
-                                                                        ></textarea>
+                                                                    <div>
+                                                                        <div className="form-group">
+                                                                            <label>Existing Control</label>
+                                                                            <textarea
+                                                                                className="textareaFont"
+                                                                                value={detail.existineControl}
+                                                                                readOnly
+                                                                                rows={5}
+                                                                            />
+                                                                        </div>
+
+                                                                        <div className="metric-row">
+                                                                            <div className="form-group">
+                                                                                <label>Probability</label>
+                                                                                <input
+                                                                                    className={`readonly ${getRiskClass(detail.existineProbability)}`}
+                                                                                    value={detail.existineProbability}
+                                                                                    readOnly
+                                                                                    style={{ borderColor: getBorderColor(detail.existineProbability), width: '80px' }}
+                                                                                />
+                                                                            </div>
+
+                                                                            <div className="form-group">
+                                                                                <label>Severity</label>
+                                                                                <input
+                                                                                    className={`readonly ${getRiskClass(detail.existingSeverity)}`}
+                                                                                    value={detail.existingSeverity}
+                                                                                    readOnly
+                                                                                    style={{ borderColor: getBorderColor(detail.existingSeverity), width: '80px' }}
+                                                                                />
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div className="form-group metric-single">
+                                                                            <label>Risk Rating</label>
+                                                                            <input
+                                                                                className={`readonly ${getRiskClass(detail.riskRating)}`}
+                                                                                value={detail.riskRating}
+                                                                                readOnly
+                                                                                style={{ borderColor: getBorderColor(detail.riskRating) }}
+                                                                            />
+                                                                            <small
+                                                                                className={`risk-text ${getRiskTextClass(
+                                                                                    detail.riskRating
+                                                                                )} center-controls`} style={{ textAlign: 'center' }}
+                                                                            >
+                                                                                {getRiskLevelText(detail.riskRating)}
+                                                                            </small>
+                                                                        </div>
                                                                     </div>
 
-                                                                    <div className="form-group">
-                                                                        <span>Additional Control</span>
-                                                                        <textarea
-                                                                            className="textareaFont"
-                                                                            value={detail.additionalControl}
-                                                                            readOnly
-                                                                            rows={10}
-                                                                        ></textarea>
+                                                                    <div>
+                                                                        <div className="form-group">
+                                                                            <label>Additional Control</label>
+                                                                            <textarea
+                                                                                className="textareaFont"
+                                                                                value={detail.additionalControl}
+                                                                                readOnly
+                                                                                rows={5}
+                                                                            />
+                                                                        </div>
+
+                                                                        <div className="metric-row">
+                                                                            <div className="form-group">
+                                                                                <label>Probability</label>
+                                                                                <input
+                                                                                    className={`readonly ${getRiskClass(detail.additionalProbability)}`}
+                                                                                    value={detail.additionalProbability}
+                                                                                    readOnly
+                                                                                    style={{ borderColor: getBorderColor(detail.additionalProbability), width: '80px' }}
+                                                                                />
+                                                                            </div>
+
+                                                                            <div className="form-group">
+                                                                                <label>Severity</label>
+                                                                                <input
+                                                                                    className={`readonly ${getRiskClass(detail.additionalSeverity)}`}
+                                                                                    value={detail.additionalSeverity}
+                                                                                    readOnly
+                                                                                    style={{ borderColor: getBorderColor(detail.additionalSeverity), width: '80px' }}
+                                                                                />
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div className="form-group metric-single">
+                                                                            <label>Additional Risk Rating</label>
+                                                                            <input
+                                                                                className={`readonly ${getRiskClass(detail.additionalRiskRating)}`}
+                                                                                value={detail.additionalRiskRating}
+                                                                                readOnly
+                                                                                style={{ borderColor: getBorderColor(detail.additionalRiskRating) }}
+                                                                            />
+                                                                            <small
+                                                                                className={`risk-text ${getRiskTextClass(
+                                                                                    detail.additionalRiskRating
+                                                                                )} center-controls`} style={{ textAlign: 'center' }}
+                                                                            >
+                                                                                {getRiskLevelText(detail.additionalRiskRating)}
+                                                                            </small>
+                                                                        </div>
                                                                     </div>
+
                                                                 </div>
-
                                                             </div>
+
                                                         </div>
 
                                                         {recsMap[idx] && recsMap[idx].length > 0 && (
@@ -439,7 +521,8 @@ const HazopView = ({ onClose, mode = "view-only" }) => {
                                                                     ))}
                                                                 </ul>
                                                             </div>
-                                                        )}
+                                                        )
+                                                        }
                                                     </div>
                                                 ))}
 
@@ -754,7 +837,7 @@ const HazopView = ({ onClose, mode = "view-only" }) => {
                 )}
 
             </div>
-        </div>
+        </div >
     );
 };
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
-import { FaChartLine, FaClipboardCheck, FaCogs, FaHome, FaList, FaListAlt, FaListUl, FaRegListAlt, FaTasks } from "react-icons/fa";
+import { FaChartLine, FaClipboardCheck, FaCogs, FaHome, FaList, FaListAlt, FaListUl, FaRegListAlt, FaTasks, FaUser } from "react-icons/fa";
 import { FaDiagramProject, FaPeopleGroup, FaShield } from "react-icons/fa6";
 import "./CommonCss/Sidebar.css";
 
@@ -28,6 +28,7 @@ const Sidebar = ({ isOpen }) => {
     },
     { name: "All Hazop's", path: "/HazopStatusPage", icon: <FaChartLine /> },
     { name: "HazopWorkflow", path: "/HazopWorkflow", icon: <FaDiagramProject /> },
+    { name: "Role Based Hazop Page", path: "/RoleBasedHazopPage", icon: <FaUser /> },
 
   ];
 

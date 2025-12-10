@@ -56,55 +56,54 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
     }
   }, [moc]);
 
+  const refs = {
+    hazopDate: React.createRef(),
+    department: React.createRef(),
+    site: React.createRef(),
+    hazopTitle: React.createRef(),
+    description: React.createRef()
+  };
 
 
   const validate = () => {
     const newErrors = {};
+    let firstErrorField = null;
 
-    // Check Hazop Date
+    const setErr = (field, message) => {
+      newErrors[field] = message;
+      if (!firstErrorField) firstErrorField = field;
+    };
+
     if (!formData.hazopDate) {
-      newErrors.hazopDate = "Date is required.";
+      setErr("hazopDate", "Date is required.");
       showToast("Date is required.", "warn");
     }
 
-    // Check Site
-    if (!formData.site.trim()) {
-      newErrors.site = "Site is required.";
-      showToast("Site is required.", "warn");
-    } else if (!/^[A-Za-z0-9\s,-]+$/.test(formData.site)) {
-      newErrors.site = "Only letters, numbers, commas & hyphens allowed in site.";
-      showToast("Only letters, numbers, commas & hyphens allowed in site.", "warn");
-    }
-
-    // Check Hazop Title
-    if (!formData.hazopTitle.trim()) {
-      newErrors.hazopTitle = "Title is required.";
-      showToast("Title is required.", "warn");
-    } else if (!/^[A-Za-z0-9\s,-]+$/.test(formData.hazopTitle)) {
-      newErrors.hazopTitle = "Only letters, numbers, commas & hyphens allowed in title.";
-      showToast("Only letters, numbers, commas & hyphens allowed in title.", "warn");
-    }
-
-    // Check Department
     if (!formData.department.trim()) {
-      newErrors.department = "Department is required.";
+      setErr("department", "Department is required.");
       showToast("Department is required.", "warn");
-    } else if (!/^[A-Za-z\s]+$/.test(formData.department)) {
-      newErrors.department = "Only alphabets allowed in department.";
-      showToast("Only alphabets are allowed in department.", "warn");
     }
 
-    // Check Description
+    if (!formData.site.trim()) {
+      setErr("site", "Site is required.");
+      showToast("Site is required.", "warn");
+    }
+
+    if (!formData.hazopTitle.trim()) {
+      setErr("hazopTitle", "Title is required.");
+      showToast("Title is required.", "warn");
+    }
+
     if (!formData.description.trim()) {
-      newErrors.description = "Description is required.";
+      setErr("description", "Description is required.");
       showToast("Description is required.", "warn");
     }
 
-    console.log("Validation errors", newErrors);
-
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+
+    return { isValid: Object.keys(newErrors).length === 0, firstErrorField };
   };
+
 
 
 
@@ -186,8 +185,15 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
 
 
   const handleSave = async () => {
-    if (!validate()) return;
+    const { isValid, firstErrorField } = validate();
 
+    if (!isValid) {
+      if (firstErrorField && refs[firstErrorField]?.current) {
+        refs[firstErrorField].current.scrollIntoView({ behavior: "smooth", block: "center" });
+        refs[firstErrorField].current.focus();
+      }
+      return;
+    }
     // CASE 1: No team selected
     if (hazopTeam.length === 0) {
       setConfirmPopup({
@@ -385,6 +391,8 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
             <label>HAZOP Date</label>
             <input
               type="date"
+              ref={refs.hazopDate}
+              className={errors.hazopDate ? "error-input" : ""}
               name="hazopDate"
               value={formData.hazopDate}
               onChange={handleChange}
@@ -397,6 +405,8 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
             <label>Department</label>
             <select
               name="department"
+              ref={refs.department}
+              className={errors.department ? "error-input" : ""}
               value={formData.department}
               onChange={handleChange}
               disabled={loading}
@@ -414,6 +424,8 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
             <label>Site</label>
             <select
               name="site"
+              ref={refs.site}
+              className={errors.site ? "error-input" : ""}
               value={formData.site}
               onChange={handleChange}
               disabled={loading || !formData.department}
@@ -433,6 +445,8 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
             <label>Title</label>
             <input
               type="text"
+              ref={refs.hazopTitle}
+              className={errors.hazopTitle ? "error-input" : ""}
               name="hazopTitle"
               value={formData.hazopTitle}
               onChange={handleChange}
@@ -452,13 +466,15 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
             <label>Description</label>
             <textarea
               name="description"
+              ref={refs.description}
+              className={`textareaFont ${errors.description ? "error-input" : ""}`}
               value={formData.description}
               onChange={handleChange}
               disabled={loading}
               rows={6}
-              className="textareaFont"
               maxLength={5000}
             />
+
             <small
               className={`char-count ${formData.description.length >= 5000 ? "limit-reached" : ""
                 }`}

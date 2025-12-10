@@ -10,7 +10,7 @@ import NodePage from "../AddNodeScreen/NodePage";
 import { useNavigate } from "react-router-dom";
 import HazopRegistration from "./HazopRegistration";
 
-const HazopPage = () => {
+const RoleBasedHazopPage = () => {
   const [newRegistered, setNewRegistered] = useState([]);
   const [pending, setPending] = useState([]);
   const [completed, setCompleted] = useState([]);
@@ -33,7 +33,7 @@ const HazopPage = () => {
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showConfirmPopup, setShowConfirmPopup] = useState(false);
-
+ const LoginUser = localStorage.getItem("empCode");
   const companyId = localStorage.getItem("companyId");
   const toggleDropdown = (id) => {
     setOpenDropdown(openDropdown === id ? null : id);
@@ -55,59 +55,52 @@ const HazopPage = () => {
   }, []);
 
   const fetchColumns = async () => {
-    let col1Data = [];
-    let col2Data = [];
-    let col3Data = [];
-
     try {
+        
+ 
       const col1 = await axios.get(
-        `http://${strings.localhost}/api/hazopRegistration/filter?companyId=${companyId}&status=true&completionStatus=false&sendForVerification=false`
+        `http://${strings.localhost}/api/hazopRegistration/getForTeamLeader?empCode=${LoginUser}/companyId=${companyId}&status=true&completionStatus=false&sendForVerification=false`
       );
-      col1Data = await Promise.all(
+      console.log("response,", col1);
+      const col2 = await axios.get(
+        `http://${strings.localhost}/api/hazopRegistration/getForTeamLeader?empCode=${LoginUser}/companyId=${companyId}&status=true&completionStatus=false&sendForVerification=true`
+      );
+
+      const col3 = await axios.get(
+        `http://${strings.localhost}/api/hazopRegistration/getForTeamLeader?empCode=${LoginUser}/companyId=${companyId}&status=true&completionStatus=true&sendForVerification=false`
+      );
+      const col1WithCount = await Promise.all(
         col1.data.map(async (item) => {
           const peopleCount = await fetchTeamCount(item.id);
           const canSendForCompletion = await checkSendForCompletionEligibility(item.id);
+
           return { ...item, peopleCount, canSendForCompletion };
         })
       );
-    } catch (err) {
-      console.error("Error fetching New Registered:", err);
-    }
 
-    try {
-      const col2 = await axios.get(
-        `http://${strings.localhost}/api/hazopRegistration/filter?companyId=${companyId}&status=true&completionStatus=false&sendForVerification=true`
-      );
-      col2Data = await Promise.all(
+
+      const col2WithCount = await Promise.all(
         col2.data.map(async (item) => ({
           ...item,
           peopleCount: await fetchTeamCount(item.id)
         }))
       );
-    } catch (err) {
-      console.error("Error fetching OnGoing:", err);
-    }
 
-    try {
-      const col3 = await axios.get(
-        `http://${strings.localhost}/api/hazopRegistration/recent-top-10?companyId=${companyId}&status=true&completionStatus=true`
-      );
-      col3Data = await Promise.all(
+      const col3WithCount = await Promise.all(
         col3.data.map(async (item) => ({
           ...item,
           peopleCount: await fetchTeamCount(item.id)
         }))
       );
+
+      setNewRegistered(col1WithCount);
+      setPending(col2WithCount);
+      setCompleted(col3WithCount);
+
     } catch (err) {
-      console.error("Error fetching Completed:", err);
+      console.error("Error loading HAZOP data:", err);
     }
-
-    // Update state even if some APIs failed
-    setNewRegistered(col1Data);
-    setPending(col2Data);
-    setCompleted(col3Data);
   };
-
 
   const checkSendForCompletionEligibility = async (hazopId) => {
     try {
@@ -276,9 +269,9 @@ const HazopPage = () => {
   return (
     <div className="page-wrapper">
       <div className="page-card">
-        <div className="rightbtn-controls">
+        {/* <div className="rightbtn-controls">
           <button className="add-btn" onClick={openPopup}> + Create Hazop </button>
-        </div>
+        </div> */}
         <div className="kanban-wrapper">
           <div className="kanban-titles">
             <div className="kanban-title">
@@ -568,4 +561,4 @@ const HazopPage = () => {
 };
 
 
-export default HazopPage;
+export default RoleBasedHazopPage;

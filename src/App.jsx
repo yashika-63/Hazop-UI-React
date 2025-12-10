@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
@@ -8,9 +8,6 @@ import NodeDetails from './AddNodeScreen/NodeDetails';
 import HazopList from './HazopList/HazopList';
 import HazopPage from './HazopEntry/HazopPage';
 import RequestHandler from './ApprovalRequest/RequestHandler';
-import { ToastContainer } from 'react-toastify';
-import './App.css';
-import "./styles/global.css";
 import RecommandationHandler from './HazopRecommandation/RecommandationHandler';
 import HazopApprovalViewPage from './ApprovalRequest/HazopApprovalViewPage';
 import HazopConfirmationViewPage from './ApprovalRequest/HazopConfirmationViewPage';
@@ -21,21 +18,22 @@ import HazopStatusPage from './HazopList/HazopStatusPage';
 import HazopView from './HazopList/HazopView';
 import CreateNodeDetails from './AddNodeScreen/CreateNodeDetails';
 import NodePopup from './AddNodeScreen/NodePopup';
+import { ToastContainer } from 'react-toastify';
+import './App.css';
+import "./styles/global.css";
+import RoleBasedHazopPage from './HazopEntry/RoleBasedHazopPage';
 
 const App = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // Auth state
   const [isAuthenticated, setIsAuthenticated] = useState(
     !!localStorage.getItem('empCode')
   );
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
-  // Call this after login
   const handleLogin = () => setIsAuthenticated(true);
 
-  // Call this after logout
   const handleLogout = () => {
     localStorage.clear();
     setIsAuthenticated(false);
@@ -44,21 +42,23 @@ const App = () => {
   return (
     <Router>
       <Routes>
-
-        {/* Login Route */}
         <Route
           path="/login"
           element={isAuthenticated ? <Navigate to="/HazopPage" /> : <Login setToken={handleLogin} />}
         />
 
-        {/* Protected Routes */}
         <Route
           path="/*"
           element={
             isAuthenticated ? (
-              <>
-                <Topbar toggleSidebar={toggleSidebar} handleLogout={handleLogout} />
+              <div className="app-container">
+                <Topbar
+                  toggleSidebar={toggleSidebar}
+                  isOpen={isSidebarOpen} 
+                  handleLogout={handleLogout}
+                />
                 <Sidebar isOpen={isSidebarOpen} />
+
                 <div className={`content-area ${isSidebarOpen ? 'shifted' : ''}`}>
                   <Routes>
                     <Route path="/NodePage" element={<NodePage />} />
@@ -66,22 +66,24 @@ const App = () => {
                     <Route path="/HazopList" element={<HazopList />} />
                     <Route path="/RequestHandler" element={<RequestHandler />} />
                     <Route path="/NodeDetails" element={<NodeDetails />} />
-                    <Route path='/RecommandationHandler' element={<RecommandationHandler />} />
+                    <Route path="/RecommandationHandler" element={<RecommandationHandler />} />
                     <Route path="/hazop-approval-view" element={<HazopApprovalViewPage />} />
                     <Route path="/hazop-confirmation-view" element={<HazopConfirmationViewPage />} />
-                    <Route path='/CreateNodeDetails' element={<CreateNodeDetails />} />
-                    <Route path='/UpdateNodeDetails' element={<UpdateNodeDetails />} />
+                    <Route path="/CreateNodeDetails" element={<CreateNodeDetails />} />
+                    <Route path="/UpdateNodeDetails" element={<UpdateNodeDetails />} />
                     <Route path="/complete-hazop-view" element={<HazopView />} />
                     <Route path="/MOCList" element={<MOCList />} />
                     <Route path="/NodePopup/:id" element={<NodePopup />} />
                     <Route path="/HazopWorkflow" element={<HazopWorkflow />} />
                     <Route path="/HazopStatusPage" element={<HazopStatusPage />} />
+                    <Route path="/RoleBasedHazopPage" element={<RoleBasedHazopPage />} />
 
-                    {/* <Route path="*" element={<Navigate to="/HazopPage" />} /> */}
+                    <Route path="*" element={<Navigate to="/HazopPage" />} />
                   </Routes>
                 </div>
-                <ToastContainer />
-              </>
+
+                <ToastContainer position="top-right" autoClose={3000} />
+              </div>
             ) : (
               <Navigate to="/login" />
             )

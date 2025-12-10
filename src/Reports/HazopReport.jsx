@@ -219,18 +219,18 @@ const getFontSize = (textLength) => {
     if (textLength < 500) return 11;
     if (textLength < 1000) return 10;
     return 8; // For very large text
-  };
-  
-  // Function to adjust column width dynamically
-  const getColumnWidth = (textLength) => {
+};
+
+// Function to adjust column width dynamically
+const getColumnWidth = (textLength) => {
     if (textLength < 500) return '8%';
     if (textLength < 1000) return '12%';
     return '18%'; // For very large text
-  };
-  
-  const TruncateText = ({ text, maxLength }) => {
+};
+
+const TruncateText = ({ text, maxLength }) => {
     return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
-  };
+};
 
 // Updated MyDocument with default props and safe optional chaining
 const MyDocument = ({
@@ -254,10 +254,8 @@ const MyDocument = ({
             <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Hazop Details</Text>
                 <View style={styles.infoCard}>
-                    {/* Hazop Info Items */}
                     <View style={styles.infoItem}>
                         <Text style={styles.infoLabel}>Title</Text>
-                        <Text style={styles.infoValue}>{hazop?.hazopTitle || '-'}</Text>
                         <Text style={styles.infoValue}>{hazop?.hazopTitle || '-'}</Text>
                     </View>
                     <View style={styles.infoItem}>
@@ -335,13 +333,14 @@ const MyDocument = ({
                     </View>
                     {team?.map((m, i) => (
                         <View key={i} style={[styles.tableRow, i % 2 !== 0 ? styles.tableRowEven : {}]}>
-                            <View style={styles.tableCol}><Text style={styles.tableCell}>{m?.firstName || ''} {m?.middleName || ''} {m?.lastName || ''}</Text></View>
+                            <View style={styles.tableCol}><Text style={styles.tableCell}>{`${m?.firstName || ''} ${m?.middleName || ''} ${m?.lastName || ''}`}</Text></View>
                             <View style={styles.tableCol}><Text style={styles.tableCell}>{m?.dimension3 || '-'}</Text></View>
                             <View style={styles.tableCol}><Text style={styles.tableCell}>{m?.emailId || '-'}</Text></View>
                         </View>
                     ))}
                 </View>
             </View>
+
             <Footer downloadDate={downloadDate} />
         </Page>
 
@@ -430,221 +429,220 @@ const MyDocument = ({
 
         {/* Pages 4+: Node Details + Recommendations */}
         {nodes?.map((node) => (
-        <Page size="A4" orientation="landscape" style={styles.page} key={node.id}>
-          <View id={`node-${node.id}`} />
-          <Header hazop={hazop} />
-          <Text style={styles.sectionTitle}>Hazop Node Details</Text>
+            <Page size="A4" orientation="landscape" style={styles.page} key={node.id}>
+                <View id={`node-${node.id}`} />
+                <Header hazop={hazop} />
+                <Text style={styles.sectionTitle}>Hazop Node Details</Text>
 
-          <View style={styles.nodeContainer}>
-            {/* Node Information */}
-            <View style={styles.nodeHeader}>
-              <Text style={styles.title}>
-                Node {node?.nodeNumber}: {node?.title || '-'}
-              </Text>
-              <View
-                style={[styles.badge, node?.completionStatus ? styles.bgGreen : styles.bgRed]}
-              >
-                <Text style={{ color: 'white', fontSize: 8 }}>
-                  {node?.completionStatus ? 'Completed' : 'Pending'}
-                </Text>
-              </View>
-            </View>
-
-            {/* Loop over node details */}
-            {nodeDetails?.[node?.id]?.map((detail, index) => {
-              const recs = nodeRecommendations?.[node?.id]?.[detail?.id] || [];
-
-              return (
-                <View key={index} style={{ marginBottom: 15 }}>
-                  {/* Node Detail Card */}
-                  <View wrap={true} style={{ marginBottom: 15 }}>
-                    <Text style={[styles.sectionTitle, { marginBottom: 5 }]}>
-                      Node Details , Discussions and Recommendations
-                    </Text>
-
-                    <View style={styles.table}>
-                      {/* Table Header */}
-                      <View style={[styles.tableRow, styles.tableRowHeader]}>
-                        <View style={{ ...styles.tableCol, width: getColumnWidth(detail?.generalParameter?.length) }}>
-                          <Text style={styles.tableCellHeader}>General Param</Text>
+                <View style={styles.nodeContainer}>
+                    {/* Node Information */}
+                    <View style={styles.nodeHeader}>
+                        <Text style={styles.title}>
+                            Node {node?.nodeNumber}: {node?.title || '-'}
+                        </Text>
+                        <View
+                            style={[styles.badge, node?.completionStatus ? styles.bgGreen : styles.bgRed]}
+                        >
+                            <Text style={{ color: 'white', fontSize: 8 }}>
+                                {node?.completionStatus ? 'Completed' : 'Pending'}
+                            </Text>
                         </View>
-                        <View style={{ ...styles.tableCol, width: getColumnWidth(detail?.specificParameter?.length) }}>
-                          <Text style={styles.tableCellHeader}>Specific Param</Text>
-                        </View>
-                        <View style={{ ...styles.tableCol, width: getColumnWidth(detail?.guidWord?.length) }}>
-                          <Text style={styles.tableCellHeader}>Guid Word</Text>
-                        </View>
-                        <View style={{ ...styles.tableCol, width: '18%' }}>
-                          <Text style={styles.tableCellHeader}>Deviation</Text>
-                        </View>
-                        <View style={{ ...styles.tableCol, width: '18%' }}>
-                          <Text style={styles.tableCellHeader}>Causes</Text>
-                        </View>
-                        <View style={{ ...styles.tableCol, width: '18%' }}>
-                          <Text style={styles.tableCellHeader}>Consequences</Text>
-                        </View>
-                        <View style={{ ...styles.tableCol, width: '8%' }}>
-                          <Text style={styles.tableCellHeader}>Existing Control</Text>
-                        </View>
-                        <View style={{ ...styles.tableCol, width: '8%' }}>
-                          <Text style={styles.tableCellHeader}>Existing Probability</Text>
-                        </View>
-                        <View style={{ ...styles.tableCol, width: '8%' }}>
-                          <Text style={styles.tableCellHeader}>Existing Severity</Text>
-                        </View>
-                        <View style={{ ...styles.tableCol, width: '6%' }}>
-                          <Text style={styles.tableCellHeader}>Existing Risk</Text>
-                        </View>
-                        <View style={{ ...styles.tableCol, width: '8%' }}>
-                          <Text style={styles.tableCellHeader}>Additional Control</Text>
-                        </View>
-                        <View style={{ ...styles.tableCol, width: '8%' }}>
-                          <Text style={styles.tableCellHeader}>Additional Probability</Text>
-                        </View>
-                        <View style={{ ...styles.tableCol, width: '8%' }}>
-                          <Text style={styles.tableCellHeader}>Additional Severity</Text>
-                        </View>
-                        <View style={{ ...styles.tableCol, width: '6%' }}>
-                          <Text style={styles.tableCellHeader}>Additional Risk</Text>
-                        </View>
-                      </View>
-
-                      {/* Table Body */}
-                      <View style={styles.tableRow}>
-                        <View style={{ ...styles.tableCol, width: '8%' }}>
-                          <Text style={[styles.tableCell, { fontSize: getFontSize(detail?.generalParameter?.length) }]}>
-                            {detail?.generalParameter || '-'}
-                          </Text>
-                        </View>
-                        <View style={{ ...styles.tableCol, width: '8%' }}>
-                          <Text style={[styles.tableCell, { fontSize: getFontSize(detail?.specificParameter?.length) }]}>
-                            {detail?.specificParameter || '-'}
-                          </Text>
-                        </View>
-                        <View style={{ ...styles.tableCol, width: '8%' }}>
-                          <Text style={[styles.tableCell, { fontSize: getFontSize(detail?.guidWord?.length) }]}>
-                            {detail?.guidWord || '-'}
-                          </Text>
-                        </View>
-                        <View style={{ ...styles.tableCol, width: '18%' }}>
-                          <Text style={[styles.tableCell, { fontSize: getFontSize(detail?.deviation?.length) }]}>
-                            {detail?.deviation || '-'}
-                          </Text>
-                        </View>
-                        <View style={{ ...styles.tableCol, width: '18%' }}>
-                          <Text style={[styles.tableCell, { fontSize: getFontSize(detail?.causes?.length) }]}>
-                            {detail?.causes || '-'}
-                          </Text>
-                        </View>
-                        <View style={{ ...styles.tableCol, width: '18%' }}>
-                          <Text style={[styles.tableCell, { fontSize: getFontSize(detail?.consequences?.length) }]}>
-                            {detail?.consequences || '-'}
-                          </Text>
-                        </View>
-                        <View style={{ ...styles.tableCol, width: '8%' }}>
-                          <Text style={[styles.tableCell, { fontSize: getFontSize(detail?.existingControl?.length) }]}>
-                            {detail?.existingControl || '-'}
-                          </Text>
-                        </View>
-                        <View style={{ ...styles.tableCol, width: '8%' }}>
-                          <Text style={[styles.tableCell, { fontSize: getFontSize(detail?.existineProbability?.length) }]}>
-                            {detail?.existineProbability || '-'}
-                          </Text>
-                        </View>
-                        <View style={{ ...styles.tableCol, width: '8%' }}>
-                          <Text style={[styles.tableCell, { fontSize: getFontSize(detail?.existingSeverity?.length) }]}>
-                            {detail?.existingSeverity || '-'}
-                          </Text>
-                        </View>
-                        <View style={{ ...styles.tableCol, width: '6%', backgroundColor: getRiskColor(detail?.existingRiskRating), paddingVertical: 2 }}>
-                          <Text style={[styles.tableCell, { textAlign: 'center', color: '#000' }]}>
-                            {detail?.existingRiskRating || '-'}
-                          </Text>
-                        </View>
-                        <View style={{ ...styles.tableCol, width: '8%' }}>
-                          <Text style={[styles.tableCell, { fontSize: getFontSize(detail?.additionalControl?.length) }]}>
-                            {detail?.additionalControl || '-'}
-                          </Text>
-                        </View>
-                        <View style={{ ...styles.tableCol, width: '8%' }}>
-                          <Text style={[styles.tableCell, { fontSize: getFontSize(detail?.additionalProbability?.length) }]}>
-                            {detail?.additionalProbability || '-'}
-                          </Text>
-                        </View>
-                        <View style={{ ...styles.tableCol, width: '8%' }}>
-                          <Text style={[styles.tableCell, { fontSize: getFontSize(detail?.additionalSeverity?.length) }]}>
-                            {detail?.additionalSeverity || '-'}
-                          </Text>
-                        </View>
-                        <View style={{ ...styles.tableCol, width: '6%', backgroundColor: getRiskColor(detail?.additionalRiskRating), paddingVertical: 2 }}>
-                          <Text style={[styles.tableCell, { textAlign: 'center', color: '#000' }]}>
-                            {detail?.additionalRiskRating || '-'}
-                          </Text>
-                        </View>
-                      </View>
                     </View>
-                  </View>
 
-                  {/* Recommendations for this detail */}
-                  <View style={styles.detailCard} wrap={false}>
-                    <Text style={{ fontSize: 10, fontWeight: 'bold', color: '#d63384', marginBottom: 5 }}>
-                      Recommendations for {detail?.designIntent || 'Detail ' + (index + 1)}
-                    </Text>
+                    {/* Loop over node details */}
+                    {(node?.nodeDetails || []).map((detail, index) => {
+                        const recs = detail?.recommendations || [];
+                        return (
+                            <View key={index} style={{ marginBottom: 15 }}>
+                                {/* Node Detail Card */}
+                                <View wrap={true} style={{ marginBottom: 15 }}>
+                                    <Text style={[styles.sectionTitle, { marginBottom: 5 }]}>
+                                        Node Details , Discussions and Recommendations
+                                    </Text>
 
-                    {recs.length > 0 ? (
-                      <View style={styles.table} >
-                        <View style={[styles.tableRow, styles.tableRowHeader]}>
-                          <View style={{ ...styles.tableCol, width: '40%' }}>
-                            <Text style={styles.tableCellHeader}>Recommendation</Text>
-                          </View>
-                          <View style={{ ...styles.tableCol, width: '20%' }}>
-                            <Text style={styles.tableCellHeader}>Department</Text>
-                          </View>
-                          <View style={{ ...styles.tableCol, width: '20%' }}>
-                            <Text style={styles.tableCellHeader}>Remark</Text>
-                          </View>
-                          <View style={{ ...styles.tableCol, width: '20%' }}>
-                            <Text style={styles.tableCellHeader}>Completion Date</Text>
-                          </View>
-                          <View style={{ ...styles.tableCol, width: '20%' }}>
-                            <Text style={styles.tableCellHeader}>Completion Status</Text>
-                          </View>
-                        </View>
+                                    <View style={styles.table}>
+                                        {/* Table Header */}
+                                        <View style={[styles.tableRow, styles.tableRowHeader]}>
+                                            <View style={{ ...styles.tableCol, width: getColumnWidth(detail?.generalParameter?.length) }}>
+                                                <Text style={styles.tableCellHeader}>General Param</Text>
+                                            </View>
+                                            <View style={{ ...styles.tableCol, width: getColumnWidth(detail?.specificParameter?.length) }}>
+                                                <Text style={styles.tableCellHeader}>Specific Param</Text>
+                                            </View>
+                                            <View style={{ ...styles.tableCol, width: getColumnWidth(detail?.guidWord?.length) }}>
+                                                <Text style={styles.tableCellHeader}>Guid Word</Text>
+                                            </View>
+                                            <View style={{ ...styles.tableCol, width: '18%' }}>
+                                                <Text style={styles.tableCellHeader}>Deviation</Text>
+                                            </View>
+                                            <View style={{ ...styles.tableCol, width: '18%' }}>
+                                                <Text style={styles.tableCellHeader}>Causes</Text>
+                                            </View>
+                                            <View style={{ ...styles.tableCol, width: '18%' }}>
+                                                <Text style={styles.tableCellHeader}>Consequences</Text>
+                                            </View>
+                                            <View style={{ ...styles.tableCol, width: '8%' }}>
+                                                <Text style={styles.tableCellHeader}>Existing Control</Text>
+                                            </View>
+                                            <View style={{ ...styles.tableCol, width: '8%' }}>
+                                                <Text style={styles.tableCellHeader}>Existing Probability</Text>
+                                            </View>
+                                            <View style={{ ...styles.tableCol, width: '8%' }}>
+                                                <Text style={styles.tableCellHeader}>Existing Severity</Text>
+                                            </View>
+                                            <View style={{ ...styles.tableCol, width: '6%' }}>
+                                                <Text style={styles.tableCellHeader}>Existing Risk</Text>
+                                            </View>
+                                            <View style={{ ...styles.tableCol, width: '8%' }}>
+                                                <Text style={styles.tableCellHeader}>Additional Control</Text>
+                                            </View>
+                                            <View style={{ ...styles.tableCol, width: '8%' }}>
+                                                <Text style={styles.tableCellHeader}>Additional Probability</Text>
+                                            </View>
+                                            <View style={{ ...styles.tableCol, width: '8%' }}>
+                                                <Text style={styles.tableCellHeader}>Additional Severity</Text>
+                                            </View>
+                                            <View style={{ ...styles.tableCol, width: '6%' }}>
+                                                <Text style={styles.tableCellHeader}>Additional Risk</Text>
+                                            </View>
+                                        </View>
 
-                        {recs.map((r, i) => (
-                          <View key={i} style={styles.tableRow}>
-                            <View style={{ ...styles.tableCol, width: '40%' }}>
-                              <Text style={styles.tableCell}>{r?.recommendation || '-'}</Text>
+                                        {/* Table Body */}
+                                        <View style={styles.tableRow}>
+                                            <View style={{ ...styles.tableCol, width: '8%' }}>
+                                                <Text style={[styles.tableCell, { fontSize: getFontSize(detail?.generalParameter?.length) }]}>
+                                                    {detail?.generalParameter || '-'}
+                                                </Text>
+                                            </View>
+                                            <View style={{ ...styles.tableCol, width: '8%' }}>
+                                                <Text style={[styles.tableCell, { fontSize: getFontSize(detail?.specificParameter?.length) }]}>
+                                                    {detail?.specificParameter || '-'}
+                                                </Text>
+                                            </View>
+                                            <View style={{ ...styles.tableCol, width: '8%' }}>
+                                                <Text style={[styles.tableCell, { fontSize: getFontSize(detail?.guidWord?.length) }]}>
+                                                    {detail?.guidWord || '-'}
+                                                </Text>
+                                            </View>
+                                            <View style={{ ...styles.tableCol, width: '18%' }}>
+                                                <Text style={[styles.tableCell, { fontSize: getFontSize(detail?.deviation?.length) }]}>
+                                                    {detail?.deviation || '-'}
+                                                </Text>
+                                            </View>
+                                            <View style={{ ...styles.tableCol, width: '18%' }}>
+                                                <Text style={[styles.tableCell, { fontSize: getFontSize(detail?.causes?.length) }]}>
+                                                    {detail?.causes || '-'}
+                                                </Text>
+                                            </View>
+                                            <View style={{ ...styles.tableCol, width: '18%' }}>
+                                                <Text style={[styles.tableCell, { fontSize: getFontSize(detail?.consequences?.length) }]}>
+                                                    {detail?.consequences || '-'}
+                                                </Text>
+                                            </View>
+                                            <View style={{ ...styles.tableCol, width: '8%' }}>
+                                                <Text style={[styles.tableCell, { fontSize: getFontSize(detail?.existingControl?.length) }]}>
+                                                    {detail?.existingControl || '-'}
+                                                </Text>
+                                            </View>
+                                            <View style={{ ...styles.tableCol, width: '8%' }}>
+                                                <Text style={[styles.tableCell, { fontSize: getFontSize(detail?.existineProbability?.length) }]}>
+                                                    {detail?.existineProbability || '-'}
+                                                </Text>
+                                            </View>
+                                            <View style={{ ...styles.tableCol, width: '8%' }}>
+                                                <Text style={[styles.tableCell, { fontSize: getFontSize(detail?.existingSeverity?.length) }]}>
+                                                    {detail?.existingSeverity || '-'}
+                                                </Text>
+                                            </View>
+                                            <View style={{ ...styles.tableCol, width: '6%', backgroundColor: getRiskColor(detail?.existingRiskRating), paddingVertical: 2 }}>
+                                                <Text style={[styles.tableCell, { textAlign: 'center', color: '#000' }]}>
+                                                    {detail?.existingRiskRating || '-'}
+                                                </Text>
+                                            </View>
+                                            <View style={{ ...styles.tableCol, width: '8%' }}>
+                                                <Text style={[styles.tableCell, { fontSize: getFontSize(detail?.additionalControl?.length) }]}>
+                                                    {detail?.additionalControl || '-'}
+                                                </Text>
+                                            </View>
+                                            <View style={{ ...styles.tableCol, width: '8%' }}>
+                                                <Text style={[styles.tableCell, { fontSize: getFontSize(detail?.additionalProbability?.length) }]}>
+                                                    {detail?.additionalProbability || '-'}
+                                                </Text>
+                                            </View>
+                                            <View style={{ ...styles.tableCol, width: '8%' }}>
+                                                <Text style={[styles.tableCell, { fontSize: getFontSize(detail?.additionalSeverity?.length) }]}>
+                                                    {detail?.additionalSeverity || '-'}
+                                                </Text>
+                                            </View>
+                                            <View style={{ ...styles.tableCol, width: '6%', backgroundColor: getRiskColor(detail?.additionalRiskRating), paddingVertical: 2 }}>
+                                                <Text style={[styles.tableCell, { textAlign: 'center', color: '#000' }]}>
+                                                    {detail?.additionalRiskRating || '-'}
+                                                </Text>
+                                            </View>
+                                        </View>
+                                    </View>
+                                </View>
+
+                                {/* Recommendations for this detail */}
+                                <View style={styles.detailCard} wrap={false}>
+                                    <Text style={{ fontSize: 10, fontWeight: 'bold', color: '#d63384', marginBottom: 5 }}>
+                                        Recommendations for {detail?.designIntent || 'Detail ' + (index + 1)}
+                                    </Text>
+
+                                    {recs.length > 0 ? (
+                                        <View style={styles.table} >
+                                            <View style={[styles.tableRow, styles.tableRowHeader]}>
+                                                <View style={{ ...styles.tableCol, width: '40%' }}>
+                                                    <Text style={styles.tableCellHeader}>Recommendation</Text>
+                                                </View>
+                                                <View style={{ ...styles.tableCol, width: '20%' }}>
+                                                    <Text style={styles.tableCellHeader}>Department</Text>
+                                                </View>
+                                                <View style={{ ...styles.tableCol, width: '20%' }}>
+                                                    <Text style={styles.tableCellHeader}>Remark</Text>
+                                                </View>
+                                                <View style={{ ...styles.tableCol, width: '20%' }}>
+                                                    <Text style={styles.tableCellHeader}>Completion Date</Text>
+                                                </View>
+                                                <View style={{ ...styles.tableCol, width: '20%' }}>
+                                                    <Text style={styles.tableCellHeader}>Completion Status</Text>
+                                                </View>
+                                            </View>
+
+                                            {recs.map((r, i) => (
+                                                <View key={i} style={styles.tableRow}>
+                                                    <View style={{ ...styles.tableCol, width: '40%' }}>
+                                                        <Text style={styles.tableCell}>{r?.recommendation || '-'}</Text>
+                                                    </View>
+                                                    <View style={{ ...styles.tableCol, width: '20%' }}>
+                                                        <Text style={styles.tableCell}>{r?.department || '-'}</Text>
+                                                    </View>
+                                                    <View style={{ ...styles.tableCol, width: '20%' }}>
+                                                        <Text style={styles.tableCell}>{r?.remarkbyManagement || '-'}</Text>
+                                                    </View>
+                                                    <View style={{ ...styles.tableCol, width: '20%' }}>
+                                                        <Text style={styles.tableCell}>{formatDate(r?.completionDate)}</Text>
+                                                    </View>
+                                                    <View style={{ ...styles.tableCol, width: '20%' }}>
+                                                        <Text style={styles.tableCell}>
+                                                            {r?.completionStatus ? 'Completed' : 'Pending'}
+                                                        </Text>
+                                                    </View>
+                                                </View>
+                                            ))}
+                                        </View>
+                                    ) : (
+                                        <Text>No recommendations available for this detail.</Text>
+                                    )}
+                                </View>
                             </View>
-                            <View style={{ ...styles.tableCol, width: '20%' }}>
-                              <Text style={styles.tableCell}>{r?.department || '-'}</Text>
-                            </View>
-                            <View style={{ ...styles.tableCol, width: '20%' }}>
-                              <Text style={styles.tableCell}>{r?.remarkbyManagement || '-'}</Text>
-                            </View>
-                            <View style={{ ...styles.tableCol, width: '20%' }}>
-                              <Text style={styles.tableCell}>{formatDate(r?.completionDate)}</Text>
-                            </View>
-                            <View style={{ ...styles.tableCol, width: '20%' }}>
-                              <Text style={styles.tableCell}>
-                                {r?.completionStatus ? 'Completed' : 'Pending'}
-                              </Text>
-                            </View>
-                          </View>
-                        ))}
-                      </View>
-                    ) : (
-                      <Text>No recommendations available for this detail.</Text>
-                    )}
-                  </View>
+                        );
+                    })}
                 </View>
-              );
-            })}
-          </View>
 
-          <Footer downloadDate={downloadDate} />
-        </Page>
-      ))}
+                <Footer downloadDate={downloadDate} />
+            </Page>
+        ))}
 
 
         {/* Page 3: All Recommendations */}
@@ -878,63 +876,16 @@ const HazopReportPage = ({ hazopId, onClose }) => {
             setLoading(true);
 
             try {
-                // 1️⃣ Fetch HAZOP info + team in parallel
-                const [hRes, tRes] = await Promise.all([
-                    axios.get(`http://${strings.localhost}/api/hazopRegistration/by-id?hazopId=${hazopId}`),
-                    axios.get(`http://${strings.localhost}/api/hazopTeam/teamByHazop/${hazopId}?status=true`)
-                ]);
-
-                setHazop(hRes.data || {});
-                setTeam(Array.isArray(tRes.data) ? tRes.data : []);
-
-                // 2️⃣ Fetch nodes
-                const nRes = await axios.get(
-                    `http://${strings.localhost}/api/hazopNode/by-registration-status?registrationId=${hazopId}&status=true`
+                const fullRes = await axios.get(
+                    `http://${strings.localhost}/api/hazopRegistration/${hazopId}/full-details`
                 );
-                const fetchedNodes = Array.isArray(nRes.data) ? nRes.data : [];
-                setNodes(fetchedNodes);
 
-                const nodeIds = fetchedNodes.map(n => n.id);
-                const dMap = {}; // nodeId -> details
-                const rMap = {}; // nodeId -> detailId -> recommendations
+                const fullData = fullRes.data || {};
 
-                if (nodeIds.length > 0) {
-                    // Fetch all node details in parallel
-                    const nodeDetailsPromises = nodeIds.map(nodeId =>
-                        axios.get(`http://${strings.localhost}/api/hazopNodeDetail/node/${nodeId}`)
-                            .then(res => ({ nodeId, details: Array.isArray(res.data) ? res.data : [] }))
-                            .catch(() => ({ nodeId, details: [] }))
-                    );
+                setHazop(fullData.hazopInfo || {});
+                setTeam(fullData.teamMembers || []);
+                setNodes(fullData.nodes || []); // contains nodeDetails + recommendations inside
 
-                    const nodeDetailsResults = await Promise.all(nodeDetailsPromises);
-
-                    const allRecPromises = [];
-
-                    nodeDetailsResults.forEach(({ nodeId, details }) => {
-                        dMap[nodeId] = details;
-
-                        details.forEach(detail => {
-                            if (detail.id) {
-                                allRecPromises.push(
-                                    axios.get(`http://${strings.localhost}/api/nodeRecommendation/getByDetailId/${detail.id}`)
-                                        .then(res => ({ nodeId, detailId: detail.id, recs: Array.isArray(res.data) ? res.data : [] }))
-                                        .catch(() => ({ nodeId, detailId: detail.id, recs: [] }))
-                                );
-                            }
-                        });
-                    });
-
-                    const allRecResults = await Promise.all(allRecPromises);
-
-                    // Organize recommendations by nodeId and detailId
-                    allRecResults.forEach(({ nodeId, detailId, recs }) => {
-                        if (!rMap[nodeId]) rMap[nodeId] = {};
-                        rMap[nodeId][detailId] = recs;
-                    });
-
-                    setNodeDetails(dMap);
-                    setNodeRecommendations(rMap);
-                }
 
                 // 3️⃣ Fetch all recommendations for HAZOP
                 const allRecRes = await axios.get(`http://${strings.localhost}/api/nodeRecommendation/getByHazopRegistration/${hazopId}`)
@@ -982,7 +933,7 @@ const HazopReportPage = ({ hazopId, onClose }) => {
         // SHEET 1: COVER PAGE (Ref: H-TC-HAZOP-COVER.csv)
         // ==========================================
         const coverSheet = workbook.addWorksheet('Cover Page');
-        
+
         // 1. Setup Columns (width approximately matches Excel visual)
         coverSheet.columns = [
             { width: 5 }, { width: 15 }, { width: 25 }, { width: 15 }, { width: 20 }, { width: 15 }, { width: 20 }, { width: 10 }
@@ -1029,7 +980,7 @@ const HazopReportPage = ({ hazopId, onClose }) => {
             row.getCell(2).value = index + 1; // Sr No
             row.getCell(3).value = `${member.firstName} ${member.lastName}`;
             row.getCell(5).value = member.dimension3 || 'member'; // Designation
-            
+
             coverSheet.mergeCells(`C${currentRow}:D${currentRow}`);
             coverSheet.mergeCells(`E${currentRow}:F${currentRow}`);
             currentRow++;
@@ -1041,22 +992,22 @@ const HazopReportPage = ({ hazopId, onClose }) => {
         // This is tricky because we need to loop per NODE
         // For simplicity, we create one big sheet, or you can create one sheet per node.
         // Let's create one master sheet listing all nodes sequentially.
-        
+
         const workSheet = workbook.addWorksheet('Hazop Worksheet');
-        
+
         // Define Columns: Needs many columns to handle the complex merging
         workSheet.columns = [
-             { width: 5 }, { width: 15 }, // A, B (General Param)
-             { width: 15 }, { width: 15 }, // C, D (Specific Param)
-             { width: 15 }, // E (Guide Word)
-             { width: 25 }, // F (Deviation)
-             { width: 30 }, // G (Causes)
-             { width: 30 }, // H (Consequences)
-             { width: 30 }, // I (Existing Controls)
-             { width: 5 }, { width: 5 }, { width: 5 }, // J,K,L (P, S, R)
-             { width: 30 }, // M (Addl Controls)
-             { width: 15 }, // N (Resp)
-             { width: 5 }, { width: 5 }, { width: 5 } // O,P,Q (P, S, R)
+            { width: 5 }, { width: 15 }, // A, B (General Param)
+            { width: 15 }, { width: 15 }, // C, D (Specific Param)
+            { width: 15 }, // E (Guide Word)
+            { width: 25 }, // F (Deviation)
+            { width: 30 }, // G (Causes)
+            { width: 30 }, // H (Consequences)
+            { width: 30 }, // I (Existing Controls)
+            { width: 5 }, { width: 5 }, { width: 5 }, // J,K,L (P, S, R)
+            { width: 30 }, // M (Addl Controls)
+            { width: 15 }, // N (Resp)
+            { width: 5 }, { width: 5 }, { width: 5 } // O,P,Q (P, S, R)
         ];
 
         // We iterate through nodes and print headers for EACH node
@@ -1069,7 +1020,7 @@ const HazopReportPage = ({ hazopId, onClose }) => {
 
             // -- Node Info Block --
             const startRow = wsRow;
-            
+
             // Row 1: Node No & Date
             workSheet.getCell(`B${wsRow}`).value = 'Node No:';
             workSheet.getCell(`B${wsRow}`).font = { bold: true };
@@ -1109,7 +1060,7 @@ const HazopReportPage = ({ hazopId, onClose }) => {
             // -- Main Table Header --
             const headerRowStart = wsRow;
             const headers = [
-                'General Param', 'Specific Param', 'Guide Word', 'Deviation', 'Causes', 'Consequences', 
+                'General Param', 'Specific Param', 'Guide Word', 'Deviation', 'Causes', 'Consequences',
                 'Existing Controls', 'Existing Risk', '', '', 'Additional Controls', 'Responsibility', 'Residual Risk', '', ''
             ];
             const headerRow = workSheet.getRow(wsRow);
@@ -1131,11 +1082,11 @@ const HazopReportPage = ({ hazopId, onClose }) => {
             workSheet.getCell(`Q${wsRow}`).value = 'R';
 
             // Style Header
-            for(let i=2; i<=17; i++) {
+            for (let i = 2; i <= 17; i++) {
                 const cell = workSheet.getRow(wsRow).getCell(i);
                 cell.font = { bold: true, color: { argb: 'FFFFFF' } };
                 cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '004085' } };
-                cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+                cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
                 cell.alignment = { wrapText: true, horizontal: 'center', vertical: 'middle' };
             }
             wsRow++;
@@ -1154,7 +1105,7 @@ const HazopReportPage = ({ hazopId, onClose }) => {
                 currentRow.getCell(10).value = det.existineProbability;
                 currentRow.getCell(11).value = det.existingSeverity;
                 currentRow.getCell(12).value = det.existingRiskRating;
-                
+
                 // For Additional Controls, we might have multiple Recommendations
                 // Concatenate them for Excel
                 const recs = nodeRecommendations[node.id]?.[det.id] || [];
@@ -1170,12 +1121,12 @@ const HazopReportPage = ({ hazopId, onClose }) => {
                 // Styling row
                 currentRow.eachCell((cell) => {
                     cell.alignment = { wrapText: true, vertical: 'top' };
-                    cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+                    cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
                 });
-                
+
                 wsRow++;
             });
-            
+
             wsRow += 3; // Gap between nodes
         });
 
@@ -1184,12 +1135,12 @@ const HazopReportPage = ({ hazopId, onClose }) => {
         // ==========================================
         const riskSheet = workbook.addWorksheet('Risk Matrix');
         addHeaderBlock(riskSheet, hazop);
-        
+
         // Add Matrix Content similar to CSV
         const matrixStart = 10;
         riskSheet.getCell(`B${matrixStart}`).value = '1.0 RISK MATRIX USED FOR THE STUDY';
         riskSheet.getCell(`B${matrixStart}`).font = { bold: true };
-        
+
         // This part is static text from your CSV, you can loop to add it, or add manually.
         // For brevity, I'm skipping the full static matrix text population, but you use the same .value = '' logic.
 
@@ -1203,33 +1154,33 @@ const HazopReportPage = ({ hazopId, onClose }) => {
         // According to H-TC-HAZOP-COVER.csv
         // The block is usually at the top right, columns E, F, G, H usually
         // Let's assume standard position for all sheets
-        
+
         const r = startRowIndex;
-        
+
         // Document No
-        sheet.getCell(`E${r+1}`).value = 'Document No.';
-        sheet.getCell(`G${r+1}`).value = 'FORM/H/TC/17';
-        
+        sheet.getCell(`E${r + 1}`).value = 'Document No.';
+        sheet.getCell(`G${r + 1}`).value = 'FORM/H/TC/17';
+
         // Document Name
-        sheet.getCell(`E${r+2}`).value = 'Document Name';
-        sheet.getCell(`G${r+2}`).value = 'Hazop Study Report';
-        
+        sheet.getCell(`E${r + 2}`).value = 'Document Name';
+        sheet.getCell(`G${r + 2}`).value = 'Hazop Study Report';
+
         // Issue No / Date
-        sheet.getCell(`E${r+3}`).value = 'Issue No: 03';
-        sheet.getCell(`G${r+3}`).value = 'Date: 2022-09-26'; // Static as per template or dynamic?
+        sheet.getCell(`E${r + 3}`).value = 'Issue No: 03';
+        sheet.getCell(`G${r + 3}`).value = 'Date: 2022-09-26'; // Static as per template or dynamic?
 
         // Revision
-        sheet.getCell(`E${r+4}`).value = 'Revision No: 00';
-        sheet.getCell(`G${r+4}`).value = 'Date: ' + formatDate(new Date());
+        sheet.getCell(`E${r + 4}`).value = 'Revision No: 00';
+        sheet.getCell(`G${r + 4}`).value = 'Date: ' + formatDate(new Date());
 
         // Prepared/Reviewed block footer
-        sheet.getCell(`E${r+6}`).value = 'Prepared By';
-        sheet.getCell(`F${r+6}`).value = 'Reviewed By';
-        sheet.getCell(`G${r+6}`).value = 'Approved By';
-        
+        sheet.getCell(`E${r + 6}`).value = 'Prepared By';
+        sheet.getCell(`F${r + 6}`).value = 'Reviewed By';
+        sheet.getCell(`G${r + 6}`).value = 'Approved By';
+
         // Borders for header block
-        for(let row = r+1; row <= r+6; row++) {
-           // Apply borders to E-G range logic
+        for (let row = r + 1; row <= r + 6; row++) {
+            // Apply borders to E-G range logic
         }
     };
     const downloadPdf = async () => {
@@ -1259,8 +1210,8 @@ const HazopReportPage = ({ hazopId, onClose }) => {
             console.error("PDF generation failed:", error);
         }
     };
-   
-      
+
+
     return (
         <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.7)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000 }}>
             <div style={{ width: "90%", height: "95%", background: "#fff", borderRadius: 8, overflow: "hidden", display: "flex", flexDirection: "column" }}>

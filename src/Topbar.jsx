@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import './CommonCss/Sidebar.css';
 import { useNavigate } from 'react-router-dom';
 
-const Topbar = ({ toggleSidebar }) => {
+const Topbar = ({ toggleSidebar, isOpen }) => {
   const [showProfile, setShowProfile] = useState(false);
   const fullName = localStorage.getItem('fullName') || 'User';
   const email = localStorage.getItem('email') || '-';
@@ -33,11 +33,23 @@ const Topbar = ({ toggleSidebar }) => {
 
   return (
     <div className="topbar">
-      <button className="sidebar-toggle" onClick={toggleSidebar}>
-        &#9776;
-      </button>
+
+      <div className="sidebar-logo" onClick={toggleSidebar}>
+        <img
+          src={isOpen ? "/assets/Pristine.png" : "/assets/Pristine-logo.png"}
+          alt="Pristine Logo"
+          height={30}
+        />
+      </div>
+
 
       <div style={{ flex: 1 }}></div>
+
+      <div className="welcome-message">
+        <span>Welcome, </span>
+        <strong>{fullName} !</strong>
+      </div>
+      <div style={{ width: 15 }}></div>
 
       <div className="topbar-logo">
         <img src="/assets/Alkyl Logo.png" alt="Logo" />

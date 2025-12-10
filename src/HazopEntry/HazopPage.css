@@ -104,7 +104,7 @@ KANBAN COLUMN
   font-weight: 600;
   margin-bottom: 18px;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
 }
 
@@ -126,6 +126,85 @@ CARD DESIGN MATCHING UI
 .kanban-card:hover {
   transform: translateY(-4px);
 }
+
+
+.kanban-wrapper {
+  max-width: 1080px;
+  margin: auto;
+  padding: 20px 10px;
+}
+
+/* Container for Kanban Titles */
+.kanban-titles {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 0 10px;
+}
+.kanban-title {
+  flex: 1 1 30%;
+  text-align: center;
+  font-weight: 700;
+  font-size: 16px;
+  color: #222;
+  padding: 14px 0;
+  border-radius: 14px;
+  position: relative;
+  overflow: hidden;
+
+  /* Gradient base */
+  background: linear-gradient(135deg, #c6daf9, #d6cefe);
+
+  /* Glass/glossy effect */
+  backdrop-filter: blur(8px) saturate(180%);
+  -webkit-backdrop-filter: blur(8px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+
+  /* Shadow for depth */
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12), 0 4px 10px rgba(0, 0, 0, 0.06);
+
+  /* Smooth transitions */
+  transition: transform 0.35s ease, box-shadow 0.35s ease, background 0.35s ease;
+}
+
+/* Floating moving shine */
+.kanban-title::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: -50%;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(120deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0) 60%);
+  transform: rotate(25deg) translateY(-50%);
+  pointer-events: none;
+  filter: blur(6px);
+  animation: shineMove 3s infinite linear;
+}
+
+/* Hover lift and glow intensify */
+.kanban-title:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2), 0 6px 14px rgba(0, 0, 0, 0.1);
+}
+
+/* Shine animation */
+@keyframes shineMove {
+  0% { left: -50%; }
+  100% { left: 100%; }
+}
+
+/* Subtle inner glow for text */
+.kanban-title span {
+  position: relative;
+  z-index: 2;
+  text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+}
+
+
 
 /* Top line */
 .card-top {
@@ -242,7 +321,7 @@ CARD DESIGN MATCHING UI
 .toggle-btn {
   display: inline-flex;
   justify-content: center;
-  align-items: center;
+  align-items: right;
   width: 32px;
   height: 32px;
   font-size: 20px;
@@ -250,7 +329,6 @@ CARD DESIGN MATCHING UI
   cursor: pointer;
   border-radius: 50%;
   background: linear-gradient(135deg, #a870e4, #9fb7e2);
-  /* purple-blue gradient */
   color: #fff;
   transition: all 0.3s ease;
   user-select: none;
@@ -465,6 +543,4 @@ body.modal-open {
     font-size: 14px;
   }
 }
-
-
 

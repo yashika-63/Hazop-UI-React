@@ -1,0 +1,356 @@
+
+
+
+/* MODAL WRAPPER */
+.modal-container {
+    padding: 1.5rem;
+    max-height: 90vh;
+    overflow-y: auto;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    background: #f6f9fc;
+  }
+  
+  /* MODAL BOX */
+  .modal-content1 {
+    background: #ffffff;
+    padding: 1.8rem 1.5rem 4rem 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0px 6px 22px rgba(0, 0, 0, 0.35);
+    width: 95%;
+    max-width: 1200px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    border: 1px solid #e2e8f0;
+  }
+  
+  /* CARD BOXES */
+  .hazop-card,
+  .node-card,
+  .recommendation-card {
+    border: 2px solid #a1cbf3;
+    border-radius: 10px;
+    background: #fdfefe;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 10px;
+    transition: 0.25s ease;
+    width: 100%;
+    margin: 0 auto;
+  }
+  
+  
+  
+  .hazop-view-page{
+    padding: 10px;
+    /* max-width: 1090px; */
+    margin: 0 auto;
+  }
+  /* CARD HOVER */
+  .node-card:hover,
+  .recommendation-card:hover {
+    box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+  }
+  
+  /* UNIQUE TABLE WRAPPER */
+  .hazop-table,
+  .node-details-table-custom,
+  .confirm-table-custom,
+  .assignment-table-custom {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.5rem;
+    font-size: 0.92rem;
+    background: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  
+  /* UNIQUE TABLE HEADERS */
+  .hazop-table thead tr th,
+  .node-details-table-custom thead tr th,
+  .confirm-table-custom thead tr th,
+  .assignment-table-custom thead tr th {
+    background: #d6e5f3;
+    color: black;
+    padding: 0.6rem;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 2px solid #b3ceed;
+  }
+  
+  /* UNIQUE TABLE CELLS */
+  .hazop-table td,
+  .node-details-table-custom td,
+  .confirm-table-custom td,
+  .assignment-table-custom td {
+    border: 1px solid #e1e7ef;
+    padding: 0.55rem;
+    background-color: #ffffff;
+  }
+  
+  .hazop-table tr:nth-child(even),
+  .node-details-table-custom tr:nth-child(even),
+  .confirm-table-custom tr:nth-child(even),
+  .assignment-table-custom tr:nth-child(even) {
+    background-color: #f3f8ff;
+  }
+  
+  /* TITLES */
+  .modal-content1 h2 {
+    color: #2a4f6e;
+    border-left: 4px solid #4da6ff;
+    padding-left: 8px;
+  }
+  
+  .modal-content1 h3,
+  .recommendation-card h3 {
+    color: #2f5f7a;
+    font-weight: 600;
+    padding: 10px;
+  }
+  
+  .modal-content1 h4 {
+    color: #2979a8;
+    margin-top: 10px;
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+  
+  /* BUTTONS */
+  .modal-actions {
+    position: sticky;
+    bottom: 0;
+    padding: 1rem 0;
+    background: #ffffff;
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid #e2e8f0;
+  }
+  
+  .modal-actions button {
+    padding: 0.6rem 1.3rem;
+    border: none;
+    border-radius: 6px;
+    background: #103b65;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.25s;
+  }
+  
+  .modal-actions button:hover {
+    background: #1d8cff;
+  }
+  
+  
+  .comment-input {
+    width: 100%;
+    height: 70px;
+    margin-top: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    padding: 0.5rem;
+    resize: none;
+    box-sizing: border-box;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  
+  
+  
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .modal-content1 {
+      padding: 1rem;
+    }
+  
+    .modal-actions button {
+      width: 48%;
+    }
+  }
+  
+  /* Node Card */
+  .node-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 1rem 1rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  width: 100%;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    gap: 0px;
+  }
+  
+  .node-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0px 6px 18px rgba(0, 0, 0, 0.12);
+  }
+  
+  /* Node Header */
+  .node-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #000000;
+    /* Warm orange */
+    border-bottom: 2px solid #0b3469;
+    padding-bottom: 4px;
+  }
+  
+  /* Node Detail Section */
+  .node-detail-section {
+    margin-top: 1rem;
+    padding: 0.8rem;
+    background: #ffffff;
+    border-radius: 8px;
+    border-left: 4px solid #91b4e3;
+  }
+  
+  /* Node Detail Label */
+  .node-detail-label {
+    font-weight: 600;
+    margin-bottom: 0.6rem;
+    color: #111111;
+  }
+  
+  /* Recommendations */
+  .node-recommendations {
+    margin-top: 0.6rem;
+    padding-left: 1rem;
+  }
+  
+  .rec-label {
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+    color: #0d0d0e;
+  }
+  
+  .node-recommendations ul {
+    list-style-type: disc;
+    padding-left: 1.2rem;
+    margin: 0;
+  }
+  
+  .node-recommendations li {
+    margin-bottom: 0.3rem;
+  }
+  
+  /* Table Styling */
+  .node-details-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    margin-top: 0.4rem;
+    margin-bottom: 20px;
+  }
+  
+  .node-details-table th {
+    background-color: #cfdef3;
+    color: #0f0f0f;
+    padding: 0.4rem;
+    text-align: left;
+  }
+  
+  .node-details-table td {
+    padding: 0.5rem;
+    border: 1px solid #e2e8f0;
+    vertical-align: top;
+    word-break: break-word;
+  }
+  .table-scroll-wrapper {
+    max-height: 60vh; /* adjust as needed */
+    overflow-y: auto;
+    border: 1px solid #e1e7ef;
+    border-radius: 8px;
+  }
+  
+  .table-scroll-wrapper table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed; /* important for custom column widths */
+  }
+  .table-scroll-wrapper th,
+  .table-scroll-wrapper td {
+      padding: 0.5rem;
+      border: 1px solid #e2e8f0 !important; 
+      vertical-align: top;
+      word-break: break-word; /* wrap long text */
+  }
+  
+  /* Numeric columns */
+  .table-scroll-wrapper td.numeric,
+  .table-scroll-wrapper th.numeric {
+      width: 50px; /* small fixed width */
+      text-align: center;
+      white-space: nowrap;
+  }
+  
+  /* Medium width columns */
+  .table-scroll-wrapper td.medium,
+  .table-scroll-wrapper th.medium {
+      width: 120px;
+      text-align: left;
+  }
+  
+  /* Long text columns */
+  .table-scroll-wrapper td.long,
+  .table-scroll-wrapper th.long {
+      width: auto;
+      text-align: left;
+      white-space: normal;
+  }
+  
+  /* Force text color inside the table cells */
+  .node-details-table td.risk-trivial-text {
+    color: var(--trivial) !important;
+    font-weight: 600;
+  }
+  
+  .node-details-table td.risk-tolerable-text {
+    color: var(--tolerable) !important;
+    font-weight: 600;
+  }
+  
+  .node-details-table td.risk-moderate-text {
+    color: var(--moderate) !important;
+    font-weight: 600;
+  }
+  
+  .node-details-table td.risk-substantial-text {
+    color: var(--substantial) !important;
+    font-weight: 600;
+  }
+  
+  .node-details-table td.risk-intolerable-text {
+    color: var(--intolerable) !important;
+    font-weight: 600;
+  }
+  
+  .node-details-table td.risk-default {
+    color: #555 !important;
+  }
+  
+  
+  
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .node-card {
+      padding: 0.8rem;
+    }
+  
+    .node-detail-section {
+      padding: 0.6rem;
+    }
+  
+    .node-details-table th, .node-details-table td {
+      font-size: 0.85rem;
+      padding: 0.4rem;
+    }
+  }

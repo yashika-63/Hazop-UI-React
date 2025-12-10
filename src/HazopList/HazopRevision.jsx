@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { FaSearch, FaTimes } from "react-icons/fa";
 import "../HazopEntry/HazopRegistration.css";
-import { showToast } from "../CommonUI/CommonUI";
+import { fetchDataByKey, fetchSitesByDepartment, showToast } from "../CommonUI/CommonUI";
 import { strings } from "../string";
 
 const HazopRevision = ({ hazopId, onClose }) => {
@@ -24,6 +24,8 @@ const HazopRevision = ({ hazopId, onClose }) => {
   const [hazopTeam, setHazopTeam] = useState([]);
   const [showTeamSearch, setShowTeamSearch] = useState(false);
   const [confirmPopup, setConfirmPopup] = useState(null);
+  const [departmentOptions, setDepartmentOptions] = useState([]);
+  const [siteOptions, setSiteOptions] = useState([]);
 
   const companyId = localStorage.getItem("companyId");
 
@@ -42,6 +44,7 @@ const HazopRevision = ({ hazopId, onClose }) => {
       newErrors.hazopDate = "Date is required.";
       showToast("Date is required", "warn");
     }
+
     if (!formData.site.trim()) {
       newErrors.site = "Site is required.";
       showToast("Site is required.", "warn");
@@ -51,11 +54,7 @@ const HazopRevision = ({ hazopId, onClose }) => {
 
     if (!formData.hazopTitle.trim()) {
       newErrors.hazopTitle = "Title is required.";
-    if (!formData.hazopTitle.trim()) {
-      newErrors.hazopTitle = "Title is required.";
       showToast("Title is required.", "warn");
-    } else if (!/^[A-Za-z0-9\s,-]+$/.test(formData.hazopTitle)) {
-      newErrors.hazopTitle = "Only letters, numbers, commas & hyphens allowed.";
     } else if (!/^[A-Za-z0-9\s,-]+$/.test(formData.hazopTitle)) {
       newErrors.hazopTitle = "Only letters, numbers, commas & hyphens allowed.";
     }
@@ -83,6 +82,10 @@ const HazopRevision = ({ hazopId, onClose }) => {
       ...formData,
       [name]: type === "checkbox" ? checked : value,
     });
+    if (name === "department") {
+      setFormData((prev) => ({ ...prev, site: "" })); // Reset site field when department changes
+      fetchSitesByDepartment(value, setSiteOptions);
+    }
   };
 
   const handleTeamSearchChange = async (e) => {
@@ -137,8 +140,6 @@ const HazopRevision = ({ hazopId, onClose }) => {
       });
       return;
     }
-
-    // CASE 2: Team is present → ask confirmation before saving
     setConfirmPopup({
       message: "Do you want to save this HAZOP entry?",
       yes: async () => {
@@ -149,41 +150,41 @@ const HazopRevision = ({ hazopId, onClose }) => {
     });
   };
 
-const saveHazop = async () => {
-  setLoading(true);
+  const saveHazop = async () => {
+    setLoading(true);
 
-  try {
-    // 1️⃣ Save new HAZOP entry
-    const hazopResponse = await axios.post(
-      `http://${strings.localhost}/api/hazopRegistration/saveByCompany/${companyId}`,
-      formData
-    );
-
-    const newHazopId = hazopResponse.data.id;   // newly created HAZOP ID
-    const oldHazopId = hazopId;                 // passed from parent component
-
-    if (hazopTeam.length > 0) {
-      await axios.post(
-        `http://${strings.localhost}/api/hazopTeam/saveTeam/${newHazopId}`,
-        hazopTeam.map((m) => m.empCode)
+    try {
+      // 1️⃣ Save new HAZOP entry
+      const hazopResponse = await axios.post(
+        `http://${strings.localhost}/api/hazopRegistration/saveByCompany/${companyId}`,
+        formData
       );
+
+      const newHazopId = hazopResponse.data.id;   // newly created HAZOP ID
+      const oldHazopId = hazopId;                 // passed from parent component
+
+      if (hazopTeam.length > 0) {
+        await axios.post(
+          `http://${strings.localhost}/api/hazopTeam/saveTeam/${newHazopId}`,
+          hazopTeam.map((m) => m.empCode)
+        );
+      }
+
+      await axios.post(
+        `http://${strings.localhost}/revision/saveRevision?oldHazopId=${oldHazopId}&newHazopId=${newHazopId}`,
+        { params: { oldHazopId, newHazopId } }
+      );
+
+      showToast("HAZOP Revision saved successfully!", "success");
+      onClose();
+
+    } catch (err) {
+      console.error("Save failed:", err);
+      showToast("Failed to save HAZOP Revision", "error");
     }
 
-    await axios.post(
-      `http://${strings.localhost}/revision/saveRevision?oldHazopId=${oldHazopId}&newHazopId=${newHazopId}`, 
-      { params: { oldHazopId, newHazopId } }
-    );
-
-    showToast("HAZOP Revision saved successfully!", "success");
-    onClose();
-
-  } catch (err) {
-    console.error("Save failed:", err);
-    showToast("Failed to save HAZOP Revision", "error");
-  }
-
-  setLoading(false);
-};
+    setLoading(false);
+  };
 
   const ConfirmationPopup = ({ message, onConfirm, onCancel }) => {
     return (
@@ -203,6 +204,21 @@ const saveHazop = async () => {
     );
   };
 
+
+
+  useEffect(() => {
+    const fetchDropdowns = async () => {
+      try {
+        const deptData = await fetchDataByKey("department");
+        setDepartmentOptions(deptData);
+
+      } catch (err) {
+        console.error("Error fetching dropdown data", err);
+      }
+    };
+
+    fetchDropdowns();
+  }, []);
   return (
     <div className="modal-overlay">
       <div className="modal-box">
@@ -221,7 +237,7 @@ const saveHazop = async () => {
           <div className="input-row">
             <div className="form-group">
               <label> <span className="required-marker">*</span>
-              HAZOP Date</label>
+                HAZOP Date</label>
               <input
                 type="date"
                 name="hazopDate"
@@ -229,57 +245,71 @@ const saveHazop = async () => {
                 onChange={handleChange}
                 disabled={loading}
                 max={new Date().toISOString().split("T")[0]}
+                className={errors.hazopDate ? "error-input" : ""}
               />
             </div>
 
-             <div className="form-group">
+            <div className="form-group">
               <label><span className="required-marker">*</span>
-              Title</label>
+                Title</label>
               <input
                 type="text"
                 name="hazopTitle"
                 value={formData.hazopTitle}
                 onChange={handleChange}
                 disabled={loading}
+                className={errors.hazopTitle ? "error-input" : ""}
               />
             </div>
 
             <div className="form-group">
-              <label><span className="required-marker">*</span>
-              Site</label>
-              <input
-                type="text"
-                name="site"
-                value={formData.site}
-                onChange={handleChange}
-                disabled={loading}
-              />
-            </div>
-            
-
-            <div className="form-group">
-              <label><span className="required-marker">*</span>
-              Department</label>
-              <input
-                type="text"
+              <span className="required-marker">*</span>
+              <label>Department</label>
+              <select
                 name="department"
+                className={errors.department ? "error-input" : ""}
                 value={formData.department}
                 onChange={handleChange}
                 disabled={loading}
-              />
+              >
+                <option value="">-- Select Department --</option>
+                {departmentOptions.map((option) => (
+                  <option key={option.id} value={option.data}>
+                    {option.data}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="form-group">
+              <span className="required-marker">*</span>
+              <label>Site</label>
+              <select
+                name="site"
+                className={errors.site ? "error-input" : ""}
+                value={formData.site}
+                onChange={handleChange}
+                disabled={loading || !formData.department}
+              >
+                <option value="">-- Select Site --</option>
+                {siteOptions.map((option) => (
+                  <option key={option.id} value={option.data}>
+                    {option.data}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
           <div className="input-row">
             <div className="form-group">
               <label><span className="required-marker">*</span>
-              Description</label>
+                Description</label>
               <textarea
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
                 disabled={loading}
-                className="textareaFont"
+                className={`textareaFont ${errors.description ? "error-input" : ""}`}
               ></textarea>
             </div>
           </div>
@@ -384,6 +414,6 @@ const saveHazop = async () => {
     </div>
   );
 };
-}
+
 
 export default HazopRevision;

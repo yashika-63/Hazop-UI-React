@@ -4,7 +4,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { strings } from "../string";
 import axios from "axios";
 import { useEffect } from "react";
-const companyId= localStorage.getItem("companyId");
+const companyId = localStorage.getItem("companyId");
 
 export const formatDate = (dateString) => {
   if (!dateString) return "N/A";
@@ -71,6 +71,20 @@ export const truncateWords = (text, wordLimit = 3) => {
 };
 
 
+
+export const getRiskClass = (risk) => {
+  if (!risk) return "risk-default";
+
+  const r = Number(risk);
+
+  if ([1, 2, 3, 4, 5].includes(r)) return "risk-trivial-text";
+  if ([6, 8, 9, 10].includes(r)) return "risk-tolerable-text";
+  if ([12, 15].includes(r)) return "risk-moderate-text";
+  if ([16, 18].includes(r)) return "risk-substantial-text";
+  if ([20, 25].includes(r)) return "risk-intolerable-text";
+
+  return "risk-default";
+}; 
 export const getRiskColor = (risk) => {
   if (!risk) return '#fff';
   const r = Number(risk);
@@ -84,11 +98,55 @@ export const getRiskColor = (risk) => {
 };
 
 
+export const getBorderColor = (risk) => {
+  const r = Number(risk);
+
+  if ([1, 2, 3, 4, 5].includes(r)) return trivial;
+  if ([6, 8, 9, 10].includes(r)) return tolerable;
+  if ([12, 15].includes(r)) return moderate;
+  if ([16, 18].includes(r)) return substantial;
+  if ([20, 25].includes(r)) return intolerable;
+
+  return "#ccc";
+};
+
+export const root = document.documentElement;
+export const trivial = getComputedStyle(root).getPropertyValue("--trivial").trim();
+export const tolerable = getComputedStyle(root)
+  .getPropertyValue("--tolerable")
+  .trim();
+  export const moderate = getComputedStyle(root).getPropertyValue("--moderate").trim();
+  export const substantial = getComputedStyle(root)
+  .getPropertyValue("--substantial")
+  .trim();
+  export const intolerable = getComputedStyle(root)
+  .getPropertyValue("--intolerable")
+  .trim();
 
 
+  export const getRiskLevelText = (risk) => {
+    const r = Number(risk);
 
+    if ([1, 2, 3, 4, 5].includes(r)) return "Trivial";
+    if ([6, 8, 9, 10].includes(r)) return "Tolerable";
+    if ([12, 15].includes(r)) return "Moderate";
+    if ([16, 18].includes(r)) return "Substantial";
+    if ([20, 25].includes(r)) return "Intolerable";
 
+    return "";
+  };
 
+  export const getRiskTextClass = (risk) => {
+    const r = Number(risk);
+
+    if ([1, 2, 3, 4, 5].includes(r)) return "risk-badge risk-trivial";
+    if ([6, 8, 9, 10].includes(r)) return "risk-badge risk-tolerable";
+    if ([12, 15].includes(r)) return "risk-badge risk-moderate";
+    if ([16, 18].includes(r)) return "risk-badge risk-substantial";
+    if ([20, 25].includes(r)) return "risk-badge risk-intolerable";
+
+    return "risk-default";
+  };
 export const fetchDataByKey = async (keyvalue) => {
   try {
     const response = await axios.get(`http://${strings.localhost}/api/JavaMasterData/getByKey/${companyId}/${keyvalue}`);

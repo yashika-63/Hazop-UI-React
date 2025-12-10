@@ -120,7 +120,7 @@ const HazopTeamAcceptanceApproval = () => {
                         <th>Hazop Title</th>
                         <th>Hazop Site</th>
                         <th>Department</th>
-                        <th>Hazop Creation Date</th>
+                        <th>Creation Date</th>
                         <th>Action</th>
                     </tr>
                 </thead>

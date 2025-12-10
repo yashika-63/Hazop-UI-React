@@ -216,6 +216,8 @@
     width: 100%;
     border-collapse: collapse;
     font-size: 14px;
+    max-width: 1090px;
+    margin: 0 auto;
 }
 
 /* Header */
@@ -435,3 +437,67 @@ td > .dropdown:hover {
     color: gray;
     margin-left: 8px;
 }
+
+
+
+
+
+
+
+
+
+.assigned-table td {
+    position: relative; /* needed for dropdown */
+    vertical-align: top;
+    padding: 8px;
+  }
+  .search-bar-table {
+    position: relative;
+    width: 60%;  /* match input width */
+  }
+  
+  .search-bar-table input {
+    width: 100%; 
+    padding: 6px 30px 6px 8px;
+    box-sizing: border-box;
+    border: 1px solid #61b1f7;
+    border-radius: 6px;
+    font-size: 13px;
+  }
+  
+  .search-icon-table {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #83acf1;
+    pointer-events: none;
+  }
+  
+  
+  
+  .search-results-table {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid #ccc;
+    max-height: 150px;
+    overflow-y: auto;
+    z-index: 10;
+    margin-top: 2px;
+    border-radius: 4px;
+    padding: 0;
+    list-style: none;
+  }
+  
+  .search-results-table li {
+    padding: 6px 8px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  
+  .search-results-table li:hover {
+    background-color: #f0f0f0;
+  }
