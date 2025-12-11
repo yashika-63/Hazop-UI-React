@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { strings } from "../string";
-import { showToast, formatDate } from "../CommonUI/CommonUI";
+import { showToast, formatDate, truncateWords } from "../CommonUI/CommonUI";
 import { FaEdit, FaEllipsisV, FaSearch, FaUserPlus } from "react-icons/fa";
 import '../styles/global.css';
 
@@ -16,14 +16,10 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
 
     const [loading, setLoading] = useState(true);
     const [openDropdown, setOpenDropdown] = useState(null);
-    const [assignPopupOpen, setAssignPopupOpen] = useState(false);
-    const [selectedHazop, setSelectedHazop] = useState(null);
-    const [teamSearch, setTeamSearch] = useState("");
     const [searchResults, setSearchResults] = useState([]);
-    const [selectedEmployee, setSelectedEmployee] = useState(null);
-    const [assignLoading, setAssignLoading] = useState(false);
-    const [confirmPopupOpen, setConfirmPopupOpen] = useState(false);
-
+    const [searchInputs, setSearchInputs] = useState({});
+    const [selectedEmployees, setSelectedEmployees] = useState({});
+    const [assigningIds, setAssigningIds] = useState([]);
 
     const toggleDropdown = (id) => {
         setOpenDropdown(openDropdown === id ? null : id);
@@ -35,72 +31,64 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
         setAssignPopupOpen(true);
         setTeamSearch("");
         setSearchResults([]);
-        setSelectedEmployee(null);
     };
 
-    const handleAssignClick = () => {
-        if (!selectedEmployee || !selectedHazop) {
-            showToast("Select an employee first", "warning");
-            return;
-        }
-        setConfirmPopupOpen(true);
-    };
-
-    const handleTeamSearchChange = async (e) => {
-        const value = e.target.value;
-        setTeamSearch(value);
+    const handleSearchChange = async (recId, value) => {
+        setSearchInputs(prev => ({ ...prev, [recId]: value }));
+        setSelectedEmployees(prev => ({ ...prev, [recId]: null }));
 
         if (value.length < 2) {
-            setSearchResults([]);
+            setSearchResults(prev => ({ ...prev, [recId]: [] }));
             return;
         }
 
         try {
-            const response = await axios.get(
+            const res = await axios.get(
                 `http://${strings.localhost}/api/employee/search?search=${encodeURIComponent(value)}`
             );
-            setSearchResults(response.data || []);
+            setSearchResults(prev => ({ ...prev, [recId]: res.data || [] }));
         } catch (err) {
-            console.error("Team search failed:", err);
-            showToast("Failed to fetch employees", "error");
+            console.error(err);
         }
     };
 
-    const addTeamMember = (user) => {
-        setSelectedEmployee(user);
-        setSearchResults([]);
-        setTeamSearch(`${user.empCode}`);
+    const handleSelectEmployee = (recId, emp) => {
+        setSelectedEmployees(prev => ({ ...prev, [recId]: emp }));
+        setSearchInputs(prev => ({ ...prev, [recId]: emp.empCode }));
+        setSearchResults(prev => ({ ...prev, [recId]: [] }));
     };
-    const handleConfirmAssign = async () => {
-        setConfirmPopupOpen(false);
-        setAssignLoading(true);
-        console.log('selectedHazopid', selectedHazop.id || 'NA');
+
+    const handleAssign = async (recId) => {
+        const employee = selectedEmployees[recId];
+        if (!employee) return;
+
+        setAssigningIds(prev => [...prev, recId]);
 
         try {
-            const response = await axios.post(
+            await axios.post(
                 `http://${strings.localhost}/api/recommendation/assign/save`,
-                null, // no request body
+                null,
                 {
                     params: {
-                        recommendationId: selectedHazop.id,
-                        createdByEmpCode: selectedEmployee.empCode,
-                        assignToEmpCode: selectedEmployee.empCode,
+                        recommendationId: recId,
+                        createdByEmpCode: employee.empCode,
+                        assignToEmpCode: employee.empCode,
                         assignWorkDate: new Date().toISOString().split("T")[0]
                     }
                 }
             );
 
-            showToast(response.data.message || "Employee assigned successfully!", "success");
+            showToast("Employee assigned successfully!", "success");
             fetchData();
-            setAssignPopupOpen(false);
         } catch (err) {
-            console.error("Assign failed:", err);
+            console.error(err);
             showToast("Failed to assign employee", "error");
         } finally {
-            setAssignLoading(false);
+            setAssigningIds(prev => prev.filter(id => id !== recId));
+            setSelectedEmployees(prev => ({ ...prev, [recId]: null }));
+            setSearchInputs(prev => ({ ...prev, [recId]: "" }));
         }
     };
-
 
     const fetchData = async () => {
         try {
@@ -135,40 +123,6 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
 
     if (loading) return <p className="loading">Loading...</p>;
 
-
-
-    const ConfirmationPopup = ({ message, onConfirm, onCancel }) => {
-        return (
-            <div className="confirm-overlay">
-                <div className="confirm-box">
-                    <p>{message}</p>
-                    <div className="confirm-buttons">
-                        <button type="button" onClick={onCancel} className="cancel-btn">No</button>
-                        <button type="button" onClick={onConfirm} className="confirm-btn">Yes</button>
-                    </div>
-                </div>
-            </div>
-        );
-    };
-
-
-
-    const renderDropdown = (item) => (
-        <div className="dropdown">
-            <button className="dots-button" onClick={() => toggleDropdown(item.id)}>
-                <FaEllipsisV />
-            </button>
-
-            {openDropdown === item.id && (
-                <div className="dropdown-content">
-                    <button onClick={() => openUpdatePopup(item)}>
-                        <FaUserPlus /> Assign Employee
-                    </button>
-                </div>
-            )}
-        </div>
-    );
-
     return (
         <div>
 
@@ -181,23 +135,60 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
                             <tr>
                                 <th>Sr.No</th>
                                 <th>Recommendation</th>
-                                <th>Remark</th>
                                 <th>Verification By</th>
                                 <th>Verification Date</th>
+                                <th>Assign Employee</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {data.notAssigned.map((item, index) => (
-                                <tr key={item.id}>
-                                    <td>{index + 1}</td>
-                                    <td>{item.recommendation ?? "-"}</td>
-                                    <td>{item.remarkbyManagement ?? "-"}</td>
-                                    <td>{item.verificationResponsibleEmployeeName ?? "-"}</td>
-                                    <td>{item.verificationDate ? formatDate(item.verificationDate) : "-"}</td>
-                                    <td>{renderDropdown(item)}</td>
+                            {data.notAssigned.length === 0 ? (
+                                <tr>
+                                    <td colSpan="7" className="no-data1">No data found</td>
                                 </tr>
-                            ))}
+                            ) : (
+                                data.notAssigned.map((item, index) => (
+                                    <tr key={item.id}>
+                                        <td>{index + 1}</td>
+                                        <td>{truncateWords(item.recommendation ?? "-")}</td>
+                                        <td>{item.verificationResponsibleEmployeeName ?? "-"}</td>
+                                        <td>{item.verificationDate ? formatDate(item.verificationDate) : "-"}</td>
+                                        <td>
+                                            <div className="search-bar-table">
+                                                <input
+                                                    type="text"
+                                                    placeholder="Search employee..."
+                                                    value={searchInputs[item.id] || ""}
+                                                    onChange={e => handleSearchChange(item.id, e.target.value)}
+                                                />
+                                                <FaSearch className="search-icon-table" />
+                                                {searchResults[item.id]?.length > 0 && (
+                                                    <ul className="search-results-table">
+                                                        {searchResults[item.id].map(emp => (
+                                                            <li
+                                                                key={emp.empCode}
+                                                                onClick={() => handleSelectEmployee(item.id, emp)}
+                                                            >
+                                                                {emp.empCode} - ({emp.emailId || 'NA'})
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <button
+                                                className="confirm-btn"
+                                                onClick={() => handleAssign(item.id)}
+                                                disabled={!selectedEmployees[item.id] || assigningIds.includes(item.id)}
+                                                title={!selectedEmployees[item.id] ? "Select employee first" : ""}
+                                            >
+                                                {assigningIds.includes(item.id) ? "Assigning..." : "Assign"}
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
                         </tbody>
                     </table>
                 </div>
@@ -212,7 +203,6 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
                             <tr>
                                 <th>Sr.No</th>
                                 <th>Recommendation</th>
-                                <th>Remark </th>
                                 <th>Created By</th>
                                 <th>Assigned To</th>
                                 <th>Assigned Date</th>
@@ -222,8 +212,7 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
                             {data.assigned.map((item, index) => (
                                 <tr key={item.id}>
                                     <td>{index + 1}</td>
-                                    <td>{item.javaHazopNodeRecommendation?.recommendation ?? "-"}</td>
-                                    <td>{item.javaHazopNodeRecommendation?.remarkbyManagement ?? "-"}</td>
+                                    <td>{truncateWords(item.javaHazopNodeRecommendation?.recommendation ?? "-")}</td>
                                     <td>{item.createdByName || '-'}</td>
                                     <td>{item.assignToEmpCode || '-'}</td>
                                     <td>{item.assignWorkDate ? formatDate(item.assignWorkDate) : "-"}</td>
@@ -243,7 +232,6 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
                             <tr>
                                 <th>Sr.No</th>
                                 <th>Recommendation</th>
-                                <th>Remark </th>
                                 <th>Created By</th>
                                 <th>Assigned To</th>
                                 <th>Accepted By</th>
@@ -254,8 +242,7 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
                             {data.accepted.map((item, index) => (
                                 <tr key={item.id}>
                                     <td>{index + 1}</td>
-                                    <td>{item.javaHazopNodeRecommendation?.recommendation ?? "-"}</td>
-                                    <td>{item.javaHazopNodeRecommendation?.remarkbyManagement ?? "-"}</td>
+                                    <td>{truncateWords(item.javaHazopNodeRecommendation?.recommendation ?? "-")}</td>
                                     <td>{item.createdByName || '-'}</td>
                                     <td>{item.assignToEmpCode}</td>
                                     <td>{item.acceptedByEmployeeName}</td>
@@ -276,7 +263,6 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
                             <tr>
                                 <th>Sr.No</th>
                                 <th>Recommendation</th>
-                                <th>Remark </th>
                                 <th>Created By</th>
                                 <th>Assigned To</th>
                                 <th>Rejected By</th>
@@ -287,8 +273,7 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
                             {data.rejected.map((item, index) => (
                                 <tr key={item.id}>
                                     <td>{index + 1}</td>
-                                    <td>{item.javaHazopNodeRecommendation?.recommendation ?? "-"}</td>
-                                    <td>{item.javaHazopNodeRecommendation?.remarkbyManagement ?? "-"}</td>
+                                    <td>{truncateWords(item.javaHazopNodeRecommendation?.recommendation ?? "-")}</td>
                                     <td>{item.createdByName || '-'}</td>
                                     <td>{item.assignToEmpCode}</td>
                                     <td>{item.acceptedByEmployeeName}</td>
@@ -300,90 +285,6 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
                 </div>
             )}
 
-            {/* Assign Employee Popup */}
-            {assignPopupOpen && (
-                <div className="modal-overlay">
-                    <div className="modal-body">
-                        <h3 className="centerText">Assign Employee</h3>
-                        <div className="search-container">
-                            <div className="search-bar-wrapper">
-                                <input
-                                    type="text"
-                                    placeholder="Search employee..."
-                                    value={teamSearch}
-                                    onChange={handleTeamSearchChange}
-                                    disabled={loading}
-                                />
-                                <FaSearch className="search-icon" />
-
-
-                                <ul className="search-results">
-                                    {searchResults.map((emp) => (
-                                        <li
-                                            key={emp.empCode}
-                                            onClick={() => addTeamMember(emp)}
-                                            className={selectedEmployee?.empCode === emp.empCode ? "selected" : ""}
-                                        >
-                                            {emp.empCode} -({emp.emailId || 'NA'})({emp.department || 'NA'})
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        </div>
-                        {/* Selected Employee Details */}
-                        {selectedEmployee && (
-                            <div className="details-container">
-                                <h5>Selected Employee</h5>
-                                <div className="details-row">
-                                    <span className="label">Name:</span>
-                                    <span className="value">{selectedEmployee.empCode}</span>
-                                </div>
-                                <div className="details-row">
-                                    <span className="label">Email:</span>
-                                    <span className="value">{selectedEmployee.emailId}</span>
-                                </div>
-                                <div className="details-row">
-                                    <span className="label">Employee Code:</span>
-                                    <span className="value">{selectedEmployee.empCode}</span>
-                                </div>
-                            </div>
-                        )}
-                        <div className="confirm-buttons">
-                            <button
-                                type="button"
-                                className="cancel-btn"
-                                onClick={() => setAssignPopupOpen(false)}
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                type="button"
-                                className="confirm-btn"
-                                disabled={!selectedEmployee || assignLoading}
-                                onClick={handleAssignClick}
-                            >{assignLoading ? (
-                                <>
-                                    <span className="spinner"></span>  {assignLoading ? "Assigning..." : "Assign"}
-                                </>
-                            ) : (
-                                "Assign"
-                            )}
-                            </button>
-
-
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Confirmation Popup */}
-            {confirmPopupOpen && (
-                <ConfirmationPopup
-                    message={`Are you sure you want to assign Hazop ID ${selectedHazop.id} to ${selectedEmployee.empCode}?`}
-                    onConfirm={handleConfirmAssign}
-                    onCancel={() => setConfirmPopupOpen(false)}
-                />
-            )}
 
 
         </div>

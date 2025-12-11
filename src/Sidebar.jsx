@@ -27,7 +27,7 @@ const Sidebar = ({ isOpen }) => {
       badge: totalPendingCount,
     },
     { name: "All Hazop's", path: "/HazopStatusPage", icon: <FaChartLine /> },
-    { name: "HazopWorkflow", path: "/HazopWorkflow", icon: <FaDiagramProject /> },
+    // { name: "HazopWorkflow", path: "/HazopWorkflow", icon: <FaDiagramProject /> },
     { name: "Role Based Hazop Page", path: "/RoleBasedHazopPage", icon: <FaUser /> },
 
   ];

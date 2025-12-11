@@ -1,0 +1,128 @@
+.document-upload-container {
+    border: 1px solid #e0e0e0;
+    padding: 16px;
+    border-radius: 8px;
+    background-color: #fdfdfd;
+    margin-top: 16px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.document-upload-container h4 {
+    margin-bottom: 12px;
+    font-size: 1rem;
+    color: #333;
+}
+
+.document-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    padding: 8px 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    background-color: #fafafa;
+    transition: background 0.2s, box-shadow 0.2s;
+}
+
+.document-row:hover {
+    background-color: #efefef;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.custom-file-upload {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 9px;
+    cursor: pointer;
+    background: linear-gradient(145deg, #ffffff, #f0f0f0);
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    color: #333;
+    font-weight: 500;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+}
+
+.custom-file-upload:hover {
+    background: linear-gradient(145deg, #fefefe, #eaeaea);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+}
+
+
+.custom-file-upload input[type="file"] {
+    display: none;
+    /* hide the native file input */
+}
+
+.file-name {
+    flex: 1;
+    font-size: 0.85rem;
+    color: #555;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.remove-btn {
+    background-color: #fff;
+    border: 1px solid #ff4d4d;
+    color: #ff4d4d;
+    padding: 6px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.remove-btn:hover {
+    background-color: #ff4d4d;
+    color: #fff;
+}
+
+.adddocument-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: white;
+    color: #1879e9;
+    border: 1px solid #1879e9;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background 0.2s;
+}
+
+.adddocument-btn:hover {
+    background-color: #105bb5;
+    color: white;
+}
+
+.document-row input[type="file"]:disabled,
+.remove-btn:disabled,
+.adddocument-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+    .document-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .remove-btn {
+        margin-left: 0;
+        margin-top: 6px;
+    }
+
+    .file-name {
+        margin-top: 4px;
+    }
+}

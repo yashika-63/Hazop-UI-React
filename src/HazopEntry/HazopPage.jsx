@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import axios, { formToJSON } from "axios";
 import "./HazopPage.css";
-import { FaEllipsisV, FaEye, FaEdit, FaTrash, FaTimes, FaLightbulb, FaSearch, FaCheckCircle, FaPlusCircle, FaSpinner } from "react-icons/fa";
+import { FaEllipsisV, FaEye, FaEdit, FaTrash, FaTimes, FaLightbulb, FaSearch, FaCheckCircle, FaPlusCircle, FaSpinner, FaTasks } from "react-icons/fa";
 import AddHazopTeamPopup from "./AddHazopTeamPopup";
 import { strings } from "../string";
 import "../styles/global.css";
-import { formatDate, showToast } from "../CommonUI/CommonUI";
+import { StatusIcon, formatDate, showToast } from "../CommonUI/CommonUI";
 import NodePage from "../AddNodeScreen/NodePage";
 import { useNavigate } from "react-router-dom";
 import HazopRegistration from "./HazopRegistration";
@@ -225,7 +225,9 @@ const HazopPage = () => {
       return 0;
     }
   };
-
+  const handleNavigate = (item) => {
+    navigate(`/HazopWorkflow/${item.id}`,);
+  };
 
   const renderDropdown = (item, isNewRegistered) => (
     <div className="dropdown">
@@ -249,6 +251,11 @@ const HazopPage = () => {
               <FaEye /> Send for Completion
             </button>
           )}
+          <button type="button" onClick={() => handleNavigate(item)}>
+            <StatusIcon status={item.status} />
+            HAZOP Status
+          </button>
+
         </div>
       )}
     </div>

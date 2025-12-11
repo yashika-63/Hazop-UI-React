@@ -37,23 +37,34 @@ const MOCList = () => {
             const url = search
                 ? `http://${strings.localhost}/api/moc/search/hazop-yes?keyword=${search}`
                 : `http://${strings.localhost}/api/moc/hazop-yes?page=${page}&size=${pageSize}`;
-
+    
+            console.log("FETCH:", url);
+    
             const response = await fetch(url);
             const result = await response.json();
-
-            // For search API, result is directly an array
-            const content = Array.isArray(result) ? result : result.data || [];
-
-            // Set pagination values if available
-            if (!search) {
-                setCurrentPage(result.currentPage > 0 ? result.currentPage - 1 : 0);
-                setTotalPages(result.totalPages || 0);
+    
+            let content = [];
+            let pageNumber = 0;
+            let pageCount = 0;
+    
+            // 🔥 Search API case
+            if (search) {
+                content = result.data || [];
+    
+                pageNumber = (result.currentPage || 1) - 1;   // convert to zero-based
+                pageCount  = result.totalPages || 1;
+    
             } else {
-                setCurrentPage(0); // or result.currentPage if your search API returns it
-                setTotalPages(1);  // or result.totalPages if your search API returns it
+                // 🔥 Normal API case
+                content = result.data || [];
+    
+                pageNumber = (result.currentPage || 1) - 1;
+                pageCount  = result.totalPages || 0;
             }
-
+    
             setData(content);
+            setCurrentPage(pageNumber);
+            setTotalPages(pageCount);
         } catch (error) {
             console.error("Error fetching MOC data:", error);
             setData([]);
@@ -62,6 +73,7 @@ const MOCList = () => {
         }
         setLoading(false);
     };
+    
 
 
     useEffect(() => {
@@ -131,13 +143,13 @@ const MOCList = () => {
                         </tr>
                     ) : (
                         data.map((item, index) => (
-                            <tr key={item.MOCID || index}>
+                            <tr key={item.mocId || index}>
                                 <td>{currentPage * pageSize + index + 1}</td>
-                                <td>{item.MocNo}</td>
-                                <td>{item.MOCTitle}</td>
-                                <td>{item.Department}</td>
-                                <td>{item.Plant}</td>
-                                <td>{formatDate(item.MOCDate)}</td>
+                                <td>{item.mocNo}</td>
+                                <td>{item.mocTitle}</td>
+                                <td>{item.department}</td>
+                                <td>{item.plant}</td>
+                                <td>{formatDate(item.mocDate)}</td>
                                 <td>{renderDropdown(item)}</td>
                             </tr>
                         ))

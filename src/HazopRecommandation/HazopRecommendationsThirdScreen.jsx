@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { showToast } from "../CommonUI/CommonUI";
+import { showToast, truncateWords } from "../CommonUI/CommonUI";
 import { strings } from "../string";
-import { FaTimes, FaSearch } from "react-icons/fa";
+import { FaTimes, FaSearch, FaEye, FaEllipsisV, FaExchangeAlt } from "react-icons/fa";
 import './Recommandation.css';
 
 const ConfirmationPopup = ({ message, onConfirm, onCancel, isSending }) => {
@@ -30,7 +30,11 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
     const [selectedEmployee, setSelectedEmployee] = useState(null);
     const [showConfirmation, setShowConfirmation] = useState(false);
     const [isSending, setIsSending] = useState(false);
-
+    const [openDropdown, setOpenDropdown] = useState(null);
+    const [selectedRecommendation, setSelectedRecommendation] = useState(null);
+    const [reassignComment, setReassignComment] = useState("");
+    const [showReassignPopup, setShowReassignPopup] = useState(false);
+    const empCode = localStorage.getItem("empCode");
     const fetchRecords = async () => {
         setLoading(true);
         try {
@@ -106,6 +110,60 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
         }
     };
 
+    const handleView = (item) => {
+        setSelectedRecommendation(item);
+        setShowReassignPopup(true);
+    };
+
+    // Reassign API call
+    const handleReassign = async () => {
+        if (!selectedEmployee || !selectedRecommendation) return;
+
+        const payload = {
+            recommendationId: selectedRecommendation.id,
+            createdByEmpCode: empCode,
+            assignToEmpCode: selectedEmployee.empCode,
+            assignWorkDate: new Date().toISOString().split("T")[0], // YYYY-MM-DD
+            reassignComment
+        };
+
+        try {
+            setIsSending(true);
+            await axios.post(`http://${strings.localhost}/api/recommendation/assign/reassign`, null, { params: payload });
+            showToast("Recommendation reassigned successfully", "success");
+            setShowReassignPopup(false);
+            setSelectedEmployee(null);
+            setReassignComment("");
+        } catch (err) {
+            console.error(err);
+            showToast("Failed to reassign recommendation", "error");
+        } finally {
+            setIsSending(false);
+        }
+    };
+
+
+    const toggleDropdown = (id) => {
+        setOpenDropdown(openDropdown === id ? null : id);
+    };
+    const renderDropdown = (item) => (
+        <div className="dropdown top-header">
+            <button className="dots-button" onClick={() => toggleDropdown(item.id)}>
+                <FaEllipsisV />
+            </button>
+
+            {openDropdown === item.id && (
+                <div className="dropdown-content">
+                    <button
+                        onClick={() => handleView(item)}
+                    >
+                        <FaExchangeAlt/> Re-assign
+                    </button>
+                </div>
+            )}
+        </div>
+    );
+
     return (
         <div>
 
@@ -120,11 +178,10 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
                     <tr>
                         <th>Sr.No</th>
                         <th>Recommendation</th>
-                        <th>Management Remark</th>
                         <th>Verified By</th>
-                        <th>Responsible</th>
                         <th>Completion Status</th>
                         <th>Completion Date</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -136,10 +193,8 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
                         records.map((item, index) => (
                             <tr key={item.id}>
                                 <td>{index + 1}</td>
-                                <td>{item.recommendation}</td>
-                                <td>{item.remarkbyManagement || "-"}</td>
+                                <td>{truncateWords(item.recommendation || '-')}</td>
                                 <td>{item.verificationResponsibleEmployeeName || "-"}</td>
-                                <td>{item.responsibility || "-"}</td>
                                 <td>
                                     <span
                                         className={
@@ -154,6 +209,7 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
                                     </span>
                                 </td>
                                 <td>{item.CompletionDate || "-"}</td>
+                                <td>{renderDropdown(item)}</td>
                             </tr>
                         ))
                     )}
@@ -193,6 +249,7 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
                             </div>
                         </div>
 
+
                         {selectedEmployee && (
                             <div className="details-row">
                                 <span className="label">Selected Employee:</span>
@@ -220,7 +277,74 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
                     </div>
                 </div>
             )}
+            {showReassignPopup && selectedRecommendation && (
+                <div className="modal-overlay">
+                    <div className="modal-body">
+                        <h3 className="centerText">Recommendation Details</h3>
+                        <p><strong>Recommendation:</strong> {selectedRecommendation.recommendation}</p>
+                        <p><strong>Completion Status:</strong> {selectedRecommendation.completionStatus || "-"}</p>
+                        <p><strong>Completion Date:</strong> {selectedRecommendation.completionDate || "-"}</p>
+                        <div className="search-container">
+                            <div className="search-bar-wrapper">
+                                <input
+                                    type="text"
+                                    placeholder="Search employee..."
+                                    value={teamSearch}
+                                    onChange={handleTeamSearchChange}
+                                    disabled={loading}
+                                />
+                                <FaSearch className="search-icon" />
 
+                                <ul className="search-results">
+                                    {searchResults.map((user) => (
+                                        <li key={user.empCode} onClick={() => addTeamMember(user)}>
+                                            {user.empCode} -  ({user.emailId || "NA"})({user.department || "NA"})
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </div>
+
+                        {selectedEmployee && (
+                            <div className="details-container">
+                                <h5>Selected Employee</h5>
+                                <div className="details-row">
+                                    <span className="label">Name:</span>
+                                    <span>{selectedEmployee.firstName} {selectedEmployee.lastName}</span>
+                                </div>
+                                <div className="details-row">
+                                    <span className="label">Email:</span>
+                                    <span>{selectedEmployee.emailId}</span>
+                                </div>
+                                <div className="details-row">
+                                    <span className="label">Code:</span>
+                                    <span>{selectedEmployee.empCode}</span>
+                                </div>
+                                <FaTimes className="remove-icon" onClick={() => setSelectedEmployee(null)} />
+                            </div>
+                        )}
+
+                        <div className='form-group'>
+                            <div>
+                                <label className="label">Reassign Comment:</label>
+                                <textarea
+                                    value={reassignComment}
+                                    onChange={(e) => setReassignComment(e.target.value)}
+                                    rows={3}
+                                    placeholder="Write a comment..."
+                                />
+                            </div>
+                        </div>
+
+                        <div className="confirm-buttons">
+                            <button type="button" className="cancel-btn" onClick={() => setShowReassignPopup(false)}>Close</button>
+                            <button type="button" className="confirm-btn" onClick={handleReassign} disabled={!selectedEmployee || !reassignComment}>
+                                {isSending ? "Sending..." : "Reassign"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
             {showConfirmation && selectedEmployee && (
                 <ConfirmationPopup
                     message={`Are you sure you want to send  this Hazop for complete to ${selectedEmployee.empCode}?`}
@@ -238,5 +362,4 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
         </div>
     );
 };
-
 export default HazopRecommendationsThirdScreen;

@@ -6,6 +6,7 @@ import { fetchDataByKey, fetchSitesByDepartment, showToast } from "../CommonUI/C
 import { strings } from "../string";
 import { useLocation } from "react-router-dom";
 import _ from "lodash";
+import HazopDocumentUpload from "./HazopDocumentUpload";
 const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
   const [formData, setFormData] = useState({
     hazopDate: "",
@@ -29,6 +30,10 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
   const hazopId = location.state?.hazopId;
   const [departmentOptions, setDepartmentOptions] = useState([]);
   const [siteOptions, setSiteOptions] = useState([]);
+  const [showDocumentUploader, setShowDocumentUploader] = useState(false);
+  const [savedHazopId, setSavedHazopId] = useState(hazopId || null);
+  const documentUploadRef = React.useRef();
+
 
 
 
@@ -223,55 +228,82 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
 
   const saveHazop = async () => {
     setLoading(true);
-
+  
     try {
       const createdBy = localStorage.getItem("fullName") || "";
       const empCode = localStorage.getItem("empCode") || "";
       const createdByEmail = localStorage.getItem("email") || "";
-
-      const payload = {
-        ...formData,
-        createdBy,
-        empCode,
-        createdByEmail
-      };
-      // Step 1: Save HAZOP
+  
+      const payload = { ...formData, createdBy, empCode, createdByEmail };
+  
+      // 1️⃣ Save HAZOP (mandatory)
       const hazopResponse = await axios.post(
         `http://${strings.localhost}/api/hazopRegistration/saveByCompany/${companyId}`,
         payload
       );
-
+  
       const hazopId = hazopResponse.data.id;
-
-      // Step 2: Save the HAZOP team (only if there are team members)
-      if (hazopTeam.length > 0) {
-        await axios.post(
-          `http://${strings.localhost}/api/hazopTeam/saveTeam/${hazopId}`,
-          hazopTeam.map((m) => m.empCode)
-        );
-
-        // Save roles for each member
-        for (const member of hazopTeam) {
-          await axios.post(
-            `http://${strings.localhost}/api/hazopTeamRole/save?companyId=${companyId}&empCode=${member.empCode}&hazopRole=${member.role}`
-          );
-        }
-      }
-      // Step 3: Save MOC Reference after HAZOP is successfully saved
-      await saveMocReference(hazopId);
-
+      setSavedHazopId(hazopId);
+  
       showToast("HAZOP saved successfully!", "success");
-
+  
+      // 2️⃣ Run optional tasks in parallel
+      const tasks = [];
+  
+      // Save Team if exists
+      if (hazopTeam.length > 0) {
+        tasks.push(
+          (async () => {
+            await axios.post(
+              `http://${strings.localhost}/api/hazopTeam/saveTeam/${hazopId}`,
+              hazopTeam.map((m) => m.empCode)
+            );
+  
+            for (const member of hazopTeam) {
+              await axios.post(
+                `http://${strings.localhost}/api/hazopTeamRole/save`,
+                null,
+                {
+                  params: {
+                    companyId,
+                    empCode: member.empCode,
+                    hazopRole: member.role,
+                  },
+                }
+              );
+            }
+          })()
+        );
+      }
+  
+      // Save MOC Reference if exists
+      if (moc) {
+        tasks.push(
+          saveMocReference(hazopId)
+        );
+      }
+  
+      // Upload documents if uploader exists
+      if (documentUploadRef.current) {
+        tasks.push(
+          documentUploadRef.current.uploadDocuments(hazopId)
+        );
+      }
+  
+      // Run all optional tasks concurrently
+      await Promise.allSettled(tasks);
+  
       if (onSaveSuccess) onSaveSuccess();
       closePopup();
-
+  
     } catch (err) {
       console.error("Save failed:", err);
       showToast("Failed to save HAZOP", "error");
     }
-
+  
     setLoading(false);
   };
+  
 
 
   const saveMocReference = async (hazopId) => {
@@ -493,6 +525,14 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
           >
             + Add HAZOP Team
           </button>
+          <button
+            type="button"
+            className="add-btn"
+            onClick={() => setShowDocumentUploader(!showDocumentUploader)}
+            disabled={loading}
+          >
+            + Add Document
+          </button>
         </div>
 
         {showTeamSearch && (
@@ -527,6 +567,11 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
           />
         )}
 
+{showDocumentUploader && (
+  <HazopDocumentUpload ref={documentUploadRef} hazopId={savedHazopId} />
+)}
+
+        {hazopId && <HazopDocumentUpload hazopId={hazopId} />}
         {confirmPopup && (
           <ConfirmationPopup
             message={confirmPopup.message}

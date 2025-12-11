@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { FaHome, FaUser, FaProjectDiagram, FaFileArchive, FaFileAlt, FaList, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import "./Workflow.css";
+import { strings } from "../string";
  
 export default function HazopWorkflow() {
   const [status, setStatus] = useState(null);
  
   useEffect(() => {
-    fetch("http://localhost:5559/api/hazop/status/26")
+    fetch(`http://${strings.localhost}/api/hazop/status/26`)
       .then((res) => res.json())
       .then((data) => setStatus(data));
   }, []);

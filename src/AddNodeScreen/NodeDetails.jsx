@@ -45,28 +45,28 @@ const NodeDetails = () => {
   };
   const [showAllRecommendations, setShowAllRecommendations] = useState(false);
 
-const renderDropdown = (item) => (
-  <div className="dropdown top-header">
-    <button className="dots-button" onClick={() => toggleDropdown(item.id)}>
-      <FaEllipsisV />
-    </button>
+  const renderDropdown = (item) => (
+    <div className="dropdown top-header">
+      <button className="dots-button" onClick={() => toggleDropdown(item.id)}>
+        <FaEllipsisV />
+      </button>
 
-    {openDropdown === item.id && (
-      <div className="dropdown-content">
-        <button
-          onClick={() => openUpdatePopup(item)}
-          disabled={node?.completionStatus} // disable if node is completed
-          style={{
-            cursor: node?.completionStatus ? "not-allowed" : "pointer",
-            opacity: node?.completionStatus ? 0.6 : 1,
-          }}
-        >
-          <FaEdit /> Update
-        </button>
-      </div>
-    )}
-  </div>
-);
+      {openDropdown === item.id && (
+        <div className="dropdown-content">
+          <button
+            onClick={() => openUpdatePopup(item)}
+            disabled={node?.completionStatus} // disable if node is completed
+            style={{
+              cursor: node?.completionStatus ? "not-allowed" : "pointer",
+              opacity: node?.completionStatus ? 0.6 : 1,
+            }}
+          >
+            <FaEdit /> Update
+          </button>
+        </div>
+      )}
+    </div>
+  );
 
   const fetchDetails = async () => {
     if (!id) return;

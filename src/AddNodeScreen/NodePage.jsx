@@ -22,7 +22,11 @@ const NodePage = () => {
   const [openDropdown, setOpenDropdown] = useState(null);
   const [mocDetails, setMocDetails] = useState(null);
   const [hasMoc, setHasMoc] = useState(false);
-  const [hazopData , setHazopData] = useState();
+  const [hazopData, setHazopData] = useState();
+  const [documents, setDocuments] = useState([]);
+  const [showDocuments, setShowDocuments] = useState(false);
+
+
   const toggleDropdown = (id) => {
     setOpenDropdown(openDropdown === id ? null : id);
   };
@@ -35,7 +39,7 @@ const NodePage = () => {
 
 
 
-  
+
   useEffect(() => {
     // Retrieve the data from localStorage
     const storedHazopData = localStorage.getItem("hazopData");
@@ -78,9 +82,9 @@ const NodePage = () => {
       console.log("No hazopData or hazopData.id is missing");
       return;
     }
-      fetchNodes();
+    fetchNodes();
   }, [hazopData]);
-  
+
   const handleSaveNode = async () => {
     await fetchNodes();
     setShowPopup(false);
@@ -137,26 +141,44 @@ const NodePage = () => {
     </div>
   );
 
+  const loadDocuments = async (hazopId) => {
+    try {
+      const res = await axios.get(
+        `http://${strings.localhost}/api/javaHazopDocument/getByKeys`,
+        {
+          params: {
+            companyId: localStorage.getItem("companyId") || 1,
+            primeryKey: "HAZOPFIRSTPAGEID",
+            primeryKeyValue: hazopId
+          }
+        }
+      );
+      setDocuments(Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
+      console.error("Error loading HAZOP documents:", err);
+    }
+  };
+
+
+  const fetchMocDetails = async () => {
+    try {
+      const res = await axios.get(
+        `http://${strings.localhost}/api/moc-reference/by-hazop?hazopRegistrationId=${hazopData.id}`
+      );
+
+      setMocDetails(res.data);
+      setHasMoc(true);
+    } catch (err) {
+      console.error("MOC Error:", err);
+
+      setHasMoc(false);
+      setMocDetails(null);
+    }
+  };
   useEffect(() => {
     if (!hazopData?.id) return;
-
-    const fetchMocDetails = async () => {
-      try {
-        const res = await axios.get(
-          `http://${strings.localhost}/api/moc-reference/by-hazop?hazopRegistrationId=${hazopData.id}`
-        );
-
-        setMocDetails(res.data);
-        setHasMoc(true);
-      } catch (err) {
-        console.error("MOC Error:", err);
-
-        setHasMoc(false);
-        setMocDetails(null);
-      }
-    };
-
     fetchMocDetails();
+    loadDocuments(hazopData.id);
   }, [hazopData]);
 
   return (
@@ -242,6 +264,12 @@ const NodePage = () => {
 
         <div className="rightbtn-controls">
           <h6
+            style={{ cursor: "pointer", marginRight: '20px' }}
+            onClick={() => setShowDocuments(!showDocuments)}
+          >
+            View Hazop Documents: {documents.length}
+          </h6>
+          <h6
             style={{ cursor: "pointer" }}
             onClick={() => setShowAllMembers(!showAllMembers)}
           >
@@ -287,6 +315,7 @@ const NodePage = () => {
             </div>
           </div>
         )}
+
         {hasMoc && mocDetails && (
           <div>
             <h1>MOC Details</h1>
@@ -318,6 +347,27 @@ const NodePage = () => {
             ) : (
               <p>No MOC details available.</p>
             )}
+          </div>
+        )}
+        {showDocuments && documents.length > 0 && (
+          <div>
+            <h3>Documents</h3>
+            <ul className="document-list">
+              {documents.map((doc) => {
+                const fileName = doc.filePath.split("\\").pop();
+                return (
+                  <li key={doc.id}>
+                    <a
+                      href={`http://${strings.localhost}/api/javaHazopDocument/view/${doc.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {fileName || "Unnamed Document"}
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
           </div>
         )}
       </div>

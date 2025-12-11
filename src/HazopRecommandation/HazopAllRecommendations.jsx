@@ -1,180 +1,170 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { FaEdit, FaEllipsisV, FaPaperPlane, FaSearch, FaTimes } from 'react-icons/fa';
+import { FaSearch } from 'react-icons/fa';
 import '../styles/global.css';
-import { showToast } from '../CommonUI/CommonUI';
+import { showToast, truncateWords } from '../CommonUI/CommonUI';
 import { strings } from '../string';
 
-
 const HazopAllRecommendations = ({ hazopId }) => {
+
     const [recommendations, setRecommendations] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [popupOpen, setPopupOpen] = useState(false);
-    const [selectedRecommendation, setSelectedRecommendation] = useState(null);
-    const [isSending, setIsSending] = useState(false);
-    const [teamSearch, setTeamSearch] = useState("");
-    const [searchResults, setSearchResults] = useState([]);
-    const [selectedEmployee, setSelectedEmployee] = useState(null);
-    const [confirmOpen, setConfirmOpen] = useState(false);
-    const [openDropdown, setOpenDropdown] = useState(null);
 
-    const toggleDropdown = (id) => {
-        setOpenDropdown(openDropdown === id ? null : id);
-    };
-    console.log("hazopId", hazopId);
+    const [searchInputs, setSearchInputs] = useState({});
+    const [searchResults, setSearchResults] = useState({});
+    const [selectedEmployees, setSelectedEmployees] = useState({});
+    const [sendingIds, setSendingIds] = useState([]);
 
+    /* =====================================
+       FETCH DATA USING FIRST API
+       ===================================== */
     const fetchRecommendations = async () => {
         if (!hazopId) return;
 
+        setLoading(true);
         try {
             const res = await axios.get(
                 `http://${strings.localhost}/api/nodeRecommendation/getByHazopRegistration/${hazopId}`
             );
-            setRecommendations(res.data);
+
+            setRecommendations(res.data ?? []);
+
         } catch (err) {
             console.error(err);
+            showToast("Failed to load recommendations", "error");
         } finally {
             setLoading(false);
         }
     };
+
     useEffect(() => {
         fetchRecommendations();
     }, [hazopId]);
 
-    const handleOpenPopup = (rec) => {
-        setSelectedRecommendation(rec);
-        setPopupOpen(true);
-        setTeamSearch("");
-        setSearchResults([]);
-        setSelectedEmployee(null);
-    };
 
-    const handleTeamSearchChange = async (e) => {
-        const value = e.target.value;
-        setTeamSearch(value);
-        setSelectedEmployee(null);
+    /* ===========================
+       INLINE SEARCH HANDLER
+       =========================== */
+    const handleSearchChange = async (recId, value) => {
+        setSearchInputs(prev => ({ ...prev, [recId]: value }));
+        setSelectedEmployees(prev => ({ ...prev, [recId]: null }));
 
         if (value.length < 2) {
-            setSearchResults([]);
+            setSearchResults(prev => ({ ...prev, [recId]: [] }));
             return;
         }
+
         try {
             const res = await axios.get(
                 `http://${strings.localhost}/api/employee/search?search=${encodeURIComponent(value)}`
             );
-            setSearchResults(res.data || []);
-        } catch (err) {
-            console.error("Error fetching employees:", err);
-        }
-    };
 
-    const selectEmployee = (emp) => {
-        setSelectedEmployee(emp);
-        setTeamSearch(emp.empCode);
-        setSearchResults([]);
-    };
+            setSearchResults(prev => ({ ...prev, [recId]: res.data || [] }));
 
-    const handleSendForVerification = async () => {
-        if (!selectedRecommendation || !selectedEmployee) return;
-        setIsSending(true)
-        try {
-            await axios.put(
-                `http://${strings.localhost}/api/nodeRecommendation/sendForVerification/${selectedRecommendation.id}/${selectedEmployee.empCode}`
-            );
-            showToast("Recommendation sent successfully!", 'success');
-            fetchRecommendations();
-            setPopupOpen(false);
         } catch (err) {
             console.error(err);
-            showToast("Failed to send recommendation.", 'error');
-        } finally {
-            setIsSending(false)
         }
     };
 
-
-    const ConfirmationPopup = ({ message, onConfirm, onCancel }) => {
-        return (
-            <div className="confirm-overlay">
-                <div className="confirm-box">
-
-                    <p>{message}</p>
-                    <div className="confirm-buttons">
-                        <button type="button" onClick={onCancel} disabled={isSending} className="cancel-btn">No</button>
-                        <button type="button" onClick={onConfirm} disabled={isSending} className="confirm-btn">{isSending ? "Sending..." : "Yes"}</button>
-                    </div>
-                </div>
-            </div>
-        );
+    const handleSelectEmployee = (recId, emp) => {
+        setSelectedEmployees(prev => ({ ...prev, [recId]: emp }));
+        setSearchInputs(prev => ({ ...prev, [recId]: emp.empCode }));
+        setSearchResults(prev => ({ ...prev, [recId]: [] }));
     };
 
+    /* ===========================
+       SEND ASSIGNMENT
+       =========================== */
+    const handleAssignSend = async (recId) => {
+        const employee = selectedEmployees[recId];
+        if (!employee) return;
 
-    const renderDropdown = (rec) => {
-        // ENABLE only for "Not Marked"
-        const isNotMarked = !rec.sendForVerification && !rec.sendForVerificationActionStatus;
+        setSendingIds(prev => [...prev, recId]);
 
-        return (
-            <div className="dropdown">
-                <button className="dots-button" onClick={() => toggleDropdown(rec.id)}>
-                    <FaEllipsisV />
-                </button>
+        try {
+            await axios.put(
+                `http://${strings.localhost}/api/nodeRecommendation/sendForVerification/${recId}/${employee.empCode}`
+            );
 
-                {openDropdown === rec.id && (
-                    <div className="dropdown-content">
-                        <button
-                            disabled={!isNotMarked}
-                            className={!isNotMarked ? "disabled-option" : ""}
-                            onClick={() => isNotMarked && handleOpenPopup(rec)}
-                            title={!isNotMarked ? "Cannot send. Already marked or pending approval." : ""}
-                        >
-                            <FaPaperPlane /> Send For Verification
-                        </button>
-                    </div>
-                )}
-            </div>
-        );
+            showToast("Sent successfully!", "success");
+
+            // Fetch updated data immediately
+            await fetchRecommendations();
+
+            // Reset selected employee for that row
+            setSelectedEmployees(prev => ({ ...prev, [recId]: null }));
+            setSearchInputs(prev => ({ ...prev, [recId]: '' }));
+
+        } catch {
+            showToast("Failed to send", "error");
+        } finally {
+            setSendingIds(prev => prev.filter(id => id !== recId));
+        }
     };
-
 
     return (
         <div>
-            {isSending && (
-                <div className="loading-overlay">
-                    <div className="loading-spinner"></div>
-                </div>
-            )}
-
             <table className="assigned-table">
                 <thead>
                     <tr>
                         <th>Sr.No</th>
                         <th>Recommendation</th>
-                        <th>Status</th>
-                        <th>Action</th>
+                        <th>Assign Employee</th>
+                        <th>Send</th>
                     </tr>
                 </thead>
+
                 <tbody>
                     {recommendations.length === 0 ? (
                         <tr>
-                            <td colSpan="4" className="no-data1">No recommendation data found</td>
+                            <td colSpan="4" className="no-data1">No data found</td>
                         </tr>
                     ) : (
                         recommendations.map((rec, index) => (
                             <tr key={rec.id}>
                                 <td>{index + 1}</td>
-                                <td>{rec.recommendation}</td>
+                                <td>{truncateWords(rec.recommendation)}</td>
                                 <td>
-                                    {rec.sendForVerification && !rec.sendForVerificationActionStatus ? (
-                                        <span className="status-pending">Pending</span>
-                                    ) : !rec.sendForVerification && rec.sendForVerificationActionStatus ? (
-                                        <span className="status-completed">Action Taken</span>
-                                    ) : (
-                                        <span className="status-notMarked">Not Marked</span>
-                                    )}
+                                    <div className="search-bar-table">
+                                        <input
+                                            type="text"
+                                            placeholder="Search employee..."
+                                            value={searchInputs[rec.id] || ''}
+                                            onChange={e => handleSearchChange(rec.id, e.target.value)}
+                                        />
+
+                                        <FaSearch className="search-icon-table" />
+
+                                        {searchResults[rec.id]?.length > 0 && (
+                                            <ul className="search-results-table">
+                                                {searchResults[rec.id].map(emp => (
+                                                    <li
+                                                        key={emp.empCode}
+                                                        onClick={() => handleSelectEmployee(rec.id, emp)}
+                                                    >
+                                                        {emp.empCode} - ({emp.emailId || 'NA'})
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        )}
+                                    </div>
                                 </td>
 
                                 <td>
-                                    {renderDropdown(rec)}
+                                    <button
+                                        className="confirm-btn"
+                                        onClick={() => handleAssignSend(rec.id)}
+                                        disabled={!selectedEmployees[rec.id] || sendingIds.includes(rec.id)}
+                                        title={
+                                            !selectedEmployees[rec.id]
+                                                ? "Select employee first"
+                                                : sendingIds.includes(rec.id)
+                                                    ? "Assigning..."
+                                                    : ""
+                                        }
+                                    >
+                                        {sendingIds.includes(rec.id) ? "Sending..." : "Send"}
+                                    </button>
                                 </td>
 
                             </tr>
@@ -182,73 +172,6 @@ const HazopAllRecommendations = ({ hazopId }) => {
                     )}
                 </tbody>
             </table>
-
-            {/* Employee selection popup */}
-            {popupOpen && (
-                <div className="modal-overlay">
-                    <div className="modal-body">
-                        <h4 className='centerText'>Send Recommendation: {selectedRecommendation?.recommendation}</h4>
-
-                        <div className="search-container">
-                            <div className="search-bar-wrapper">
-                                <input
-                                    type="text"
-                                    placeholder="Search employee..."
-                                    value={teamSearch}
-                                    onChange={handleTeamSearchChange}
-                                />
-                                <FaSearch className="search-icon" />
-                                {searchResults.length > 0 && (
-                                    <ul className="search-results">
-                                        {searchResults.map((emp) => (
-                                            <li key={emp.empCode} onClick={() => selectEmployee(emp)}>
-                                                {emp.empCode} - ({emp.emailId || "NA"}) ({emp.department || "NA"})
-                                            </li>
-                                        ))}
-                                    </ul>
-                                )}
-                            </div>
-                        </div>
-                        {selectedEmployee && (
-                            <div className="details-row">
-                                <span className="label">Selected Employee:</span>
-
-                                <span className="value selected-employee-value">
-                                    {selectedEmployee.empCode}
-                                    <FaTimes
-                                        onClick={() => setSelectedEmployee(null)}
-                                        className="remove-icon"
-                                    />
-                                </span>
-                            </div>
-                        )}
-
-
-                        <div className="confirm-buttons">
-                            <button onClick={() => setPopupOpen(false)} className="cancel-btn">Cancel</button>
-                            <button
-                                onClick={() => setConfirmOpen(true)}
-                                className="confirm-btn"
-                                disabled={!selectedEmployee}
-                            >
-                                Send
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Confirmation popup */}
-            {confirmOpen && selectedEmployee && selectedRecommendation && (
-                <ConfirmationPopup
-                    message={`Do you really want to send this HAZOP recommendation to ${selectedEmployee.empCode}?`}
-                    onCancel={() => setConfirmOpen(false)}
-                    onConfirm={() => {
-                        setConfirmOpen(false);
-                        handleSendForVerification();
-                    }}
-                />
-            )}
         </div>
     );
 };

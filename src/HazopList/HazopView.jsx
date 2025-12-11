@@ -6,6 +6,7 @@ import { formatDate, getBorderColor, getRiskClass, getRiskLevelText, getRiskText
 import { useNavigate } from "react-router-dom";
 import '../AddNodeScreen/Node.css';
 import './HazopView.css';
+
 const HazopView = ({ onClose, mode = "view-only" }) => {
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
@@ -14,6 +15,8 @@ const HazopView = ({ onClose, mode = "view-only" }) => {
     const [team, setTeam] = useState([]);
     const [nodes, setNodes] = useState([]);
     const [teamComments, setTeamComments] = useState([]);
+    const [documents, setDocuments] = useState([]);
+    const [mocReferences, setMocReferences] = useState([]);
 
     const [nodeDetails, setNodeDetails] = useState({});
     const [nodeRecommendations, setNodeRecommendations] = useState({});
@@ -41,6 +44,8 @@ const HazopView = ({ onClose, mode = "view-only" }) => {
                 ]);
                 setHazop(hRes.data || {});
                 setTeam(Array.isArray(tRes.data) ? tRes.data : []);
+                await loadMocReferences();
+                await loadDocuments();
             } catch (err) {
                 console.error(err);
             } finally {
@@ -163,6 +168,40 @@ const HazopView = ({ onClose, mode = "view-only" }) => {
         }
     };
 
+    const loadDocuments = async () => {
+        try {
+            const res = await axios.get(
+                `http://${strings.localhost}/api/javaHazopDocument/getByKeys`,
+                {
+                    params: {
+                        companyId: localStorage.getItem("companyId") || 1,
+                        primeryKey: "HAZOPFIRSTPAGEID",
+                        primeryKeyValue: hazopId
+                    }
+                }
+            );
+            setDocuments(Array.isArray(res.data) ? res.data : []);
+        } catch (err) {
+            console.error("Error loading HAZOP documents:", err);
+        }
+    };
+
+
+    const loadMocReferences = async () => {
+        try {
+            const res = await axios.get(
+                `http://${strings.localhost}/api/moc-reference/by-hazop`,
+                {
+                    params: { hazopRegistrationId: hazopId }
+                }
+            );
+            setMocReferences(Array.isArray(res.data) ? res.data : []);
+        } catch (err) {
+            console.error("Error loading MOC references:", err);
+            showToast("Failed to load MOC references", "error");
+        }
+    };
+
 
     const handleNext = async () => {
         if (step === 1) await loadNodes();
@@ -217,6 +256,59 @@ const HazopView = ({ onClose, mode = "view-only" }) => {
                                 <p>
                                     <strong>Revision:</strong> {hazop.hazopRevisionNo}
                                 </p>
+
+                                {mocReferences.length > 0 && (
+                                    <div>
+                                        <h3>MOC Details</h3>
+                                        <table className="hazop-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>MOC No</th>
+                                                    <th>Title</th>
+                                                    <th>Plant</th>
+                                                    <th>Department</th>
+                                                    <th>MOC Date</th>
+                                                    <th>Registered Date</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {mocReferences.map((moc) => (
+                                                    <tr key={moc.id}>
+                                                        <td>{moc.mocNo}</td>
+                                                        <td>{moc.mocTitle}</td>
+                                                        <td>{moc.mocPlant}</td>
+                                                        <td>{moc.mocDepartment}</td>
+                                                        <td>{moc.mocDate}</td>
+                                                        <td>{moc.registerDate}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
+
+
+                                {documents.length > 0 && (
+                                    <div>
+                                        <h3>Documents</h3>
+                                        <ul className="document-list">
+                                            {documents.map((doc) => {
+                                                const fileName = doc.filePath.split("\\").pop(); 
+                                                return (
+                                                    <li key={doc.id}>
+                                                        <a
+                                                            href={`http://${strings.localhost}/api/javaHazopDocument/view/${doc.id}`}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                        >
+                                                            {fileName || "Unnamed Document"}
+                                                        </a>
+                                                    </li>
+                                                );
+                                            })}
+                                        </ul>
+                                    </div>
+                                )}
 
                                 <h3>Team Members</h3>
                                 {team.length === 0 ? (

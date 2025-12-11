@@ -11,6 +11,9 @@ const Login = ({ setToken }) => {
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
+  const [showPopup, setShowPopup] = useState(false);  // popup state
+  const [popupMsg, setPopupMsg] = useState("");
+
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -23,34 +26,50 @@ const Login = ({ setToken }) => {
       );
 
       if (response.data && response.data.message === "Login Successful!") {
-        // Save user info in localStorage
+
         localStorage.setItem('empCode', response.data.empCode);
         localStorage.setItem('email', response.data.email);
         localStorage.setItem('fullName', response.data.fullName);
         localStorage.setItem('companyId', response.data.companyId);
         localStorage.setItem('Role', response.data.hazopRoles);
-        alert(`Hey, welcome ${response.data.fullName}`);
-        window.location.href = '/HazopPage';
+
+        // Do NOT setToken here
+        setPopupMsg(`Hey, welcome ${response.data.fullName}`);
+        setShowPopup(true);
+
+
 
       } else {
         setError('Login failed. Please check your credentials.');
       }
     } catch (err) {
       console.error('Login error:', err);
-      if (err.response && err.response.data) {
-        setError(err.response.data.message || 'Login failed. Please try again.');
-      } else {
-        setError('An unexpected error occurred. Please try again later.');
-      }
+      setError(
+        err.response?.data?.message || 'An unexpected error occurred. Please try again later.'
+      );
     }
   };
 
-  // const handleResetPasswordClick = () => {
-  //   navigate('/ResetpasswordPage');
-  // };
+  const handlePopupClose = () => {
+    setShowPopup(false);
+    setToken(true);
+    navigate('/HazopPage');
+  };
+
 
   return (
     <div className="logincontainer">
+
+      {/* ===== Custom Popup Inside Login Component ===== */}
+      {showPopup && (
+        <div className="popup-overlay">
+          <div className="popup-box">
+            <h3>{popupMsg}</h3>
+            <button className="popup-btn" onClick={handlePopupClose}>OK</button>
+          </div>
+        </div>
+      )}
+
       <div className="form-container">
         <div className="login-container">
           <div className="logo">
@@ -82,17 +101,9 @@ const Login = ({ setToken }) => {
               required
             />
             {showPassword ? (
-              <FaEyeSlash
-                className="password-toggle-icon"
-                onClick={() => setShowPassword(false)}
-                style={{ cursor: 'pointer' }}
-              />
+              <FaEyeSlash className="password-toggle-icon" onClick={() => setShowPassword(false)} />
             ) : (
-              <FaEye
-                className="password-toggle-icon"
-                onClick={() => setShowPassword(true)}
-                style={{ cursor: 'pointer' }}
-              />
+              <FaEye className="password-toggle-icon" onClick={() => setShowPassword(true)} />
             )}
           </div>
 
@@ -100,10 +111,6 @@ const Login = ({ setToken }) => {
             Login
           </button>
         </form>
-
-        {/* <button type="button" className="blackbutton" onClick={handleResetPasswordClick}>
-          Forgot Password: <span className="underlineText">Click Here</span>
-        </button> */}
       </div>
     </div>
   );

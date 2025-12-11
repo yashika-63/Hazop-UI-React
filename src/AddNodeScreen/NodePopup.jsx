@@ -11,7 +11,6 @@ const NodePopup = ({ onClose, onSave, hazopData }) => {
     date: "",
     designIntent: "",
     pIdRevision: "",
-    hazopTitle: "",
     sopNo: "",
     sopDate: "",
     equipment: "",
@@ -49,10 +48,7 @@ const NodePopup = ({ onClose, onSave, hazopData }) => {
       newErrors.pIdRevision = "P&ID No. & Revision is required.";
       showToast("P&ID No. is required", "warn");
     }
-    if (!form.hazopTitle.trim()) {
-      newErrors.hazopTitle = "Node title is required.";
-      showToast("Node title is required", "warn");
-    }
+    
     if (!form.sopNo.trim()) {
       newErrors.sopNo = "SOP Number is required.";
       showToast("SOP number is required", "warn");
@@ -104,8 +100,6 @@ const NodePopup = ({ onClose, onSave, hazopData }) => {
           date: formatDateToBackend(form.date),
           designIntent: form.designIntent,
           pIdRevision: form.pIdRevision,
-          hazopTitle: form.hazopTitle,
-          hazopTitle: form.hazopTitle,
           sopNo: form.sopNo,
           sopDate: formatDateToBackend(form.sopDate),
           equipment: form.equipment,

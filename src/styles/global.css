@@ -712,7 +712,7 @@ p {
 }
 
 .confirm-btn:disabled {
-  background: #8d9094;
+  background: #587090;
   cursor: not-allowed;
 }
 

@@ -1,13 +1,17 @@
 /* Container for the full-screen image */
 .logincontainer {
-  position: fixed;         /* Cover the entire screen */
+  position: fixed;
+  /* Cover the entire screen */
   top: 0;
   left: 0;
   width: 100%;
-  height: 100vh;           /* Full viewport height */
+  height: 100vh;
+  /* Full viewport height */
   display: flex;
-  justify-content: center;  /* Center form horizontally */
-  align-items: center;      /* Center form vertically */
+  justify-content: center;
+  /* Center form horizontally */
+  align-items: center;
+  /* Center form vertically */
   overflow: hidden;
   z-index: 1;
 }
@@ -24,9 +28,10 @@
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  filter: blur(0px) brightness(0.7);  /* Add slight blur and darken */
-  transform: scale(1.05);  
-  z-index: -1;             
+  filter: blur(0px) brightness(0.7);
+  /* Add slight blur and darken */
+  transform: scale(1.05);
+  z-index: -1;
 }
 
 /* The login form container with frosted glass effect */
@@ -39,9 +44,12 @@
   z-index: 2;
   text-align: center;
   color: #000;
-  background: rgba(255, 255, 255, 0.25);  /* Semi-transparent */
-  backdrop-filter: blur(10px);           /* Frosted glass blur */
-  -webkit-backdrop-filter: blur(10px);   /* Safari support */
+  background: rgba(255, 255, 255, 0.25);
+  /* Semi-transparent */
+  backdrop-filter: blur(10px);
+  /* Frosted glass blur */
+  -webkit-backdrop-filter: blur(10px);
+  /* Safari support */
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.18);
 }
@@ -66,6 +74,7 @@
   font-size: 14px;
   margin-bottom: 10px;
 }
+
 /* Style for input group */
 .input-group {
   position: relative;
@@ -95,7 +104,7 @@
 
 
 .blackbutton {
-  background-color: rgba(0,0,0,0.7);
+  background-color: rgba(0, 0, 0, 0.7);
   color: white;
   padding: 10px 0;
   border: none;
@@ -106,8 +115,9 @@
 }
 
 .blackbutton:hover {
-  background-color: rgba(0,0,0,0.9);
+  background-color: rgba(0, 0, 0, 0.9);
 }
+
 /* Media queries for responsiveness */
 
 /* Responsive adjustments */
@@ -233,27 +243,33 @@ input[type="email"] {
   transform: translateY(-50%);
   cursor: pointer;
 }
+
 .modal-overlay1 {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  background-color: rgba(0, 0, 0, 0.5);
+  /* Semi-transparent background */
   display: flex;
   justify-content: center;
   align-items: center;
   backdrop-filter: blur(6px);
-  visibility: visible; /* Ensure it's visible */
-  opacity: 1; /* Ensure it’s fully visible */
-  transition: opacity 0.3s ease-in-out; /* Optional for smooth transition */
+  visibility: visible;
+  /* Ensure it's visible */
+  opacity: 1;
+  /* Ensure it’s fully visible */
+  transition: opacity 0.3s ease-in-out;
+  /* Optional for smooth transition */
 }
 
 .modal-container1 {
   background-color: white;
   padding: 20px;
   border-radius: 8px;
-  width: 300px; /* Adjust as needed */
+  width: 300px;
+  /* Adjust as needed */
   text-align: center;
 }
 
@@ -281,4 +297,56 @@ input[type="email"] {
   border: none;
   border-radius: 5px;
   cursor: pointer;
+}
+
+
+
+/* Popup styles inside login component */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.popup-box {
+  background: #fff;
+  width: 350px;
+  padding: 30px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  animation: popupFade 0.25s ease-in-out;
+}
+
+.popup-btn {
+  margin-top: 15px;
+  padding: 8px 20px;
+  background: #007bff;
+  border: none;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.popup-btn:hover {
+  background: #0056b3;
+}
+
+@keyframes popupFade {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }

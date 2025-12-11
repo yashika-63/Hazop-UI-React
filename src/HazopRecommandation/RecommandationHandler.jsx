@@ -36,7 +36,7 @@ const RecommandationHandler = () => {
                     className={`active-section-item ${activeSection === 'HazopAllRecommendations' ? 'active' : ''}`}
                     onClick={() => handleButtonClick('HazopAllRecommendations')}
                 >
-                    <FaClock /> Active
+                    <FaClock style={{marginRight:'8px'}}/> View Recommendations
                 </button>
 
                 <button
@@ -44,7 +44,7 @@ const RecommandationHandler = () => {
                     className={`active-section-item ${activeSection === 'HazopRecommendationsSecondScreen' ? 'active' : ''}`}
                     onClick={() => handleButtonClick('HazopRecommendationsSecondScreen')}
                 >
-                    <FaFileAlt /> HazopRecommendationsSecondScreen
+                    <FaFileAlt style={{marginRight:'8px'}}/> Assign Recommendations 
                 </button>
 
                 <button
@@ -52,7 +52,7 @@ const RecommandationHandler = () => {
                     className={`active-section-item ${activeSection === 'HazopRecommendationsThirdScreen' ? 'active' : ''}`}
                     onClick={() => handleButtonClick('HazopRecommendationsThirdScreen')}
                 >
-                    <FaFolderClosed /> HazopRecommendationsThirdScreen
+                    <FaFolderClosed style={{marginRight:'8px'}}/> Complete Recommendations 
                 </button>
             </div>
 

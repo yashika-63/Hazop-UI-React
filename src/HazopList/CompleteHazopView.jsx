@@ -22,6 +22,8 @@ const CompleteHazopView = ({
   const [nodeRecommendations, setNodeRecommendations] = useState({});
   const [allRecommendations, setAllRecommendations] = useState([]);
   const [teamComments, setTeamComments] = useState([]);
+  const [documents, setDocuments] = useState([]);
+  const [mocReferences, setMocReferences] = useState([]);
 
   const [assignData, setAssignData] = useState({
     rejected: [],
@@ -48,6 +50,8 @@ const CompleteHazopView = ({
         ]);
         setHazop(hRes.data || {});
         setTeam(Array.isArray(tRes.data) ? tRes.data : []);
+        await loadMocReferences();
+        await loadDocuments();
       } catch (err) {
         console.error(err);
       } finally {
@@ -161,12 +165,46 @@ const CompleteHazopView = ({
   };
   const loadTeamComments = async () => {
     try {
-      const res = await axios.get(`http://localhost:5559/api/team-comments/getByHazop/${hazopId}`);
+      const res = await axios.get(`http://${strings.localhost}/api/team-comments/getByHazop/${hazopId}`);
       setTeamComments(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error("Error loading team comments:", err);
     }
   };
+
+  const loadDocuments = async () => {
+    try {
+      const res = await axios.get(
+        `http://${strings.localhost}/api/javaHazopDocument/getByKeys`,
+        {
+          params: {
+            companyId: localStorage.getItem("companyId") || 1,
+            primeryKey: "HAZOPFIRSTPAGEID",
+            primeryKeyValue: hazopId
+          }
+        }
+      );
+      setDocuments(Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
+      console.error("Error loading HAZOP documents:", err);
+    }
+  };
+
+  const loadMocReferences = async () => {
+    try {
+      const res = await axios.get(
+        `http://${strings.localhost}/api/moc-reference/by-hazop`,
+        {
+          params: { hazopRegistrationId: hazopId }
+        }
+      );
+      setMocReferences(Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
+      console.error("Error loading MOC references:", err);
+      showToast("Failed to load MOC references", "error");
+    }
+  };
+
 
   const handleNext = async () => {
     if (step === 1) await loadNodes();
@@ -316,6 +354,59 @@ const CompleteHazopView = ({
                   <strong>Revision:</strong> {hazop.hazopRevisionNo}
                 </p>
 
+                {mocReferences.length > 0 && (
+                  <div>
+                    <h3>MOC Details</h3>
+                    <table className="hazop-table">
+                      <thead>
+                        <tr>
+                          <th>MOC No</th>
+                          <th>Title</th>
+                          <th>Plant</th>
+                          <th>Department</th>
+                          <th>MOC Date</th>
+                          <th>Registered Date</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {mocReferences.map((moc) => (
+                          <tr key={moc.id}>
+                            <td>{moc.mocNo}</td>
+                            <td>{moc.mocTitle}</td>
+                            <td>{moc.mocPlant}</td>
+                            <td>{moc.mocDepartment}</td>
+                            <td>{moc.mocDate}</td>
+                            <td>{moc.registerDate}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
+                {documents.length > 0 && (
+                  <div>
+                    <h3>Documents</h3>
+                    <ul className="document-list">
+                      {documents.map((doc) => {
+                        const fileName = doc.filePath.split("\\").pop();
+                        return (
+                          <li key={doc.id}>
+                            <a
+                              href={`http://${strings.localhost}/api/javaHazopDocument/view/${doc.id}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {fileName || "Unnamed Document"}
+                            </a>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                )}
+
+
                 <h3>Team Members</h3>
                 {team.length === 0 ? (
                   <p>No team members assigned.</p>
@@ -351,7 +442,7 @@ const CompleteHazopView = ({
                   <div key={node.id} className="node-card">
                     <p>
                       <strong>
-                        Node #{node.nodeNumber} - {node.hazopTitle ||'-'}
+                        Node #{node.nodeNumber} - {node.hazopTitle || '-'}
                       </strong>
                     </p>
                     <div>
@@ -431,7 +522,7 @@ const CompleteHazopView = ({
                         details.map((detail, idx) => (
                           <div key={detail.id} className="node-detail-section">
                             <div className="node-detail-label">
-                            {idx + 1}. Discussion 
+                              {idx + 1}. Discussion
 
                             </div>
                             <div >
@@ -544,7 +635,7 @@ const CompleteHazopView = ({
                                       <small
                                         className={`risk-text ${getRiskTextClass(
                                           detail.riskRating
-                                        )} center-controls`} style={{ textAlign: 'center' ,marginTop:'10px'}}
+                                        )} center-controls`} style={{ textAlign: 'center', marginTop: '10px' }}
                                       >
                                         {getRiskLevelText(detail.riskRating)}
                                       </small>
@@ -595,7 +686,7 @@ const CompleteHazopView = ({
                                       <small
                                         className={`risk-text ${getRiskTextClass(
                                           detail.additionalRiskRating
-                                        )} center-controls`} style={{ textAlign: 'center' ,marginTop:'10px'}}
+                                        )} center-controls`} style={{ textAlign: 'center', marginTop: '10px' }}
                                       >
                                         {getRiskLevelText(detail.additionalRiskRating)}
                                       </small>

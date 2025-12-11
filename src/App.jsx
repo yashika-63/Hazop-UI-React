@@ -54,7 +54,7 @@ const App = () => {
               <div className="app-container">
                 <Topbar
                   toggleSidebar={toggleSidebar}
-                  isOpen={isSidebarOpen} 
+                  isOpen={isSidebarOpen}
                   handleLogout={handleLogout}
                 />
                 <Sidebar isOpen={isSidebarOpen} />
@@ -74,7 +74,7 @@ const App = () => {
                     <Route path="/complete-hazop-view" element={<HazopView />} />
                     <Route path="/MOCList" element={<MOCList />} />
                     <Route path="/NodePopup/:id" element={<NodePopup />} />
-                    <Route path="/HazopWorkflow" element={<HazopWorkflow />} />
+                    <Route path="/HazopWorkflow/:id" element={<HazopWorkflow />} />
                     <Route path="/HazopStatusPage" element={<HazopStatusPage />} />
                     <Route path="/RoleBasedHazopPage" element={<RoleBasedHazopPage />} />
 
