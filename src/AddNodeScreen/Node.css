@@ -502,6 +502,7 @@
 .metric-single {
   display: grid;
   grid-template-columns: 1fr;
+  margin-top: 10px;
 }
 
 /* A very light border tint based on risk */

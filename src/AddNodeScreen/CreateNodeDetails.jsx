@@ -45,19 +45,21 @@ const CreateNodeDetails = () => {
 
   const nodeID = location.state?.nodeID;
   const [currentNodeId, setCurrentNodeId] = useState(nodeID); // initial node
-const [currentNodeData, setCurrentNodeData] = useState(null);
+  const [currentNodeData, setCurrentNodeData] = useState(null);
 
-useEffect(() => {
-  const fetchNode = async () => {
-    if (!currentNodeId) return;
-    const res = await fetch(`http://${strings.localhost}/api/hazopNode/${currentNodeId}`);
-    if (res.ok) {
-      const data = await res.json();
-      setCurrentNodeData(data);
-    }
-  };
-  fetchNode();
-}, [currentNodeId]);
+  useEffect(() => {
+    const fetchNode = async () => {
+      if (!currentNodeId) return;
+      const res = await fetch(
+        `http://${strings.localhost}/api/hazopNode/${currentNodeId}`
+      );
+      if (res.ok) {
+        const data = await res.json();
+        setCurrentNodeData(data);
+      }
+    };
+    fetchNode();
+  }, [currentNodeId]);
 
   const handleChange = (e) => {
     setIsSaved(false);
@@ -109,7 +111,9 @@ useEffect(() => {
   };
 
   useEffect(() => {
-    fetch(`http://${strings.localhost}/api/hazopNodeDetail/node/${currentNodeId}`)
+    fetch(
+      `http://${strings.localhost}/api/hazopNodeDetail/node/${currentNodeId}`
+    )
       .then((res) => res.json())
       .then((data) => setDetails(data));
   }, [nodeID]);
@@ -219,37 +223,42 @@ useEffect(() => {
   };
 
   const loadNodeDetails = async (nodeId) => {
-  try {
-    setLoading(true);
-    const res = await fetch(`http://${strings.localhost}/api/hazopNodeDetail/node/${nodeId}`);
-    const data = await res.json();
-    setDetails(data);
+    try {
+      setLoading(true);
+      const res = await fetch(
+        `http://${strings.localhost}/api/hazopNodeDetail/node/${nodeId}`
+      );
+      const data = await res.json();
+      setDetails(data);
 
-    if (data.length > 0) {
-      const firstDetail = data[0];
-      const recsRes = await fetch(`http://${strings.localhost}/api/nodeRecommendation/getByDetailId/${firstDetail.id}`);
-      const recommendations = await recsRes.json();
+      if (data.length > 0) {
+        const firstDetail = data[0];
+        const recsRes = await fetch(
+          `http://${strings.localhost}/api/nodeRecommendation/getByDetailId/${firstDetail.id}`
+        );
+        const recommendations = await recsRes.json();
 
-      setForm({
-        ...firstDetail,
-        additionalControl: recommendations.map((r) => r.recommendation).join("\n") || "• ",
-      });
-      setTempRecommendations(recommendations);
-      setCurrentDetailId(firstDetail.id);
-      setCurrentIndex(0);
-    } else {
-      setForm(initialState);
-      setTempRecommendations([]);
-      setCurrentDetailId(null);
-      setCurrentIndex(0);
+        setForm({
+          ...firstDetail,
+          additionalControl:
+            recommendations.map((r) => r.recommendation).join("\n") || "• ",
+        });
+        setTempRecommendations(recommendations);
+        setCurrentDetailId(firstDetail.id);
+        setCurrentIndex(0);
+      } else {
+        setForm(initialState);
+        setTempRecommendations([]);
+        setCurrentDetailId(null);
+        setCurrentIndex(0);
+      }
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to load node details.", "error");
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    console.error(err);
-    showToast("Failed to load node details.", "error");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   const reloadDetails = async () => {
     const res = await fetch(
@@ -653,35 +662,37 @@ useEffect(() => {
     }
   };
 
-const fetchNodeByDirection = async (direction) => {
-  if (!nodeID) return null; // fallback
+  const fetchNodeByDirection = async (direction) => {
+    if (!nodeID) return null; // fallback
 
-  try {
-    setLoading(true);
-    const currentIdParam = currentNodeId || 0;
+    try {
+      setLoading(true);
+      const currentIdParam = currentNodeId || 0;
 
-    const nodeRes = await fetch(`http://${strings.localhost}/api/hazopNode/${currentNodeId}`);
-    if (!nodeRes.ok) throw new Error("Failed to fetch node");
+      const nodeRes = await fetch(
+        `http://${strings.localhost}/api/hazopNode/${currentNodeId}`
+      );
+      if (!nodeRes.ok) throw new Error("Failed to fetch node");
 
-    const nodeData = await nodeRes.json();
-    const registrationId = nodeData.javaHazopRegistration?.id || 0; 
+      const nodeData = await nodeRes.json();
+      const registrationId = nodeData.javaHazopRegistration?.id || 0;
 
-    const res = await fetch(
-      `http://${strings.localhost}/api/hazopNode/node/getByDirection?currentId=${currentIdParam}&registrationId=${registrationId}&direction=${direction}`
-    );
+      const res = await fetch(
+        `http://${strings.localhost}/api/hazopNode/node/getByDirection?currentId=${currentIdParam}&registrationId=${registrationId}&direction=${direction}`
+      );
 
-    if (!res.ok) return null;
+      if (!res.ok) return null;
 
-    const data = await res.json();
-    return data || null;
-  } catch (error) {
-    console.error("Error fetching node by direction:", error);
-    showToast("Failed to fetch node.", "error");
-    return null;
-  } finally {
-    setLoading(false);
-  }
-};
+      const data = await res.json();
+      return data || null;
+    } catch (error) {
+      console.error("Error fetching node by direction:", error);
+      showToast("Failed to fetch node.", "error");
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const saveCurrentDetails = async (currentForm) => {
     setIsSaved(true);
@@ -816,7 +827,10 @@ const fetchNodeByDirection = async (direction) => {
     </select>
   );
   console.log("currentNodeData:", currentNodeData);
-console.log("javaHazopRegistration id:", currentNodeData?.javaHazopRegistration?.id);
+  console.log(
+    "javaHazopRegistration id:",
+    currentNodeData?.javaHazopRegistration?.id
+  );
 
   const root = document.documentElement;
   const trivial = getComputedStyle(root).getPropertyValue("--trivial").trim();
@@ -913,7 +927,7 @@ console.log("javaHazopRegistration id:", currentNodeData?.javaHazopRegistration?
     }
   }, []);
 
-    const [isNodePopupOpen, setIsNodePopupOpen] = useState(false);
+  const [isNodePopupOpen, setIsNodePopupOpen] = useState(false);
 
   const handleOpenNodePopup = () => {
     setIsNodePopupOpen(true);
@@ -924,13 +938,13 @@ console.log("javaHazopRegistration id:", currentNodeData?.javaHazopRegistration?
   };
 
   const handleSaveNode = async () => {
-  // After saving in NodePopup, refresh NodeInfo or currentNodeId as needed
-  if (currentNodeId) {
-    // reload current node details after adding new node
-    await loadNodeDetails(currentNodeId); 
-  }
-  setIsNodePopupOpen(false);
-};
+    // After saving in NodePopup, refresh NodeInfo or currentNodeId as needed
+    if (currentNodeId) {
+      // reload current node details after adding new node
+      await loadNodeDetails(currentNodeId);
+    }
+    setIsNodePopupOpen(false);
+  };
 
   return (
     <div>
@@ -951,8 +965,8 @@ console.log("javaHazopRegistration id:", currentNodeData?.javaHazopRegistration?
               navigate("/NodePopup", {
                 state: {
                   registrationId: currentNodeData?.javaHazopRegistration?.id, // explicitly name it registrationId
-    hazopData: currentNodeData?.javaHazopRegistration,
-    redirectTo: "/hazop-details",
+                  hazopData: currentNodeData?.javaHazopRegistration,
+                  redirectTo: "/hazop-details",
                 },
               })
             }
@@ -960,7 +974,7 @@ console.log("javaHazopRegistration id:", currentNodeData?.javaHazopRegistration?
             + Add Node
           </button>
         </div>
-        </div>
+      </div>
 
       <NodeInfo currentNodeId={currentNodeId} />
 
