@@ -103,6 +103,13 @@ h6 {
   margin-bottom: 12px;
 }
 
+.input-row-node {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 20px;
+  margin-bottom: 12px;
+}
+
 .form-group {
   flex-direction: column;
   position: relative;

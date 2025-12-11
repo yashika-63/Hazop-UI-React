@@ -73,10 +73,10 @@ const App = () => {
                     <Route path="/UpdateNodeDetails" element={<UpdateNodeDetails />} />
                     <Route path="/complete-hazop-view" element={<HazopView />} />
                     <Route path="/MOCList" element={<MOCList />} />
-                    <Route path="/NodePopup/:id" element={<NodePopup />} />
                     <Route path="/HazopWorkflow" element={<HazopWorkflow />} />
                     <Route path="/HazopStatusPage" element={<HazopStatusPage />} />
                     <Route path="/RoleBasedHazopPage" element={<RoleBasedHazopPage />} />
+                    <Route path="/NodePopup" element={<NodePopup />} />
 
                     <Route path="*" element={<Navigate to="/HazopPage" />} />
                   </Routes>

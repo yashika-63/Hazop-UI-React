@@ -22,7 +22,7 @@ const NodePage = () => {
   const [openDropdown, setOpenDropdown] = useState(null);
   const [mocDetails, setMocDetails] = useState(null);
   const [hasMoc, setHasMoc] = useState(false);
-  const [hazopData , setHazopData] = useState();
+  const [hazopData, setHazopData] = useState();
   const toggleDropdown = (id) => {
     setOpenDropdown(openDropdown === id ? null : id);
   };
@@ -32,10 +32,6 @@ const NodePage = () => {
     // Add your completion logic here later
   };
 
-
-
-
-  
   useEffect(() => {
     // Retrieve the data from localStorage
     const storedHazopData = localStorage.getItem("hazopData");
@@ -49,13 +45,6 @@ const NodePage = () => {
       setHazopTeam(JSON.parse(storedHazopTeam));
     }
   }, []);
-
-  // useEffect(() => {
-  //   if (stateTeam) {
-  //     setHazopTeam(stateTeam);
-  //     setOriginalTeam(stateTeam);
-  //   }
-  // }, [stateTeam]);
 
   const fetchNodes = async () => {
     if (!hazopData?.id) {
@@ -72,15 +61,14 @@ const NodePage = () => {
     }
   };
 
-
   useEffect(() => {
     if (!hazopData?.id) {
       console.log("No hazopData or hazopData.id is missing");
       return;
     }
-      fetchNodes();
+    fetchNodes();
   }, [hazopData]);
-  
+
   const handleSaveNode = async () => {
     await fetchNodes();
     setShowPopup(false);
@@ -328,14 +316,17 @@ const NodePage = () => {
           <button
             type="button"
             className="add-btn"
-            onClick={() => {
-              console.log("Add Node clicked");
-              setShowPopup(true);
-            }}
+            onClick={() =>
+              navigate("/NodePopup", {
+                state: {
+                  hazopData: hazopData, 
+                  redirectTo: "/hazop-details",
+                },
+              })
+            }
           >
             + Add Node
           </button>
-
         </div>
 
         <div className="card table-card">
@@ -375,8 +366,8 @@ const NodePage = () => {
                           n.completionStatus === true
                             ? "status-completed"
                             : n.completionStatus === false
-                              ? "status-pending"
-                              : "status-pending"
+                            ? "status-pending"
+                            : "status-pending"
                         }
                       >
                         {n.completionStatus === true ? "Completed" : "Ongoing"}
@@ -389,14 +380,6 @@ const NodePage = () => {
           </table>
         </div>
       </div>
-
-      {showPopup && (
-        <NodePopup
-          onClose={() => setShowPopup(false)}
-          onSave={handleSaveNode}
-          hazopData={hazopData}
-        />
-      )}
     </div>
   );
 };

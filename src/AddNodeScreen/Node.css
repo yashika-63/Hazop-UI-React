@@ -495,14 +495,13 @@
 /* Metric rows */
 .metric-row {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 10px;
 }
 
 .metric-single {
   display: grid;
   grid-template-columns: 1fr;
-  margin-top: 15px;
 }
 
 /* A very light border tint based on risk */

@@ -1,17 +1,25 @@
 import React, { useState } from "react";
 import axios from "axios";
 import "./Node.css";
-import { FaTimes } from "react-icons/fa";
+import { useLocation, useNavigate } from "react-router-dom";
 import { formatDateToBackend, showToast } from "../CommonUI/CommonUI";
 import { strings } from "../string";
 
-const NodePopup = ({ onClose, onSave, hazopData }) => {
+const NodePopup = ({ onSave }) => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+const { registrationId: registrationId, hazopData } = location.state || {};
+console.log("Using registrationId for POST:", registrationId);
+
+  if (!hazopData) {
+    console.error("hazopData missing in NodePopup");
+  }
   const [form, setForm] = useState({
     nodeNumber: "",
     date: "",
     designIntent: "",
     pIdRevision: "",
-    hazopTitle: "",
     sopNo: "",
     sopDate: "",
     equipment: "",
@@ -32,7 +40,7 @@ const NodePopup = ({ onClose, onSave, hazopData }) => {
 
   const validate = () => {
     const newErrors = {};
-  
+
     if (!form.nodeNumber) {
       newErrors.nodeNumber = "Node number is required.";
       showToast("Node number is required", "warn");
@@ -48,10 +56,6 @@ const NodePopup = ({ onClose, onSave, hazopData }) => {
     if (!form.pIdRevision) {
       newErrors.pIdRevision = "P&ID No. & Revision is required.";
       showToast("P&ID No. is required", "warn");
-    }
-    if (!form.hazopTitle.trim()) {
-      newErrors.hazopTitle = "Node title is required.";
-      showToast("Node title is required", "warn");
     }
     if (!form.sopNo.trim()) {
       newErrors.sopNo = "SOP Number is required.";
@@ -85,27 +89,25 @@ const NodePopup = ({ onClose, onSave, hazopData }) => {
       newErrors.quantityFlowRate = "Quantity is required.";
       showToast("Quantity is required", "warn");
     }
-  
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0; // returns false if there are errors, true if no errors
   };
-  
+
   const handleSave = async () => {
     if (!validate()) return;
 
     setLoading(true);
     try {
       setErrors({});
-
       const registrationId = hazopData.id;
+
       const payload = [
         {
           nodeNumber: form.nodeNumber,
           date: formatDateToBackend(form.date),
           designIntent: form.designIntent,
           pIdRevision: form.pIdRevision,
-          hazopTitle: form.hazopTitle,
-          hazopTitle: form.hazopTitle,
           sopNo: form.sopNo,
           sopDate: formatDateToBackend(form.sopDate),
           equipment: form.equipment,
@@ -125,9 +127,8 @@ const NodePopup = ({ onClose, onSave, hazopData }) => {
       if (onSave) {
         onSave();
       }
-
+      navigate(-1);
       showToast("Hazop note created successfully!", "success");
-      onClose();
     } catch (err) {
       console.error("Save failed:", err);
       showToast("Failed to save Hazop note", "error");
@@ -137,65 +138,60 @@ const NodePopup = ({ onClose, onSave, hazopData }) => {
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-box">
-        {loading && (
-          <div className="loading-overlay">
-            <div className="loading-spinner"></div>
-          </div>
-        )}
-        <div className="modal-content">
-          <button className="close-btn" onClick={onClose} disabled={loading}>
-            <FaTimes />
-          </button>
-          <h2 className="modal-header">Create Hazop Node</h2>
+    <div>
+      <div className="node-header">
+        <button className="nd-back-btn" onClick={() => navigate(-1)}>
+          ← Back
+        </button>
+        <h1>Create Node</h1>
+      </div>
 
-          <div className="popup-body">
-            <div>
-              {/* Node meta */}
-              <div className="input-row">
-                <div className="form-group">
-                  <label>
-                    <span className="required-marker">* </span>Node Number
-                  </label>
-                  <input
-                    type="number"
-                    name="nodeNumber"
-                    value={form.nodeNumber}
-                    onChange={handleChange}
-                    disabled={loading}
-                  />
-                </div>
+      <div>
+        <div className="popup-body">
+          <div>
+            {/* Node meta */}
+            <div className="input-row">
+              <div className="form-group">
+                <label>
+                  <span className="required-marker">* </span>Node Number
+                </label>
+                <input
+                  type="number"
+                  name="nodeNumber"
+                  value={form.nodeNumber}
+                  onChange={handleChange}
+                  disabled={loading}
+                />
+              </div>
 
-                <div className="form-group">
-                  <label>
-                    <span className="required-marker">* </span>Node Date
-                  </label>
-                  <input
-                    type="date"
-                    name="date"
-                    value={form.date}
-                    onChange={handleChange}
-                    disabled={loading}
-                    max={new Date().toISOString().split("T")[0]}
-                  />
-                </div>
+              <div className="form-group">
+                <label>
+                  <span className="required-marker">* </span>Node Date
+                </label>
+                <input
+                  type="date"
+                  name="date"
+                  value={form.date}
+                  onChange={handleChange}
+                  disabled={loading}
+                  max={new Date().toISOString().split("T")[0]}
+                />
+              </div>
 
-                <div className="form-group">
-                  <label>
-                    <span className="required-marker">* </span>P&ID No. &
-                    Revision
-                  </label>
-                  <input
-                    type="number"
-                    name="pIdRevision"
-                    value={form.pIdRevision}
-                    onChange={handleChange}
-                    disabled={loading}
-                  />
-                </div>
+              <div className="form-group">
+                <label>
+                  <span className="required-marker">* </span>P&ID No. & Revision
+                </label>
+                <input
+                  type="number"
+                  name="pIdRevision"
+                  value={form.pIdRevision}
+                  onChange={handleChange}
+                  disabled={loading}
+                />
+              </div>
 
-                {/* <div className="form-group ">
+              {/* <div className="form-group ">
                   <label>
                     <span className="required-marker">* </span>Node Title
                   </label>
@@ -207,204 +203,211 @@ const NodePopup = ({ onClose, onSave, hazopData }) => {
                     disabled={loading}
                   />
                 </div> */}
-              </div>
-
-              {/* Design / P&ID */}
-              <div className="form-group">
-                <label>
-                  <span className="required-marker">* </span>Design Intent
-                </label>
-                <textarea
-                  name="designIntent"
-                  value={form.designIntent}
-                  rows={3}
-                  onChange={handleChange}
-                  className="textareaFont"
-                  disabled={loading}
-                />
-              </div>
-
-              {/* SOP */}
-              <div className="input-row">
-                <div className="form-group">
-                  <label>
-                    <span className="required-marker">* </span>SOP Number
-                  </label>
-                  <input
-                    type="text"
-                    name="sopNo"
-                    value={form.sopNo}
-                    onChange={handleChange}
-                    disabled={loading}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>
-                    <span className="required-marker">* </span>SOP Date
-                  </label>
-                  <input
-                    type="date"
-                    name="sopDate"
-                    value={form.sopDate}
-                    onChange={handleChange}
-                    disabled={loading}
-                    max={new Date().toISOString().split("T")[0]}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>
-                    <span className="required-marker">* </span>Temperature
-                  </label>
-                  <input
-                    type="text"
-                    name="temperature"
-                    value={form.temperature}
-                    onChange={handleChange}
-                    disabled={loading}
-                    maxLength={1000}
-                  />
-                  <small
-                    className={`char-count ${form.temperature.length >= 1000 ? "limit-reached" : ""
-                      }`}
-                  >
-                    {form.temperature.length}/1000
-                  </small>
-                </div>
-
-                <div className="form-group">
-                  <label>
-                    <span className="required-marker">* </span>Pressure, barg
-                  </label>
-                  <input
-                    type="text"
-                    name="pressure"
-                    value={form.pressure}
-                    onChange={handleChange}
-                    disabled={loading}
-                    maxLength={1000}
-                  />
-                  <small
-                    className={`char-count ${form.pressure.length >= 1000 ? "limit-reached" : ""
-                      }`}
-                  >
-                    {form.pressure.length}/1000
-                  </small>
-                </div>
-              </div>
             </div>
 
-            {/* Equipment / controls */}
+            {/* Design / P&ID */}
+            <div className="form-group">
+              <label>
+                <span className="required-marker">* </span>Design Intent
+              </label>
+              <textarea
+                name="designIntent"
+                value={form.designIntent}
+                rows={3}
+                onChange={handleChange}
+                className="textareaFont"
+                disabled={loading}
+              />
+            </div>
+
+            {/* SOP */}
             <div className="input-row">
               <div className="form-group">
                 <label>
-                  <span className="required-marker">* </span>Equipment
+                  <span className="required-marker">* </span>SOP Number
                 </label>
                 <input
                   type="text"
-                  name="equipment"
-                  value={form.equipment}
+                  name="sopNo"
+                  value={form.sopNo}
                   onChange={handleChange}
                   disabled={loading}
-                  maxLength={2000}
                 />
-                <small
-                  className={`char-count ${form.equipment.length >= 2000 ? "limit-reached" : ""
-                    }`}
-                >
-                  {form.equipment.length}/2000
-                </small>
               </div>
 
               <div className="form-group">
                 <label>
-                  <span className="required-marker">* </span>Controls
+                  <span className="required-marker">* </span>SOP Date
                 </label>
                 <input
-                  type="text"
-                  name="controls"
-                  value={form.controls}
+                  type="date"
+                  name="sopDate"
+                  value={form.sopDate}
                   onChange={handleChange}
                   disabled={loading}
-                  maxLength={2000}
+                  max={new Date().toISOString().split("T")[0]}
                 />
-                <small
-                  className={`char-count ${form.controls.length >= 2000 ? "limit-reached" : ""
-                    }`}
-                >
-                  {form.controls.length}/2000
-                </small>
               </div>
 
-              {/* Chemicals */}
-              <div className="form-group full-width">
+              <div className="form-group">
                 <label>
-                  <span className="required-marker">* </span>Chemicals and
-                  utilities
+                  <span className="required-marker">* </span>Temperature
                 </label>
                 <input
                   type="text"
-                  name="chemicalAndUtilities"
-                  value={form.chemicalAndUtilities}
-                  rows={2}
+                  name="temperature"
+                  value={form.temperature}
                   onChange={handleChange}
                   disabled={loading}
                   maxLength={1000}
                 />
                 <small
-                  className={`char-count ${form.chemicalAndUtilities.length >= 1000 ? "limit-reached" : ""
-                    }`}
+                  className={`char-count ${
+                    form.temperature.length >= 1000 ? "limit-reached" : ""
+                  }`}
                 >
-                  {form.chemicalAndUtilities.length}/1000
+                  {form.temperature.length}/1000
                 </small>
               </div>
 
-              {/* Process conditions */}
-              <div className="input-row">
-                <div className="form-group">
-                  <label>
-                    <span className="required-marker">* </span>Quantity
-                  </label>
-                  <input
-                    type="text"
-                    name="quantityFlowRate"
-                    value={form.quantityFlowRate}
-                    onChange={handleChange}
-                    disabled={loading}
-                    maxLength={1000}
-                  />
-                  <small
-                    className={`char-count ${form.quantityFlowRate.length >= 1000 ? "limit-reached" : ""
-                      }`}
-                  >
-                    {form.quantityFlowRate.length}/1000
-                  </small>
-                </div>
+              <div className="form-group">
+                <label>
+                  <span className="required-marker">* </span>Pressure, barg
+                </label>
+                <input
+                  type="text"
+                  name="pressure"
+                  value={form.pressure}
+                  onChange={handleChange}
+                  disabled={loading}
+                  maxLength={1000}
+                />
+                <small
+                  className={`char-count ${
+                    form.pressure.length >= 1000 ? "limit-reached" : ""
+                  }`}
+                >
+                  {form.pressure.length}/1000
+                </small>
+              </div>
+            </div>
+          </div>
+
+          {/* Equipment / controls */}
+          <div className="input-row">
+            <div className="form-group">
+              <label>
+                <span className="required-marker">* </span>Equipment
+              </label>
+              <input
+                type="text"
+                name="equipment"
+                value={form.equipment}
+                onChange={handleChange}
+                disabled={loading}
+                maxLength={2000}
+              />
+              <small
+                className={`char-count ${
+                  form.equipment.length >= 2000 ? "limit-reached" : ""
+                }`}
+              >
+                {form.equipment.length}/2000
+              </small>
+            </div>
+
+            <div className="form-group">
+              <label>
+                <span className="required-marker">* </span>Controls
+              </label>
+              <input
+                type="text"
+                name="controls"
+                value={form.controls}
+                onChange={handleChange}
+                disabled={loading}
+                maxLength={2000}
+              />
+              <small
+                className={`char-count ${
+                  form.controls.length >= 2000 ? "limit-reached" : ""
+                }`}
+              >
+                {form.controls.length}/2000
+              </small>
+            </div>
+
+            {/* Chemicals */}
+            <div className="form-group full-width">
+              <label>
+                <span className="required-marker">* </span>Chemicals and
+                utilities
+              </label>
+              <input
+                type="text"
+                name="chemicalAndUtilities"
+                value={form.chemicalAndUtilities}
+                rows={2}
+                onChange={handleChange}
+                disabled={loading}
+                maxLength={1000}
+              />
+              <small
+                className={`char-count ${
+                  form.chemicalAndUtilities.length >= 1000
+                    ? "limit-reached"
+                    : ""
+                }`}
+              >
+                {form.chemicalAndUtilities.length}/1000
+              </small>
+            </div>
+
+            {/* Process conditions */}
+            <div className="input-row">
+              <div className="form-group">
+                <label>
+                  <span className="required-marker">* </span>Quantity
+                </label>
+                <input
+                  type="text"
+                  name="quantityFlowRate"
+                  value={form.quantityFlowRate}
+                  onChange={handleChange}
+                  disabled={loading}
+                  maxLength={1000}
+                />
+                <small
+                  className={`char-count ${
+                    form.quantityFlowRate.length >= 1000 ? "limit-reached" : ""
+                  }`}
+                >
+                  {form.quantityFlowRate.length}/1000
+                </small>
               </div>
             </div>
           </div>
         </div>
-
-        <div className="center-controls">
-          <button
-            type="button"
-            className="outline-btn"
-            onClick={onClose}
-            disabled={loading}
-          >
-            Close
-          </button>
-
-          <button type="button" className="save-btn" onClick={handleSave} disabled={loading}>
-            {loading ? "Saving..." : "Save Node"}
-          </button>
-        </div>
       </div>
+
+      <div className="center-controls">
+        <button
+          type="button"
+          className="save-btn"
+          onClick={handleSave}
+          disabled={loading}
+        >
+          {loading ? "Saving..." : "Save Node"}
+        </button>
+      </div>
+
+      {loading && (
+        <div className="loading-overlay">
+          <div className="loading-spinner"></div>
+        </div>
+      )}
     </div>
   );
-
 };
-
 
 export default NodePopup;

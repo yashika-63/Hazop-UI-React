@@ -412,7 +412,7 @@ const renderDropdown = (item) => (
 
       <div className="rightbtn-controls">
         <button className="add-btn" onClick={() => setShowRiskPopup(true)}>
-          View Risk Levels
+          View Risk Matrix
         </button>
 
         {!node?.completionStatus && (
