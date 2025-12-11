@@ -77,6 +77,7 @@ const App = () => {
                     <Route path="/HazopWorkflow/:id" element={<HazopWorkflow />} />
                     <Route path="/HazopStatusPage" element={<HazopStatusPage />} />
                     <Route path="/RoleBasedHazopPage" element={<RoleBasedHazopPage />} />
+                    <Route path="/NodePopup" element={<NodePopup />} />
 
                     <Route path="*" element={<Navigate to="/HazopPage" />} />
                   </Routes>

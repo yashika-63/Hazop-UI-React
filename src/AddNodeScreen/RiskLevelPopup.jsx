@@ -2,23 +2,26 @@ import React from "react";
 import { FaTimes } from "react-icons/fa";
 
 const RiskLevelPopup = ({ onClose }) => {
-  // Read CSS variable colors directly
   const root = document.documentElement;
   const trivial = getComputedStyle(root).getPropertyValue("--trivial").trim();
-  const tolerable = getComputedStyle(root).getPropertyValue("--tolerable").trim();
+  const tolerable = getComputedStyle(root)
+    .getPropertyValue("--tolerable")
+    .trim();
   const moderate = getComputedStyle(root).getPropertyValue("--moderate").trim();
-  const substantial = getComputedStyle(root).getPropertyValue("--substantial").trim();
-  const intolerable = getComputedStyle(root).getPropertyValue("--intolerable").trim();
+  const substantial = getComputedStyle(root)
+    .getPropertyValue("--substantial")
+    .trim();
+  const intolerable = getComputedStyle(root)
+    .getPropertyValue("--intolerable")
+    .trim();
 
-  // Color mapping for each risk set
   const riskRows = [
     {
       sr: "1",
       risk: "1, 2, 3, 4, 5",
       level: "Trivial",
       color: trivial,
-      action:
-        "No action required and no documentary records need to be kept.",
+      action: "No action required and no documentary records need to be kept.",
     },
     {
       sr: "2",
@@ -54,6 +57,39 @@ const RiskLevelPopup = ({ onClose }) => {
     },
   ];
 
+  const getColor = (num) => {
+    if ([1, 2, 3, 4, 5].includes(num)) return trivial;
+    if ([6, 8, 9, 10].includes(num)) return tolerable;
+    if ([12, 15].includes(num)) return moderate;
+    if ([16, 18].includes(num)) return substantial;
+    if ([20, 25].includes(num)) return intolerable;
+    return "#fff";
+  };
+
+  const severityLabels = [
+    { p: "Slight injury", a: "Slight damage", e: "Slight effect" },
+    { p: "Minor injury", a: "Minor damage", e: "Minor effect" },
+    { p: "Major injury", a: "Localised damage", e: "Localised effect" },
+    { p: "Single Fatality", a: "Major damage", e: "Major effect" },
+    { p: "Multiple Fatalities", a: "Extensive damage", e: "Extensive effect" },
+  ];
+
+  const frequencyLabels = [
+    "Once in 10 years",
+    "Once in 5 years",
+    "Once in a year",
+    "Once a month",
+    "Once a week",
+  ];
+
+  const matrixNumbers = [
+    [1, 2, 3, 4, 5],
+    [2, 4, 6, 8, 10],
+    [3, 6, 9, 12, 15],
+    [4, 8, 12, 16, 20],
+    [5, 10, 15, 20, 25],
+  ];
+
   return (
     <div className="modal-overlay">
       <div className="modal-box">
@@ -66,11 +102,60 @@ const RiskLevelPopup = ({ onClose }) => {
 
         <div className="table-section">
           <div className="card table-card">
+            <h3>Risk Matrix</h3>
+            <table>
+              <thead>
+  <tr>
+    <th>
+      SEVERITY OF CONSEQUENCES - S
+      <div>People (P)</div>
+      <div>Assets (A)</div>
+      <div>Environment (E)</div>
+    </th>
+    {frequencyLabels.map((freq, idx) => (
+      <th key={idx}>{freq}</th>
+    ))}
+  </tr>
+</thead>
+
+
+              <tbody>
+  {matrixNumbers.map((row, rowIndex) => (
+    <tr key={rowIndex}>
+      <td>
+        <div>{severityLabels[rowIndex].p}</div>
+        <div>{severityLabels[rowIndex].a}</div>
+        <div>{severityLabels[rowIndex].e}</div>
+      </td>
+      {row.map((num, colIndex) => (
+        <td
+          key={colIndex}
+          style={{
+            backgroundColor: getColor(num),
+            textAlign: "center",
+            fontWeight: "bold",
+            color: "#000",
+          }}
+        >
+          {num}
+        </td>
+      ))}
+    </tr>
+  ))}
+</tbody>
+
+            </table>
+          </div>
+        </div>
+
+        <div className="table-section">
+          <div className="card table-card">
+            <h3>Risk Levels Details</h3>
             <table>
               <thead>
                 <tr>
                   <th>Sr. No</th>
-                  <th style={{ width: "10%"}}>Risk</th>
+                  <th style={{ width: "10%" }}>Risk</th>
                   <th>Risk Level</th>
                   <th>Action and Time Scale</th>
                 </tr>
@@ -81,7 +166,7 @@ const RiskLevelPopup = ({ onClose }) => {
                   <tr
                     key={row.sr}
                     style={{
-                      borderLeft: `8px solid ${row.color}`, 
+                      borderLeft: `8px solid ${row.color}`,
                     }}
                   >
                     <td>{row.sr}</td>
@@ -93,7 +178,6 @@ const RiskLevelPopup = ({ onClose }) => {
                   </tr>
                 ))}
               </tbody>
-
             </table>
           </div>
         </div>

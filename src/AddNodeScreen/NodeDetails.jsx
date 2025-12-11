@@ -412,7 +412,7 @@ const NodeDetails = () => {
 
       <div className="rightbtn-controls">
         <button className="add-btn" onClick={() => setShowRiskPopup(true)}>
-          View Risk Levels
+          View Risk Matrix
         </button>
 
         {!node?.completionStatus && (
@@ -480,7 +480,7 @@ const NodeDetails = () => {
                     </span>
                   </div>
                 </div>
-                <div className="input-row">
+                <div className="input-row-node">
                   <div className="form-group">
                     <span>Deviation</span>
                     <ShowMoreText text={d.deviation} previewLength={600} />
@@ -503,9 +503,10 @@ const NodeDetails = () => {
                         previewLength={250}
                       />
                     </div>
+
                     <div className="metric-row">
                       <div className="form-group">
-                        <label>Probability</label>
+                        <label>P</label>
                         <input
                           value={d.existineProbability || "-"}
                           style={{
@@ -521,7 +522,7 @@ const NodeDetails = () => {
                         />
                       </div>
                       <div className="form-group">
-                        <label>Severity</label>
+                        <label>S</label>
                         <input
                           value={d.existingSeverity || "-"}
                           style={{
@@ -536,9 +537,8 @@ const NodeDetails = () => {
                           readOnly
                         />
                       </div>
-                    </div>
-                    <div className="form-group metric-single">
-                      <label>Risk Rating</label>
+                    <div className="form-group">
+                      <label>R</label>
                       <input
                         value={d.riskRating || "-"}
                         style={{
@@ -553,11 +553,12 @@ const NodeDetails = () => {
                         readOnly
                       />
                     </div>
+                    </div>
                     <small
                       className={`risk-text ${getRiskTextClass(
                         d.riskRating
-                      )} center-controls`}
-                      style={{ marginTop: "10px" }}
+                      )} metric-single`}
+                      style={{ textAlign: "center" }}
                     >
                       {getRiskLevelText(d.riskRating)}
                     </small>
@@ -574,7 +575,7 @@ const NodeDetails = () => {
                     </div>
                     <div className="metric-row">
                       <div className="form-group">
-                        <label>Probability</label>
+                        <label>P</label>
                         <input
                           value={d.additionalProbability || "-"}
                           style={{
@@ -590,7 +591,7 @@ const NodeDetails = () => {
                         />
                       </div>
                       <div className="form-group">
-                        <label>Severity</label>
+                        <label>S</label>
                         <input
                           value={d.additionalSeverity || "-"}
                           style={{
@@ -605,9 +606,8 @@ const NodeDetails = () => {
                           readOnly
                         />
                       </div>
-                    </div>
-                    <div className="form-group metric-single">
-                      <label>Additional Risk Rating</label>
+                    <div className="form-group">
+                      <label>R</label>
                       <input
                         value={d.additionalRiskRating || "-"}
                         style={{
@@ -622,11 +622,12 @@ const NodeDetails = () => {
                         readOnly
                       />
                     </div>
+                    </div>
                     <small
                       className={`risk-text ${getRiskTextClass(
                         d.additionalRiskRating
-                      )} center-controls`}
-                      style={{ marginTop: "10px" }}
+                      )} metric-single`}
+                      style={{ textAlign: "center" }}
                     >
                       {getRiskLevelText(d.additionalRiskRating)}
                     </small>

@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { FaPlus } from "react-icons/fa";
-import { formatDate, showToast } from "../CommonUI/CommonUI";
+import { FaMinus, FaPlus } from "react-icons/fa";
+import { showToast } from "../CommonUI/CommonUI";
 import "./Node.css";
-import Recommendations from "./Recommendations";
 import { strings } from "../string";
-import UpdateRecommendations from "./UpdateRecommendations";
 import { useLocation, useNavigate } from "react-router-dom";
+import NodeInfo from "./NodeInfo";
+import NodePopup from "./NodePopup";
 
 const initialState = {
   generalParameter: "",
@@ -27,32 +27,55 @@ const initialState = {
 const UpdateNodeDetails = () => {
   const [form, setForm] = useState(initialState);
   const [rows, setRows] = useState(15);
-  const [smallRows, setSmallRows] = useState(7);
+  const [smallRows, setSmallRows] = useState(9);
   const [loading, setLoading] = useState(false);
-  const [originalForm, setOriginalForm] = useState(initialState);
-  const [showRecommendations, setShowRecommendations] = useState(false);
   const [tempRecommendations, setTempRecommendations] = useState([]);
-  const [nodeDetailId, setNodeDetailId] = useState(null);
   const additionalControlRef = React.useRef(null);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [currentDetailId, setCurrentDetailId] = useState(null);
+  const [details, setDetails] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isSaved, setIsSaved] = useState(true);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [recToDelete, setRecToDelete] = useState(null);
+  const [recIndexToDelete, setRecIndexToDelete] = useState(null);
 
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { detail, node, nodeID } = location.state || {};
+  const nodeID = location.state?.nodeID;
+  const [currentNodeId, setCurrentNodeId] = useState(nodeID); // initial node
+const [currentNodeData, setCurrentNodeData] = useState(null);
 
-  if (!detail) {
-    return (
-      <div style={{ padding: "20px" }}>
-        <h2>No detail found.</h2>
-        <button onClick={() => navigate(-1)}>← Back</button>
-      </div>
-    );
-  }
+useEffect(() => {
+  const fetchNode = async () => {
+    if (!currentNodeId) return;
+    const res = await fetch(`http://${strings.localhost}/api/hazopNode/${currentNodeId}`);
+    if (res.ok) {
+      const data = await res.json();
+      setCurrentNodeData(data);
+    }
+  };
+  fetchNode();
+}, [currentNodeId]);
 
   const handleChange = (e) => {
+    setIsSaved(false);
     const { name, value } = e.target;
     setForm((prevForm) => {
       const updatedForm = { ...prevForm, [name]: value };
+
+      if (name === "additionalControl") {
+        const lines = value
+          .split("\n")
+          .map((line) => line.replace(/^•\s*/, "").trim())
+          .filter((line) => line !== "");
+        const recommendations = lines.map((text) => ({
+          recommendation: text,
+          remarkbyManagement: "",
+        }));
+        setTempRecommendations(recommendations);
+      }
 
       if (
         name === "causes" ||
@@ -65,7 +88,7 @@ const UpdateNodeDetails = () => {
 
       if (name === "additionalControl" || name === "existineControl") {
         const lineCount = value.split("\n").length;
-        setSmallRows(Math.min(10, Math.max(7, lineCount)));
+        setSmallRows(Math.min(12, Math.max(9, lineCount)));
       }
 
       if (name === "existineProbability" || name === "existingSeverity") {
@@ -86,45 +109,45 @@ const UpdateNodeDetails = () => {
   };
 
   useEffect(() => {
-    const fetchDetail = async () => {
+    fetch(`http://${strings.localhost}/api/hazopNodeDetail/node/${currentNodeId}`)
+      .then((res) => res.json())
+      .then((data) => setDetails(data));
+  }, [nodeID]);
+
+  useEffect(() => {
+    const fetchAllDetails = async () => {
+      if (!nodeID) return;
       try {
+        setLoading(true);
         const res = await fetch(
-          `http://${strings.localhost}/api/hazopNodeDetail/${detail.id}`
+          `http://${strings.localhost}/api/hazopNodeDetail/node/${nodeID}`
         );
-
-        if (!res.ok) return;
-
+        if (!res.ok) throw new Error("Failed to fetch node details");
         const data = await res.json();
-
-        const detailData = Array.isArray(data) ? data[0] : data;
-
-        const filled = {
-          ...initialState,
-          ...detailData,
-          id: detailData.id,
-        };
-
-        setForm(filled);
-        setOriginalForm(filled);
-        setNodeDetailId(detailData.id);
+        if (data && data.length > 0) {
+          setDetails(data);
+          setCurrentIndex(0);
+          const firstDetail = data[0];
+          setForm({
+            ...firstDetail,
+            additionalControl:
+              firstDetail.recommendations
+                ?.map((r) => r.recommendation)
+                .join("\n") || "• ",
+          });
+          setTempRecommendations(firstDetail.recommendations || []);
+          setCurrentDetailId(firstDetail.id);
+          setIsSaved(true);
+        }
       } catch (err) {
-        showToast("Failed to load details for update.", "error");
+        console.error("Error fetching node details:", err);
+      } finally {
+        setLoading(false);
       }
     };
 
-    if (detail?.id) fetchDetail();
-  }, [detail]);
-
-  const openRecommendations = () => {
-    setShowRecommendations(true);
-  };
-
-  const saveRecommendations = (recs) => {
-    const bulletText = recs.map((r) => `• ${r.recommendation}`).join("\n");
-
-    setForm((prev) => ({ ...prev, additionalControl: bulletText }));
-    setShowRecommendations(false);
-  };
+    fetchAllDetails();
+  }, [nodeID]);
 
   const validate = () => {
     if (!form.generalParameter.trim()) {
@@ -168,7 +191,6 @@ const UpdateNodeDetails = () => {
       return false;
     }
 
-    // Extra validation when riskRating ≥ 12
     if (isAdditionalRequired()) {
       if (!form.additionalControl.trim()) {
         showToast(
@@ -196,97 +218,593 @@ const UpdateNodeDetails = () => {
     return true;
   };
 
-  const getRecommendationsFromControl = (controlText) => {
-  return controlText
-    .split("\n")
-    .map((line) => line.trim())
-    .filter((line) => line.startsWith("•"))
-    .map((line) => ({ recommendation: line.replace("• ", "") }));
-};
-
-  const handleRecommendations = async () => {
-  const recs = getRecommendationsFromControl(form.additionalControl);
-
-  const promises = recs.map((rec, index) => {
-    if (tempRecommendations[index]?.id) {
-      // Update existing
-      return fetch(
-        `http://${strings.localhost}/api/nodeRecommendation/update/${tempRecommendations[index].id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(rec),
-        }
-      );
-    } else {
-      // Save new
-      return fetch(
-        `http://${strings.localhost}/api/nodeRecommendation/save/${nodeID}/${nodeDetailId}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify([rec]),
-        }
-      );
-    }
-  });
-
-  await Promise.all(promises);
-};
-
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (!validate()) return;
-
-  const changedFields = {};
-  Object.keys(form).forEach((key) => {
-    if (form[key] !== originalForm[key]) {
-      changedFields[key] = form[key];
-    }
-  });
-  changedFields.id = form.id;
-
+  const loadNodeDetails = async (nodeId) => {
   try {
     setLoading(true);
+    const res = await fetch(`http://${strings.localhost}/api/hazopNodeDetail/node/${nodeId}`);
+    const data = await res.json();
+    setDetails(data);
 
-    // Update Node Details
-    const response = await fetch(
-      `http://${strings.localhost}/api/hazopNodeDetail/update/${form.id}`,
-      {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(changedFields),
-      }
-    );
+    if (data.length > 0) {
+      const firstDetail = data[0];
+      const recsRes = await fetch(`http://${strings.localhost}/api/nodeRecommendation/getByDetailId/${firstDetail.id}`);
+      const recommendations = await recsRes.json();
 
-    if (!response.ok) throw new Error("Failed to update Node Detail");
-
-    // Update/Save Recommendations
-    await handleRecommendations();
-
-    showToast("Details & Recommendations updated successfully!", "success");
-
-    navigate("/NodeDetails", {
-      state: { id: node?.id || nodeID || detail?.nodeId },
-    });
-  } catch (error) {
-    showToast(error.message || "Error updating details.", "error");
+      setForm({
+        ...firstDetail,
+        additionalControl: recommendations.map((r) => r.recommendation).join("\n") || "• ",
+      });
+      setTempRecommendations(recommendations);
+      setCurrentDetailId(firstDetail.id);
+      setCurrentIndex(0);
+    } else {
+      setForm(initialState);
+      setTempRecommendations([]);
+      setCurrentDetailId(null);
+      setCurrentIndex(0);
+    }
+  } catch (err) {
+    console.error(err);
+    showToast("Failed to load node details.", "error");
   } finally {
     setLoading(false);
   }
 };
+
+  const reloadDetails = async () => {
+    const res = await fetch(
+      `http://${strings.localhost}/api/hazopNodeDetail/node/${currentNodeId}`
+    );
+    const data = await res.json();
+    setDetails(data);
+    return data;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!validate()) return;
+
+    try {
+      setLoading(true);
+      const nodeDetailResponse = await fetch(
+        `http://${strings.localhost}/api/hazopNodeDetail/saveDetails/${currentNodeId}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify([form]),
+        }
+      );
+
+      if (nodeDetailResponse.ok) {
+        setIsSaved(true);
+        const nodeDetailResult = await nodeDetailResponse.json();
+        const savedDetail = Array.isArray(nodeDetailResult)
+          ? nodeDetailResult[0]
+          : nodeDetailResult;
+
+        const nodeDetailId = savedDetail.id;
+        setCurrentDetailId(nodeDetailId);
+
+        // Extract recommendations from additionalControl textarea
+        const cleanedRecommendations = form.additionalControl
+          .split("\n")
+          .map((line) => line.replace(/^•\s*/, "").trim())
+          .filter((line) => line !== "");
+
+        // Prepare recommendations for save/update
+        const recommendationsList = cleanedRecommendations.map(
+          (text, index) => {
+            const existingRec = tempRecommendations[index];
+            return {
+              id: existingRec?.id,
+              recommendation: text,
+              remarkbyManagement: existingRec?.remarkbyManagement || "",
+            };
+          }
+        );
+
+        // Send recommendations as an array
+        const recommendationsResponse = await fetch(
+          `http://${strings.localhost}/api/nodeRecommendation/save/${currentNodeId}/${nodeDetailId}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(recommendationsList),
+          }
+        );
+
+        if (recommendationsResponse.ok) {
+          showToast("Details saved successfully!", "success");
+        } else {
+          showToast("Failed to save recommendations.", "error");
+        }
+      } else {
+        showToast("Failed to save details.", "error");
+      }
+    } catch (error) {
+      console.error("Error saving details:", error);
+      showToast("Error saving details.", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const ConfirmationPopup = ({ message, onConfirm, onCancel }) => {
+    return (
+      <div className="confirm-overlay">
+        <div className="confirm-box">
+          <p>{message}</p>
+          <div className="confirm-buttons">
+            <button type="button" onClick={onCancel} className="cancel-btn">
+              No
+            </button>
+            <button type="button" onClick={onConfirm} className="confirm-btn">
+              Yes
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  useEffect(() => {
+    const fetchFirstNodeDetail = async () => {
+      if (!nodeID) return;
+
+      try {
+        setLoading(true);
+        const res = await fetch(
+          `http://${strings.localhost}/api/hazopNodeDetail/node/${currentNodeId}`
+        );
+        if (!res.ok) throw new Error("Failed to fetch node details");
+        const data = await res.json();
+
+        if (data && data.length > 0) {
+          const detail = data[0];
+          const recommendationsRes = await fetch(
+            `http://${strings.localhost}/api/nodeRecommendation/getByDetailId/${detail.id}`
+          );
+          const recommendations = await recommendationsRes.json();
+
+          setForm({
+            ...detail,
+            additionalControl:
+              recommendations.map((r) => r.recommendation).join("\n") || "• ",
+          });
+          setTempRecommendations(recommendations);
+          setCurrentDetailId(detail.id);
+          setIsSaved(true);
+        }
+      } catch (err) {
+        console.error("Error fetching node details:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFirstNodeDetail();
+  }, [nodeID]);
+
+  const fetchDetailByDirection = async (direction) => {
+    if (!nodeID) return null;
+
+    try {
+      setLoading(true);
+      // pass currentDetailId only if it exists; otherwise send currentId=0 to avoid "undefined"
+      const currentIdParam = currentDetailId ? currentDetailId : 0;
+      const res = await fetch(
+        `http://${strings.localhost}/api/hazopNodeDetail/getByDirection?currentId=${currentIdParam}&nodeId=${currentNodeId}&direction=${direction}`
+      );
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data || null;
+    } catch (error) {
+      console.error("Error fetching node detail by direction:", error);
+      showToast("Failed to load the discussion.", "error");
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveAndNext = async () => {
+    if (!validate()) return;
+
+    try {
+      setLoading(true);
+
+      const discussionPayload = {
+        generalParameter: form.generalParameter,
+        specificParameter: form.specificParameter,
+        guidWord: form.guidWord,
+        deviation: form.deviation,
+        causes: form.causes,
+        consequences: form.consequences,
+
+        existineControl: form.existineControl,
+        existineProbability: parseInt(form.existineProbability, 10),
+        existingSeverity: parseInt(form.existingSeverity, 10),
+        riskRating: parseInt(form.riskRating, 10),
+
+        additionalControl: form.additionalControl,
+        additionalProbability: parseInt(form.additionalProbability, 10),
+        additionalSeverity: parseInt(form.additionalSeverity, 10),
+        additionalRiskRating: parseInt(form.additionalRiskRating, 10),
+
+        node: { id: nodeID },
+      };
+
+      const detailRes = await fetch(
+        `http://${strings.localhost}/api/hazopNodeDetail/saveDetails/${currentNodeId}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify([discussionPayload]),
+        }
+      );
+
+      const savedDetails = await detailRes.json();
+      const nodeDetailId = savedDetails[0].id;
+      setCurrentDetailId(nodeDetailId);
+
+      const cleanedRecommendations = form.additionalControl
+        .split("\n")
+        .map((line) => line.replace(/^•\s*/, "").trim())
+        .filter((line) => line !== "");
+
+      const recommendationsList = cleanedRecommendations.map((text) => ({
+        recommendation: text,
+      }));
+
+      if (recommendationsList.length > 0) {
+        for (let rec of recommendationsList) {
+          const url = rec.id
+            ? `http://${strings.localhost}/api/nodeRecommendation/update/${rec.id}`
+            : `http://${strings.localhost}/api/nodeRecommendation/save/${currentNodeId}/${nodeDetailId}`;
+
+          await fetch(url, {
+            method: rec.id ? "PUT" : "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(rec),
+          });
+        }
+      }
+
+      showToast("Saved Successfully!", "success");
+      setForm(initialState);
+      setRows(15);
+      setSmallRows(7);
+      setIsSaved(true);
+    } catch (error) {
+      console.error("Save Error:", error);
+      showToast("Failed to Save", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePrevNextNode = async (direction) => {
+    if (!isSaved) {
+      showToast("Please save the form before switching nodes.", "warn");
+      return;
+    }
+
+    const nextNode = await fetchNodeByDirection(direction);
+
+    if (!nextNode) {
+      showToast(
+        direction === "previous"
+          ? "No previous node found."
+          : "No next node found.",
+        "info"
+      );
+      return;
+    }
+
+    // update currentNodeId
+    setCurrentNodeId(nextNode.id);
+
+    // reload first detail of the new node
+    try {
+      setLoading(true);
+      const res = await fetch(
+        `http://${strings.localhost}/api/hazopNodeDetail/node/${nextNode.id}`
+      );
+      const detailsData = await res.json();
+
+      if (detailsData && detailsData.length > 0) {
+        const firstDetail = detailsData[0];
+        const recsRes = await fetch(
+          `http://${strings.localhost}/api/nodeRecommendation/getByDetailId/${firstDetail.id}`
+        );
+        const recommendations = await recsRes.json();
+
+        setForm({
+          ...firstDetail,
+          additionalControl:
+            recommendations.map((r) => r.recommendation).join("\n") || "• ",
+        });
+        setTempRecommendations(recommendations);
+        setCurrentDetailId(firstDetail.id);
+        setCurrentIndex(0);
+        setIsSaved(true);
+      } else {
+        // if no details exist, open blank form
+        setForm(initialState);
+        setTempRecommendations([]);
+        setCurrentDetailId(null);
+        setCurrentIndex(0);
+        setIsSaved(true);
+        showToast("Blank form opened for new node.", "info");
+      }
+    } catch (err) {
+      console.error("Error loading node details:", err);
+      showToast("Failed to load node details.", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePrevNext = async (direction) => {
+    if (!isSaved) {
+      showToast("Please save the form before navigating.", "warn");
+      return;
+    }
+
+    // CASE 1: You are on a blank new form and user clicked PREVIOUS
+    if (!currentDetailId && direction === "previous") {
+      const lastRecord = await fetchDetailByDirection("previous");
+      if (!lastRecord) {
+        showToast("No previous record found.", "info");
+        return;
+      }
+
+      const recs = await loadRecommendations(lastRecord.id);
+
+      setForm({
+        ...lastRecord,
+        additionalControl: recs.map((r) => r.recommendation).join("\n") || "• ",
+      });
+
+      setTempRecommendations(recs);
+      setCurrentDetailId(lastRecord.id);
+      return;
+    }
+
+    // CASE 2: Move to next/previous existing record
+    const nextDetail = await fetchDetailByDirection(direction);
+
+    // If NEXT returns null → means no next → open blank form
+    if (!nextDetail && direction === "next") {
+      setForm(initialState);
+      setTempRecommendations([]);
+      setCurrentDetailId(null);
+      showToast("Blank form opened. Enter new details.", "info");
+      return;
+    }
+
+    // If PREVIOUS returns null → means no previous
+    if (!nextDetail && direction === "previous") {
+      showToast("No previous record found.", "info");
+      return;
+    }
+
+    // Load recommendations for found record
+    const recs = await loadRecommendations(nextDetail.id);
+
+    setForm({
+      ...nextDetail,
+      additionalControl: recs.map((r) => r.recommendation).join("\n") || "• ",
+    });
+
+    setTempRecommendations(recs);
+    setCurrentDetailId(nextDetail.id);
+  };
+
+  const openNextRecord = async () => {
+    if (!validate()) return;
+
+    if (!isSaved) {
+      showToast("Please save the form before navigating.", "warn");
+      return;
+    }
+    const updatedDetails = await reloadDetails();
+
+    const nextIndex = currentIndex + 1;
+
+    if (nextIndex < updatedDetails.length) {
+      const detail = updatedDetails[nextIndex];
+      const recs = await loadRecommendations(detail.id);
+
+      setForm({
+        ...detail,
+        additionalControl: recs.map((r) => r.recommendation).join("\n") || "• ",
+      });
+
+      setTempRecommendations(recs);
+      setCurrentDetailId(detail.id);
+      setCurrentIndex(nextIndex);
+      setIsSaved(true);
+
+      return;
+    }
+
+    setForm(initialState);
+    setTempRecommendations([]);
+    setCurrentDetailId(null);
+    setCurrentIndex(updatedDetails.length);
+    setIsSaved(true);
+
+    showToast("Blank form opened. Enter new details.", "info");
+  };
+
+  const loadRecommendations = async (detailId) => {
+    try {
+      const res = await fetch(
+        `http://${strings.localhost}/api/nodeRecommendation/getByDetailId/${detailId}`
+      );
+      if (!res.ok) return [];
+
+      return await res.json();
+    } catch (e) {
+      console.error("Error loading recommendations:", e);
+      return [];
+    }
+  };
+
+const fetchNodeByDirection = async (direction) => {
+  if (!nodeID) return null; // fallback
+
+  try {
+    setLoading(true);
+    const currentIdParam = currentNodeId || 0;
+
+    const nodeRes = await fetch(`http://${strings.localhost}/api/hazopNode/${currentNodeId}`);
+    if (!nodeRes.ok) throw new Error("Failed to fetch node");
+
+    const nodeData = await nodeRes.json();
+    const registrationId = nodeData.javaHazopRegistration?.id || 0; 
+
+    const res = await fetch(
+      `http://${strings.localhost}/api/hazopNode/node/getByDirection?currentId=${currentIdParam}&registrationId=${registrationId}&direction=${direction}`
+    );
+
+    if (!res.ok) return null;
+
+    const data = await res.json();
+    return data || null;
+  } catch (error) {
+    console.error("Error fetching node by direction:", error);
+    showToast("Failed to fetch node.", "error");
+    return null;
+  } finally {
+    setLoading(false);
+  }
+};
+
+  const saveCurrentDetails = async (currentForm) => {
+    setIsSaved(true);
+    try {
+      setLoading(true);
+
+      // Update Node Detail
+      const nodeDetailRes = await fetch(
+        `http://${strings.localhost}/api/hazopNodeDetail/update/${currentForm.id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(currentForm),
+        }
+      );
+      await reloadDetails();
+
+      if (!nodeDetailRes.ok) throw new Error("Failed to update node detail");
+
+      // Save or update each recommendation
+      for (let rec of tempRecommendations) {
+        const recPayload = {
+          recommendation: rec.recommendation,
+          remarkbyManagement: rec.remarkbyManagement,
+        };
+
+        const url = rec.id
+          ? `http://${strings.localhost}/api/nodeRecommendation/update/${rec.id}`
+          : `http://${strings.localhost}/api/nodeRecommendation/save/${currentNodeId}/${currentForm.id}`;
+
+        await fetch(url, {
+          method: rec.id ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(recPayload),
+        });
+      }
+
+      showToast("Saved Successfully", "success");
+    } catch (error) {
+      console.error("Error saving current form:", error);
+      showToast("Failed to save changes", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteClick = (rec, index) => {
+    setRecToDelete(rec);
+    setRecIndexToDelete(index);
+    setShowDeleteConfirmation(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!recToDelete) return;
+
+    setShowDeleteConfirmation(false);
+    setLoading(true);
+
+    try {
+      // 1️⃣ Remove recommendation from local state first
+      const updatedRecs = tempRecommendations.filter(
+        (_, i) => i !== recIndexToDelete
+      );
+
+      // Update form's additionalControl so deleted recommendation is gone
+      const updatedForm = {
+        ...form,
+        additionalControl: updatedRecs.map((r) => r.recommendation).join("\n"),
+      };
+
+      setTempRecommendations(updatedRecs);
+      setForm(updatedForm);
+
+      // 2️⃣ Delete recommendation from backend (only if it exists in DB)
+      if (recToDelete.id) {
+        const deleteRes = await fetch(
+          `http://${strings.localhost}/api/nodeRecommendation/delete/${recToDelete.id}`,
+          { method: "DELETE" }
+        );
+
+        if (!deleteRes.ok) throw new Error("Failed to delete recommendation");
+      }
+
+      // 3️⃣ Update node details after deletion
+      const updateRes = await fetch(
+        `http://${strings.localhost}/api/hazopNodeDetail/update/${currentDetailId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedForm),
+        }
+      );
+
+      if (!updateRes.ok) throw new Error("Failed to update node details");
+
+      showToast("Recommendation deleted successfully.", "success");
+    } catch (error) {
+      console.error(error);
+      showToast("Error deleting recommendation.", "error");
+    } finally {
+      setLoading(false);
+      setRecToDelete(null);
+      setRecIndexToDelete(null);
+    }
+  };
+
+  const cancelDelete = () => {
+    setRecToDelete(null);
+    setRecIndexToDelete(null);
+    setShowDeleteConfirmation(false);
+  };
 
   const isAdditionalRequired = () => {
     const riskRating = parseInt(form.riskRating, 10) || 0;
     return riskRating >= 12;
   };
 
-  const renderScaleSelect = (name, value, style) => (
+  const renderScaleSelect = (name, value, style, className) => (
     <select
       name={name}
       value={value}
       onChange={handleChange}
-      className="form-group"
+      className={className}
       style={style}
     >
       <option value="">Select</option>
@@ -297,6 +815,8 @@ const handleSubmit = async (e) => {
       ))}
     </select>
   );
+  console.log("currentNodeData:", currentNodeData);
+console.log("javaHazopRegistration id:", currentNodeData?.javaHazopRegistration?.id);
 
   const root = document.documentElement;
   const trivial = getComputedStyle(root).getPropertyValue("--trivial").trim();
@@ -323,7 +843,6 @@ const handleSubmit = async (e) => {
     return "#ccc";
   };
 
-  // CSS class based on risk
   const getRiskClass = (risk) => {
     const r = Number(risk);
 
@@ -390,8 +909,28 @@ const handleSubmit = async (e) => {
         ...prev,
         additionalControl: "• ",
       }));
+      setIsSaved(true);
     }
   }, []);
+
+    const [isNodePopupOpen, setIsNodePopupOpen] = useState(false);
+
+  const handleOpenNodePopup = () => {
+    setIsNodePopupOpen(true);
+  };
+
+  const handleCloseNodePopup = () => {
+    setIsNodePopupOpen(false);
+  };
+
+  const handleSaveNode = async () => {
+  // After saving in NodePopup, refresh NodeInfo or currentNodeId as needed
+  if (currentNodeId) {
+    // reload current node details after adding new node
+    await loadNodeDetails(currentNodeId); 
+  }
+  setIsNodePopupOpen(false);
+};
 
   return (
     <div>
@@ -399,38 +938,33 @@ const handleSubmit = async (e) => {
         <button className="nd-back-btn" onClick={() => navigate(-1)}>
           ← Back
         </button>
-        <h1>Update Node Detail</h1>
+        <h1>Update Discussion</h1>
       </div>
 
-      <div>
-        <div className="hazop-info">
-          <div className="input-row">
-            <div>
-              <strong>Node No.: </strong> {node?.nodeNumber}
-            </div>
-            <div>
-              <strong>Registration Date: </strong>
-              {node?.registrationDate && formatDate(node.registrationDate)}
-            </div>
-            <div>
-              <strong>Completion Status: </strong>
-              <span
-                className={
-                  node?.completionStatus === true
-                    ? "status-completed"
-                    : "status-pending"
-                }
-              >
-                {node?.completionStatus ? "Completed" : "Ongoing"}
-              </span>
-            </div>
-          </div>
-
-          <div>
-            <strong>Design Intent:</strong> {node?.designIntent}
-          </div>
+      <div className="table-section">
+        <div className="table-header">
+          <h1></h1>
+          <button
+            type="button"
+            className="add-btn"
+            onClick={() =>
+              navigate("/NodePopup", {
+                state: {
+                  registrationId: currentNodeData?.javaHazopRegistration?.id, // explicitly name it registrationId
+    hazopData: currentNodeData?.javaHazopRegistration,
+    redirectTo: "/hazop-details",
+                },
+              })
+            }
+          >
+            + Add Node
+          </button>
+        </div>
         </div>
 
+      <NodeInfo currentNodeId={currentNodeId} />
+
+      <div>
         <div>
           <form onSubmit={handleSubmit}>
             <div className="input-row">
@@ -442,7 +976,7 @@ const handleSubmit = async (e) => {
                 <input
                   type="text"
                   name="generalParameter"
-                  value={form.generalParameter ?? ""}
+                  value={form.generalParameter}
                   onChange={handleChange}
                   maxLength={1000}
                 />
@@ -462,7 +996,7 @@ const handleSubmit = async (e) => {
                 <input
                   type="text"
                   name="specificParameter"
-                  value={form.specificParameter ?? ""}
+                  value={form.specificParameter}
                   onChange={handleChange}
                   maxLength={1000}
                 />
@@ -482,7 +1016,7 @@ const handleSubmit = async (e) => {
                 <input
                   type="text"
                   name="guidWord"
-                  value={form.guidWord ?? ""}
+                  value={form.guidWord}
                   onChange={handleChange}
                   maxLength={1000}
                 />
@@ -496,7 +1030,7 @@ const handleSubmit = async (e) => {
               </div>
             </div>
 
-            <div className="input-row">
+            <div className="input-row-node">
               <div className="form-group">
                 <label>
                   {" "}
@@ -505,7 +1039,7 @@ const handleSubmit = async (e) => {
                 <textarea
                   name="deviation"
                   rows={rows}
-                  value={form.deviation ?? ""}
+                  value={form.deviation}
                   onChange={handleChange}
                   className="textareaFont"
                   maxLength={5000}
@@ -526,7 +1060,7 @@ const handleSubmit = async (e) => {
                 <textarea
                   name="causes"
                   rows={rows}
-                  value={form.causes ?? ""}
+                  value={form.causes}
                   onChange={handleChange}
                   className="textareaFont"
                   maxLength={5000}
@@ -547,7 +1081,7 @@ const handleSubmit = async (e) => {
                 <textarea
                   name="consequences"
                   rows={rows}
-                  value={form.consequences ?? ""}
+                  value={form.consequences}
                   onChange={handleChange}
                   className="textareaFont"
                   maxLength={5000}
@@ -562,7 +1096,7 @@ const handleSubmit = async (e) => {
               </div>
 
               <div>
-                <div className="form-group existing-control">
+                <div className="form-group">
                   <label>
                     {" "}
                     <span className="required-marker">*</span>Existing Control
@@ -570,7 +1104,7 @@ const handleSubmit = async (e) => {
                   <textarea
                     name="existineControl"
                     rows={smallRows}
-                    value={form.existineControl ?? ""}
+                    value={form.existineControl}
                     onChange={handleChange}
                     className="textareaFont"
                     maxLength={5000}
@@ -583,11 +1117,12 @@ const handleSubmit = async (e) => {
                     {form.existineControl.length}/5000
                   </small>
                 </div>
+
                 <div className="metric-row">
                   <div className="form-group">
                     <label>
                       {" "}
-                      <span className="required-marker">*</span>Probability
+                      <span className="required-marker">*</span>P
                     </label>
                     {renderScaleSelect(
                       "existineProbability",
@@ -603,7 +1138,10 @@ const handleSubmit = async (e) => {
                     )}
                   </div>
                   <div className="form-group">
-                    <span className="required-marker">*</span>Severity
+                    <label>
+                      {" "}
+                      <span className="required-marker">*</span>S
+                    </label>
                     {renderScaleSelect(
                       "existingSeverity",
                       form.existingSeverity,
@@ -617,38 +1155,38 @@ const handleSubmit = async (e) => {
                       }
                     )}
                   </div>
-                </div>
-                <div className="form-group metric-single">
-                  <label>
-                    {" "}
-                    <span className="required-marker">*</span>Risk Rating
-                  </label>
-                  <input
-                    type="text"
-                    name="riskRating"
-                    value={form.riskRating ?? ""}
-                    onChange={handleChange}
-                    readOnly
-                    className={`readonly ${getRiskClass(form.riskRating)}`}
-                    style={{
-                      borderColor: getBorderColor(form.riskRating),
-                      borderWidth: "2px",
-                      borderStyle: "solid",
-                      borderLeft: `5px solid ${getBorderColor(
-                        form.riskRating
-                      )}`,
-                    }}
-                  />
+                  <div className="form-group">
+                    <label>
+                      {" "}
+                      <span className="required-marker">*</span>R
+                    </label>
+                    <input
+                      type="text"
+                      name="riskRating"
+                      value={form.riskRating}
+                      onChange={handleChange}
+                      readOnly
+                      className={`readonly ${getRiskClass(form.riskRating)}`}
+                      style={{
+                        borderColor: getBorderColor(form.riskRating),
+                        borderWidth: "2px",
+                        borderStyle: "solid",
+                        borderLeft: `5px solid ${getBorderColor(
+                          form.riskRating
+                        )}`,
+                      }}
+                    />
+                  </div>
                 </div>
                 <small
                   className={`risk-text ${getRiskTextClass(
                     form.riskRating
-                  )} center-controls`}
+                  )} metric-single`}
+                  style={{ textAlign: "center" }}
                 >
                   {getRiskLevelText(form.riskRating)}
                 </small>
               </div>
-
               <div>
                 <div className="form-group existing-control">
                   <div className="label-row">
@@ -659,31 +1197,130 @@ const handleSubmit = async (e) => {
                       Additional Control
                     </label>
 
-                    <div onClick={addBulletPoint} style={{ cursor: "pointer" }}>
+                    <div
+                      onClick={addBulletPoint}
+                      style={{ cursor: "pointer" }}
+                    ></div>
+                    <div
+                      onClick={() => {
+                        setTempRecommendations((prev) => [
+                          ...prev,
+                          {
+                            recommendation: "",
+                            remarkbyManagement: "",
+                            id: null,
+                            editing: true,
+                          },
+                        ]);
+                        setIsSaved(false);
+                      }}
+                      style={{ cursor: "pointer" }}
+                    >
                       <FaPlus />
                     </div>
-                    {/* <button
-                      type="button"
-                      className="add-btn"
-                      onClick={openRecommendations}
-                    >
-                      Add
-                    </button> */}
                   </div>
-                  <textarea
-                    name="additionalControl"
-                    rows={smallRows}
-                    value={form.additionalControl ?? ""}
-                    onChange={handleChange}
+                  <div
                     className="textareaFont"
-                    ref={additionalControlRef}
-                  />
+                    style={{
+                      width: "100%",
+                      padding: "5.5px",
+                      borderRadius: "9px",
+                      border: "1px solid #ccc",
+                      fontSize: "14px",
+                      outline: "none",
+                      background: "transparent",
+                      transition: "all 0.2s ease",
+                      boxShadow: "0 1px 2px rgba(0, 0, 0, 0.05)",
+                      maxHeight: "240px",
+                      minHeight: "180px",
+                      overflowY: "auto",
+                    }}
+                  >
+                    {tempRecommendations.map((rec, index) => (
+                      <div
+                        key={index}
+                        className="recommendation-item"
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          marginBottom: "5px",
+                        }}
+                      >
+                        <span style={{ marginRight: "5px" }}>•</span>
+                        {rec.editing ? (
+                          <textarea
+                            type="text"
+                            value={rec.recommendation}
+                            onChange={(e) => {
+                              const updatedRecs = tempRecommendations.map(
+                                (r, i) =>
+                                  i === index
+                                    ? { ...r, recommendation: e.target.value }
+                                    : r
+                              );
+                              setTempRecommendations(updatedRecs);
+                              setForm((prev) => ({
+                                ...prev,
+                                additionalControl: updatedRecs
+                                  .map((r) => r.recommendation)
+                                  .join("\n"),
+                              }));
+                              setIsSaved(false);
+                            }}
+                            onBlur={() => {
+                              setTempRecommendations((prev) =>
+                                prev.map((r, i) =>
+                                  i === index ? { ...r, editing: false } : r
+                                )
+                              );
+                            }}
+                            className="textareaFont"
+                            style={{
+                              width: "100%",
+                              padding: "10px",
+                              border: "1px solid #ccc",
+                              borderRadius: "4px",
+                              resize: "vertical",
+                            }}
+                            autoFocus
+                          />
+                        ) : (
+                          <span
+                            style={{ flex: 1, cursor: "pointer" }}
+                            onClick={() => {
+                              setTempRecommendations((prev) =>
+                                prev.map((r, i) =>
+                                  i === index ? { ...r, editing: true } : r
+                                )
+                              );
+                            }}
+                          >
+                            {rec.recommendation}
+                          </span>
+                        )}
+                        <div
+                          onClick={() => handleDeleteClick(rec, index)}
+                          className="delete-btn"
+                          style={{
+                            margin: "5px",
+                            border: "none",
+                            background: "transparent",
+                            cursor: "pointer",
+                            color: "var(--intolerable)",
+                          }}
+                        >
+                          <FaMinus />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                   <small
                     className={`char-count ${
                       form.additionalControl.length >= 5000
                         ? "limit-reached"
                         : ""
                     }`}
+                    style={{ marginTop: "9px" }}
                   >
                     {form.additionalControl.length}/5000
                   </small>
@@ -692,9 +1329,9 @@ const handleSubmit = async (e) => {
                   <div className="form-group">
                     <label>
                       {isAdditionalRequired() && (
-                        <span className="required-marker">*</span>
+                        <span className="required-marker">* </span>
                       )}
-                      Probability
+                      P
                     </label>
                     {renderScaleSelect(
                       "additionalProbability",
@@ -712,9 +1349,9 @@ const handleSubmit = async (e) => {
                   <div className="form-group">
                     <label>
                       {isAdditionalRequired() && (
-                        <span className="required-marker">*</span>
+                        <span className="required-marker">* </span>
                       )}
-                      Severity
+                      S
                     </label>
                     {renderScaleSelect(
                       "additionalSeverity",
@@ -729,37 +1366,38 @@ const handleSubmit = async (e) => {
                       }
                     )}
                   </div>
-                </div>
-                <div className="form-group metric-single">
-                  <label>
-                    {isAdditionalRequired() && (
-                      <span className="required-marker">*</span>
-                    )}
-                    Additional Risk Rating
-                  </label>
-                  <input
-                    type="text"
-                    name="additionalRiskRating"
-                    value={form.additionalRiskRating ?? ""}
-                    onChange={handleChange}
-                    readOnly
-                    className={`readonly ${getRiskClass(
-                      form.additionalRiskRating
-                    )}`}
-                    style={{
-                      borderColor: getBorderColor(form.additionalRiskRating),
-                      borderWidth: "2px",
-                      borderStyle: "solid",
-                      borderLeft: `5px solid ${getBorderColor(
+                  <div className="form-group">
+                    <label>
+                      {isAdditionalRequired() && (
+                        <span className="required-marker">* </span>
+                      )}
+                      R
+                    </label>
+                    <input
+                      type="text"
+                      name="additionalRiskRating"
+                      value={form.additionalRiskRating}
+                      onChange={handleChange}
+                      readOnly
+                      className={`readonly ${getRiskClass(
                         form.additionalRiskRating
-                      )}`,
-                    }}
-                  />
+                      )}`}
+                      style={{
+                        borderColor: getBorderColor(form.additionalRiskRating),
+                        borderWidth: "2px",
+                        borderStyle: "solid",
+                        borderLeft: `5px solid ${getBorderColor(
+                          form.additionalRiskRating
+                        )}`,
+                      }}
+                    />
+                  </div>
                 </div>
                 <small
                   className={`risk-text ${getRiskTextClass(
                     form.additionalRiskRating
-                  )} center-controls`}
+                  )} metric-single`}
+                  style={{ textAlign: "center" }}
                 >
                   {getRiskLevelText(form.additionalRiskRating)}
                 </small>
@@ -768,26 +1406,76 @@ const handleSubmit = async (e) => {
 
             <div className="center-controls">
               <button
-                type="submit"
+                type="button"
                 className="save-btn"
-                // onClick={handleSubmit}
                 disabled={loading}
+                onClick={() => handlePrevNext("previous")}
               >
-                {loading ? "Updating..." : "Update"}
+                Previous Discussion
+              </button>
+              <button
+                type="button"
+                className="save-btn"
+                disabled={loading}
+                onClick={handleSubmit}
+              >
+                Save
+              </button>
+              <button
+                type="button"
+                className="save-btn"
+                disabled={loading}
+                onClick={() => handlePrevNext("next")}
+              >
+                Next Discussion
+              </button>
+            </div>
+            <div className="center-controls">
+              <button
+                type="button"
+                className="save-btn"
+                disabled={loading}
+                onClick={() => handlePrevNextNode("previous")}
+              >
+                Previous Node
+              </button>
+              <button
+                type="button"
+                className="save-btn"
+                disabled={loading}
+                onClick={() => handlePrevNextNode("next")}
+              >
+                Next Node
               </button>
             </div>
           </form>
         </div>
-        {/* {showRecommendations && (
-          <UpdateRecommendations
-            onClose={() => setShowRecommendations(false)}
-            onSave={saveRecommendations}
-            initialRecommendations={[]}
-            nodeID={nodeID}
-            nodeDetailId={nodeDetailId}
-          />
-        )} */}
       </div>
+
+      {showConfirmation && (
+        <ConfirmationPopup
+          message="Are you sure you want to save this discussion and proceed to next?"
+          onConfirm={() => {
+            setShowConfirmation(false);
+            handleSaveAndNext();
+          }}
+          onCancel={() => setShowConfirmation(false)}
+        />
+      )}
+
+      {showDeleteConfirmation && (
+        <ConfirmationPopup
+          message="Are you sure you want to delete this recommendation?"
+          onConfirm={confirmDelete}
+          onCancel={cancelDelete}
+        />
+      )}
+
+      {loading && (
+        <div className="loading-overlay">
+          <div className="loading-spinner"></div>
+        </div>
+      )}
     </div>
   );
 };
