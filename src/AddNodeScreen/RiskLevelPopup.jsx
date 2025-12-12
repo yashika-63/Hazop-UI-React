@@ -102,50 +102,55 @@ const RiskLevelPopup = ({ onClose }) => {
 
         <div className="table-section">
           <div className="card table-card">
-            <h3>Risk Matrix</h3>
-            <table>
-              <thead>
-  <tr>
-    <th>
-      SEVERITY OF CONSEQUENCES - S
-      <div>People (P)</div>
-      <div>Assets (A)</div>
-      <div>Environment (E)</div>
-    </th>
-    {frequencyLabels.map((freq, idx) => (
-      <th key={idx}>{freq}</th>
-    ))}
-  </tr>
-</thead>
-
-
-              <tbody>
-  {matrixNumbers.map((row, rowIndex) => (
-    <tr key={rowIndex}>
-      <td>
-        <div>{severityLabels[rowIndex].p}</div>
-        <div>{severityLabels[rowIndex].a}</div>
-        <div>{severityLabels[rowIndex].e}</div>
-      </td>
-      {row.map((num, colIndex) => (
-        <td
-          key={colIndex}
-          style={{
-            backgroundColor: getColor(num),
-            textAlign: "center",
-            fontWeight: "bold",
-            color: "#000",
-          }}
-        >
-          {num}
-        </td>
-      ))}
-    </tr>
-  ))}
-</tbody>
-
-            </table>
+  <h3>Risk Matrix</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>
+          SEVERITY OF CONSEQUENCES - S
+          <div style={{ display: "flex", justifyContent: "space-between", marginTop: "4px" }}>
+            <span>People (P)</span>
+            <span>Assets (A)</span>
+            <span>Environment (E)</span>
           </div>
+        </th>
+        {frequencyLabels.map((freq, idx) => (
+          <th key={idx}>{freq}</th>
+        ))}
+      </tr>
+    </thead>
+
+    <tbody>
+      {matrixNumbers.map((row, rowIndex) => (
+        <tr key={rowIndex}>
+          {/* Severity Column */}
+          <td style={{ display: "flex", justifyContent: "space-between" }}>
+            <span>{severityLabels[rowIndex].p}</span>
+            <span>{severityLabels[rowIndex].a}</span>
+            <span>{severityLabels[rowIndex].e}</span>
+          </td>
+
+          {/* Frequency / Risk Numbers Column */}
+          {row.map((num, colIndex) => (
+            <td
+              key={colIndex}
+              style={{
+                backgroundColor: getColor(num),
+                textAlign: "center",
+                fontWeight: "bold",
+                color: "#000",
+                padding: "8px 0",
+              }}
+            >
+              {num}
+            </td>
+          ))}
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
         </div>
 
         <div className="table-section">

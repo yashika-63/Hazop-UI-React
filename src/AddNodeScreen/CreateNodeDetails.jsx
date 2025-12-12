@@ -395,27 +395,31 @@ const CreateNodeDetails = () => {
     fetchFirstNodeDetail();
   }, [nodeID]);
 
-  const fetchDetailByDirection = async (direction) => {
-    if (!nodeID) return null;
+const fetchDetailByDirection = async (direction) => {
+  if (!nodeID) return null;
 
-    try {
-      setLoading(true);
-      // pass currentDetailId only if it exists; otherwise send currentId=0 to avoid "undefined"
-      const currentIdParam = currentDetailId ? currentDetailId : 0;
-      const res = await fetch(
-        `http://${strings.localhost}/api/hazopNodeDetail/getByDirection?currentId=${currentIdParam}&nodeId=${currentNodeId}&direction=${direction}`
-      );
-      if (!res.ok) return null;
-      const data = await res.json();
-      return data || null;
-    } catch (error) {
-      console.error("Error fetching node detail by direction:", error);
-      showToast("Failed to load the discussion.", "error");
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    setLoading(true);
+
+    // Pass nothing if currentDetailId is null for "previous"
+    const currentIdParam =
+      currentDetailId || (direction === "previous" ? "" : 0);
+
+    const res = await fetch(
+      `http://${strings.localhost}/api/hazopNodeDetail/getByDirection?currentId=${currentIdParam}&nodeId=${currentNodeId}&direction=${direction}`
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data || null;
+  } catch (error) {
+    console.error("Error fetching node detail by direction:", error);
+    showToast("Failed to load the discussion.", "error");
+    return null;
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const handleSaveAndNext = async () => {
     if (!validate()) return;

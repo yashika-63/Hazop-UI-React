@@ -16,7 +16,6 @@ console.log("Using registrationId for POST:", registrationId);
     console.error("hazopData missing in NodePopup");
   }
   const [form, setForm] = useState({
-    nodeNumber: "",
     date: "",
     designIntent: "",
     pIdRevision: "",
@@ -41,10 +40,6 @@ console.log("Using registrationId for POST:", registrationId);
   const validate = () => {
     const newErrors = {};
 
-    if (!form.nodeNumber) {
-      newErrors.nodeNumber = "Node number is required.";
-      showToast("Node number is required", "warn");
-    }
     if (!form.date) {
       newErrors.date = "Date is required.";
       showToast("Date is required", "warn");
@@ -104,7 +99,6 @@ console.log("Using registrationId for POST:", registrationId);
 
       const payload = [
         {
-          nodeNumber: form.nodeNumber,
           date: formatDateToBackend(form.date),
           designIntent: form.designIntent,
           pIdRevision: form.pIdRevision,
@@ -151,19 +145,7 @@ console.log("Using registrationId for POST:", registrationId);
           <div>
             {/* Node meta */}
             <div className="input-row">
-              <div className="form-group">
-                <label>
-                  <span className="required-marker">* </span>Node Number
-                </label>
-                <input
-                  type="number"
-                  name="nodeNumber"
-                  value={form.nodeNumber}
-                  onChange={handleChange}
-                  disabled={loading}
-                />
-              </div>
-
+              
               <div className="form-group">
                 <label>
                   <span className="required-marker">* </span>Node Date
@@ -191,37 +173,6 @@ console.log("Using registrationId for POST:", registrationId);
                 />
               </div>
 
-              {/* <div className="form-group ">
-                  <label>
-                    <span className="required-marker">* </span>Node Title
-                  </label>
-                  <input
-                    type="text"
-                    name="hazopTitle"
-                    value={form.hazopTitle}
-                    onChange={handleChange}
-                    disabled={loading}
-                  />
-                </div> */}
-            </div>
-
-            {/* Design / P&ID */}
-            <div className="form-group">
-              <label>
-                <span className="required-marker">* </span>Design Intent
-              </label>
-              <textarea
-                name="designIntent"
-                value={form.designIntent}
-                rows={3}
-                onChange={handleChange}
-                className="textareaFont"
-                disabled={loading}
-              />
-            </div>
-
-            {/* SOP */}
-            <div className="input-row">
               <div className="form-group">
                 <label>
                   <span className="required-marker">* </span>SOP Number
@@ -248,6 +199,24 @@ console.log("Using registrationId for POST:", registrationId);
                   max={new Date().toISOString().split("T")[0]}
                 />
               </div>
+
+              {/* <div className="form-group ">
+                  <label>
+                    <span className="required-marker">* </span>Node Title
+                  </label>
+                  <input
+                    type="text"
+                    name="hazopTitle"
+                    value={form.hazopTitle}
+                    onChange={handleChange}
+                    disabled={loading}
+                  />
+                </div> */}
+            </div>
+
+            {/* SOP */}
+            <div className="input-row">
+              
 
               <div className="form-group">
                 <label>
@@ -288,6 +257,27 @@ console.log("Using registrationId for POST:", registrationId);
                   }`}
                 >
                   {form.pressure.length}/1000
+                </small>
+              </div>
+
+              <div className="form-group">
+                <label>
+                  <span className="required-marker">* </span>Quantity
+                </label>
+                <input
+                  type="text"
+                  name="quantityFlowRate"
+                  value={form.quantityFlowRate}
+                  onChange={handleChange}
+                  disabled={loading}
+                  maxLength={1000}
+                />
+                <small
+                  className={`char-count ${
+                    form.quantityFlowRate.length >= 1000 ? "limit-reached" : ""
+                  }`}
+                >
+                  {form.quantityFlowRate.length}/1000
                 </small>
               </div>
             </div>
@@ -362,31 +352,21 @@ console.log("Using registrationId for POST:", registrationId);
                 {form.chemicalAndUtilities.length}/1000
               </small>
             </div>
-
-            {/* Process conditions */}
-            <div className="input-row">
-              <div className="form-group">
-                <label>
-                  <span className="required-marker">* </span>Quantity
-                </label>
-                <input
-                  type="text"
-                  name="quantityFlowRate"
-                  value={form.quantityFlowRate}
-                  onChange={handleChange}
-                  disabled={loading}
-                  maxLength={1000}
-                />
-                <small
-                  className={`char-count ${
-                    form.quantityFlowRate.length >= 1000 ? "limit-reached" : ""
-                  }`}
-                >
-                  {form.quantityFlowRate.length}/1000
-                </small>
-              </div>
-            </div>
           </div>
+          
+            <div className="form-group">
+              <label>
+                <span className="required-marker">* </span>Design Intent
+              </label>
+              <textarea
+                name="designIntent"
+                value={form.designIntent}
+                rows={3}
+                onChange={handleChange}
+                className="textareaFont"
+                disabled={loading}
+              />
+            </div>
         </div>
       </div>
 

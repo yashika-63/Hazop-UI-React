@@ -466,7 +466,7 @@ const NodeDetails = () => {
                     <span
                       className={`risk-badge ${getRiskClass(d.riskRating)}`}
                     >
-                      Risk Rating: {d.riskRating || "-"} (
+                      Initial Risk Rating: {d.riskRating || "-"} (
                       {getRiskLevelText(d.riskRating)})
                     </span>
 
@@ -475,7 +475,7 @@ const NodeDetails = () => {
                         d.additionalRiskRating
                       )}`}
                     >
-                      Additional Risk Rating: {d.additionalRiskRating || "-"} (
+                      Final Risk Rating: {d.additionalRiskRating || "-"} (
                       {getRiskLevelText(d.additionalRiskRating)})
                     </span>
                   </div>
