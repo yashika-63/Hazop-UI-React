@@ -394,8 +394,8 @@ const CreateNodeDetails = () => {
     fetchFirstNodeDetail();
   }, [nodeID]);
 
-  const fetchDetailByDirection = async (direction) => {
-    if (!nodeID) return null;
+const fetchDetailByDirection = async (direction) => {
+  if (!nodeID) return null;
 
     try {
       setLoading(true);
