@@ -157,7 +157,7 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
                     <button
                         onClick={() => handleView(item)}
                     >
-                        <FaExchangeAlt/> Re-assign
+                        <FaExchangeAlt /> Re-assign
                     </button>
                 </div>
             )}
@@ -282,7 +282,16 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
                     <div className="modal-body">
                         <h3 className="centerText">Recommendation Details</h3>
                         <p><strong>Recommendation:</strong> {selectedRecommendation.recommendation}</p>
-                        <p><strong>Completion Status:</strong> {selectedRecommendation.completionStatus || "-"}</p>
+                        <p>
+                            <strong>Completion Status:</strong>{" "}
+                            {
+                                selectedRecommendation.completionStatus === true
+                                    ? "Completed"
+                                    : selectedRecommendation.completionStatus === false
+                                        ? "Pending"
+                                        : "-"
+                            }
+                        </p>
                         <p><strong>Completion Date:</strong> {selectedRecommendation.completionDate || "-"}</p>
                         <div className="search-container">
                             <div className="search-bar-wrapper">

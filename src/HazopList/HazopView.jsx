@@ -210,9 +210,9 @@ const HazopView = ({ onClose, mode = "view-only" }) => {
             await loadAllRecommendations();
             await loadVerificationRecords();
         }
-        if (step === 4) {
-            await loadTeamComments(); // Load comments for last page
-        }
+        // if (step === 4) {
+        //     await loadTeamComments(); // Load comments for last page
+        // }
         setStep((prev) => prev + 1);
     };
 
@@ -345,7 +345,7 @@ const HazopView = ({ onClose, mode = "view-only" }) => {
                                     <div key={node.id} className="node-card">
                                         <p>
                                             <strong>
-                                                Node #{node.nodeNumber} - {node.hazopTitle}
+                                                Node #{node.nodeNumber} - {node.designIntent}
                                             </strong>
                                         </p>
 
@@ -923,7 +923,7 @@ const HazopView = ({ onClose, mode = "view-only" }) => {
 
                         <div className="modal-actions">
                             {step > 1 && <button onClick={handlePrev}>Previous</button>}
-                            {step < 5 && <button onClick={handleNext}>Next</button>}
+                            {step < 4 && <button onClick={handleNext}>Next</button>}
                         </div>
                     </>
                 )}

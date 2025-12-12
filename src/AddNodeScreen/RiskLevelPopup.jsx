@@ -1,6 +1,6 @@
 import React from "react";
 import { FaTimes } from "react-icons/fa";
-
+ 
 const RiskLevelPopup = ({ onClose }) => {
   const root = document.documentElement;
   const trivial = getComputedStyle(root).getPropertyValue("--trivial").trim();
@@ -14,7 +14,7 @@ const RiskLevelPopup = ({ onClose }) => {
   const intolerable = getComputedStyle(root)
     .getPropertyValue("--intolerable")
     .trim();
-
+ 
   const riskRows = [
     {
       sr: "1",
@@ -56,7 +56,7 @@ const RiskLevelPopup = ({ onClose }) => {
         "Work must not start or continue until risk is reduced. If risk cannot be controlled even with unlimited resources, the work must remain prohibited.",
     },
   ];
-
+ 
   const getColor = (num) => {
     if ([1, 2, 3, 4, 5].includes(num)) return trivial;
     if ([6, 8, 9, 10].includes(num)) return tolerable;
@@ -65,7 +65,7 @@ const RiskLevelPopup = ({ onClose }) => {
     if ([20, 25].includes(num)) return intolerable;
     return "#fff";
   };
-
+ 
   const severityLabels = [
     { p: "Slight injury", a: "Slight damage", e: "Slight effect" },
     { p: "Minor injury", a: "Minor damage", e: "Minor effect" },
@@ -73,7 +73,7 @@ const RiskLevelPopup = ({ onClose }) => {
     { p: "Single Fatality", a: "Major damage", e: "Major effect" },
     { p: "Multiple Fatalities", a: "Extensive damage", e: "Extensive effect" },
   ];
-
+ 
   const frequencyLabels = [
     "Once in 10 years",
     "Once in 5 years",
@@ -81,7 +81,7 @@ const RiskLevelPopup = ({ onClose }) => {
     "Once a month",
     "Once a week",
   ];
-
+ 
   const matrixNumbers = [
     [1, 2, 3, 4, 5],
     [2, 4, 6, 8, 10],
@@ -89,7 +89,7 @@ const RiskLevelPopup = ({ onClose }) => {
     [4, 8, 12, 16, 20],
     [5, 10, 15, 20, 25],
   ];
-
+ 
   return (
     <div className="modal-overlay">
       <div className="modal-box">
@@ -99,55 +99,60 @@ const RiskLevelPopup = ({ onClose }) => {
           </button>
           <h2 className="modal-header">Risk Levels Information</h2>
         </div>
-
+ 
         <div className="table-section">
           <div className="card table-card">
-            <h3>Risk Matrix</h3>
-            <table>
-              <thead>
-  <tr>
-    <th>
-      SEVERITY OF CONSEQUENCES - S
-      <div>People (P)</div>
-      <div>Assets (A)</div>
-      <div>Environment (E)</div>
-    </th>
-    {frequencyLabels.map((freq, idx) => (
-      <th key={idx}>{freq}</th>
-    ))}
-  </tr>
-</thead>
-
-
-              <tbody>
-  {matrixNumbers.map((row, rowIndex) => (
-    <tr key={rowIndex}>
-      <td>
-        <div>{severityLabels[rowIndex].p}</div>
-        <div>{severityLabels[rowIndex].a}</div>
-        <div>{severityLabels[rowIndex].e}</div>
-      </td>
-      {row.map((num, colIndex) => (
-        <td
-          key={colIndex}
-          style={{
-            backgroundColor: getColor(num),
-            textAlign: "center",
-            fontWeight: "bold",
-            color: "#000",
-          }}
-        >
-          {num}
-        </td>
-      ))}
-    </tr>
-  ))}
-</tbody>
-
-            </table>
+  <h3>Risk Matrix</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>
+          SEVERITY OF CONSEQUENCES - S
+          <div style={{ display: "flex", justifyContent: "space-between", marginTop: "4px" }}>
+            <span>People (P)</span>
+            <span>Assets (A)</span>
+            <span>Environment (E)</span>
           </div>
+        </th>
+        {frequencyLabels.map((freq, idx) => (
+          <th key={idx}>{freq}</th>
+        ))}
+      </tr>
+    </thead>
+ 
+    <tbody>
+      {matrixNumbers.map((row, rowIndex) => (
+        <tr key={rowIndex}>
+          {/* Severity Column */}
+          <td style={{ display: "flex", justifyContent: "space-between" }}>
+            <span>{severityLabels[rowIndex].p}</span>
+            <span>{severityLabels[rowIndex].a}</span>
+            <span>{severityLabels[rowIndex].e}</span>
+          </td>
+ 
+          {/* Frequency / Risk Numbers Column */}
+          {row.map((num, colIndex) => (
+            <td
+              key={colIndex}
+              style={{
+                backgroundColor: getColor(num),
+                textAlign: "center",
+                fontWeight: "bold",
+                color: "#000",
+                padding: "8px 0",
+              }}
+            >
+              {num}
+            </td>
+          ))}
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+ 
         </div>
-
+ 
         <div className="table-section">
           <div className="card table-card">
             <h3>Risk Levels Details</h3>
@@ -160,7 +165,7 @@ const RiskLevelPopup = ({ onClose }) => {
                   <th>Action and Time Scale</th>
                 </tr>
               </thead>
-
+ 
               <tbody>
                 {riskRows.map((row) => (
                   <tr
@@ -185,5 +190,5 @@ const RiskLevelPopup = ({ onClose }) => {
     </div>
   );
 };
-
+ 
 export default RiskLevelPopup;

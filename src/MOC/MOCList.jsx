@@ -37,31 +37,31 @@ const MOCList = () => {
             const url = search
                 ? `http://${strings.localhost}/api/moc/search/hazop-yes?keyword=${search}`
                 : `http://${strings.localhost}/api/moc/hazop-yes?page=${page}&size=${pageSize}`;
-    
+
             console.log("FETCH:", url);
-    
+
             const response = await fetch(url);
             const result = await response.json();
-    
+
             let content = [];
             let pageNumber = 0;
             let pageCount = 0;
-    
+
             // 🔥 Search API case
             if (search) {
                 content = result.data || [];
-    
+
                 pageNumber = (result.currentPage || 1) - 1;   // convert to zero-based
-                pageCount  = result.totalPages || 1;
-    
+                pageCount = result.totalPages || 1;
+
             } else {
                 // 🔥 Normal API case
                 content = result.data || [];
-    
+
                 pageNumber = (result.currentPage || 1) - 1;
-                pageCount  = result.totalPages || 0;
+                pageCount = result.totalPages || 0;
             }
-    
+
             setData(content);
             setCurrentPage(pageNumber);
             setTotalPages(pageCount);
@@ -73,7 +73,7 @@ const MOCList = () => {
         }
         setLoading(false);
     };
-    
+
 
 
     useEffect(() => {
@@ -131,6 +131,7 @@ const MOCList = () => {
                         <th>Department</th>
                         <th>Plant</th>
                         <th>MOC Date</th>
+                        <th>Hazop Status</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -150,6 +151,17 @@ const MOCList = () => {
                                 <td>{item.department}</td>
                                 <td>{item.plant}</td>
                                 <td>{formatDate(item.mocDate)}</td>
+
+                                <td><span
+                                    className={
+                                        item.hazopGenerationStatus?.toLowerCase() === "generated"
+                                            ? "status-completed"
+                                            : "status-pending"
+                                    }
+                                >
+                                    {item.hazopGenerationStatus}
+                                </span>
+                                </td>
                                 <td>{renderDropdown(item)}</td>
                             </tr>
                         ))

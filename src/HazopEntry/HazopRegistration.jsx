@@ -45,21 +45,22 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
   }, [hazopId]);
   const companyId = localStorage.getItem("companyId");
 
-
   useEffect(() => {
     if (moc) {
+      console.log('MOC:', moc);  // Debugging to check moc data
+
       setFormData({
-        hazopDate: moc.MOCDate ? moc.MOCDate.split("T")[0] : "", // YYYY-MM-DD
-        hazopTitle: moc.MOCTitle || "",
-        department: moc.Department || "",
-        site: moc.Plant || "",
-        description: "",
+        hazopDate: moc.mocDate ? moc.mocDate.split("T")[0] : "", // YYYY-MM-DD format
+        hazopTitle: moc.mocTitle || "", // Set hazopTitle from mocTitle
+        department: moc.department || "", // Set department from moc
+        site: moc.plant || "", // Set site from plant
+        description: "", // Empty initially
         verificationStatus: false,
         verificationComplitionStatus: false,
         completionStatus: false,
       });
     }
-  }, [moc]);
+  }, [moc]);  // The useEffect will run whenever moc changes
 
   const refs = {
     hazopDate: React.createRef(),
@@ -228,28 +229,28 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
 
   const saveHazop = async () => {
     setLoading(true);
-  
+
     try {
       const createdBy = localStorage.getItem("fullName") || "";
       const empCode = localStorage.getItem("empCode") || "";
       const createdByEmail = localStorage.getItem("email") || "";
-  
+
       const payload = { ...formData, createdBy, empCode, createdByEmail };
-  
+
       // 1️⃣ Save HAZOP (mandatory)
       const hazopResponse = await axios.post(
         `http://${strings.localhost}/api/hazopRegistration/saveByCompany/${companyId}`,
         payload
       );
-  
+
       const hazopId = hazopResponse.data.id;
       setSavedHazopId(hazopId);
-  
+
       showToast("HAZOP saved successfully!", "success");
-  
+
       // 2️⃣ Run optional tasks in parallel
       const tasks = [];
-  
+
       // Save Team if exists
       if (hazopTeam.length > 0) {
         tasks.push(
@@ -258,7 +259,7 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
               `http://${strings.localhost}/api/hazopTeam/saveTeam/${hazopId}`,
               hazopTeam.map((m) => m.empCode)
             );
-  
+
             for (const member of hazopTeam) {
               await axios.post(
                 `http://${strings.localhost}/api/hazopTeamRole/save`,
@@ -275,35 +276,35 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
           })()
         );
       }
-  
+
       // Save MOC Reference if exists
       if (moc) {
         tasks.push(
           saveMocReference(hazopId)
         );
       }
-  
+
       // Upload documents if uploader exists
       if (documentUploadRef.current) {
         tasks.push(
           documentUploadRef.current.uploadDocuments(hazopId)
         );
       }
-  
+
       // Run all optional tasks concurrently
       await Promise.allSettled(tasks);
-  
+
       if (onSaveSuccess) onSaveSuccess();
       closePopup();
-  
+
     } catch (err) {
       console.error("Save failed:", err);
       showToast("Failed to save HAZOP", "error");
     }
-  
+
     setLoading(false);
   };
-  
+
 
 
   const saveMocReference = async (hazopId) => {
@@ -313,7 +314,7 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
         null,
         {
           params: {
-            mocId: moc.MOCID, // mocId comes from the prop
+            mocId: moc.mocId, // mocId comes from the prop
             hazopRegistrationId: hazopId, // hazopId comes from HAZOP save response
             companyId
           }
@@ -567,9 +568,9 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
           />
         )}
 
-{showDocumentUploader && (
-  <HazopDocumentUpload ref={documentUploadRef} hazopId={savedHazopId} />
-)}
+        {showDocumentUploader && (
+          <HazopDocumentUpload ref={documentUploadRef} hazopId={savedHazopId} />
+        )}
 
         {hazopId && <HazopDocumentUpload hazopId={hazopId} />}
         {confirmPopup && (

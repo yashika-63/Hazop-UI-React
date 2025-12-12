@@ -7,7 +7,7 @@ export default function HazopWorkflow() {
   const [status, setStatus] = useState(null);
  
   useEffect(() => {
-    fetch(`http://${strings.localhost}/api/hazop/status/26`)
+    fetch(`http://${strings.localhost}/api/hazop/status/34`)
       .then((res) => res.json())
       .then((data) => setStatus(data));
   }, []);

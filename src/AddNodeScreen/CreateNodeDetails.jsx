@@ -5,7 +5,6 @@ import "./Node.css";
 import { strings } from "../string";
 import { useLocation, useNavigate } from "react-router-dom";
 import NodeInfo from "./NodeInfo";
-import NodePopup from "./NodePopup";
 
 const initialState = {
   generalParameter: "",
@@ -27,7 +26,7 @@ const initialState = {
 const CreateNodeDetails = () => {
   const [form, setForm] = useState(initialState);
   const [rows, setRows] = useState(15);
-  const [smallRows, setSmallRows] = useState(9);
+  const [smallRows, setSmallRows] = useState(11);
   const [loading, setLoading] = useState(false);
   const [tempRecommendations, setTempRecommendations] = useState([]);
   const additionalControlRef = React.useRef(null);
@@ -90,7 +89,7 @@ const CreateNodeDetails = () => {
 
       if (name === "additionalControl" || name === "existineControl") {
         const lineCount = value.split("\n").length;
-        setSmallRows(Math.min(12, Math.max(9, lineCount)));
+        setSmallRows(Math.min(15, Math.max(11, lineCount)));
       }
 
       if (name === "existineProbability" || name === "existingSeverity") {
@@ -126,7 +125,7 @@ const CreateNodeDetails = () => {
         const res = await fetch(
           `http://${strings.localhost}/api/hazopNodeDetail/node/${nodeID}`
         );
-        if (!res.ok) throw new Error("Failed to fetch node details");
+        // if (!res.ok) throw new Error("Failed to fetch node details");
         const data = await res.json();
         if (data && data.length > 0) {
           setDetails(data);
@@ -254,7 +253,7 @@ const CreateNodeDetails = () => {
       }
     } catch (err) {
       console.error(err);
-      showToast("Failed to load node details.", "error");
+      // showToast("Failed to load node details.", "error");
     } finally {
       setLoading(false);
     }
@@ -400,8 +399,11 @@ const CreateNodeDetails = () => {
 
     try {
       setLoading(true);
-      // pass currentDetailId only if it exists; otherwise send currentId=0 to avoid "undefined"
-      const currentIdParam = currentDetailId ? currentDetailId : 0;
+
+      // Pass nothing if currentDetailId is null for "previous"
+      const currentIdParam =
+        currentDetailId || (direction === "previous" ? "" : 0);
+
       const res = await fetch(
         `http://${strings.localhost}/api/hazopNodeDetail/getByDirection?currentId=${currentIdParam}&nodeId=${currentNodeId}&direction=${direction}`
       );
@@ -549,7 +551,7 @@ const CreateNodeDetails = () => {
       }
     } catch (err) {
       console.error("Error loading node details:", err);
-      showToast("Failed to load node details.", "error");
+      // showToast("Failed to load node details.", "error");
     } finally {
       setLoading(false);
     }
@@ -995,9 +997,8 @@ const CreateNodeDetails = () => {
                   maxLength={1000}
                 />
                 <small
-                  className={`char-count ${
-                    form.generalParameter.length >= 1000 ? "limit-reached" : ""
-                  }`}
+                  className={`char-count ${form.generalParameter.length >= 1000 ? "limit-reached" : ""
+                    }`}
                 >
                   {form.generalParameter.length}/1000
                 </small>
@@ -1015,9 +1016,8 @@ const CreateNodeDetails = () => {
                   maxLength={1000}
                 />
                 <small
-                  className={`char-count ${
-                    form.specificParameter.length >= 1000 ? "limit-reached" : ""
-                  }`}
+                  className={`char-count ${form.specificParameter.length >= 1000 ? "limit-reached" : ""
+                    }`}
                 >
                   {form.specificParameter.length}/1000
                 </small>
@@ -1035,9 +1035,8 @@ const CreateNodeDetails = () => {
                   maxLength={1000}
                 />
                 <small
-                  className={`char-count ${
-                    form.guidWord.length >= 1000 ? "limit-reached" : ""
-                  }`}
+                  className={`char-count ${form.guidWord.length >= 1000 ? "limit-reached" : ""
+                    }`}
                 >
                   {form.guidWord.length}/1000
                 </small>
@@ -1059,9 +1058,8 @@ const CreateNodeDetails = () => {
                   maxLength={5000}
                 />
                 <small
-                  className={`char-count ${
-                    form.deviation.length >= 5000 ? "limit-reached" : ""
-                  }`}
+                  className={`char-count ${form.deviation.length >= 5000 ? "limit-reached" : ""
+                    }`}
                 >
                   {form.deviation.length}/5000
                 </small>
@@ -1080,9 +1078,8 @@ const CreateNodeDetails = () => {
                   maxLength={5000}
                 />
                 <small
-                  className={`char-count ${
-                    form.causes.length >= 5000 ? "limit-reached" : ""
-                  }`}
+                  className={`char-count ${form.causes.length >= 5000 ? "limit-reached" : ""
+                    }`}
                 >
                   {form.causes.length}/5000
                 </small>
@@ -1101,9 +1098,8 @@ const CreateNodeDetails = () => {
                   maxLength={5000}
                 />
                 <small
-                  className={`char-count ${
-                    form.consequences.length >= 5000 ? "limit-reached" : ""
-                  }`}
+                  className={`char-count ${form.consequences.length >= 5000 ? "limit-reached" : ""
+                    }`}
                 >
                   {form.consequences.length}/5000
                 </small>
@@ -1124,9 +1120,8 @@ const CreateNodeDetails = () => {
                     maxLength={5000}
                   />
                   <small
-                    className={`char-count ${
-                      form.existineControl.length >= 5000 ? "limit-reached" : ""
-                    }`}
+                    className={`char-count ${form.existineControl.length >= 5000 ? "limit-reached" : ""
+                      }`}
                   >
                     {form.existineControl.length}/5000
                   </small>
@@ -1245,8 +1240,8 @@ const CreateNodeDetails = () => {
                       background: "transparent",
                       transition: "all 0.2s ease",
                       boxShadow: "0 1px 2px rgba(0, 0, 0, 0.05)",
-                      maxHeight: "240px",
-                      minHeight: "180px",
+                      maxHeight: "300px",
+                      minHeight: "220px",
                       overflowY: "auto",
                     }}
                   >
@@ -1329,11 +1324,10 @@ const CreateNodeDetails = () => {
                     ))}
                   </div>
                   <small
-                    className={`char-count ${
-                      form.additionalControl.length >= 5000
+                    className={`char-count ${form.additionalControl.length >= 5000
                         ? "limit-reached"
                         : ""
-                    }`}
+                      }`}
                     style={{ marginTop: "9px" }}
                   >
                     {form.additionalControl.length}/5000

@@ -131,6 +131,7 @@ const HazopAllRecommendations = ({ hazopId }) => {
                                             placeholder="Search employee..."
                                             value={searchInputs[rec.id] || ''}
                                             onChange={e => handleSearchChange(rec.id, e.target.value)}
+                                            disabled={rec.sendForVerificationActionStatus === true}
                                         />
 
                                         <FaSearch className="search-icon-table" />
@@ -151,21 +152,22 @@ const HazopAllRecommendations = ({ hazopId }) => {
                                 </td>
 
                                 <td>
-                                    <button
-                                        className="confirm-btn"
-                                        onClick={() => handleAssignSend(rec.id)}
-                                        disabled={!selectedEmployees[rec.id] || sendingIds.includes(rec.id)}
-                                        title={
-                                            !selectedEmployees[rec.id]
-                                                ? "Select employee first"
-                                                : sendingIds.includes(rec.id)
-                                                    ? "Assigning..."
-                                                    : ""
-                                        }
-                                    >
-                                        {sendingIds.includes(rec.id) ? "Sending..." : "Send"}
-                                    </button>
+                                    {rec.sendForVerificationActionStatus === true ? (
+                                        <span className="sent-badge">✔ Sent</span>
+                                    ) : (
+                                        <button
+                                            className="confirm-btn"
+                                            onClick={() => handleAssignSend(rec.id)}
+                                            disabled={
+                                                !selectedEmployees[rec.id] ||
+                                                sendingIds.includes(rec.id)
+                                            }
+                                        >
+                                            {sendingIds.includes(rec.id) ? "Sending..." : "Send"}
+                                        </button>
+                                    )}
                                 </td>
+
 
                             </tr>
                         ))

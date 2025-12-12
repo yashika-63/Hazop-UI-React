@@ -23,7 +23,6 @@ const NodePage = () => {
   const [mocDetails, setMocDetails] = useState(null);
   const [hasMoc, setHasMoc] = useState(false);
   const [hazopData, setHazopData] = useState();
-  const [hazopData, setHazopData] = useState();
   const [documents, setDocuments] = useState([]);
   const [showDocuments, setShowDocuments] = useState(false);
 

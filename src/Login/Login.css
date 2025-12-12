@@ -299,54 +299,162 @@ input[type="email"] {
   cursor: pointer;
 }
 
+/* Popup overlay */
 
 
-/* Popup styles inside login component */
-.popup-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.55);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
+/* Popup box - glass + glow + moving sparkles */
+.popup-box {
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 20px;
+  padding: 35px 40px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  position: relative;
+  backdrop-filter: blur(15px);
+  box-shadow:
+    0 15px 35px rgba(0, 0, 0, 0.25),
+    0 0 25px rgba(255, 255, 255, 0.15),
+    0 0 60px rgba(37, 117, 252, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  animation: fadeInScale 0.5s ease forwards;
+  overflow: hidden;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Moving shiny reflection */
+.popup-box::before {
+  content: "";
+  position: absolute;
+  top: -60%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(120deg,
+      rgba(255, 255, 255, 0.5) 0%,
+      rgba(255, 255, 255, 0) 60%);
+  transform: rotate(25deg);
+  pointer-events: none;
+  animation: shineMove 10s linear infinite;
+  border-radius: 50%;
+}
+
+/* Floating sparkles */
+.popup-box .floating-sparkle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+  animation: float 6s linear infinite;
+}
+
+/* Sparkle positions with random delay */
+.popup-box .floating-sparkle:nth-child(1) {
+  top: 10%;
+  left: 20%;
+  animation-delay: 0s;
+}
+
+.popup-box .floating-sparkle:nth-child(2) {
+  top: 30%;
+  left: 70%;
+  animation-delay: 1s;
+}
+
+.popup-box .floating-sparkle:nth-child(3) {
+  top: 60%;
+  left: 40%;
+  animation-delay: 2s;
+}
+
+.popup-box .floating-sparkle:nth-child(4) {
+  top: 80%;
+  left: 80%;
+  animation-delay: 3s;
+}
+
+/* Floating animation */
+@keyframes float {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0.8;
+  }
+
+  50% {
+    transform: translateY(-10px) scale(1.2);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 0.8;
+  }
+}
+
+/* Shine animation */
+@keyframes shineMove {
+  0% {
+    transform: rotate(25deg) translateX(-100%);
+  }
+
+  50% {
+    transform: rotate(25deg) translateX(100%);
+  }
+
+  100% {
+    transform: rotate(25deg) translateX(-100%);
+  }
+}
+
+@keyframes slideUp {
+  0% {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .popup-box {
-  background: #fff;
-  width: 350px;
-  padding: 30px;
-  border-radius: 10px;
-  text-align: center;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-  animation: popupFade 0.25s ease-in-out;
+  animation: slideUp 0.6s ease forwards;
 }
 
+
+/* Welcome message */
+.popup-box h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 25px;
+  color: #fff;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  position: relative;
+  z-index: 2;
+}
+
+/* Popup button */
 .popup-btn {
-  margin-top: 15px;
-  padding: 8px 20px;
-  background: #007bff;
-  border: none;
-  color: white;
-  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  padding: 12px 30px;
+  font-size: 1rem;
+  border-radius: 50px;
   cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  position: relative;
+  z-index: 2;
 }
 
 .popup-btn:hover {
-  background: #0056b3;
-}
-
-@keyframes popupFade {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  background: rgba(255, 255, 255, 0.45);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
 }

@@ -18,7 +18,11 @@ const RequestHandler = () => {
     const [counts, setCounts] = useState({
         teamAcceptancePending: 0,
         recommendationVerificationPending: 0,
-        registrationVerificationPending: 0
+        registrationVerificationPending: 0,
+        approvalPending:0,
+        assignmentPending:0,
+        totalPendingCount:0
+
     });
 
     useEffect(() => {
@@ -28,7 +32,9 @@ const RequestHandler = () => {
                 setCounts({
                     teamAcceptancePending: data.teamAcceptancePending,
                     recommendationVerificationPending: data.recommendationVerificationPending,
-                    registrationVerificationPending: data.registrationVerificationPending
+                    registrationVerificationPending: data.registrationVerificationPending,
+                    approvalPending:data.approvalPending,
+                    assignmentPending: data.assignmentPending
                 });
             })
             .catch(err => console.error(err));
@@ -78,7 +84,7 @@ const RequestHandler = () => {
                         onClick={() => handleButtonClick('HazopApprove')}
                     >
                         <FaList />
-                        Hazop Verify
+                        Hazop Review
                         {counts.registrationVerificationPending > 0 && (
                             <span className="badge">{counts.registrationVerificationPending}</span>
                         )}

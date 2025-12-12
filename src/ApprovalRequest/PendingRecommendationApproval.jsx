@@ -93,7 +93,14 @@ const PendingConfirmationPopup = ({
 
             <div className="confirm-buttons">
                 <button type="button" className="cancel-btn" onClick={onCancel}>No</button>
-                <button type="button" className="confirm-btn" onClick={onConfirm}>Yes</button>
+                <button
+                    type="button"
+                    className={`confirm-btn ${type === "reject" && !comment ? "disabled-btn" : ""}`}
+                    onClick={type === "reject" && !comment ? null : onConfirm}
+                    disabled={type === "reject" && !comment}
+                >
+                    Yes
+                </button>
             </div>
         </div>
     </div>
@@ -255,7 +262,6 @@ const PendingRecommendationApproval = () => {
                                 <td>{truncateWords(rec.javaHazopNodeRecommendation?.recommendation)}</td>
                                 <td>{truncateWords(rec.javaHazopNodeRecommendation?.remarkbyManagement)}</td>
                                 <td>{rec.createdByName}</td>
-
                                 <td>
                                     <div className="dropdown">
                                         <button className="dots-button" onClick={() => toggleDropdown(rec.id)}>

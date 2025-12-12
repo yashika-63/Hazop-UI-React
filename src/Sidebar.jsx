@@ -3,12 +3,14 @@ import { NavLink } from "react-router-dom";
 import { FaChartLine, FaClipboardCheck, FaCogs, FaHome, FaList, FaListAlt, FaListUl, FaRegListAlt, FaTasks, FaUser } from "react-icons/fa";
 import { FaDiagramProject, FaPeopleGroup, FaShield } from "react-icons/fa6";
 import "./CommonCss/Sidebar.css";
+import { strings } from "./string";
 
 const Sidebar = ({ isOpen }) => {
   const [totalPendingCount, setTotalPendingCount] = useState(0);
-
+  const empCode = localStorage.getItem("empCode");
+  
   useEffect(() => {
-    fetch("http://localhost:5559/api/hazop-dashboard/total-pending-count?empCode=Rohan Kaitake")
+    fetch(`http://${strings.localhost}/api/hazop-dashboard/total-pending-count?empCode=${empCode}`)
       .then(res => res.json())
       .then(data => {
         setTotalPendingCount(data.totalPendingCount || 0);

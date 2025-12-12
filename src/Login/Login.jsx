@@ -65,6 +65,10 @@ const Login = ({ setToken }) => {
         <div className="popup-overlay">
           <div className="popup-box">
             <h3>{popupMsg}</h3>
+            <div className="floating-sparkle"></div>
+  <div className="floating-sparkle"></div>
+  <div className="floating-sparkle"></div>
+  <div className="floating-sparkle"></div>
             <button className="popup-btn" onClick={handlePopupClose}>OK</button>
           </div>
         </div>
