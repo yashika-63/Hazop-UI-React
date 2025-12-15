@@ -35,6 +35,10 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
     const [reassignComment, setReassignComment] = useState("");
     const [showReassignPopup, setShowReassignPopup] = useState(false);
     const empCode = localStorage.getItem("empCode");
+    const [showSendReviewPopup, setShowSendReviewPopup] = useState(false);
+    const [selectedReviewEmployee, setSelectedReviewEmployee] = useState(null);
+
+
     const fetchRecords = async () => {
         setLoading(true);
         try {
@@ -80,6 +84,11 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
         setSearchResults([]);
         setTeamSearch("");
     };
+    const addReviewEmployee = (user) => {
+        setSelectedReviewEmployee(user);
+        setSearchResults([]);
+        setTeamSearch("");
+    };
 
     const handleCompleteClick = () => {
         setShowModal(true);
@@ -89,6 +98,36 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
         setShowModal(false);
         setSelectedEmployee(null);
     };
+
+
+    const handleOpenSendReview = () => {
+        setShowSendReviewPopup(true);
+        setSelectedReviewEmployee(null);
+        setTeamSearch("");
+        setSearchResults([]);
+    };
+
+
+    const handleSendReview = async () => {
+        if (!selectedReviewEmployee) return;
+
+        setIsSending(true);
+        try {
+            await axios.post(
+                `http://${strings.localhost}/api/hazopRegistration/hazop/sendForVerification/${hazopId}/${encodeURIComponent(selectedReviewEmployee.empCode)}`
+            );
+            showToast("Hazop sent for review successfully.", "success");
+            setShowSendReviewPopup(false);
+            setSelectedReviewEmployee(null);
+            fetchRecords(); // refresh table
+        } catch (err) {
+            console.error("Error sending for review:", err);
+            showToast("Failed to send Hazop for review.", "error");
+        } finally {
+            setIsSending(false);
+        }
+    };
+
 
     const handleConfirmComplete = async () => {
         if (!selectedEmployee) return;
@@ -216,13 +255,22 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
                 </tbody>
             </table>
             <div className="rightbtn-controls">
-                <button
+                {/* <button
                     className="confirm-btn"
                     onClick={handleCompleteClick}
                     disabled={!allCompleted}
                     title={!allCompleted ? "All records must be completed to enable this button" : ""}
                 >
                     Send For Verification
+                </button> */}
+
+                <button
+                    className="confirm-btn review-btn"
+                    onClick={handleOpenSendReview}
+                    disabled={!allCompleted || isSending}
+                    title={!allCompleted ? "All records must be completed to enable this button" : ""}
+                >
+                    Send For Review
                 </button>
             </div>
             {showModal && (
@@ -368,6 +416,84 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
                     <div className="loading-spinner"></div>
                 </div>
             )}
+            {showSendReviewPopup && (
+                <div className="modal-overlay">
+                    <div className="modal-body">
+                        <h4 className="centerText">Select Employee to Send Hazop for Review</h4>
+
+                        <div className="search-container">
+                            <div className="search-bar-wrapper">
+                                <input
+                                    type="text"
+                                    placeholder="Search employee..."
+                                    value={teamSearch}
+                                    onChange={handleTeamSearchChange} // reuse existing search handler
+                                    disabled={loading}
+                                />
+                                <FaSearch className="search-icon" />
+                                <ul className="search-results">
+                                    {searchResults.map(user => (
+                                        <li key={user.empCode} onClick={() => addReviewEmployee(user)}>
+                                            {user.empCode} - ({user.emailId || "NA"}) ({user.department || "NA"})
+                                        </li>
+
+                                    ))}
+                                </ul>
+                            </div>
+                        </div>
+
+                        {selectedReviewEmployee && (
+                            <div>
+                                <span className="label">Selected Employee:</span>
+                                <span className="value selected-employee-value">
+                                    <div className="details-row">
+                                        <span className="label">Employee Code:</span>
+                                        <span className="value">{selectedReviewEmployee.empCode}</span>
+                                    </div>
+                                    <div className="details-row">
+                                        <span className="label">Name:</span>
+                                        <span className="value">{selectedReviewEmployee.firstName} {selectedReviewEmployee.lastName}</span>
+                                    </div>
+                                    <div className="details-row">
+                                        <span className="label">Department:</span>
+                                        <span className="value">{selectedReviewEmployee.department || '-'}</span>
+                                    </div>
+                                    <div className="details-row">
+                                        <span className="label">Email:</span>
+                                        <span className="value">{selectedReviewEmployee.emailId || '-'}</span>
+                                    </div>
+                                    <FaTimes
+                                        onClick={() => setSelectedReviewEmployee(null)}
+                                        className="remove-icon"
+                                    />
+                                </span>
+                            </div>
+                        )}
+
+
+
+                        <div className="confirm-buttons">
+                            <button
+                                type="button"
+                                className="cancel-btn"
+                                onClick={() => setShowSendReviewPopup(false)}
+                                disabled={isSending}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                className="confirm-btn"
+                                onClick={handleSendReview}
+                                disabled={!selectedReviewEmployee || isSending}
+                            >
+                                {isSending ? "Sending..." : "Send"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
         </div>
     );
 };

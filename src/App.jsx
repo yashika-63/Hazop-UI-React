@@ -78,7 +78,9 @@ const App = () => {
                     <Route path="/HazopStatusPage" element={<HazopStatusPage />} />
                     <Route path="/RoleBasedHazopPage" element={<RoleBasedHazopPage />} />
                     <Route path="/NodePopup" element={<NodePopup />} />
+                    <Route path="/HazopView" element={<HazopView />} />
 
+                    
                     <Route path="*" element={<Navigate to="/HazopPage" />} />
                   </Routes>
                 </div>

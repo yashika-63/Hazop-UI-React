@@ -2,41 +2,18 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "../styles/global.css";
 import { strings } from "../string";
-import { FaEllipsisV, FaEye, FaTimes } from "react-icons/fa";
-import { truncateWords } from "../CommonUI/CommonUI";
-
-const ConfirmationPopup = ({ message, onConfirm, onCancel }) => {
-    return (
-        <div className="confirm-overlay">
-            <div className="confirm-box">
-                <h4>Confirmation</h4>
-                <p>{message}</p>
-                <div className="confirm-buttons">
-                    <button type="button" onClick={onCancel} className="cancel-btn">No</button>
-                    <button type="button" onClick={onConfirm} className="confirm-btn">Yes</button>
-                </div>
-            </div>
-        </div>
-    );
-};
+import { getRiskColor, truncateWords } from "../CommonUI/CommonUI";
 
 const HazopRecommendationApproval = () => {
     const [recommendations, setRecommendations] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [selectedRecord, setSelectedRecord] = useState(null);
-    const [showModal, setShowModal] = useState(false);
-    const [openDropdown, setOpenDropdown] = useState(null);
-    const [showConfirmation, setShowConfirmation] = useState(false);
-    const [actionToTake, setActionToTake] = useState(null);
+    const [showRejectModal, setShowRejectModal] = useState(false);
+    const [selectedRejectId, setSelectedRejectId] = useState(null);
+    const [rejectComment, setRejectComment] = useState("");
     const empCode = localStorage.getItem("empCode");
-
-    const toggleDropdown = (id) => {
-        setOpenDropdown(openDropdown === id ? null : id);
-    };
 
     const fetchRecommendations = async () => {
         if (!empCode) {
-            console.error("Employee code not found in localStorage");
             setLoading(false);
             return;
         }
@@ -57,66 +34,46 @@ const HazopRecommendationApproval = () => {
         fetchRecommendations();
     }, []);
 
-    const openRecordModal = (record) => {
-        setSelectedRecord(record);
-        setShowModal(true);
-    };
-
-    const handleApprove = () => {
-        setActionToTake("approve");
-        setShowConfirmation(true);
-    };
-
-    const handleReject = () => {
-        setActionToTake("reject");
-        setShowConfirmation(true);
-    };
-
-    const handleCancel = () => {
-        setShowModal(false);
-    };
-
-    const confirmAction = async () => {
-        if (!selectedRecord) return;
-
-        const actionStatus = actionToTake === "approve" ? true : false;
-
+    const handleApprove = async (id) => {
         setLoading(true);
-
         try {
-            const response = await axios.put(
-                `http://${strings.localhost}/api/nodeRecommendation/verify/${selectedRecord.id}/${empCode}/${actionStatus}`
+            await axios.put(
+                `http://${strings.localhost}/api/nodeRecommendation/verify/${id}/${empCode}/true?remark=Yes`
             );
-            console.log("Action successful:", response.data);
-            setShowModal(false);
-            setShowConfirmation(false);
             fetchRecommendations();
-        } catch (error) {
-            console.error("Error during approval/rejection:", error);
+        } catch (err) {
+            console.error("Error approving recommendation:", err);
         } finally {
             setLoading(false);
         }
     };
 
-    const handleConfirmationCancel = () => {
-        setShowConfirmation(false);
+    const handleRejectClick = (id) => {
+        setSelectedRejectId(id);
+        setRejectComment("");
+        setShowRejectModal(true);
     };
 
-    const renderDropdown = (item) => (
-        <div className="dropdown">
-            <button className="dots-button" onClick={() => toggleDropdown(item.id)}>
-                <FaEllipsisV />
-            </button>
+    const handleRejectSave = async () => {
+        if (!rejectComment.trim()) return;
+        setLoading(true);
+        try {
+            await axios.put(
+                `http://${strings.localhost}/api/nodeRecommendation/verify/${selectedRejectId}/${empCode}/false?remark=No`,
+                { comment: rejectComment }
+            );
+            fetchRecommendations();
+            setShowRejectModal(false);
+        } catch (err) {
+            console.error("Error rejecting recommendation:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-            {openDropdown === item.id && (
-                <div className="dropdown-content">
-                    <button type="button" onClick={() => openRecordModal(item)}>
-                        <FaEye /> View
-                    </button>
-                </div>
-            )}
-        </div>
-    );
+    const handleRejectCancel = () => {
+        setShowRejectModal(false);
+    };
 
     return (
         <div>
@@ -126,79 +83,87 @@ const HazopRecommendationApproval = () => {
                 </div>
             )}
 
-
             <table className="hazoplist-table">
                 <thead>
                     <tr>
                         <th>Sr.No</th>
                         <th>Recommendation</th>
                         <th>Department</th>
-                        <th>Remark</th>
+                        <th>Initial Risk rating</th>
+                        <th>Final Risk rating</th>
+                        {/* <th>Remark</th> */}
                         <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     {recommendations.length === 0 ? (
-                        <tr><td>No recommendations found.</td></tr>
+                        <tr>
+                            <td colSpan="5">No recommendations found.</td>
+                        </tr>
                     ) : (
                         recommendations.map((rec, index) => (
                             <tr key={rec.id}>
                                 <td>{index + 1}</td>
-                                <td>{truncateWords(rec.recommendation)}</td>
+                                <td className="description-cell" title={rec.recommendation}>
+                                    {rec.recommendation}
+                                </td>
                                 <td>{rec.department || "N/A"}</td>
-                                <td>{truncateWords(rec.remarkbyManagement || "N/A")}</td>
-                                <td>{renderDropdown(rec)}</td>
+                                <td style={{ color: getRiskColor(rec.javaHazopNodeDetail?.riskRating || '-') }}>
+                                    {rec.javaHazopNodeDetail?.riskRating || '-'}
+                                </td>
+                                <td style={{ color: getRiskColor(rec.javaHazopNodeDetail?.additionalRiskRating || '-') }}>
+                                    {rec.javaHazopNodeDetail?.additionalRiskRating || '-'}
+                                </td>
+                                {/* <td title={rec.remarkbyManagement || ""}>{truncateWords(rec.remarkbyManagement || "N/A")}</td> */}
+                                <td className="action-buttons">
+                                    <button
+                                        className="approveBtn"
+                                        onClick={() => handleApprove(rec.id)}
+                                        title="Approve this recommendation"
+                                    >
+                                        Yes
+                                    </button>
+                                    <button
+                                        className="rejectBtn"
+                                        onClick={() => handleRejectClick(rec.id)}
+                                        title="Reject this recommendation"
+                                    >
+                                        No
+                                    </button>
+                                </td>
                             </tr>
                         ))
                     )}
                 </tbody>
             </table>
 
-
-            {showModal && selectedRecord && (
+            {/* Reject Modal */}
+            {showRejectModal && (
                 <div className="modal-overlay">
                     <div className="modal-body">
-                        <div className="modal-header">
-                            <div className="centerText">Recommendation Details</div>
-                            <button className="close-btn" onClick={handleCancel}>
-                                <FaTimes />
+                        <h3 className="centerText">Reject Recommendation</h3>
+                        <textarea
+                            placeholder="Enter your comment..."
+                            value={rejectComment}
+                            onChange={(e) => setRejectComment(e.target.value)}
+                            rows={5}
+                        />
+                        <div className="center-controls">
+                            <button type="button" onClick={handleRejectCancel} className="cancel-btn">
+                                Cancel
                             </button>
-                        </div>
-                        <div className="modal-content">
-                            <div>
-                                <div className="details-row">
-                                    <span className="label">Recommendation:</span>
-                                    <span className="value">{selectedRecord.recommendation || '-'}</span>
-                                </div>
-                                <div className="details-row">
-                                    <span className="label">Department:</span>
-                                    <span className="value">{selectedRecord.department || '-'}</span>
-                                </div>
-                                <div className="details-row">
-                                    <span className="label">Remark:</span>
-                                    <span className="value">{selectedRecord.remarkbyManagement || '-'}</span>
-                                </div>
-                                <div className="details-row">
-                                    <span className="label">Responsible:</span>
-                                    <span className="value">{selectedRecord.responsibility || '-'}</span>
-                                </div>
-                            </div>
-                            <div className="confirm-buttons">
-                                <button type="button" onClick={handleApprove} className="approveBtn"> Approve </button>
-                                <button type="button" onClick={handleReject} className="rejectBtn"> Reject </button>
-                                <button type="button" onClick={handleCancel} className="cancel-btn"> Cancel</button>
-                            </div>
+                            <button
+                                type="button"
+                                onClick={handleRejectSave}
+                                disabled={!rejectComment.trim()}
+                                className="confirm-btn"
+                            >
+                                Save
+                            </button>
+
                         </div>
                     </div>
                 </div>
-            )}
-
-            {showConfirmation && (
-                <ConfirmationPopup
-                    message={`Are you sure you want to ${actionToTake === 'approve' ? 'approve' : 'reject'} this recommendation?`}
-                    onConfirm={confirmAction}
-                    onCancel={handleConfirmationCancel}
-                />
             )}
         </div>
     );

@@ -995,23 +995,14 @@ const CompleteHazopView = ({
                       setShowConfirm(true);
                     }}
                   >
-                    Approve
-                  </button>
-
-                  <button
-                    className="rejectBtn"
-                    onClick={() => {
-                      setApprovalAction("reject");
-                      setShowConfirm(true);
-                    }}
-                  >
-                    Reject
+                    Check this HAZOP
                   </button>
 
                   <button className="cancel-btn" onClick={onClose}>
                     Cancel
                   </button>
                 </div>
+
               </div>
             )}
             {step === 5 && (
@@ -1050,8 +1041,7 @@ const CompleteHazopView = ({
         )}
         {showConfirm && (
           <ConfirmationPopup
-            message={`Are you sure you want to ${approvalAction === "accept" ? "Approve" : "Reject"
-              }?`}
+            message="Are you sure you want to mark this HAZOP as checked?"
             onConfirm={(enteredComment) => handleApprovalSubmit(enteredComment)}
             onCancel={() => {
               setShowConfirm(false);
@@ -1060,6 +1050,7 @@ const CompleteHazopView = ({
             mode="approval"
           />
         )}
+
       </div>
     </div>
   );

@@ -33,7 +33,7 @@ const RoleBasedHazopPage = () => {
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showConfirmPopup, setShowConfirmPopup] = useState(false);
- const LoginUser = localStorage.getItem("empCode");
+  const LoginUser = localStorage.getItem("empCode");
   const companyId = localStorage.getItem("companyId");
   const toggleDropdown = (id) => {
     setOpenDropdown(openDropdown === id ? null : id);
@@ -46,6 +46,13 @@ const RoleBasedHazopPage = () => {
     completed: true
   });
 
+
+  const handleViewHazop = (item) => {
+    localStorage.setItem("hazopId", item.id); 
+    navigate("/HazopView");
+  };
+
+
   const toggleExpand = (key) => {
     setExpanded((prev) => ({ ...prev, [key]: !prev[key] }));
   };
@@ -56,18 +63,18 @@ const RoleBasedHazopPage = () => {
 
   const fetchColumns = async () => {
     try {
-        
- 
+
+
       const col1 = await axios.get(
-        `http://${strings.localhost}/api/hazopRegistration/getForTeamLeader?empCode=${LoginUser}/companyId=${companyId}&status=true&completionStatus=false&sendForVerification=false`
+        `http://${strings.localhost}/api/hazopRegistration/getForTeamLeader?empCode=${LoginUser}&companyId=${companyId}&status=true&completionStatus=false&sendForVerification=false`
       );
       console.log("response,", col1);
       const col2 = await axios.get(
-        `http://${strings.localhost}/api/hazopRegistration/getForTeamLeader?empCode=${LoginUser}/companyId=${companyId}&status=true&completionStatus=false&sendForVerification=true`
+        `http://${strings.localhost}/api/hazopRegistration/getForTeamLeader?empCode=${LoginUser}&companyId=${companyId}&status=true&completionStatus=false&sendForVerification=true`
       );
 
       const col3 = await axios.get(
-        `http://${strings.localhost}/api/hazopRegistration/getForTeamLeader?empCode=${LoginUser}/companyId=${companyId}&status=true&completionStatus=true&sendForVerification=false`
+        `http://${strings.localhost}/api/hazopRegistration/getForTeamLeader?empCode=${LoginUser}&companyId=${companyId}&status=true&completionStatus=true&sendForVerification=false`
       );
       const col1WithCount = await Promise.all(
         col1.data.map(async (item) => {
@@ -220,7 +227,7 @@ const RoleBasedHazopPage = () => {
   };
 
 
-  const renderDropdown = (item, isNewRegistered) => (
+  const renderDropdown = (item, columnType) => (
     <div className="dropdown">
       <button className="dots-button" onClick={() => toggleDropdown(item.id)}>
         <FaEllipsisV />
@@ -228,24 +235,42 @@ const RoleBasedHazopPage = () => {
 
       {openDropdown === item.id && (
         <div className="dropdown-content">
-          <button type="button" onClick={() => handleOpenNode(item)}>
-            <FaEye /> Open Node
-          </button>
-          <button type="button" onClick={() => handleUpdate(item)}>
-            <FaEdit /> Add Team
-          </button>
-          <button type="button" onClick={() => handleRecommendation(item)}>
-            <FaLightbulb /> Recommendation
-          </button>
-          {item.canSendForCompletion && isNewRegistered && (
-            <button type="button" onClick={() => openSendCompletionPopup(item)}>
-              <FaEye /> Send for Completion
+
+          {/* ✅ New Registered column → show all options */}
+          {columnType === "new" && (
+            <>
+              <button type="button" onClick={() => handleOpenNode(item)}>
+                <FaEye /> Open Node
+              </button>
+
+              <button type="button" onClick={() => handleUpdate(item)}>
+                <FaEdit /> Add Team
+              </button>
+
+              <button type="button" onClick={() => handleRecommendation(item)}>
+                <FaLightbulb /> Recommendation
+              </button>
+
+              {item.canSendForCompletion && (
+                <button type="button" onClick={() => openSendCompletionPopup(item)}>
+                  <FaCheckCircle /> Send for Completion
+                </button>
+              )}
+            </>
+          )}
+
+          {/* ✅ Pending & Completed → View only */}
+          {(columnType === "pending" || columnType === "completed") && (
+            <button type="button" onClick={() => handleViewHazop(item)}>
+              <FaEye /> View
             </button>
           )}
+
         </div>
       )}
     </div>
   );
+
 
   const truncateWords = (text, wordLimit = 4) => {
     if (!text) return "-";
@@ -305,7 +330,7 @@ const RoleBasedHazopPage = () => {
                         <span className="verified-badge"><FaCheckCircle /> Verified</span>
                       )}
                       <span className="card-date">{formatDate(item.hazopCreationDate)}</span>
-                      {renderDropdown(item, true)}
+                      {renderDropdown(item, 'new')}
                     </div>
 
                     <div className="card-title">{truncateWords(item.hazopTitle || "Untitled", 4)}</div>
@@ -354,7 +379,7 @@ const RoleBasedHazopPage = () => {
                         <span className="verified-badge"><FaCheckCircle /> Verified</span>
                       )}
                       <span className="card-date">{formatDate(item.hazopCreationDate)}</span>
-                      {renderDropdown(item, false)}
+                      {renderDropdown(item, 'pending')}
                     </div>
 
                     <div className="card-title">{truncateWords(item.hazopTitle, 4)}</div>
@@ -401,7 +426,7 @@ const RoleBasedHazopPage = () => {
                         <span className="verified-badge"><FaCheckCircle />  Verified</span>
                       )}
                       <span className="card-date">{formatDate(item.hazopCreationDate)}</span>
-                      {renderDropdown(item, false)}
+                      {renderDropdown(item, 'completed')}
                     </div>
 
                     <div className="card-title">{truncateWords(item.hazopTitle, 4)}</div>

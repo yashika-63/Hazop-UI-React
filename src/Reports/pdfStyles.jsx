@@ -1,14 +1,32 @@
 import { StyleSheet } from "@react-pdf/renderer";
 
+// 1. Centralized Color Palette
+const theme = {
+    primary: "#1E293B",      // Navy / Slate - Main Headers
+    secondary: "#475569",    // Dark Grey - Subheaders
+    accent: "#0F766E",       // Teal - Highlights
+    border: "#CBD5E1",       // Light Blue-Grey - Borders
+    bgLight: "#F8FAFC",      // Very Light - Alternating rows
+    bgHeader: "#F1F5F9",     // Page Headers
+    textMain: "#334155",     // Body Text
+    textDark: "#0F172A",     // Bold Values
+    textLight: "#64748B",    // Meta info
+    white: "#FFFFFF",
+    link: "#2563EB",         // Hyperlink Blue
+    success: "#166534",
+    danger: "#991B1B",
+    warning: "#B45309",
+};
+
 const styles = StyleSheet.create({
     page: {
-        paddingTop: 120,
+        paddingTop: 110,
         paddingBottom: 60,
-        paddingHorizontal: 40,
+        paddingHorizontal: 35,
         fontFamily: "Helvetica",
-        fontSize: 10,
-        color: "#333",
-        backgroundColor: "#fff",
+        fontSize: 9,
+        color: theme.textMain,
+        backgroundColor: theme.white,
     },
 
     /* ---------- HEADER ---------- */
@@ -17,26 +35,27 @@ const styles = StyleSheet.create({
         top: 0,
         left: 0,
         right: 0,
-        height: 100,
-        paddingHorizontal: 40,
+        height: 90,
+        paddingHorizontal: 35,
         paddingTop: 20,
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
         borderBottomWidth: 2,
-        borderBottomColor: "#0056b3",
+        borderBottomColor: theme.primary,
+        backgroundColor: theme.white,
     },
-    logo: { width: 60, height: 60, objectFit: "contain" },
+    logo: { width: 50, height: 50, objectFit: "contain" },
     headerTitleBlock: { textAlign: "center", flex: 1 },
     companyName: {
-        fontSize: 16,
+        fontSize: 14,
         fontWeight: "bold",
-        color: "#003366",
+        color: theme.primary,
         textTransform: "uppercase",
     },
-    reportTitle: { fontSize: 12, color: "#555", marginTop: 4, letterSpacing: 1 },
+    reportTitle: { fontSize: 10, color: theme.secondary, marginTop: 4, letterSpacing: 1 },
     headerMeta: { textAlign: "right", minWidth: 100 },
-    metaText: { fontSize: 9, color: "#666" },
+    metaText: { fontSize: 8, color: theme.textLight },
 
     /* ---------- FOOTER ---------- */
     footerContainer: {
@@ -44,168 +63,199 @@ const styles = StyleSheet.create({
         bottom: 0,
         left: 0,
         right: 0,
-        height: 50,
-        paddingHorizontal: 40,
+        height: 40,
+        paddingHorizontal: 35,
         borderTopWidth: 1,
-        borderTopColor: "#ccc",
+        borderTopColor: theme.border,
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
+        backgroundColor: theme.white,
     },
-    footerText: { fontSize: 9, color: "#888" },
+    footerText: { fontSize: 8, color: theme.textLight },
 
-    /* ---------- GENERAL ---------- */
-    section: { marginBottom: 20, backgroundColor: '#FFFFFF' },
+    /* ---------- SECTIONS & TYPOGRAPHY ---------- */
+    section: {
+        marginBottom: 15,
+        width: "100%",
+    },
     sectionTitle: {
         fontSize: 12,
         fontWeight: "bold",
-        color: "#0056b3",
-        marginBottom: 10,
+        color: theme.primary,
+        marginBottom: 8,
         borderBottomWidth: 1,
-        borderBottomColor: "#ddd",
+        borderBottomColor: theme.border,
         paddingBottom: 4,
+        textTransform: "uppercase",
     },
 
-    /* ---------- INFO CARDS ---------- */
+    /* ---------- TABLES (Professional Grid) ---------- */
+    // Strategy: Table has Top & Left border. Cells have Bottom & Right.
+    // This prevents double borders.
+    table: {
+        width: "100%",
+        borderTopWidth: 1,
+        borderLeftWidth: 1,
+        borderColor: theme.border,
+        marginBottom: 10,
+    },
+    tableRow: {
+        flexDirection: "row",
+        minHeight: 20,
+        alignItems: "stretch"
+    },
+    tableRowHeader: {
+        backgroundColor: theme.primary,
+    },
+    tableRowEven: {
+        backgroundColor: theme.bgLight
+    },
+    tableCol: {
+        borderRightWidth: 1,
+        borderBottomWidth: 1,
+        borderColor: theme.border,
+        padding: 4,
+        justifyContent: "center",
+    },
+    tableCellHeader: {
+        fontSize: 8,
+        fontWeight: "bold",
+        color: theme.white,
+        textAlign: "center"
+    },
+    tableCell: {
+        fontSize: 8,
+        color: theme.textMain,
+        flexWrap: "wrap",
+        wordBreak: "break-word"
+    },
+
+    /* ---------- INFO GRID (Key-Value Pairs) ---------- */
     infoCard: {
-        backgroundColor: "#F4FAFF",
-        padding: 12,
-        borderRadius: 6,
-        marginBottom: 15,
+        borderWidth: 1,
+        borderColor: theme.border,
+        borderRadius: 4,
+        marginBottom: 10,
     },
     infoItem: {
         flexDirection: "row",
-        justifyContent: "space-between",
-        marginBottom: 6,
-        flexWrap: "wrap",
+        borderBottomWidth: 1,
+        borderBottomColor: theme.bgLight,
+        paddingVertical: 5,
+        paddingHorizontal: 8,
     },
     infoLabel: {
         fontSize: 9,
         fontWeight: "bold",
-        color: "#495057",
-        width: "30%",
-        marginBottom: 2,
+        color: theme.secondary,
+        width: "35%",
     },
     infoValue: {
-        fontSize: 10,
-        color: "#212529",
+        fontSize: 9,
+        color: theme.textDark,
         flex: 1,
         textAlign: "right",
     },
 
-    /* ---------- TABLES ---------- */
-    table: {
-        width: "100%",
-        borderStyle: "solid",
-        borderWidth: 1,
-        borderColor: "#bfbfbf",
-        borderRightWidth: 0,
-        borderBottomWidth: 0,
-        marginBottom: 15,
-    },
-    tableRow: { flexDirection: "row", minHeight: 20 },
-    tableRowHeader: { backgroundColor: "#275D8D" },
-    tableRowEven: { backgroundColor: "#e9ecef" },
-    tableCol: {
-        width: "33.33%",
-        borderStyle: "solid",
-        borderWidth: 1,
-        borderLeftWidth: 0,
-        borderTopWidth: 0,
-        borderColor: "#BEBEBE",
-        padding: 3,
-        color: 'FFFFFF'
-    },
-    tableColWidths : {
-        recommendation: "40%",
-        department: "15%",
-        remark: "20%",
-        completionDate: "15%",
-        status: "10%",
-    },
-
-    tableCellHeader: { fontSize: 9, fontWeight: "bold", color: "#FFFFFF" },
-    tableCell: { fontSize: 9, color: "#212529", flexWrap: "wrap", wordBreak: "break-word", },
-
-    /* ---------- NODE SECTIONS ---------- */
+    /* ---------- NODE DETAILS ---------- */
     nodeContainer: {
-        borderWidth: 1,
-        borderColor: "#dee2e6",
-        borderRadius: 6,
         marginBottom: 15,
+        borderWidth: 1,
+        borderColor: theme.border,
+        borderRadius: 4,
+        overflow: "hidden",
     },
     nodeHeader: {
-        backgroundColor: "#275D8D",
-        padding: 8,
-        borderBottomWidth: 1,
-        borderBottomColor: "#ced4da",
+        backgroundColor: theme.primary,
+        paddingVertical: 6,
+        paddingHorizontal: 10,
+
         flexDirection: "row",
-        justifyContent: "space-between",
-        color: '#F4FAFF'
+        alignItems: "flex-start",   // 🔑 allow multi-line left side
+        flexWrap: "wrap",           // 🔑 allow wrapping
+
+        color: theme.white,
+        fontSize: 10,
+        fontWeight: "bold",
     },
-    nodeTitle: { fontSize: 11, fontWeight: "bold" },
+      
     nodeBody: {
+        padding: 8,
         flexDirection: "row",
         flexWrap: "wrap",
-        padding: 10,
-        justifyContent: "space-between",
+        backgroundColor: theme.white,
     },
-    nodeField: { width: "48%", marginBottom: 8 },
-    nodeLabel: { fontWeight: "bold", marginBottom: 2, fontSize: 10 },
-    nodeValue: { fontSize: 10, width: "100%", color: "#212529" },
-
-    /* ---------- INDEX ---------- */
-    indexRow: { flexDirection: "row", alignItems: "center" },
-    indexCol: { fontSize: 10, paddingHorizontal: 5 },
-
-    /* ---------- BADGES ---------- */
-    badge: {
-        borderRadius: 8,
-        paddingHorizontal: 6,
-        paddingVertical: 2,
+    nodeField: {
+        width: "50%",
+        marginBottom: 4,
+        flexDirection: "row",
+        paddingRight: 5
+    },
+    nodeLabel: {
+        fontWeight: "bold",
         fontSize: 8,
-        color: "white",
+        color: theme.secondary,
+        marginRight: 4,
+        width: "40%",
     },
-    bgGreen: { backgroundColor: "#28a745" },
-    bgRed: { backgroundColor: "#dc3545" },
+    nodeValue: {
+        fontSize: 8,
+        color: theme.textDark,
+        flex: 1,
+    },
 
-    /* ---------- CARDS ---------- */
+    /* ---------- DETAIL CARDS (Recs, Assignments) ---------- */
+    detailCard: {
+        marginBottom: 20,
+    },
     card: {
         borderWidth: 1,
-        borderColor: "#ccc",
-        borderRadius: 6,
+        borderColor: theme.border,
+        borderRadius: 4,
         padding: 10,
         marginBottom: 10,
-        backgroundColor: "#f9f9f9",
+        backgroundColor: theme.bgLight,
     },
-    cardTitle: { fontSize: 11, fontWeight: "bold", color: "#003366", marginBottom: 6 },
+    cardTitle: {
+        fontSize: 10,
+        fontWeight: "bold",
+        color: theme.primary,
+        marginBottom: 6,
+        borderBottomWidth: 1,
+        borderBottomColor: theme.border,
+        paddingBottom: 2
+    },
     cardRow: { flexDirection: "row", flexWrap: "wrap", marginBottom: 3 },
     cardLabel: {
         fontWeight: "bold",
-        width: "35%",
-        fontSize: 10,
-        color: "#495057",
+        width: "30%",
+        fontSize: 9,
+        color: theme.secondary,
     },
-    cardValue: { width: "65%", fontSize: 10, color: "#212529" },
+    cardValue: { width: "70%", fontSize: 9, color: theme.textDark },
 
-    completed: { color: "#28a745", fontWeight: "600" },
-    pending: { color: "#dc3545", fontWeight: "600" },
+    /* ---------- INDEX TABLE SPECIFIC ---------- */
+    indexRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        paddingVertical: 5,
+        borderBottomWidth: 1,
+        borderBottomColor: theme.border
+    },
+    indexHeader: {
+        backgroundColor: theme.secondary,
+        color: theme.white,
+        paddingVertical: 6,
+        borderBottomWidth: 0
+    },
+    indexCol: { fontSize: 9, paddingHorizontal: 5 },
 
-    /* ---------- ASSIGNMENT ---------- */
-    assignmentHeader: {
-        fontSize: 10,
-        fontWeight: "bold",
-        color: "#007bff",
-        marginBottom: 6,
-    },
-    assignmentCard: {
-        borderWidth: 1,
-        borderColor: "#ccc",
-        borderRadius: 6,
-        padding: 10,
-        marginBottom: 10,
-        backgroundColor: "#f9f9f9",
-    },
+    /* ---------- UTILS ---------- */
+    completed: { color: theme.success, fontWeight: "bold" },
+    pending: { color: theme.danger, fontWeight: "bold" },
+    linkText: { color: theme.link, textDecoration: "none" }
 });
 
 export default styles;
+export { theme }; // Export theme if needed elsewhere

@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { strings } from "../string";
-import { FaEllipsisV, FaEye } from "react-icons/fa";
+import { FaEllipsisV, FaEye, FaFilePdf } from "react-icons/fa";
 import '../styles/global.css';
 import { useNavigate } from "react-router-dom";
+import HazopReportPage from "../Reports/HazopReport";
 
 const HazopApprovalPage = () => {
     const [records, setRecords] = useState([]);
@@ -11,6 +12,7 @@ const HazopApprovalPage = () => {
     const [openDropdown, setOpenDropdown] = useState(null);
     const navigate = useNavigate();
     const empCode = localStorage.getItem("empCode");
+    const [selectedHazopId, setSelectedHazopId] = useState(null);
 
     const fetchHazopData = async () => {
         setLoading(true);
@@ -31,6 +33,9 @@ const HazopApprovalPage = () => {
         fetchHazopData();
     }, [empCode]);
 
+
+
+    
     const toggleDropdown = (id) => {
         setOpenDropdown(openDropdown === id ? null : id);
     };
@@ -51,6 +56,9 @@ const HazopApprovalPage = () => {
         navigate("/hazop-approval-view"); // Navigate to dedicated page
     };
 
+    const handleReportClick = (hazop) => {
+        setSelectedHazopId(hazop.id); // Open the HazopReport modal/page
+    };
     const renderDropdown = (hazop, rec) => (
         <div className="dropdown">
             <button className="dots-button" onClick={() => toggleDropdown(hazop.id)}>
@@ -61,7 +69,11 @@ const HazopApprovalPage = () => {
                     <button type="button" onClick={() => handleViewClick(hazop, rec)}>
                         <FaEye /> View
                     </button>
+                    <button type="button" onClick={() => handleReportClick(hazop)}>
+                        <FaFilePdf /> Report
+                    </button>
                 </div>
+
             )}
         </div>
     );
@@ -109,6 +121,10 @@ const HazopApprovalPage = () => {
                     </tbody>
                 </table>
             )}
+            {selectedHazopId && (
+                <HazopReportPage hazopId={selectedHazopId} onClose={() => setSelectedHazopId(null)} />
+            )}
+
         </div>
     );
 };

@@ -156,7 +156,7 @@ const CompleteRecommendationApproval = () => {
                                             <span style={{ color: "red", fontWeight: 600 }}>Delay</span>
                                         )}
 
-                                        <div className="dropdown" style={{ display: "inline-block", marginLeft: "8px" }}>
+                                        <div className="dropdown" style={{ display: "inline-block", marginLeft: "0px" }}>
                                             <button
                                                 className="dots-button"
                                                 onClick={() => toggleDropdown(rec.id)}

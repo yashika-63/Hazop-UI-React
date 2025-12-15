@@ -3,6 +3,8 @@ import axios from "axios";
 import { PDFViewer } from "@react-pdf/renderer";
 import { strings } from "../string";
 import HazopPdfDocument from "./HazopPdfDocument";
+import { generateHazopExcel } from "./hazopExcelGenerator";
+import { generateHazopPdf } from "./hazopPdfGenerator";
 
 
 const HazopReportPage = ({ hazopId, onClose }) => {
@@ -135,7 +137,18 @@ const HazopReportPage = ({ hazopId, onClose }) => {
                     <div>
                         <button
                             onClick={() =>
-                                downloadExcel(hazop, team, nodes, nodeDetails, nodeRecommendations)
+                                generateHazopExcel({
+                                    hazop: hazop,
+                                    team: team,
+                                    nodes: nodes, // Full details for Sheet 3
+                                    registrationNodes: registrationNodes, // <--- ADD THIS for Sheet 2 (Index)
+                                    nodeDetailsState: nodeDetails,
+                                    allRecommendations: allRecommendations,
+                                    mocReferences: mocReferences,
+                                    verificationData: verificationData,
+                                    assignData: assignData,
+                                    hazopId: hazopId
+                                })
                             }
                             style={{
                                 backgroundColor: "#28a745",
@@ -152,7 +165,21 @@ const HazopReportPage = ({ hazopId, onClose }) => {
 
                         <button
                             onClick={() =>
-                                downloadPdf(hazop, team, nodes, nodeDetails, nodeRecommendations)
+                                // ✅ FIXED: Pass a single object with all properties
+                                generateHazopPdf({
+                                    hazop: hazop,
+                                    team: team,
+                                    nodes: nodes,
+                                    nodeDetails: nodeDetails,
+                                    nodeDetailsState: nodeDetails, // Map this correctly based on generator expectation
+                                    nodeRecommendations: nodeRecommendations,
+                                    allRecommendations: allRecommendations,
+                                    verificationData: verificationData,
+                                    mocReferences: mocReferences,
+                                    assignData: assignData,
+                                    downloadDate: downloadDate,
+                                    hazopId: hazopId
+                                })
                             }
                             style={{
                                 backgroundColor: "#28a745",
@@ -176,7 +203,11 @@ const HazopReportPage = ({ hazopId, onClose }) => {
                             <div className="loading-spinner"></div>
                         </div>
                     ) : registrationNodes.length > 0 ? (
-                        <PDFViewer width="100%" height={600}>
+                        <PDFViewer
+                            key={`${hazopId}-${downloadDate}`}   // ✅ IMPORTANT FIX
+                            width="100%"
+                            height="100%"
+                        >
                             <HazopPdfDocument
                                 hazop={hazop}
                                 team={team}
@@ -195,8 +226,8 @@ const HazopReportPage = ({ hazopId, onClose }) => {
                             No registration nodes found.
                         </div>
                     )}
-
                 </div>
+
             </div>
         </div>
     );

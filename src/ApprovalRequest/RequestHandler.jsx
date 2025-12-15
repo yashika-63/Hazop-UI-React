@@ -19,9 +19,9 @@ const RequestHandler = () => {
         teamAcceptancePending: 0,
         recommendationVerificationPending: 0,
         registrationVerificationPending: 0,
-        approvalPending:0,
-        assignmentPending:0,
-        totalPendingCount:0
+        approvalPending: 0,
+        assignmentPending: 0,
+        totalPendingCount: 0
 
     });
 
@@ -33,7 +33,7 @@ const RequestHandler = () => {
                     teamAcceptancePending: data.teamAcceptancePending,
                     recommendationVerificationPending: data.recommendationVerificationPending,
                     registrationVerificationPending: data.registrationVerificationPending,
-                    approvalPending:data.approvalPending,
+                    approvalPending: data.approvalPending,
                     assignmentPending: data.assignmentPending
                 });
             })
@@ -85,11 +85,11 @@ const RequestHandler = () => {
                     >
                         <FaList />
                         Hazop Review
-                        {counts.registrationVerificationPending > 0 && (
-                            <span className="badge">{counts.registrationVerificationPending}</span>
+                        {counts.approvalPending > 0 && (
+                            <span className="badge">{counts.approvalPending}</span>
                         )}
                     </button>
-
+                    {/* 
                     <button
                         type="button"
                         className={activeSection === 'HazopConfirmationApproval' ? 'active' : ''}
@@ -100,7 +100,7 @@ const RequestHandler = () => {
                         {counts.approvalPending > 0 && (
                             <span className="badge">{counts.approvalPending}</span>
                         )}
-                    </button>
+                    </button> */}
 
                     <button
                         type="button"
@@ -119,7 +119,7 @@ const RequestHandler = () => {
                     {activeSection === 'HazopTeamAcceptance' && <HazopTeamAcceptanceApproval />}
                     {activeSection === 'HazopRecommendationApproval' && <HazopRecommendationApproval />}
                     {activeSection === 'HazopApprove' && <HazopApprovalPage />}
-                    {activeSection === 'HazopConfirmationApproval' && <HazopConfirmationApproval />}
+                    {/* {activeSection === 'HazopConfirmationApproval' && <HazopConfirmationApproval />} */}
                     {activeSection === 'RecommendationApproval' && <RecommendationApproval />}
                 </div>
             </div>

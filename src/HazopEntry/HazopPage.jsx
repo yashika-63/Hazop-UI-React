@@ -229,7 +229,14 @@ const HazopPage = () => {
     navigate(`/HazopWorkflow/${item.id}`,);
   };
 
-  const renderDropdown = (item, isNewRegistered) => (
+
+  const handleViewHazop = (item) => {
+    localStorage.setItem("hazopId", item.id); 
+        navigate("/HazopView");
+  };
+
+
+  const renderDropdown = (item, columnType) => (
     <div className="dropdown">
       <button className="dots-button" onClick={() => toggleDropdown(item.id)}>
         <FaEllipsisV />
@@ -237,29 +244,47 @@ const HazopPage = () => {
 
       {openDropdown === item.id && (
         <div className="dropdown-content">
-          <button type="button" onClick={() => handleOpenNode(item)}>
-            <FaEye /> Open Node
-          </button>
-          <button type="button" onClick={() => handleUpdate(item)}>
-            <FaEdit /> Add Team
-          </button>
-          <button type="button" onClick={() => handleRecommendation(item)}>
-            <FaLightbulb /> Recommendation
-          </button>
-          {item.canSendForCompletion && isNewRegistered && (
-            <button type="button" onClick={() => openSendCompletionPopup(item)}>
-              <FaEye /> Send for Completion
+
+          {/* 🔹 New Registered → ALL options */}
+          {columnType === "new" && (
+            <>
+              <button type="button" onClick={() => handleOpenNode(item)}>
+                <FaEye /> Open Node
+              </button>
+
+              <button type="button" onClick={() => handleUpdate(item)}>
+                <FaEdit /> Add Team
+              </button>
+
+              <button type="button" onClick={() => handleRecommendation(item)}>
+                <FaLightbulb /> Recommendation
+              </button>
+
+              {/* {item.canSendForCompletion && (
+                <button type="button" onClick={() => openSendCompletionPopup(item)}>
+                  <FaCheckCircle /> Send for Completion
+                </button>
+              )} */}
+
+              <button type="button" onClick={() => handleNavigate(item)}>
+                <StatusIcon status={item.status} />
+                HAZOP Status
+              </button>
+            </>
+          )}
+
+          {/* 🔹 Pending & Completed → View only */}
+          {(columnType === "pending" || columnType === "completed") && (
+            <button type="button" onClick={() => handleViewHazop(item)}>
+              <FaEye /> View
             </button>
           )}
-          <button type="button" onClick={() => handleNavigate(item)}>
-            <StatusIcon status={item.status} />
-            HAZOP Status
-          </button>
 
         </div>
       )}
     </div>
   );
+
 
   const truncateWords = (text, wordLimit = 4) => {
     if (!text) return "-";
@@ -319,7 +344,7 @@ const HazopPage = () => {
                         <span className="verified-badge"><FaCheckCircle /> Verified</span>
                       )}
                       <span className="card-date">{formatDate(item.hazopCreationDate)}</span>
-                      {renderDropdown(item, true)}
+                      {renderDropdown(item, 'new')}
                     </div>
 
                     <div className="card-title">{truncateWords(item.hazopTitle || "Untitled", 4)}</div>
@@ -368,7 +393,7 @@ const HazopPage = () => {
                         <span className="verified-badge"><FaCheckCircle /> Verified</span>
                       )}
                       <span className="card-date">{formatDate(item.hazopCreationDate)}</span>
-                      {renderDropdown(item, false)}
+                      {renderDropdown(item, 'pending')}
                     </div>
 
                     <div className="card-title">{truncateWords(item.hazopTitle, 4)}</div>
@@ -415,7 +440,7 @@ const HazopPage = () => {
                         <span className="verified-badge"><FaCheckCircle />  Verified</span>
                       )}
                       <span className="card-date">{formatDate(item.hazopCreationDate)}</span>
-                      {renderDropdown(item, false)}
+                      {renderDropdown(item, 'completed')}
                     </div>
 
                     <div className="card-title">{truncateWords(item.hazopTitle, 4)}</div>
