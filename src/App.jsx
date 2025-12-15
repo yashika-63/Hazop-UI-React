@@ -22,6 +22,7 @@ import { ToastContainer } from 'react-toastify';
 import './App.css';
 import "./styles/global.css";
 import RoleBasedHazopPage from './HazopEntry/RoleBasedHazopPage';
+import MainComponent from './CreateNodeDiscussion/mainComponent';
 
 const App = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -78,6 +79,7 @@ const App = () => {
                     <Route path="/HazopStatusPage" element={<HazopStatusPage />} />
                     <Route path="/RoleBasedHazopPage" element={<RoleBasedHazopPage />} />
                     <Route path="/NodePopup" element={<NodePopup />} />
+                    <Route path="/MainComponent" element={<MainComponent />} />
 
                     <Route path="*" element={<Navigate to="/HazopPage" />} />
                   </Routes>

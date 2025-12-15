@@ -38,6 +38,7 @@ const CreateNodeDetails = () => {
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [recToDelete, setRecToDelete] = useState(null);
   const [recIndexToDelete, setRecIndexToDelete] = useState(null);
+const [currentDetailNo, setCurrentDetailNo] = useState(null);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -131,6 +132,7 @@ const CreateNodeDetails = () => {
           setDetails(data);
           setCurrentIndex(0);
           const firstDetail = data[0];
+  setCurrentDetailNo(firstDetail.nodeDetailNumber);
           setForm({
             ...firstDetail,
             additionalControl:
@@ -275,12 +277,16 @@ const CreateNodeDetails = () => {
 
     try {
       setLoading(true);
+      const previousDetailNo =
+  currentDetailId === null && currentDetailNo
+    ? currentDetailNo
+    : currentDetailNo || 0;
       const nodeDetailResponse = await fetch(
-        `http://${strings.localhost}/api/hazopNodeDetail/saveDetails/${currentNodeId}`,
+        `http://${strings.localhost}/api/hazopNodeDetail/saveDetails/${currentNodeId}?previousDetailNo=${previousDetailNo}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify([form]),
+          body: JSON.stringify(form),
         }
       );
 
@@ -383,6 +389,7 @@ const CreateNodeDetails = () => {
           setTempRecommendations(recommendations);
           setCurrentDetailId(detail.id);
           setIsSaved(true);
+          setCurrentDetailNo(detail.nodeDetailNumber);
         }
       } catch (err) {
         console.error("Error fetching node details:", err);
@@ -397,27 +404,32 @@ const CreateNodeDetails = () => {
 const fetchDetailByDirection = async (direction) => {
   if (!nodeID) return null;
 
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      // Pass nothing if currentDetailId is null for "previous"
-      const currentIdParam =
-        currentDetailId || (direction === "previous" ? "" : 0);
+    // IMPORTANT: use nodeDetailNumber, not ID
+    const currentDetailNumberParam =
+      currentDetailNo ?? 0; // null-safe
 
-      const res = await fetch(
-        `http://${strings.localhost}/api/hazopNodeDetail/getByDirection?currentId=${currentIdParam}&nodeId=${currentNodeId}&direction=${direction}`
-      );
-      if (!res.ok) return null;
-      const data = await res.json();
-      return data || null;
-    } catch (error) {
-      console.error("Error fetching node detail by direction:", error);
-      showToast("Failed to load the discussion.", "error");
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  };
+    const res = await fetch(
+      `http://${strings.localhost}/api/hazopNodeDetail/getByDirectionNew` +
+        `?currentDetailNumber=${currentDetailNumberParam}` +
+        `&nodeId=${currentNodeId}` +
+        `&direction=${direction}`
+    );
+
+    if (!res.ok) return null;
+
+    const data = await res.json();
+    return data || null;
+  } catch (error) {
+    console.error("Error fetching node detail by direction:", error);
+    showToast("Failed to load the discussion.", "error");
+    return null;
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleSaveAndNext = async () => {
     if (!validate()) return;
@@ -446,12 +458,16 @@ const fetchDetailByDirection = async (direction) => {
         node: { id: nodeID },
       };
 
+const previousDetailNo =
+  currentDetailId === null && currentDetailNo
+    ? currentDetailNo
+    : currentDetailNo || 0;
       const detailRes = await fetch(
-        `http://${strings.localhost}/api/hazopNodeDetail/saveDetails/${currentNodeId}`,
+        `http://${strings.localhost}/api/hazopNodeDetail/saveDetails/${currentNodeId}?previousDetailNo=${previousDetailNo}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify([discussionPayload]),
+          body: JSON.stringify(discussionPayload),
         }
       );
 
@@ -562,7 +578,6 @@ const fetchDetailByDirection = async (direction) => {
       showToast("Please save the form before navigating.", "warn");
       return;
     }
-
     // CASE 1: You are on a blank new form and user clicked PREVIOUS
     if (!currentDetailId && direction === "previous") {
       const lastRecord = await fetchDetailByDirection("previous");
@@ -580,6 +595,7 @@ const fetchDetailByDirection = async (direction) => {
 
       setTempRecommendations(recs);
       setCurrentDetailId(lastRecord.id);
+      setCurrentDetailNo(lastRecord.nodeDetailNumber);
       return;
     }
 
@@ -611,44 +627,24 @@ const fetchDetailByDirection = async (direction) => {
 
     setTempRecommendations(recs);
     setCurrentDetailId(nextDetail.id);
+  setCurrentDetailNo(nextDetail.nodeDetailNumber);
   };
 
-  const openNextRecord = async () => {
-    if (!validate()) return;
+  const handleAddDiscussionNext = () => {
+  if (!isSaved) {
+    showToast("Please save the current discussion first.", "warn");
+    return;
+  }
 
-    if (!isSaved) {
-      showToast("Please save the form before navigating.", "warn");
-      return;
-    }
-    const updatedDetails = await reloadDetails();
+  // Open a fresh blank form
+  setForm(initialState);
+  setTempRecommendations([]);
+  setCurrentDetailId(null);
+  setCurrentIndex(details.length); // optional, keeps index in sync
+  setIsSaved(true);
 
-    const nextIndex = currentIndex + 1;
-
-    if (nextIndex < updatedDetails.length) {
-      const detail = updatedDetails[nextIndex];
-      const recs = await loadRecommendations(detail.id);
-
-      setForm({
-        ...detail,
-        additionalControl: recs.map((r) => r.recommendation).join("\n") || "• ",
-      });
-
-      setTempRecommendations(recs);
-      setCurrentDetailId(detail.id);
-      setCurrentIndex(nextIndex);
-      setIsSaved(true);
-
-      return;
-    }
-
-    setForm(initialState);
-    setTempRecommendations([]);
-    setCurrentDetailId(null);
-    setCurrentIndex(updatedDetails.length);
-    setIsSaved(true);
-
-    showToast("Blank form opened. Enter new details.", "info");
-  };
+  showToast("Blank form opened. Add new discussion.", "info");
+};
 
   const loadRecommendations = async (detailId) => {
     try {
@@ -827,11 +823,6 @@ const fetchDetailByDirection = async (direction) => {
         </option>
       ))}
     </select>
-  );
-  console.log("currentNodeData:", currentNodeData);
-  console.log(
-    "javaHazopRegistration id:",
-    currentNodeData?.javaHazopRegistration?.id
   );
 
   const root = document.documentElement;
@@ -1436,6 +1427,14 @@ const fetchDetailByDirection = async (direction) => {
                 onClick={() => handlePrevNext("next")}
               >
                 Next Discussion
+              </button>
+              <button
+                type="button"
+                className="save-btn"
+                disabled={loading}
+                onClick={handleAddDiscussionNext}
+              >
+                Add Discussion next to this
               </button>
             </div>
             <div className="center-controls">

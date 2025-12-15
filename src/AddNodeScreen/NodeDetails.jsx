@@ -7,6 +7,10 @@ import TextareaAutosize from "react-textarea-autosize";
 import RiskLevelPopup from "./RiskLevelPopup";
 import { strings } from "../string";
 import CreateNodeDetails from "./CreateNodeDetails";
+import MainComponent from "../CreateNodeDiscussion/mainComponent";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import axios from "axios";
+import SequenceUpdatePopup from "./SequenceUpdatePopup";
 
 const NodeDetails = () => {
   const location = useLocation();
@@ -21,6 +25,7 @@ const NodeDetails = () => {
   const [selectedDetail, setSelectedDetail] = useState(null);
   const [openDropdown, setOpenDropdown] = useState(null);
   const [showRiskPopup, setShowRiskPopup] = useState(false);
+  const [sequenceUpdatePopup, setSequenceUpdatePopup] = useState(false);
   const [showCompletePopup, setShowCompletePopup] = useState(false);
   const [recommendationsMap, setRecommendationsMap] = useState({});
   const [expandedDetailId, setExpandedDetailId] = useState(null);
@@ -172,6 +177,83 @@ const NodeDetails = () => {
     if ([20, 25].includes(r)) return "risk-badge risk-intolerable";
 
     return "risk-default";
+  };
+
+  const reorder = (list, startIndex, endIndex) => {
+    const result = Array.from(list);
+    const [removed] = result.splice(startIndex, 1);
+    result.splice(endIndex, 0, removed);
+    return result;
+  };
+
+  const updateSequenceToBackend = async (newList) => {
+    try {
+      const payload = newList.map((item, index) => ({
+        id: item.id,
+        nodeDetailNumber: index + 1,
+      }));
+
+      const response = await fetch(
+        `http://${strings.localhost}/api/hazopNodeDetail/updateSequenceById/${id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      if (!response.ok) {
+        showToast("Failed to update sequence", "error");
+        return;
+      }
+
+      showToast("Sequence Updated Successfully!", "success");
+    } catch (error) {
+      console.error("Sequence update error:", error);
+      showToast("Something went wrong", "error");
+    }
+  };
+
+  const onDragEnd = (result) => {
+    if (!result.destination) return;
+
+    const reorderedList = reorder(
+      details,
+      result.source.index,
+      result.destination.index
+    );
+
+    setDetails(reorderedList);
+    updateSequenceToBackend(reorderedList);
+  };
+
+  const handleDragEnd = async (result) => {
+    const { source, destination } = result;
+    if (!destination) return;
+
+    if (source.index === destination.index) return;
+
+    const reordered = Array.from(details);
+    const [moved] = reordered.splice(source.index, 1);
+    reordered.splice(destination.index, 0, moved);
+
+    setDetails(reordered);
+
+    // backend expects ONLY list of IDs in correct order
+    const payload = reordered.map((item) => item.id);
+
+    try {
+      await axios.put(
+        `http://${strings.localhost}/api/hazopNodeDetail/updateSequenceById/${id}`,
+        payload,
+        { headers: { "Content-Type": "application/json" } }
+      );
+
+      showToast("Sequence updated!", "success");
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to update sequence", "error");
+    }
   };
 
   function ShowMoreText({ text = "", previewLength = 250, borderClass }) {
@@ -424,6 +506,15 @@ const NodeDetails = () => {
           </button>
         )}
 
+        {!node?.completionStatus && (
+          <button
+            className="add-btn"
+            onClick={() => setSequenceUpdatePopup(true)}
+          >
+            Update Discussion Sequence
+          </button>
+        )}
+
         {/* Show Add Discussion button only if node is not completed */}
         {!node?.completionStatus && (
           <button
@@ -440,221 +531,276 @@ const NodeDetails = () => {
       </div>
 
       <div className="nd-details-wrapper">
-        <div>
-          {details.length === 0 ? (
-            <p className="error-text">
-              No node details created yet. Click “Add Discussion” to add one.
-            </p>
-          ) : (
-            details.map((d, index) => (
-              <div
-                key={d.id}
-                className={`nd-detail-card ${getRiskClass(
-                  d.riskRating || d.additionalRiskRating
-                )}`}
-              >
-                {renderDropdown(d)}
-
-                <div className="nd-detail-header">
-                  <div>
-                    <h2>General Parameter: {d.generalParameter}</h2>
-                    <p>Specific Parameter: {d.specificParameter}</p>
-                    <p>Guide Word: {d.guidWord}</p>
-                  </div>
-
-                  <div className="nd-detail-badges">
-                    <span
-                      className={`risk-badge ${getRiskClass(d.riskRating)}`}
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <Droppable droppableId="details">
+            {(provided) => (
+              <div ref={provided.innerRef} {...provided.droppableProps}>
+                {details.length === 0 ? (
+                  <p className="error-text">
+                    No node details created yet. Click “Add Discussion” to add
+                    one.
+                  </p>
+                ) : (
+                  details.map((d, index) => (
+                    <Draggable
+                      key={d.id}
+                      draggableId={String(d.id)}
+                      index={index}
                     >
-                      Initial Risk Rating: {d.riskRating || "-"} (
-                      {getRiskLevelText(d.riskRating)})
-                    </span>
+                      {(provided, snapshot) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          className={`nd-detail-card ${getRiskClass(
+                            d.riskRating || d.additionalRiskRating
+                          )} ${snapshot.isDragging ? "dragging" : ""}`}
+                        >
+                          {/* ---------- YOUR ORIGINAL CARD CONTENT START ---------- */}
 
-                    <span
-                      className={`risk-badge ${getRiskClass(
-                        d.additionalRiskRating
-                      )}`}
-                    >
-                      Final Risk Rating: {d.additionalRiskRating || "-"} (
-                      {getRiskLevelText(d.additionalRiskRating)})
-                    </span>
-                  </div>
-                </div>
-                <div className="input-row-node">
-                  <div className="form-group">
-                    <span>Deviation</span>
-                    <ShowMoreText text={d.deviation} previewLength={600} />
-                  </div>
-                  <div className="form-group">
-                    <span>Consequences</span>
-                    <ShowMoreText text={d.consequences} previewLength={600} />
-                  </div>
-                  <div className="form-group">
-                    <span>Causes</span>
-                    <ShowMoreText text={d.causes} previewLength={600} />
-                  </div>
+                          {renderDropdown(d)}
 
-                  <div>
-                    <div className="form-group existing-control">
-                      <label>Existing control</label>
-                      <ShowMoreText
-                        text={d.existineControl}
-                        borderClass={getBorderClass(d.riskRating)}
-                        previewLength={250}
-                      />
-                    </div>
+                          <div className="nd-detail-header">
+                            <div>
+                              <h2>General Parameter: {d.generalParameter}</h2>
+                              <p>Specific Parameter: {d.specificParameter}</p>
+                              <p>Guide Word: {d.guidWord}</p>
+                            </div>
 
-                    <div className="metric-row">
-                      <div className="form-group">
-                        <label>P</label>
-                        <input
-                          value={d.existineProbability || "-"}
-                          style={{
-                            borderColor: getBorderColor(d.riskRating),
-                            borderWidth: "2px",
-                            borderStyle: "solid",
-                            width: "80%",
-                            borderLeft: `5px solid ${getBorderColor(
-                              d.riskRating
-                            )}`,
-                          }}
-                          readOnly
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label>S</label>
-                        <input
-                          value={d.existingSeverity || "-"}
-                          style={{
-                            borderColor: getBorderColor(d.riskRating),
-                            borderWidth: "2px",
-                            borderStyle: "solid",
-                            width: "80%",
-                            borderLeft: `5px solid ${getBorderColor(
-                              d.riskRating
-                            )}`,
-                          }}
-                          readOnly
-                        />
-                      </div>
-                    <div className="form-group">
-                      <label>R</label>
-                      <input
-                        value={d.riskRating || "-"}
-                        style={{
-                          borderColor: getBorderColor(d.riskRating),
-                          borderWidth: "2px",
-                          borderStyle: "solid",
-                          width: "90%",
-                          borderLeft: `5px solid ${getBorderColor(
-                            d.riskRating
-                          )}`,
-                        }}
-                        readOnly
-                      />
-                    </div>
-                    </div>
-                    <small
-                      className={`risk-text ${getRiskTextClass(
-                        d.riskRating
-                      )} metric-single`}
-                      style={{ textAlign: "center" }}
-                    >
-                      {getRiskLevelText(d.riskRating)}
-                    </small>
-                  </div>
+                            <div className="nd-detail-badges">
+                              <span
+                                className={`risk-badge ${getRiskClass(
+                                  d.riskRating
+                                )}`}
+                              >
+                                Initial Risk Rating: {d.riskRating || "-"} (
+                                {getRiskLevelText(d.riskRating)})
+                              </span>
 
-                  <div>
-                    <div className="form-group existing-control">
-                      <label>Additional Control</label>
-                      <ShowMoreText
-                        text={d.additionalControl}
-                        borderClass={getBorderClass(d.additionalRiskRating)}
-                        previewLength={250}
-                      />
-                    </div>
-                    <div className="metric-row">
-                      <div className="form-group">
-                        <label>P</label>
-                        <input
-                          value={d.additionalProbability || "-"}
-                          style={{
-                            borderColor: getBorderColor(d.additionalRiskRating),
-                            borderWidth: "2px",
-                            borderStyle: "solid",
-                            width: "80%",
-                            borderLeft: `5px solid ${getBorderColor(
-                              d.additionalRiskRating
-                            )}`,
-                          }}
-                          readOnly
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label>S</label>
-                        <input
-                          value={d.additionalSeverity || "-"}
-                          style={{
-                            borderColor: getBorderColor(d.additionalRiskRating),
-                            borderWidth: "2px",
-                            borderStyle: "solid",
-                            width: "80%",
-                            borderLeft: `5px solid ${getBorderColor(
-                              d.additionalRiskRating
-                            )}`,
-                          }}
-                          readOnly
-                        />
-                      </div>
-                    <div className="form-group">
-                      <label>R</label>
-                      <input
-                        value={d.additionalRiskRating || "-"}
-                        style={{
-                          borderColor: getBorderColor(d.additionalRiskRating),
-                          borderWidth: "2px",
-                          borderStyle: "solid",
-                          width: "90%",
-                          borderLeft: `5px solid ${getBorderColor(
-                            d.additionalRiskRating
-                          )}`,
-                        }}
-                        readOnly
-                      />
-                    </div>
-                    </div>
-                    <small
-                      className={`risk-text ${getRiskTextClass(
-                        d.additionalRiskRating
-                      )} metric-single`}
-                      style={{ textAlign: "center" }}
-                    >
-                      {getRiskLevelText(d.additionalRiskRating)}
-                    </small>
-                  </div>
-                </div>
-                <div className="rightbtn-controls">
-                  <h6
-                    style={{ cursor: "pointer" }}
-                    onClick={() => handleToggleRecommendations(d.id)}
-                  >
-                    {expandedDetailId === d.id
-                      ? "Hide Recommendations"
-                      : "View All Recommendations"}
-                  </h6>
-                </div>
+                              <span
+                                className={`risk-badge ${getRiskClass(
+                                  d.additionalRiskRating
+                                )}`}
+                              >
+                                Final Risk Rating:{" "}
+                                {d.additionalRiskRating || "-"} (
+                                {getRiskLevelText(d.additionalRiskRating)})
+                              </span>
+                            </div>
+                          </div>
 
-                {expandedDetailId === d.id && (
-                  <div className="recommendation-table-container">
-                    <RecommendationTable
-                      recommendations={recommendationsMap[d.id] || []}
-                    />
-                  </div>
+                          <div className="input-row-node">
+                            <div className="form-group">
+                              <span>Deviation</span>
+                              <ShowMoreText
+                                text={d.deviation}
+                                previewLength={600}
+                              />
+                            </div>
+
+                            <div className="form-group">
+                              <span>Consequences</span>
+                              <ShowMoreText
+                                text={d.consequences}
+                                previewLength={600}
+                              />
+                            </div>
+
+                            <div className="form-group">
+                              <span>Causes</span>
+                              <ShowMoreText
+                                text={d.causes}
+                                previewLength={600}
+                              />
+                            </div>
+
+                            <div>
+                              <div className="form-group existing-control">
+                                <label>Existing control</label>
+                                <ShowMoreText
+                                  text={d.existineControl}
+                                  borderClass={getBorderClass(d.riskRating)}
+                                  previewLength={250}
+                                />
+                              </div>
+
+                              <div className="metric-row">
+                                <div className="form-group">
+                                  <label>P</label>
+                                  <input
+                                    value={d.existineProbability || "-"}
+                                    style={{
+                                      borderColor: getBorderColor(d.riskRating),
+                                      borderWidth: "2px",
+                                      borderStyle: "solid",
+                                      width: "80%",
+                                      borderLeft: `5px solid ${getBorderColor(
+                                        d.riskRating
+                                      )}`,
+                                    }}
+                                    readOnly
+                                  />
+                                </div>
+
+                                <div className="form-group">
+                                  <label>S</label>
+                                  <input
+                                    value={d.existingSeverity || "-"}
+                                    style={{
+                                      borderColor: getBorderColor(d.riskRating),
+                                      borderWidth: "2px",
+                                      borderStyle: "solid",
+                                      width: "80%",
+                                      borderLeft: `5px solid ${getBorderColor(
+                                        d.riskRating
+                                      )}`,
+                                    }}
+                                    readOnly
+                                  />
+                                </div>
+
+                                <div className="form-group">
+                                  <label>R</label>
+                                  <input
+                                    value={d.riskRating || "-"}
+                                    style={{
+                                      borderColor: getBorderColor(d.riskRating),
+                                      borderWidth: "2px",
+                                      borderStyle: "solid",
+                                      width: "90%",
+                                      borderLeft: `5px solid ${getBorderColor(
+                                        d.riskRating
+                                      )}`,
+                                    }}
+                                    readOnly
+                                  />
+                                </div>
+                              </div>
+
+                              <small
+                                className={`risk-text ${getRiskTextClass(
+                                  d.riskRating
+                                )} metric-single`}
+                                style={{ textAlign: "center" }}
+                              >
+                                {getRiskLevelText(d.riskRating)}
+                              </small>
+                            </div>
+
+                            {/* Additional Control */}
+                            <div>
+                              <div className="form-group existing-control">
+                                <label>Additional Control</label>
+                                <ShowMoreText
+                                  text={d.additionalControl}
+                                  borderClass={getBorderClass(
+                                    d.additionalRiskRating
+                                  )}
+                                  previewLength={250}
+                                />
+                              </div>
+
+                              <div className="metric-row">
+                                <div className="form-group">
+                                  <label>P</label>
+                                  <input
+                                    value={d.additionalProbability || "-"}
+                                    style={{
+                                      borderColor: getBorderColor(
+                                        d.additionalRiskRating
+                                      ),
+                                      borderWidth: "2px",
+                                      borderStyle: "solid",
+                                      width: "80%",
+                                      borderLeft: `5px solid ${getBorderColor(
+                                        d.additionalRiskRating
+                                      )}`,
+                                    }}
+                                    readOnly
+                                  />
+                                </div>
+
+                                <div className="form-group">
+                                  <label>S</label>
+                                  <input
+                                    value={d.additionalSeverity || "-"}
+                                    style={{
+                                      borderColor: getBorderColor(
+                                        d.additionalRiskRating
+                                      ),
+                                      borderWidth: "2px",
+                                      borderStyle: "solid",
+                                      width: "80%",
+                                      borderLeft: `5px solid ${getBorderColor(
+                                        d.additionalRiskRating
+                                      )}`,
+                                    }}
+                                    readOnly
+                                  />
+                                </div>
+
+                                <div className="form-group">
+                                  <label>R</label>
+                                  <input
+                                    value={d.additionalRiskRating || "-"}
+                                    style={{
+                                      borderColor: getBorderColor(
+                                        d.additionalRiskRating
+                                      ),
+                                      borderWidth: "2px",
+                                      borderStyle: "solid",
+                                      width: "90%",
+                                      borderLeft: `5px solid ${getBorderColor(
+                                        d.additionalRiskRating
+                                      )}`,
+                                    }}
+                                    readOnly
+                                  />
+                                </div>
+                              </div>
+
+                              <small
+                                className={`risk-text ${getRiskTextClass(
+                                  d.additionalRiskRating
+                                )} metric-single`}
+                                style={{ textAlign: "center" }}
+                              >
+                                {getRiskLevelText(d.additionalRiskRating)}
+                              </small>
+                            </div>
+                          </div>
+
+                          <div className="rightbtn-controls">
+                            <h6
+                              style={{ cursor: "pointer" }}
+                              onClick={() => handleToggleRecommendations(d.id)}
+                            >
+                              {expandedDetailId === d.id
+                                ? "Hide Recommendations"
+                                : "View All Recommendations"}
+                            </h6>
+                          </div>
+
+                          {expandedDetailId === d.id && (
+                            <div className="recommendation-table-container">
+                              <RecommendationTable
+                                recommendations={recommendationsMap[d.id] || []}
+                              />
+                            </div>
+                          )}
+
+                          {/* ---------- YOUR ORIGINAL CARD CONTENT END ---------- */}
+                        </div>
+                      )}
+                    </Draggable>
+                  ))
                 )}
+
+                {provided.placeholder}
               </div>
-            ))
-          )}
-        </div>
+            )}
+          </Droppable>
+        </DragDropContext>
 
         <div className="center-controls">
           <button
@@ -668,8 +814,16 @@ const NodeDetails = () => {
         </div>
       </div>
 
-      {showDetailPopup && (
+      {/* {showDetailPopup && (
         <CreateNodeDetails
+          onClose={() => setShowDetailPopup(false)}
+          onSave={handleSaveDetail}
+          nodeID={id}
+        />
+      )} */}
+
+      {showDetailPopup && (
+        <MainComponent
           onClose={() => setShowDetailPopup(false)}
           onSave={handleSaveDetail}
           nodeID={id}
@@ -687,6 +841,13 @@ const NodeDetails = () => {
 
       {showRiskPopup && (
         <RiskLevelPopup onClose={() => setShowRiskPopup(false)} />
+      )}
+
+      {sequenceUpdatePopup && (
+        <SequenceUpdatePopup
+          onClose={() => setSequenceUpdatePopup(false)}
+          nodeId={id}
+        />
       )}
 
       {showCompletePopup && (
