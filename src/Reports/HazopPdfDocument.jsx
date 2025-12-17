@@ -4,7 +4,7 @@ import { formatDate, getRiskColor } from "../CommonUI/CommonUI";
 import styles, { theme } from "./pdfStyles";
 import Header from "./Header";
 import Footer from "./Footer";
-
+import  { memo } from "react";
 const columnWidths = {
     generalParam: "6%",
     specificParam: "6%",
@@ -23,6 +23,7 @@ const columnWidths = {
 };
 
 const HazopPdfDocument = ({
+
     hazop = {},
     team = [],
     nodes = [],
@@ -33,10 +34,11 @@ const HazopPdfDocument = ({
     verificationData = [],
     assignData = { rejected: [], accepted: [], assigned: [], notAssigned: [] },
     downloadDate = new Date().toLocaleString(),
+    onRenderComplete,
 }) => {
 
     return (
-        <Document>
+        <Document onRender={onRenderComplete}>
             {/* ==================================================================================
                                     PAGE 1: HAZOP INFO + TEAM
                ================================================================================== */}
@@ -188,7 +190,7 @@ const HazopPdfDocument = ({
                 {registrationNodes?.map((node) => (
                     <View key={`reg-${node.id}`} style={styles.nodeContainer} wrap={false}>
                         <View style={styles.nodeHeader}>
-                            <Text style={{ color: theme.white }}>{node.designIntent || '-'} - {node.nodeNumber || '-'}</Text>
+                            <Text style={{ color: theme.white }}> {node.nodeNumber || '-'}</Text>
                             <Text style={{ color: theme.white }}>Reg: {formatDate(node?.registrationDate) || '-'}</Text>
                         </View>
 
@@ -347,9 +349,6 @@ const HazopPdfDocument = ({
 
 
             {/* ==================================================================================
-                                    PAGE 5: ALL RECOMMENDATIONS
-               ================================================================================== */}
-            {/* ==================================================================================
                                 PAGE 5: ALL RECOMMENDATIONS
    ================================================================================== */}
             <Page size="A4" style={styles.page} orientation="landscape">
@@ -484,5 +483,15 @@ const HazopPdfDocument = ({
         </Document>
     );
 };
+const arePropsEqual = (prevProps, nextProps) => {
+    return (
+        // Only re-render if these specific things change
+        prevProps.downloadDate === nextProps.downloadDate &&
+        prevProps.hazop?.id === nextProps.hazop?.id &&
+        prevProps.nodes?.length === nextProps.nodes?.length &&
+        prevProps.allRecommendations?.length === nextProps.allRecommendations?.length
+    );
+};
 
-export default HazopPdfDocument;
+// 3. Export with memo
+export default memo(HazopPdfDocument, arePropsEqual);

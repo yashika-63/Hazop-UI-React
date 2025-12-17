@@ -253,7 +253,7 @@ const HazopPage = () => {
               </button>
 
               <button type="button" onClick={() => handleUpdate(item)}>
-                <FaEdit /> Add Team
+                <FaEdit /> Create Team
               </button>
 
               <button type="button" onClick={() => handleRecommendation(item)}>

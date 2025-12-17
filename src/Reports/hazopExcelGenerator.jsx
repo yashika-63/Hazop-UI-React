@@ -1,107 +1,185 @@
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { formatDate } from "../CommonUI/CommonUI";
+import { formatDate } from "../CommonUI/CommonUI";
  
-// --- CONSTANTS & STYLES ---
+// --- CONFIGURATION & COLORS ---
  
 const COLORS = {
-    GREEN: 'FF92D050',   // 1-5 Trivial (Light Green)
-    YELLOW: 'FFFFFF00',  // 6-10 Tolerable (Yellow)
-    ORANGE: 'FFFFC000',  // 12-15 Moderate (Orange)
-    RED_ORANGE: 'FFFF0000', // 16-19 Substantial (Red)
-    RED: 'FFC00000',      // 20-25 Intolerable (Dark Red)
-    HEADER_BG: 'FFD9D9D9', // Light Grey for Table Headers
-    SUB_HEADER_BG: 'FFEFEFEF' // Lighter Grey
+    TRIVIAL: 'FF207229',      // #207229
+    TOLERABLE: 'FF56A744',    // #56a744
+    MODERATE: 'FFFEF65E',     // #fef65e
+    SUBSTANTIAL: 'FFFA9201',  // #fa9201
+    INTOLERABLE: 'FFF91111',  // #f91111
+
+    HEADER_GREY: 'FFD9D9D9',  // Standard Header Grey
+    WHITE: 'FFFFFFFF',        // Pure White
+    TEXT_BLUE: 'FF000080',    // Company Title Blue
+    BORDER_BLACK: 'FF000000'
 };
  
-// Returns ARGB color based on Risk Score
-const getRiskColorArgb = (val) => {
+// --- HELPERS ---
+
+ 
+const getRiskColor = (val) => {
     const num = parseInt(val, 10);
-    if (isNaN(num)) return 'FFFFFFFF';
-    if (num >= 20) return COLORS.RED;
-    if (num >= 16) return COLORS.RED_ORANGE;
-    if (num >= 12) return COLORS.ORANGE;
-    if (num >= 6) return COLORS.YELLOW;
-    return COLORS.GREEN;
+    if (isNaN(num)) return COLORS.WHITE;
+    if (num >= 20) return COLORS.INTOLERABLE;
+    if (num >= 16) return COLORS.SUBSTANTIAL;
+    if (num >= 12) return COLORS.MODERATE;
+    if (num >= 6) return COLORS.TOLERABLE;
+    return COLORS.TRIVIAL;
 };
  
-// Helper to apply thin borders
+// Standard cell border
 const applyBorder = (cell, style = "thin") => {
     cell.border = {
-        top: { style: style },
-        left: { style: style },
-        bottom: { style: style },
-        right: { style: style }
+        top: { style: style, color: { argb: COLORS.BORDER_BLACK } },
+        left: { style: style, color: { argb: COLORS.BORDER_BLACK } },
+        bottom: { style: style, color: { argb: COLORS.BORDER_BLACK } },
+        right: { style: style, color: { argb: COLORS.BORDER_BLACK } }
     };
 };
  
-// Helper for bold, centered header cells
-const styleHeaderCell = (cell) => {
-    cell.font = { bold: true, size: 10, name: 'Arial' };
-    cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+// Header: Grey BG, Bold
+const styleHeader = (cell, bg = true, align = 'center') => {
+    cell.font = { bold: true, name: 'Arial', size: 10 };
+    cell.alignment = { vertical: 'middle', horizontal: align, wrapText: true };
     applyBorder(cell);
-};
- 
-// Helper for data cells
-const styleDataCell = (cell, alignLeft = false) => {
-    cell.font = { size: 10, name: 'Arial' };
-    cell.alignment = { vertical: 'top', horizontal: alignLeft ? 'left' : 'center', wrapText: true };
-    applyBorder(cell);
-};
- 
-// --- REUSABLE HEADER (ROWS 1-8) ---
-// This replicates the header found in "H-TC-HAZOP-COVER.csv" and others
-const addCommonHeader = (sheet, hazop, pageNum, totalPages) => {
-    // Row 1 is usually a narrow margin
-    sheet.getRow(1).height = 10;
- 
-    // Document No & Form No
-    sheet.mergeCells('G2:H2'); sheet.getCell('G2').value = 'Document No.'; sheet.getCell('G2').font = { bold: true, name: 'Arial', size: 10 };
-    sheet.mergeCells('I2:L2'); sheet.getCell('I2').value = 'FORM/H/TC/17'; sheet.getCell('I2').alignment = { horizontal: 'center' };
-   
-    // Document Name
-    sheet.mergeCells('G3:H3'); sheet.getCell('G3').value = 'Document Name'; sheet.getCell('G3').font = { bold: true, name: 'Arial', size: 10 };
-    sheet.mergeCells('I3:L3'); sheet.getCell('I3').value = 'Hazop Study Report'; sheet.getCell('I3').alignment = { horizontal: 'center' };
-   
-    // Issue No & Date
-    sheet.mergeCells('G4:H4'); sheet.getCell('G4').value = 'Issue No'; sheet.getCell('G4').font = { bold: true, name: 'Arial', size: 10 };
-    sheet.getCell('I4').value = '03'; sheet.getCell('I4').alignment = { horizontal: 'center' };
-    sheet.getCell('J4').value = 'Dated'; sheet.getCell('J4').font = { bold: true, name: 'Arial', size: 10 };
-    sheet.mergeCells('K4:L4'); sheet.getCell('K4').value = '2022-09-26'; // Static Issue Date
-   
-    // Revision No & Date
-    sheet.mergeCells('G5:H5'); sheet.getCell('G5').value = 'Revision No.'; sheet.getCell('G5').font = { bold: true, name: 'Arial', size: 10 };
-    sheet.getCell('I5').value = hazop?.hazopRevisionNo || '00'; sheet.getCell('I5').alignment = { horizontal: 'center' };
-    sheet.getCell('J5').value = 'Dated'; sheet.getCell('J5').font = { bold: true, name: 'Arial', size: 10 };
-    sheet.mergeCells('K5:L5'); sheet.getCell('K5').value = formatDate(hazop?.hazopCreationDate);
-   
-    // Initials & Page No
-    sheet.mergeCells('G6:H6'); sheet.getCell('G6').value = 'MBS'; sheet.getCell('G6').font = { bold: true };
-    sheet.getCell('I6').value = 'PS'; sheet.getCell('I6').font = { bold: true };
-    sheet.getCell('J6').value = 'VJD'; sheet.getCell('J6').font = { bold: true };
-    sheet.mergeCells('K6:L6'); sheet.getCell('K6').value = 'Page';
-   
-    // Signatures placeholders
-    sheet.mergeCells('G7:H7');
-    sheet.getCell('I7').value = '';
-    sheet.getCell('J7').value = '';
-    sheet.mergeCells('K7:L7'); sheet.getCell('K7').value = `${pageNum} of ${totalPages}`; sheet.getCell('K7').alignment = { horizontal: 'center', vertical: 'middle' };
- 
-    // Approval Titles
-    sheet.mergeCells('G8:H8'); sheet.getCell('G8').value = 'Prepared By'; sheet.getCell('G8').font = { bold: true };
-    sheet.getCell('I8').value = 'Reviewed By'; sheet.getCell('I8').font = { bold: true };
-    sheet.getCell('J8').value = 'Approved By'; sheet.getCell('J8').font = { bold: true };
-   
-    // Apply borders and alignment to the header block (Row 2 to 8, Col G to L)
-    for (let r = 2; r <= 8; r++) {
-        for (let c = 7; c <= 12; c++) {
-            applyBorder(sheet.getCell(r, c));
-            sheet.getCell(r,c).alignment = { ...sheet.getCell(r,c).alignment, vertical: 'middle', horizontal: 'center' };
-        }
+    if (bg) {
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLORS.HEADER_GREY } };
     }
 };
  
-// --- MAIN GENERATOR FUNCTION ---
+// Data: White BG, Regular
+const styleData = (cell, align = 'center', wrap = true, bold = false) => {
+    cell.font = { name: 'Arial', size: 10, bold: bold };
+    cell.alignment = { vertical: 'top', horizontal: align, wrapText: wrap };
+    applyBorder(cell);
+};
+ 
+// --- STYLE A4 PAGE (Columns B to I, Rows 2 to 42) ---
+const styleA4Page = (sheet) => {
+    // 1. Paint White Background
+    for (let r = 2; r <= 42; r++) {
+        for (let c = 2; c <= 9; c++) { // B=2, I=9
+            const cell = sheet.getCell(r, c);
+            if (!cell.fill) {
+                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLORS.WHITE } };
+            }
+        }
+    }
+ 
+    // 2. Thick Border Around the "Paper" Edge (B2:I42)
+    // Top (Row 2, B-I)
+    for (let c = 2; c <= 9; c++) sheet.getCell(2, c).border = { ...sheet.getCell(2, c).border, top: { style: 'medium' } };
+    // Bottom (Row 42, B-I)
+    for (let c = 2; c <= 9; c++) sheet.getCell(42, c).border = { ...sheet.getCell(42, c).border, bottom: { style: 'medium' } };
+    // Left (B2:B42)
+    for (let r = 2; r <= 42; r++) sheet.getCell(r, 2).border = { ...sheet.getCell(r, 2).border, left: { style: 'medium' } };
+    // Right (I2:I42)
+    for (let r = 2; r <= 42; r++) sheet.getCell(r, 9).border = { ...sheet.getCell(r, 9).border, right: { style: 'medium' } };
+};
+ 
+ 
+ 
+// --- SPECIAL HEADER (For Cover/Completion B-I range) ---
+const addCompactHeader = (sheet, hazop, pageNo, totalPages) => {
+    // Row 2: Document No
+    sheet.getCell('F2').value = "Document No."; styleHeader(sheet.getCell('F2'), true);
+    sheet.mergeCells('G2:I2'); sheet.getCell('G2').value = "FORM/H/TC/17"; styleHeader(sheet.getCell('G2'), false);
+ 
+    // Row 3: Document Name
+    sheet.getCell('F3').value = "Document Name"; styleHeader(sheet.getCell('F3'), true);
+    sheet.mergeCells('G3:I3'); sheet.getCell('G3').value = "Hazop Study Report"; styleHeader(sheet.getCell('G3'), false);
+ 
+    // Row 4: Issue / Date
+    sheet.getCell('F4').value = "Issue No"; styleHeader(sheet.getCell('F4'), true);
+    sheet.getCell('G4').value = hazop?.hazopId || "03"; styleData(sheet.getCell('G4'));
+    sheet.getCell('H4').value = "Date"; styleHeader(sheet.getCell('H4'), true);
+    sheet.getCell('I4').value = formatDate(hazop?.hazopCreationDate); styleData(sheet.getCell('I4'));
+ 
+    // Row 5: Rev / Date
+    sheet.getCell('F5').value = "Rev No"; styleHeader(sheet.getCell('F5'), true);
+    sheet.getCell('G5').value = hazop?.hazopRevisionNo || "00"; styleData(sheet.getCell('G5'));
+    sheet.getCell('H5').value = "Date"; styleHeader(sheet.getCell('H5'), true);
+    sheet.getCell('I5').value = formatDate(hazop?.completionDate || new Date()); styleData(sheet.getCell('I5'));
+ 
+    // Row 6: Page No
+    sheet.mergeCells('F6:H6'); sheet.getCell('F6').value = "Page"; styleHeader(sheet.getCell('F6'), true);
+    sheet.getCell('I6').value = `${pageNo} Of ${totalPages}`; styleData(sheet.getCell('I6'));
+ 
+    // Row 7: Sign Titles
+    sheet.getCell('F7').value = ""; applyBorder(sheet.getCell('F7')); // Spacer
+    sheet.getCell('G7').value = "Prepared By"; styleHeader(sheet.getCell('G7'), true);
+    sheet.getCell('H7').value = "Reviewed By"; styleHeader(sheet.getCell('H7'), true);
+    sheet.getCell('I7').value = "Approved By"; styleHeader(sheet.getCell('I7'), true);
+ 
+    // Row 8: Signatures / Names
+    sheet.getCell('F8').value = "Sign"; styleHeader(sheet.getCell('F8'), true);
+    sheet.getCell('G8').value = hazop?.createdBy || "-"; styleData(sheet.getCell('G8'));
+    sheet.getCell('H8').value = hazop?.verificationemployeeName || "-"; styleData(sheet.getCell('H8'));
+    sheet.getCell('I8').value = hazop?.completionEmployeeName || "-"; styleData(sheet.getCell('I8'));
+};
+ 
+ 
+// --- COMMON HEADER BLOCK ---
+const addReportHeader = (sheet, hazop, pageNo, totalPages) => {
+    sheet.columns = [
+        { width: 8 },  // A
+        { width: 22 }, // B
+        { width: 22 }, // C
+        { width: 12 }, // D
+        { width: 18 }, // E
+        { width: 22 }, // F
+        { width: 25 }, // G
+        { width: 8 },  // H
+        { width: 8 },  // I
+        { width: 8 },  // J
+        { width: 25 }, // K
+        { width: 8 },  // L
+        { width: 8 },  // M (Extra buffer)
+        { width: 8 }   // N
+    ];
+ 
+    // Row 2-9 Logic (Document Control)
+    sheet.mergeCells('G2:H2'); sheet.getCell('G2').value = "Document No."; styleHeader(sheet.getCell('G2'), true);
+    sheet.mergeCells('I2:L2'); sheet.getCell('I2').value = "FORM/H/TC/17"; styleHeader(sheet.getCell('I2'), false);
+ 
+    sheet.mergeCells('G3:H3'); sheet.getCell('G3').value = "Document Name"; styleHeader(sheet.getCell('G3'), true);
+    sheet.mergeCells('I3:L3'); sheet.getCell('I3').value = "Hazop Study Report"; styleHeader(sheet.getCell('I3'), false);
+ 
+    sheet.mergeCells('G4:H4'); sheet.getCell('G4').value = "Issue No"; styleHeader(sheet.getCell('G4'), true);
+    sheet.getCell('I4').value = hazop?.hazopId || "-"; styleData(sheet.getCell('I4'));
+    sheet.getCell('J4').value = "Dated"; styleHeader(sheet.getCell('J4'), true);
+    sheet.mergeCells('K4:L4'); sheet.getCell('K4').value = formatDate(hazop?.hazopCreationDate); styleData(sheet.getCell('K4'));
+ 
+    sheet.mergeCells('G5:H5'); sheet.getCell('G5').value = "Revision No."; styleHeader(sheet.getCell('G5'), true);
+    sheet.getCell('I5').value = hazop?.hazopRevisionNo || "00"; styleData(sheet.getCell('I5'));
+    sheet.getCell('J5').value = "Dated"; styleHeader(sheet.getCell('J5'), true);
+    sheet.mergeCells('K5:L5'); sheet.getCell('K5').value = formatDate(hazop?.completionDate || new Date()); styleData(sheet.getCell('K5'));
+ 
+    sheet.mergeCells('G6:H6'); sheet.getCell('G6').value = "MBS"; styleHeader(sheet.getCell('G6'), true);
+    sheet.getCell('I6').value = "PS"; styleHeader(sheet.getCell('I6'), true);
+    sheet.getCell('J6').value = "VJD"; styleHeader(sheet.getCell('J6'), true);
+    sheet.mergeCells('K6:L6'); sheet.getCell('K6').value = "Page"; styleHeader(sheet.getCell('K6'), true);
+ 
+    sheet.mergeCells('G7:H7'); applyBorder(sheet.getCell('G7'));
+    sheet.getCell('I7').value = ""; applyBorder(sheet.getCell('I7'));
+    sheet.getCell('J7').value = ""; applyBorder(sheet.getCell('J7'));
+    sheet.mergeCells('K7:L7'); sheet.getCell('K7').value = `${pageNo} Of ${totalPages}`; styleData(sheet.getCell('K7'));
+ 
+    sheet.mergeCells('G8:H8'); sheet.getCell('G8').value = "Prepared By"; styleHeader(sheet.getCell('G8'), true);
+    sheet.mergeCells('I8:J8'); sheet.getCell('I8').value = "Reviewed By"; styleHeader(sheet.getCell('I8'), true);
+    sheet.mergeCells('K8:L8'); sheet.getCell('K8').value = "Approved By"; styleHeader(sheet.getCell('K8'), true);
+ 
+    sheet.mergeCells('G9:H9'); sheet.getCell('G9').value = hazop?.createdBy || "-"; styleData(sheet.getCell('G9'));
+    sheet.mergeCells('I9:J9'); sheet.getCell('I9').value = hazop?.verificationemployeeName || "-"; styleData(sheet.getCell('I9'));
+    sheet.mergeCells('K9:L9'); sheet.getCell('K9').value = hazop?.completionEmployeeName || "-"; styleData(sheet.getCell('K9'));
+};
+ 
+ 
+// --- MAIN EXPORT FUNCTION ---
  
 export async function generateHazopExcel({
     hazop,
@@ -111,438 +189,497 @@ export async function generateHazopExcel({
     nodeDetailsState = {},
     allRecommendations = [],
     mocReferences = [],
-    verificationData = [],
-    hazopId,
+    hazopId
 }) {
     const workbook = new ExcelJS.Workbook();
-    workbook.creator = 'Alkyl Amines';
-    workbook.created = new Date();
+    const TOTAL_PAGES = 7;
  
     // ==========================================
-    // SHEET 1: COVER PAGE
+    // SHEET 1: COVER (A4 Page Style)
     // ==========================================
-    const coverSheet = workbook.addWorksheet('H-TC-HAZOP-COVER');
-    // Align columns approx to A4 width
+    const coverSheet = workbook.addWorksheet('H-TC-HAZOP-COVER', {
+        views: [{ showGridLines: false }], // Hide default Excel grid
+        pageSetup: { paperSize: 9, orientation: 'portrait', fitToPage: true }
+    });
+ 
+    // Columns B to I width setup
     coverSheet.columns = [
-        { width: 5 }, { width: 20 }, { width: 25 }, { width: 15 }, { width: 15 },
-        { width: 15 }, { width: 15 }, { width: 10 }, { width: 10 }, { width: 10 }, { width: 10 }, { width: 10 }
+        { width: 2 },  // A (Spacer)
+        { width: 5 },  // B (Sr)
+        { width: 20 }, // C
+        { width: 15 }, // D
+        { width: 15 }, // E
+        { width: 15 }, // F (Header Start)
+        { width: 15 }, // G
+        { width: 15 }, // H
+        { width: 15 }  // I (Header End)
     ];
-    addCommonHeader(coverSheet, hazop, 1, 7);
  
-    let cRow = 11;
-    coverSheet.mergeCells(`B${cRow}:L${cRow}`);
-    const titleCell = coverSheet.getCell(`B${cRow}`);
-    titleCell.value = 'ALKYL AMINES CHEMICALS LTD';
-    titleCell.font = { bold: true, size: 16, color: { argb: 'FF000080' }, name: 'Arial' };
-    titleCell.alignment = { horizontal: 'center' };
+    addCompactHeader(coverSheet, hazop, 1, TOTAL_PAGES);
+ 
+    // -- Company Name Block (Rows 9-13) --
+    coverSheet.mergeCells('B9:I13');
+    const compCell = coverSheet.getCell('B9');
+    compCell.value = "ALKYL AMINES CHEMICALS LIMITED";
+    compCell.font = { bold: true, size: 18, name: 'Arial', color: { argb: COLORS.TEXT_BLUE } };
+    compCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    applyBorder(compCell, 'medium');
+ 
+    // -- Project Name Block (Rows 14-16) --
+    // FIX: Started at 14 to avoid overlap with row 13
+    coverSheet.mergeCells('B14:I16');
+    const projCell = coverSheet.getCell('B14');
+    projCell.value = `HAZOP STUDY: ${hazop?.hazopTitle || "Project Name"}`;
+    projCell.font = { bold: true, size: 14, name: 'Arial' };
+    projCell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+    applyBorder(projCell, 'medium');
+ 
+    // -- Site Info --
+    let cRow = 18;
+    coverSheet.getCell(`B${cRow}`).value = "Site Name:";
+    coverSheet.getCell(`B${cRow}`).font = { bold: true };
+    coverSheet.mergeCells(`C${cRow}:I${cRow}`); coverSheet.getCell(`C${cRow}`).value = hazop?.site || "";
     cRow += 2;
  
-    coverSheet.getCell(`B${cRow}`).value = "HAZOP DETAILS";
-    coverSheet.getCell(`B${cRow}`).font = { bold: true, underline: true };
-    cRow++;
- 
-    const details = [
-        { l: "Title", v: hazop?.hazopTitle }, { l: "Site", v: hazop?.site }, { l: "Department", v: hazop?.department },
-        { l: "Revision", v: hazop?.hazopRevisionNo }, { l: "Start Date", v: formatDate(hazop?.hazopCreationDate) },
-        { l: "Status", v: hazop?.completionStatus ? 'Completed' : 'Pending' }, { l: "Created By", v: hazop?.createdBy },
-        { l: "Approved By", v: hazop?.verificationemployeeName }, { l: "Description", v: hazop?.description },
-    ];
- 
-    details.forEach(i => {
-        coverSheet.getCell(`B${cRow}`).value = i.l;
-        coverSheet.getCell(`B${cRow}`).font = { bold: true };
-        coverSheet.mergeCells(`C${cRow}:I${cRow}`);
-        coverSheet.getCell(`C${cRow}`).value = i.v || '-';
-        applyBorder(coverSheet.getCell(`B${cRow}`));
-        applyBorder(coverSheet.getCell(`C${cRow}`));
-        cRow++;
-    });
-    cRow++;
- 
-    // MOC References Table
-    if (mocReferences.length > 0) {
+    // -- MOC References --
+    if (mocReferences && mocReferences.length > 0) {
         coverSheet.getCell(`B${cRow}`).value = "MOC REFERENCES";
         coverSheet.getCell(`B${cRow}`).font = { bold: true, underline: true };
         cRow++;
-       
-        // Headers
-        const mocHeaders = ['MOC No', 'Title', 'Plant', 'Dept', 'Date'];
-        coverSheet.getCell(`B${cRow}`).value = mocHeaders[0]; styleHeaderCell(coverSheet.getCell(`B${cRow}`));
-        coverSheet.mergeCells(`C${cRow}:E${cRow}`); coverSheet.getCell(`C${cRow}`).value = mocHeaders[1]; styleHeaderCell(coverSheet.getCell(`C${cRow}`));
-        coverSheet.getCell(`F${cRow}`).value = mocHeaders[2]; styleHeaderCell(coverSheet.getCell(`F${cRow}`));
-        coverSheet.getCell(`G${cRow}`).value = mocHeaders[3]; styleHeaderCell(coverSheet.getCell(`G${cRow}`));
-        coverSheet.getCell(`H${cRow}`).value = mocHeaders[4]; styleHeaderCell(coverSheet.getCell(`H${cRow}`));
+ 
+        coverSheet.getCell(`B${cRow}`).value = "No"; styleHeader(coverSheet.getCell(`B${cRow}`), true);
+        coverSheet.mergeCells(`C${cRow}:F${cRow}`); coverSheet.getCell(`C${cRow}`).value = "Title"; styleHeader(coverSheet.getCell(`C${cRow}`), true);
+        coverSheet.mergeCells(`G${cRow}:H${cRow}`); coverSheet.getCell(`G${cRow}`).value = "Plant"; styleHeader(coverSheet.getCell(`G${cRow}`), true);
+        coverSheet.getCell(`I${cRow}`).value = "Date"; styleHeader(coverSheet.getCell(`I${cRow}`), true);
         cRow++;
  
-        // Data
         mocReferences.forEach(moc => {
-            coverSheet.getCell(`B${cRow}`).value = moc.mocNo; applyBorder(coverSheet.getCell(`B${cRow}`));
-            coverSheet.mergeCells(`C${cRow}:E${cRow}`); coverSheet.getCell(`C${cRow}`).value = moc.mocTitle; applyBorder(coverSheet.getCell(`C${cRow}`));
-            coverSheet.getCell(`F${cRow}`).value = moc.mocPlant; applyBorder(coverSheet.getCell(`F${cRow}`));
-            coverSheet.getCell(`G${cRow}`).value = moc.mocDepartment; applyBorder(coverSheet.getCell(`G${cRow}`));
-            coverSheet.getCell(`H${cRow}`).value = moc.mocDate; applyBorder(coverSheet.getCell(`H${cRow}`));
+            coverSheet.getCell(`B${cRow}`).value = moc.mocNo; styleData(coverSheet.getCell(`B${cRow}`));
+            coverSheet.mergeCells(`C${cRow}:F${cRow}`); coverSheet.getCell(`C${cRow}`).value = moc.mocTitle; styleData(coverSheet.getCell(`C${cRow}`), 'left');
+            coverSheet.mergeCells(`G${cRow}:H${cRow}`); coverSheet.getCell(`G${cRow}`).value = moc.mocPlant; styleData(coverSheet.getCell(`G${cRow}`));
+            coverSheet.getCell(`I${cRow}`).value = formatDate(moc.mocDate); styleData(coverSheet.getCell(`I${cRow}`));
             cRow++;
         });
-        cRow++;
+        cRow += 2;
     }
  
-    // Team Table
-    coverSheet.mergeCells(`B${cRow}:I${cRow}`);
-    coverSheet.getCell(`B${cRow}`).value = 'Pre-execution approval of Team Members';
+    // -- Team Members --
+    coverSheet.getCell(`B${cRow}`).value = "Pre-execution approval of Team Members";
     coverSheet.getCell(`B${cRow}`).font = { bold: true, underline: true };
-    cRow += 1;
- 
-    // Team Header
-    coverSheet.getCell(`B${cRow}`).value = 'Sr. No.'; styleHeaderCell(coverSheet.getCell(`B${cRow}`));
-    coverSheet.mergeCells(`C${cRow}:E${cRow}`); coverSheet.getCell(`C${cRow}`).value = 'Name'; styleHeaderCell(coverSheet.getCell(`C${cRow}`));
-    coverSheet.mergeCells(`F${cRow}:H${cRow}`); coverSheet.getCell(`F${cRow}`).value = 'Department'; styleHeaderCell(coverSheet.getCell(`F${cRow}`));
-    coverSheet.mergeCells(`I${cRow}:L${cRow}`); coverSheet.getCell(`I${cRow}`).value = 'Email'; styleHeaderCell(coverSheet.getCell(`I${cRow}`));
     cRow++;
  
-    // Team Data
-    const printRows = Math.max(team.length, 5); // Ensure at least 5 rows appear
-    for (let i = 0; i < printRows; i++) {
-        const m = team[i] || {};
-        coverSheet.getCell(`B${cRow}`).value = i + 1; applyBorder(coverSheet.getCell(`B${cRow}`));
-        coverSheet.mergeCells(`C${cRow}:E${cRow}`); coverSheet.getCell(`C${cRow}`).value = m.firstName ? `${m.firstName} ${m.lastName}` : ''; applyBorder(coverSheet.getCell(`C${cRow}`));
-        coverSheet.mergeCells(`F${cRow}:H${cRow}`); coverSheet.getCell(`F${cRow}`).value = m.dimension1 || ''; applyBorder(coverSheet.getCell(`F${cRow}`));
-        coverSheet.mergeCells(`I${cRow}:L${cRow}`); coverSheet.getCell(`I${cRow}`).value = m.emailId || ''; applyBorder(coverSheet.getCell(`I${cRow}`));
+    coverSheet.getCell(`B${cRow}`).value = "Sr."; styleHeader(coverSheet.getCell(`B${cRow}`), true);
+    coverSheet.mergeCells(`C${cRow}:E${cRow}`); coverSheet.getCell(`C${cRow}`).value = "Name"; styleHeader(coverSheet.getCell(`C${cRow}`), true);
+    coverSheet.mergeCells(`F${cRow}:G${cRow}`); coverSheet.getCell(`F${cRow}`).value = "Designation"; styleHeader(coverSheet.getCell(`F${cRow}`), true);
+    coverSheet.mergeCells(`H${cRow}:I${cRow}`); coverSheet.getCell(`H${cRow}`).value = "Signature"; styleHeader(coverSheet.getCell(`H${cRow}`), true);
+    cRow++;
+ 
+    const teamList = team.length > 0 ? team : [{}, {}, {}, {}, {}];
+    teamList.forEach((member, idx) => {
+        const name = member.firstName ? `${member.firstName} ${member.lastName}` : "";
+        coverSheet.getCell(`B${cRow}`).value = idx + 1; styleData(coverSheet.getCell(`B${cRow}`));
+        coverSheet.mergeCells(`C${cRow}:E${cRow}`); coverSheet.getCell(`C${cRow}`).value = name; styleData(coverSheet.getCell(`C${cRow}`), 'left');
+        coverSheet.mergeCells(`F${cRow}:G${cRow}`); coverSheet.getCell(`F${cRow}`).value = member.dimension3 || ""; styleData(coverSheet.getCell(`F${cRow}`), 'left');
+        coverSheet.mergeCells(`H${cRow}:I${cRow}`); coverSheet.getCell(`H${cRow}`).value = ""; styleData(coverSheet.getCell(`H${cRow}`));
         cRow++;
-    }
- 
- 
-    // ==========================================
-    // SHEET 2: NODE LIST
-    // ==========================================
-    const indexSheet = workbook.addWorksheet('H-TC-HAZOP-NODE LIST');
-    indexSheet.columns = [{ width: 5 }, { width: 10 }, { width: 35 }, { width: 15 }, { width: 20 }, { width: 15 }, { width: 15 }];
-    addCommonHeader(indexSheet, hazop, 2, 7);
- 
-    indexSheet.mergeCells('B12:G12');
-    indexSheet.getCell('B12').value = 'INDEX OF HAZOP NODES';
-    indexSheet.getCell('B12').font = { bold: true, underline: true };
- 
-    const idxHead = 14;
-    const idxHeaders = ['Node', 'Design Intent / Title', 'Registration Date', 'Equipment', 'SOP No.', 'Status'];
-    ['B', 'C', 'D', 'E', 'F', 'G'].forEach((col, i) => {
-        const cell = indexSheet.getCell(`${col}${idxHead}`);
-        cell.value = idxHeaders[i];
-        styleHeaderCell(cell);
-        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLORS.HEADER_BG } };
     });
  
-    let idxRow = 15;
-    const nodeListSource = (registrationNodes && registrationNodes.length > 0) ? registrationNodes : nodes;
-   
-    if (nodeListSource.length > 0) {
-        nodeListSource.forEach(node => {
-            indexSheet.getCell(`B${idxRow}`).value = node.nodeNumber || (node.nodeInfo?.nodeNumber) || '-'; styleDataCell(indexSheet.getCell(`B${idxRow}`));
-            indexSheet.getCell(`C${idxRow}`).value = node.designIntent || '-'; styleDataCell(indexSheet.getCell(`C${idxRow}`), true);
-            indexSheet.getCell(`D${idxRow}`).value = formatDate(node.registrationDate || node.creationDate); styleDataCell(indexSheet.getCell(`D${idxRow}`));
-            indexSheet.getCell(`E${idxRow}`).value = node.equipment || '-'; styleDataCell(indexSheet.getCell(`E${idxRow}`));
-            indexSheet.getCell(`F${idxRow}`).value = node.sopNo || '-'; styleDataCell(indexSheet.getCell(`F${idxRow}`));
-            indexSheet.getCell(`G${idxRow}`).value = node.completionStatus ? "Completed" : "Pending"; styleDataCell(indexSheet.getCell(`G${idxRow}`));
-            idxRow++;
+    cRow++;
+    coverSheet.getCell(`C${cRow}`).value = "DATE :"; coverSheet.getCell(`C${cRow}`).font = { bold: true };
+    coverSheet.getCell(`D${cRow}`).value = formatDate(new Date());
+ 
+    // Apply strict A4 styling to B2:I42
+    styleA4Page(coverSheet);
+ 
+ 
+ 
+ 
+    // ==========================================
+    // 2. NODE LIST (Standard Grid)
+    // ==========================================
+    const listSheet = workbook.addWorksheet('H-TC-HAZOP-NODE LIST', { pageSetup: { orientation: 'landscape' } });
+    addReportHeader(listSheet, hazop, 2, TOTAL_PAGES);
+ 
+    listSheet.getCell('B12').value = "LIST OF PROCESS ACTIVITIES";
+    listSheet.getCell('B12').font = { bold: true, underline: true };
+ 
+    const lHead = 15;
+    listSheet.getCell(`B${lHead}`).value = "ACTIVITY NO."; styleHeader(listSheet.getCell(`B${lHead}`), true);
+    listSheet.mergeCells(`C${lHead}:G${lHead}`); listSheet.getCell(`C${lHead}`).value = "DESCRIPTION"; styleHeader(listSheet.getCell(`C${lHead}`), true);
+    listSheet.getCell(`H${lHead}`).value = "PAGE NO"; styleHeader(listSheet.getCell(`H${lHead}`), true);
+ 
+    let lRow = 16;
+    const nodesForList = (registrationNodes && registrationNodes.length > 0) ? registrationNodes : nodes;
+    if (nodesForList && nodesForList.length > 0) {
+        nodesForList.forEach(node => {
+            const actNo = node.nodeNumber || (node.nodeInfo ? node.nodeInfo.nodeNumber : "-");
+            listSheet.getCell(`B${lRow}`).value = actNo; styleData(listSheet.getCell(`B${lRow}`));
+            listSheet.mergeCells(`C${lRow}:G${lRow}`);
+            const desc = node.designIntent || (node.nodeInfo ? node.nodeInfo.designIntent : "") || "-";
+            listSheet.getCell(`C${lRow}`).value = desc; styleData(listSheet.getCell(`C${lRow}`), 'left');
+            listSheet.getCell(`H${lRow}`).value = "3"; styleData(listSheet.getCell(`H${lRow}`));
+            lRow++;
         });
     }
  
     // ==========================================
-    // SHEET 3: HAZOP DETAILS (The main dynamic sheet)
+    // 3. HAZOP DETAILS (Standard Grid)
     // ==========================================
-    const detailSheet = workbook.addWorksheet('H-TC-HAZOP-DETAILS');
-    // Standard HAZOP columns (14 cols)
-    detailSheet.columns = [
-        { width: 15 }, { width: 15 }, { width: 12 }, { width: 20 }, { width: 25 }, { width: 25 },
-        { width: 25 }, { width: 5 }, { width: 5 }, { width: 5 },
-        { width: 30 }, { width: 5 }, { width: 5 }, { width: 5 }
-    ];
-    addCommonHeader(detailSheet, hazop, 3, 7);
+    const detailSheet = workbook.addWorksheet('H-TC-HAZOP-DETAILS', { pageSetup: { orientation: 'landscape' } });
+    addReportHeader(detailSheet, hazop, 3, TOTAL_PAGES);
  
-    let dRow = 11; // Starting row after header
- 
+    let dRow = 11;
     if (nodes && nodes.length > 0) {
-        nodes.forEach((node, nodeIdx) => {
-            const nodeId = node.nodeInfo?.id || node.id;
+        nodes.forEach(node => {
+            const nInfo = node.nodeInfo || node;
+            const nodeId = nInfo.id;
             const details = nodeDetailsState[nodeId] || [];
  
-            // --- 1. NODE INFORMATION BLOCK ---
-            // Design matches typical HAZOP worksheets: Labels on Left, Merged Data on Right
-            detailSheet.getCell(`A${dRow}`).value = 'Node No'; styleHeaderCell(detailSheet.getCell(`A${dRow}`));
-            detailSheet.getCell(`B${dRow}`).value = node.nodeNumber || (node.nodeInfo?.nodeNumber) || '-'; applyBorder(detailSheet.getCell(`B${dRow}`));
-            detailSheet.getCell(`B${dRow}`).alignment = { horizontal: 'left', vertical: 'middle' };
-           
-            detailSheet.getCell(`G${dRow}`).value = 'Date'; styleHeaderCell(detailSheet.getCell(`G${dRow}`));
-            detailSheet.getCell(`K${dRow}`).value = formatDate(node.creationDate); applyBorder(detailSheet.getCell(`K${dRow}`));
+            // Node Details Headers
+            detailSheet.getCell(`A${dRow}`).value = "Node No"; styleData(detailSheet.getCell(`A${dRow}`), 'left');
+            detailSheet.getCell(`B${dRow}`).value = nInfo.nodeNumber || ""; styleData(detailSheet.getCell(`B${dRow}`), 'center');
+            detailSheet.mergeCells(`D${dRow}:F${dRow}`); detailSheet.getCell(`D${dRow}`).value = "Hazop Worksheet No."; styleData(detailSheet.getCell(`D${dRow}`), 'right');
+            detailSheet.mergeCells(`H${dRow}:J${dRow}`); detailSheet.getCell(`H${dRow}`).value = "Date auto filled"; styleData(detailSheet.getCell(`H${dRow}`), 'right');
+            detailSheet.mergeCells(`K${dRow}:L${dRow}`); detailSheet.getCell(`K${dRow}`).value = formatDate(nInfo.creationDate); styleData(detailSheet.getCell(`K${dRow}`), 'center');
             dRow++;
  
-            const metaFields = [
-                { label: 'Design Intent', val: node.designIntent },
-                { label: 'SOP / Date', val: `${node.sopNo || ''} / ${formatDate(node.sopDate)}` },
-                { label: 'Equipment', val: node.equipment },
-                { label: 'Parameters', val: `Temp: ${node.temprature || '-'} | Press: ${node.pressure || '-'} | Flow: ${node.quantityFlowRate || '-'}` }
-            ];
+            detailSheet.getCell(`A${dRow}`).value = "Design Intent"; styleData(detailSheet.getCell(`A${dRow}`), 'left');
+            detailSheet.mergeCells(`B${dRow}:N${dRow}`); detailSheet.getCell(`B${dRow}`).value = nInfo.designIntent || ""; styleData(detailSheet.getCell(`B${dRow}`), 'left');
+            dRow++;
  
-            metaFields.forEach(f => {
-                detailSheet.getCell(`A${dRow}`).value = f.label; styleHeaderCell(detailSheet.getCell(`A${dRow}`));
-                detailSheet.mergeCells(`B${dRow}:N${dRow}`);
-                detailSheet.getCell(`B${dRow}`).value = f.val || '-';
-                styleDataCell(detailSheet.getCell(`B${dRow}`), true);
-                dRow++;
-            });
-            dRow++; // Spacer
+            detailSheet.getCell(`A${dRow}`).value = "P & I D No. & Revision"; styleData(detailSheet.getCell(`A${dRow}`), 'left');
+            detailSheet.mergeCells(`B${dRow}:N${dRow}`); detailSheet.getCell(`B${dRow}`).value = nInfo.pIdRevision || ""; styleData(detailSheet.getCell(`B${dRow}`), 'left');
+            dRow++;
  
-            // --- 2. TABLE HEADER (Repeated once per Node as requested) ---
+            detailSheet.getCell(`A${dRow}`).value = "SOP No and date"; styleData(detailSheet.getCell(`A${dRow}`), 'left');
+            detailSheet.mergeCells(`B${dRow}:D${dRow}`); detailSheet.getCell(`B${dRow}`).value = `${nInfo.sopNo || ""} / ${formatDate(nInfo.sopDate)}`; styleData(detailSheet.getCell(`B${dRow}`), 'left');
+            detailSheet.getCell(`E${dRow}`).value = "Title"; styleData(detailSheet.getCell(`E${dRow}`), 'center');
+            detailSheet.mergeCells(`F${dRow}:N${dRow}`); detailSheet.getCell(`F${dRow}`).value = ""; styleData(detailSheet.getCell(`F${dRow}`), 'left');
+            dRow++;
+ 
+            detailSheet.getCell(`A${dRow}`).value = "Equipment"; styleData(detailSheet.getCell(`A${dRow}`), 'left');
+            detailSheet.mergeCells(`B${dRow}:N${dRow}`); detailSheet.getCell(`B${dRow}`).value = nInfo.equipment || ""; styleData(detailSheet.getCell(`B${dRow}`), 'left');
+            dRow++;
+ 
+            detailSheet.getCell(`A${dRow}`).value = "Controls"; styleData(detailSheet.getCell(`A${dRow}`), 'left');
+            detailSheet.mergeCells(`B${dRow}:N${dRow}`); detailSheet.getCell(`B${dRow}`).value = nInfo.controls || ""; styleData(detailSheet.getCell(`B${dRow}`), 'left');
+            dRow++;
+ 
+            detailSheet.mergeCells(`A${dRow}:B${dRow}`); detailSheet.getCell(`A${dRow}`).value = "Chemicals and utilities"; styleData(detailSheet.getCell(`A${dRow}`), 'left');
+            detailSheet.mergeCells(`C${dRow}:E${dRow}`); detailSheet.getCell(`C${dRow}`).value = `Temperature, ${nInfo.temprature || nInfo.temperature || "-"} C`; styleData(detailSheet.getCell(`C${dRow}`));
+            detailSheet.mergeCells(`F${dRow}:H${dRow}`); detailSheet.getCell(`F${dRow}`).value = `Pressure, ${nInfo.pressure || "-"} barg`; styleData(detailSheet.getCell(`F${dRow}`));
+            detailSheet.mergeCells(`I${dRow}:N${dRow}`); detailSheet.getCell(`I${dRow}`).value = `Quantity / flow rate ${nInfo.quantityFlowRate || "-"}`; styleData(detailSheet.getCell(`I${dRow}`));
+            dRow += 2;
+ 
+            // Main Headers
             const h1 = dRow;
             const h2 = dRow + 1;
-           
-            // Merged Headers (Top Row)
-            detailSheet.mergeCells(`A${h1}:A${h2}`); detailSheet.getCell(`A${h1}`).value = 'General Param';
-            detailSheet.mergeCells(`B${h1}:B${h2}`); detailSheet.getCell(`B${h1}`).value = 'Specific Param';
-            detailSheet.mergeCells(`C${h1}:C${h2}`); detailSheet.getCell(`C${h1}`).value = 'Guide Word';
-            detailSheet.mergeCells(`D${h1}:D${h2}`); detailSheet.getCell(`D${h1}`).value = 'Deviation';
-            detailSheet.mergeCells(`E${h1}:E${h2}`); detailSheet.getCell(`E${h1}`).value = 'Causes';
-            detailSheet.mergeCells(`F${h1}:F${h2}`); detailSheet.getCell(`F${h1}`).value = 'Consequences';
-           
-            detailSheet.mergeCells(`G${h1}:J${h1}`); detailSheet.getCell(`G${h1}`).value = 'Existing Control';
-            detailSheet.mergeCells(`K${h1}:N${h1}`); detailSheet.getCell(`K${h1}`).value = 'Additional Control / Recommendations';
+            detailSheet.mergeCells(`A${h1}:A${h2}`); detailSheet.getCell(`A${h1}`).value = "General Parameter";
+            detailSheet.mergeCells(`B${h1}:B${h2}`); detailSheet.getCell(`B${h1}`).value = "Specific Parameter";
+            detailSheet.mergeCells(`C${h1}:C${h2}`); detailSheet.getCell(`C${h1}`).value = "Guide word";
+            detailSheet.mergeCells(`D${h1}:D${h2}`); detailSheet.getCell(`D${h1}`).value = "Deviation";
+            detailSheet.mergeCells(`E${h1}:E${h2}`); detailSheet.getCell(`E${h1}`).value = "Causes";
+            detailSheet.mergeCells(`F${h1}:F${h2}`); detailSheet.getCell(`F${h1}`).value = "Consequences";
+            detailSheet.mergeCells(`G${h1}:J${h1}`); detailSheet.getCell(`G${h1}`).value = "Existing";
+            detailSheet.getCell(`G${h2}`).value = "Controls";
+            detailSheet.getCell(`H${h2}`).value = "P";
+            detailSheet.getCell(`I${h2}`).value = "S";
+            detailSheet.getCell(`J${h2}`).value = "R";
+            detailSheet.mergeCells(`K${h1}:N${h1}`); detailSheet.getCell(`K${h1}`).value = "Additional";
+            detailSheet.getCell(`K${h2}`).value = "Controls";
+            detailSheet.getCell(`L${h2}`).value = "P";
+            detailSheet.getCell(`M${h2}`).value = "S";
+            detailSheet.getCell(`N${h2}`).value = "R";
  
-            // Sub Headers (Bottom Row)
-            detailSheet.getCell(`G${h2}`).value = 'Control';
-            detailSheet.getCell(`H${h2}`).value = 'P'; detailSheet.getCell(`I${h2}`).value = 'S'; detailSheet.getCell(`J${h2}`).value = 'R';
- 
-            detailSheet.getCell(`K${h2}`).value = 'Recommendation';
-            detailSheet.getCell(`L${h2}`).value = 'P'; detailSheet.getCell(`M${h2}`).value = 'S'; detailSheet.getCell(`N${h2}`).value = 'R';
- 
-            // Styling Headers
             for (let r = h1; r <= h2; r++) {
                 for (let c = 1; c <= 14; c++) {
-                    const cell = detailSheet.getCell(r, c);
-                    styleHeaderCell(cell);
-                    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLORS.HEADER_BG } };
+                    styleHeader(detailSheet.getCell(r, c), true);
                 }
             }
             dRow += 2;
  
-            // --- 3. DATA ROWS ---
+            // Deviations
             if (details.length > 0) {
                 details.forEach(det => {
-                    const r = detailSheet.getRow(dRow);
-                   
-                    // 1-6 Basic
-                    r.getCell(1).value = det.generalParameter;
-                    r.getCell(2).value = det.specificParameter;
-                    r.getCell(3).value = det.guidWord;
-                    r.getCell(4).value = det.deviation;
-                    r.getCell(5).value = det.causes;
-                    r.getCell(6).value = det.consequences;
-                   
-                    // 7-10 Existing
-                    r.getCell(7).value = det.existineControl;
-                    r.getCell(8).value = det.existineProbability;
-                    r.getCell(9).value = det.existingSeverity;
-                    r.getCell(10).value = det.riskRating;
-                    const f1 = getRiskColorArgb(det.riskRating);
-                    if (det.riskRating) r.getCell(10).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: f1 } };
+                    const row = detailSheet.getRow(dRow);
+                    row.getCell(1).value = det.generalParameter;
+                    row.getCell(2).value = det.specificParameter;
+                    row.getCell(3).value = det.guidWord;
+                    row.getCell(4).value = det.deviation;
+                    row.getCell(5).value = det.causes;
+                    row.getCell(6).value = det.consequences;
+                    row.getCell(7).value = det.existineControl;
+                    row.getCell(8).value = det.existineProbability;
+                    row.getCell(9).value = det.existingSeverity;
  
-                    // 11-14 Additional / Recs
-                    let recText = det.additionalControl || '';
-                    if (det.recommendations && det.recommendations.length) {
-                        // Formatting recommendations as bullet points in one cell
-                        recText += (recText ? '\n' : '') + det.recommendations.map(x => `• ${x.recommendation}`).join('\n');
-                    }
-                    r.getCell(11).value = recText || '-';
-                   
-                    r.getCell(12).value = det.additionalProbability;
-                    r.getCell(13).value = det.additionalSeverity;
-                    r.getCell(14).value = det.additionalRiskRating;
-                    const f2 = getRiskColorArgb(det.additionalRiskRating);
-                    if (det.additionalRiskRating) r.getCell(14).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: f2 } };
+                    const rCell = row.getCell(10);
+                    rCell.value = det.riskRating;
+                    if (det.riskRating) rCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: getRiskColor(det.riskRating) } };
  
-                    // Apply Borders & Styling
-                    for (let c = 1; c <= 14; c++) {
-                        styleDataCell(r.getCell(c), true); // Align left
+                    let recText = det.additionalControl || "";
+                    if (det.recommendations && det.recommendations.length > 0) {
+                        recText += (recText ? "\n" : "") + det.recommendations.map(r => `${r.recommendation}`).join("\n");
                     }
+                    row.getCell(11).value = recText;
+ 
+                    row.getCell(12).value = det.additionalProbability;
+                    row.getCell(13).value = det.additionalSeverity;
+ 
+                    const arCell = row.getCell(14);
+                    arCell.value = det.additionalRiskRating;
+                    if (det.additionalRiskRating) arCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: getRiskColor(det.additionalRiskRating) } };
+ 
+                    for (let c = 1; c <= 14; c++) styleData(row.getCell(c), 'left');
                     dRow++;
                 });
             } else {
                 detailSheet.mergeCells(`A${dRow}:N${dRow}`);
-                detailSheet.getCell(`A${dRow}`).value = "No Details Found for this Node";
-                styleDataCell(detailSheet.getCell(`A${dRow}`));
+                detailSheet.getCell(`A${dRow}`).value = "No deviations recorded.";
+                styleData(detailSheet.getCell(`A${dRow}`), 'center');
                 dRow++;
             }
-            dRow += 2; // Spacer between Nodes
+            dRow++;
         });
     }
  
     // ==========================================
-    // SHEET 4: RECOMMENDATIONS
+    // 4. RECOMMENDATIONS (Standard Grid)
     // ==========================================
-    const recSheet = workbook.addWorksheet('RECOMMENDATIONS');
-    recSheet.columns = [{ width: 5 }, { width: 30 }, { width: 20 }, { width: 15 }, { width: 15 }, { width: 15 }, { width: 15 }, { width: 10 }, { width: 15 }, { width: 15 }, { width: 15 }, { width: 20 }, { width: 15 }];
-    addCommonHeader(recSheet, hazop, 4, 7);
-    recSheet.mergeCells('B10:M10'); recSheet.getCell('B10').value = "ALL RECOMMENDATIONS"; recSheet.getCell('B10').font = { bold: true, underline: true };
-   
-    let rHead = 12;
-    const rHeaders = ['No.', 'Recommendation', 'Remark', 'Responsibility', 'Department', 'Status', 'Date', 'Sent for Review', 'Action', 'Review Status', 'Reviewed By', 'Email', 'Review Date'];
+    const recSheet = workbook.addWorksheet('RECOMMENDATIONS', { pageSetup: { orientation: 'landscape' } });
+    addReportHeader(recSheet, hazop, 4, TOTAL_PAGES);
+ 
+    recSheet.mergeCells('B10:G10');
+    recSheet.getCell('B10').value = "Recommendation List for Approval of Management";
+    recSheet.getCell('B10').font = { bold: true };
+ 
+    const rHead = 12;
+    const rHeaders = ["Sr No", "Node No", "Recommendation", "Remark by Management", "Responsibility", "Completion Status", "Date"];
     rHeaders.forEach((h, i) => {
-        const c = recSheet.getCell(rHead, i + 2);
-        c.value = h;
-        styleHeaderCell(c);
-        c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLORS.HEADER_BG } };
+        const cell = recSheet.getCell(rHead, i + 2);
+        cell.value = h;
+        styleHeader(cell, true);
     });
-   
+ 
     let rRow = 13;
-    allRecommendations.forEach((rec, i) => {
-        const row = recSheet.getRow(rRow);
-        const values = [
-            i + 1, rec.recommendation, rec.remarkbyManagement, rec.responsibility, rec.department,
-            rec.completionStatus ? 'Completed' : 'Pending', formatDate(rec.completionDate),
-            rec.sendForVerification ? 'Yes' : 'No', rec.sendForVerificationAction ? 'Taken' : 'None',
-            rec.sendForVerificationActionStatus ? 'Approved' : 'Rejected', rec.verificationResponsibleEmployeeName,
-            rec.verificationResponsibleEmployeeEmail, formatDate(rec.verificationDate)
-        ];
-        values.forEach((v, idx) => {
-            row.getCell(idx + 2).value = v || '-';
-            styleDataCell(row.getCell(idx + 2), idx === 1);
+    if (allRecommendations.length > 0) {
+        allRecommendations.forEach((rec, idx) => {
+            recSheet.getCell(`B${rRow}`).value = idx + 1; styleData(recSheet.getCell(`B${rRow}`));
+            recSheet.getCell(`C${rRow}`).value = rec.nodeNumber || "-"; styleData(recSheet.getCell(`C${rRow}`));
+            recSheet.getCell(`D${rRow}`).value = rec.recommendation; styleData(recSheet.getCell(`D${rRow}`), 'left');
+            recSheet.getCell(`E${rRow}`).value = rec.remarkbyManagement || ""; styleData(recSheet.getCell(`E${rRow}`), 'left');
+            recSheet.getCell(`F${rRow}`).value = rec.responsibility || ""; styleData(recSheet.getCell(`F${rRow}`));
+            recSheet.getCell(`G${rRow}`).value = rec.completionStatus ? "Completed" : "Pending"; styleData(recSheet.getCell(`G${rRow}`));
+            recSheet.getCell(`H${rRow}`).value = formatDate(rec.completionDate); styleData(recSheet.getCell(`H${rRow}`));
+            rRow++;
         });
-        rRow++;
-    });
+    }
  
     // ==========================================
-    // SHEET 5: CONFIRMATION SUMMARY
+    // SHEET 5: COMPLETION (A4 Page Style)
     // ==========================================
-    const confSheet = workbook.addWorksheet('CONFIRMATION SUMMARY');
-    confSheet.columns = [{ width: 5 }, { width: 30 }, { width: 15 }, { width: 20 }, { width: 20 }, { width: 20 }, { width: 15 }];
-    addCommonHeader(confSheet, hazop, 5, 7);
-    confSheet.mergeCells('B10:G10'); confSheet.getCell('B10').value = "CONFIRMATION / VERIFICATION"; confSheet.getCell('B10').font = { bold: true, underline: true };
-   
-    const cHeaders = ['No.', 'Recommendation', 'Status', 'Review Action', 'Reviewed By', 'Email', 'Date'];
-    cHeaders.forEach((h, i) => {
-        const c = confSheet.getCell(12, i + 2);
-        c.value = h;
-        styleHeaderCell(c);
-        c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLORS.HEADER_BG } };
+    const compSheet = workbook.addWorksheet('HAZOP COMPLETION', {
+        views: [{ showGridLines: false }],
+        pageSetup: { paperSize: 9, orientation: 'portrait', fitToPage: true }
     });
-   
-    let cRowIdx = 13;
-    verificationData.forEach((v, i) => {
-        const row = confSheet.getRow(cRowIdx);
-        const values = [
-            i + 1, v.recommendation, v.completionStatus ? 'Completed' : 'Pending',
-            v.sendForVerificationAction ? 'Approved' : 'Rejected', v.verificationResponsibleEmployeeName,
-            v.verificationResponsibleEmployeeEmail, formatDate(v.verificationDate)
-        ];
-        values.forEach((val, idx) => { row.getCell(idx + 2).value = val || '-'; styleDataCell(row.getCell(idx + 2), idx === 1); });
-        cRowIdx++;
+ 
+    compSheet.columns = [
+        { width: 2 }, { width: 5 }, { width: 20 }, { width: 15 }, { width: 15 }, { width: 15 }, { width: 15 }, { width: 15 }, { width: 15 }
+    ];
+ 
+    addCompactHeader(compSheet, hazop, 5, TOTAL_PAGES);
+ 
+    // Company (Rows 9-13)
+    compSheet.mergeCells('B9:I13');
+    const ccCell = compSheet.getCell('B9');
+    ccCell.value = "ALKYL AMINES CHEMICALS LIMITED";
+    ccCell.font = { bold: true, size: 18, name: 'Arial', color: { argb: COLORS.TEXT_BLUE } };
+    ccCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    applyBorder(ccCell, 'medium');
+ 
+    // Project (Rows 14-16) - Fix overlap by starting at 14
+    compSheet.mergeCells('B14:I16');
+    const cpCell = compSheet.getCell('B14');
+    cpCell.value = `COMPLETION CERTIFICATE: ${hazop?.hazopTitle || ""}`;
+    cpCell.font = { bold: true, size: 14, name: 'Arial' };
+    cpCell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+    applyBorder(cpCell, 'medium');
+ 
+    // Status
+    let compRow = 18;
+    compSheet.getCell(`B${compRow}`).value = "Status:"; compSheet.getCell(`B${compRow}`).font = { bold: true };
+    compSheet.getCell(`C${compRow}`).value = hazop?.completionStatus ? "COMPLETED" : "IN PROGRESS";
+    compSheet.getCell(`C${compRow}`).border = { bottom: { style: 'thin' } };
+ 
+    compSheet.getCell(`F${compRow}`).value = "Date:"; compSheet.getCell(`F${compRow}`).font = { bold: true };
+    compSheet.getCell(`G${compRow}`).value = formatDate(hazop?.completionDate);
+    compSheet.getCell(`G${compRow}`).border = { bottom: { style: 'thin' } };
+    compRow += 3;
+ 
+    // Team Signatures
+    compSheet.getCell(`B${compRow}`).value = "Closure Approvals"; compSheet.getCell(`B${compRow}`).font = { bold: true, underline: true };
+    compRow += 2;
+ 
+    compSheet.getCell(`B${compRow}`).value = "Sr."; styleHeader(compSheet.getCell(`B${compRow}`), true);
+    compSheet.mergeCells(`C${compRow}:E${compRow}`); compSheet.getCell(`C${compRow}`).value = "Name"; styleHeader(compSheet.getCell(`C${compRow}`), true);
+    compSheet.mergeCells(`F${compRow}:G${compRow}`); compSheet.getCell(`F${compRow}`).value = "Designation"; styleHeader(compSheet.getCell(`F${compRow}`), true);
+    compSheet.mergeCells(`H${compRow}:I${compRow}`); compSheet.getCell(`H${compRow}`).value = "Signature"; styleHeader(compSheet.getCell(`H${compRow}`), true);
+    compRow++;
+ 
+    teamList.forEach((member, idx) => {
+        const name = member.firstName ? `${member.firstName} ${member.lastName}` : "";
+        compSheet.getCell(`B${compRow}`).value = idx + 1; styleData(compSheet.getCell(`B${compRow}`));
+        compSheet.mergeCells(`C${compRow}:E${compRow}`); compSheet.getCell(`C${compRow}`).value = name; styleData(compSheet.getCell(`C${compRow}`), 'left');
+        compSheet.mergeCells(`F${compRow}:G${compRow}`); compSheet.getCell(`F${compRow}`).value = member.dimension3 || ""; styleData(compSheet.getCell(`F${compRow}`), 'left');
+        compSheet.mergeCells(`H${compRow}:I${compRow}`); compSheet.getCell(`H${compRow}`).value = ""; styleData(compSheet.getCell(`H${compRow}`));
+        compRow++;
     });
+ 
+    styleA4Page(compSheet);
+ 
+    styleA4Page(compSheet);
  
  
     // ==========================================
-    // SHEET 6: TABLE 1 (RISK MATRIX)
+    // SHEET 6: TABLE 1 (Risk Matrix - All Data)
     // ==========================================
     const t1Sheet = workbook.addWorksheet('H-TC-HAZOP-TABLE 1');
-    t1Sheet.columns = [{ width: 5 }, { width: 5 }, { width: 8 }, { width: 2 }, { width: 12 }, { width: 12 }, { width: 12 }, { width: 12 }, { width: 12 }];
-    addCommonHeader(t1Sheet, hazop, 6, 7);
+    addReportHeader(t1Sheet, hazop, 6, TOTAL_PAGES);
  
-    t1Sheet.getCell('B10').value = '1.0 RISK MATRIX';
-    t1Sheet.getCell('B10').font = { bold: true, underline: true };
+    // 1. Title
+    t1Sheet.getCell('B11').value = "1.0  RISK MATRIX USED FOR THE STUDY";
+    t1Sheet.getCell('B11').font = { bold: true, size: 12 };
  
-    // Probability Header (Top)
-    t1Sheet.mergeCells('E12:I12');
-    const probLabel = t1Sheet.getCell('E12');
-    probLabel.value = "PROBABILITY";
-    styleHeaderCell(probLabel);
-    probLabel.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLORS.HEADER_BG } };
+    // 2. Main Headers Row (Row 13)
+    // "SEVERITY OF CONSEQUENCES - S" spans across People(C), Assets(D), and Environment(E)
+    t1Sheet.mergeCells('B13:E13'); // Merging B too to cover the Index column visually
+    const sevHeader = t1Sheet.getCell('B13');
+    sevHeader.value = "SEVERITY OF CONSEQUENCES - S";
+    styleHeader(sevHeader, true);
  
-    const probHeaders = [
-        { val: 1, desc: "< 1 in 10 yr" }, { val: 2, desc: "< 1 in 5 yr" },
-        { val: 3, desc: "< 1 in 1 yr" }, { val: 4, desc: "< 1 in Month" }, { val: 5, desc: "< 1 in Week" }
+    // Probability Headers (Columns F to J) matching the image text
+    const pLabels = [
+        "1\nOnce in 10\nyears",
+        "2\nOnce in five\nyears",
+        "3\nOnce in a\nyear",
+        "4\nOnce a month",
+        "5\nOnce a week"
     ];
  
-    probHeaders.forEach((p, idx) => {
-        const cell = t1Sheet.getCell(13, 5 + idx);
-        cell.value = `${p.val}\n${p.desc}`;
-        cell.alignment = { wrapText: true, horizontal: 'center', vertical: 'middle' };
-        cell.font = { bold: true, size: 9 };
-        applyBorder(cell);
-        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLORS.SUB_HEADER_BG } };
+    let colIndex = 6; // Column F is index 6
+    pLabels.forEach((lbl) => {
+        const cell = t1Sheet.getCell(13, colIndex);
+        cell.value = lbl;
+        styleHeader(cell, true);
+        // Ensure text wraps for the multi-line labels in the image
+        cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+        colIndex++;
     });
  
-    // Severity Header (Left)
-    t1Sheet.mergeCells('B14:B18');
-    const sevLabel = t1Sheet.getCell('B14');
-    sevLabel.value = "SEVERITY";
-    styleHeaderCell(sevLabel);
-    sevLabel.alignment = { textRotation: 90, vertical: 'middle', horizontal: 'center', bold: true };
-    sevLabel.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLORS.HEADER_BG } };
+    // 3. Sub-Headers Row (Row 14)
+    // Column B is empty or can hold the index header if desired, usually left blank or merged in image
+    t1Sheet.getCell('C14').value = "People(P)"; styleHeader(t1Sheet.getCell('C14'), true);
+    t1Sheet.getCell('D14').value = "Assets(A)"; styleHeader(t1Sheet.getCell('D14'), true);
+    t1Sheet.getCell('E14').value = "Environment (E)"; styleHeader(t1Sheet.getCell('E14'), true);
  
-    const severityRows = [
-        { id: 1, desc: "Minor" }, { id: 2, desc: "Major" }, { id: 3, desc: "Critical" },
-        { id: 4, desc: "Severe" }, { id: 5, desc: "Catastrophic" }
+    // For the Probability columns (F-J) in Row 14, they are technically part of the grid
+    // but based on the image, the headers in Row 13 are tall.
+    // We will leave F14-J14 blank or merged if we want the headers to span down,
+    // but for standard Excel logic, we start data at 15.
+ 
+    // 4. Data Rows (Starting Row 15)
+    // Updated text to match the image exactly (e.g., "Slight effect" vs "Slight damage")
+    const matrixRows = [
+        { idx: 1, p: "Slight injury", a: "Slight damage", e: "Slight effect", vals: [1, 2, 3, 4, 5] },
+        { idx: 2, p: "Minor injury", a: "Minor damage", e: "Minor effect", vals: [2, 4, 6, 8, 10] },
+        { idx: 3, p: "Major injury", a: "Localised damage", e: "Localised effect", vals: [3, 6, 9, 12, 15] },
+        { idx: 4, p: "Single Fatality", a: "Major damage", e: "Major effect", vals: [4, 8, 12, 16, 20] },
+        { idx: 5, p: "Multiple\nFatalities", a: "Extensive damage", e: "Extensive effect", vals: [5, 10, 15, 20, 25] },
     ];
  
-    let gridRowStart = 14;
-    severityRows.forEach((sev) => {
-        const sCell = t1Sheet.getCell(gridRowStart, 3);
-        sCell.value = sev.id;
-        styleHeaderCell(sCell);
-        sCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLORS.SUB_HEADER_BG } };
+    let mRow = 15;
+    matrixRows.forEach(row => {
+        // Col B: Index (1, 2, 3, 4, 5) - The bold number on the left
+        const idxCell = t1Sheet.getCell(`B${mRow}`);
+        idxCell.value = row.idx;
+        styleHeader(idxCell, true); // Center and bold like a header
  
-        probHeaders.forEach((prob, pIdx) => {
-            const riskValue = sev.id * prob.val;
-            const cell = t1Sheet.getCell(gridRowStart, 5 + pIdx);
-            cell.value = riskValue;
-            cell.alignment = { vertical: 'middle', horizontal: 'center' };
-            cell.font = { bold: true };
-            applyBorder(cell);
-            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: getRiskColorArgb(riskValue) } };
+        // Col C: People
+        const pCell = t1Sheet.getCell(`C${mRow}`);
+        pCell.value = row.p;
+        styleData(pCell, 'center'); // Image shows center alignment
+        pCell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+ 
+        // Col D: Assets
+        const aCell = t1Sheet.getCell(`D${mRow}`);
+        aCell.value = row.a;
+        styleData(aCell, 'center');
+        aCell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+ 
+        // Col E: Environment
+        const eCell = t1Sheet.getCell(`E${mRow}`);
+        eCell.value = row.e;
+        styleData(eCell, 'center');
+        eCell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+ 
+        // Cols F-J: The Matrix Values
+        row.vals.forEach((val, vIdx) => {
+            const cell = t1Sheet.getCell(mRow, 6 + vIdx); // Start at Column F (6)
+            cell.value = val;
+            styleHeader(cell, false); // Standard border, not necessarily bold text unless desired
+ 
+            // Optional: Add color logic if defined
+            if (typeof getRiskColor === 'function') {
+                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: getRiskColor(val) } };
+            }
         });
-        gridRowStart++;
+ 
+        mRow++;
     });
  
- 
+    // Helper style adjustments for widths
+    t1Sheet.getColumn('B').width = 5;  // Narrow index column
+    t1Sheet.getColumn('C').width = 15;
+    t1Sheet.getColumn('D').width = 15;
+    t1Sheet.getColumn('E').width = 15;
+    // Probability columns width
+    ['F', 'G', 'H', 'I', 'J'].forEach(col => t1Sheet.getColumn(col).width = 12);
     // ==========================================
-    // SHEET 7: TABLE 2 (RISK LEVEL VS ACTION)
+    // 7. TABLE 2 (Standard)
     // ==========================================
-    const t2Sheet = workbook.addWorksheet('H-TC-HAZOP-TABLE 2');
-    t2Sheet.columns = [{ width: 5 }, { width: 10 }, { width: 20 }, { width: 70 }];
-    addCommonHeader(t2Sheet, hazop, 7, 7);
+    const t2Sheet = workbook.addWorksheet('H-TC-HAZOP-TABLE 2', { pageSetup: { orientation: 'landscape' } });
+    addReportHeader(t2Sheet, hazop, 7, TOTAL_PAGES);
  
-    t2Sheet.getCell('B10').value = '2.0 RISK LEVEL Vs ACTION';
-    t2Sheet.getCell('B10').font = { bold: true, underline: true };
+    t2Sheet.getCell('B10').value = "Table-2"; t2Sheet.getCell('B10').font = { bold: true };
+    t2Sheet.getCell('B11').value = "   2.0   RISK LEVEL Vs ACTION PLAN"; t2Sheet.getCell('B11').font = { bold: true };
  
-    const t2HeadRow = 12;
-    ['Risk', 'Level', 'Action'].forEach((h, i) => {
-        const c = t2Sheet.getCell(t2HeadRow, i + 2);
-        c.value = h;
-        styleHeaderCell(c);
-        c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLORS.HEADER_BG } };
-    });
+    const t2Head = 13;
+    t2Sheet.getCell(`B${t2Head}`).value = "Risk"; styleHeader(t2Sheet.getCell(`B${t2Head}`), true);
+    t2Sheet.getCell(`C${t2Head}`).value = "Risk level"; styleHeader(t2Sheet.getCell(`C${t2Head}`), true);
+    t2Sheet.mergeCells(`D${t2Head}:J${t2Head}`); t2Sheet.getCell(`D${t2Head}`).value = "Action and time scale"; styleHeader(t2Sheet.getCell(`D${t2Head}`), true);
+ 
+    t2Sheet.getColumn('D').width = 80;
  
     const actionData = [
-        { risk: "1 - 5", level: "TRIVIAL", color: COLORS.GREEN, action: "No action is required and no documentary records need to be kept." },
-        { risk: "6 - 10", level: "TOLERABLE", color: COLORS.YELLOW, action: "No additional controls are required. Consideration may be given to a more cost-effective solution or improvement that imposes no additional cost burden. Monitoring is required to ensure that the controls are maintained." },
-        { risk: "12 - 15", level: "MODERATE", color: COLORS.ORANGE, action: "Efforts should be made to reduce the risk, but the costs of prevention should be carefully measured and limited. Risk reduction measures should be implemented within a defined time period." },
-        { risk: "16 - 19", level: "SUBSTANTIAL", color: COLORS.RED_ORANGE, action: "Activity should not be started until the risk has been reduced. Considerable resources may have to be allocated to reduce the risk." },
-        { risk: "20 - 25", level: "INTOLERABLE", color: COLORS.RED, action: "Activity should not be started or continued until the risk has been reduced. If it is not possible to reduce risk even with unlimited resources, activity has to remain prohibited." }
+        { r: "1,2,3,4,5", l: "Trivial", c: COLORS.TRIVIAL, a: "No action required and no documentary records need to be kept" },
+        { r: "6,8,9,10", l: "Tolerable", c: COLORS.TOLERABLE, a: "No  additional  controls  are  required.  Consideration  may  be  given  to  a  more  cost\neffective solution or moderate improvement that imposes no additional cost burden. Monitoring is required to ensure that the controls are maintained." },
+        { r: "12,15,", l: "Moderate", c: COLORS.MODERATE, a: "Efforts  should  be  made  to  reduce  the  risk,  but  the  \ncost  of  prevention  should  be\ncarefully measured and limited. Risk reduction measures should be implemented" },
+        { r: "16,18", l: "Substantial", c: COLORS.SUBSTANTIAL, a: "Work should not be started until the risk has been reduced. Considerable resources\nmay have to be allocated to reduce the risk where the risk involves work in progress, urgent action should be taken." },
+        { r: "20,25", l: "Intolerable", c: COLORS.INTOLERABLE, a: "Work should not be started or continued until the risk has been reduced, if it is not possible  to  reduce  the  risk  even  with  unlimited  resources,  work  has  to  remain\nprohibited." }
     ];
  
-    let t2Row = 13;
+    let aRow = 14;
     actionData.forEach(row => {
-        const rCell = t2Sheet.getCell(t2Row, 2);
-        rCell.value = row.risk; styleDataCell(rCell); rCell.alignment = { vertical: 'middle', horizontal: 'center' };
- 
-        const lCell = t2Sheet.getCell(t2Row, 3);
-        lCell.value = row.level; styleDataCell(lCell); lCell.alignment = { vertical: 'middle', horizontal: 'center', bold: true };
-        lCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: row.color } };
- 
-        const aCell = t2Sheet.getCell(t2Row, 4);
-        aCell.value = row.action; styleDataCell(aCell, true);
-        t2Row++;
+        t2Sheet.getCell(`B${aRow}`).value = row.r; styleData(t2Sheet.getCell(`B${aRow}`));
+        t2Sheet.getCell(`C${aRow}`).value = row.l; styleData(t2Sheet.getCell(`C${aRow}`));
+        t2Sheet.getCell(`C${aRow}`).font = { bold: true };
+        t2Sheet.getCell(`C${aRow}`).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: row.c } };
+        t2Sheet.mergeCells(`D${aRow}:J${aRow}`); t2Sheet.getCell(`D${aRow}`).value = row.a; styleData(t2Sheet.getCell(`D${aRow}`), 'left');
+        t2Sheet.getCell(`D${aRow}`).alignment = { wrapText: true, vertical: 'top', horizontal: 'left' };
+        t2Sheet.getRow(aRow).height = 45;
+        aRow++;
     });
  
-    // Write File
+    // WRITE FILE
     const buffer = await workbook.xlsx.writeBuffer();
-    saveAs(new Blob([buffer]), `Hazop_Report_${hazopId || 'Export'}.xlsx`);
+    saveAs(new Blob([buffer]), `Hazop_Study_Report_${hazopId || "Export"}.xlsx`);
 }
- 

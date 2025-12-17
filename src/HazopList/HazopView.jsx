@@ -812,12 +812,12 @@ const HazopView = ({ onClose, mode = "view-only" }) => {
                                                     <th>Recommendation</th>
                                                     <th>Remark</th>
                                                     <th>Completion Status</th>
-                                                    <th>Send for Verification</th>
-                                                    <th>Verification Action</th>
-                                                    <th>Verification Status</th>
+                                                    <th>Send for Review</th>
+                                                    <th>Reviewed Action</th>
+                                                    <th>Reviewed Status</th>
                                                     <th>Verified By</th>
                                                     <th>Email</th>
-                                                    <th>Verification Date</th>
+                                                    <th>Reviewed Date</th>
                                                 </tr>
                                             </thead>
                                             <tbody>

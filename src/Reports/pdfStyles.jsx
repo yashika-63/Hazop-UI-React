@@ -1,5 +1,5 @@
 import { StyleSheet } from "@react-pdf/renderer";
-
+ 
 // 1. Centralized Color Palette
 const theme = {
     primary: "#1E293B",      // Navy / Slate - Main Headers
@@ -17,7 +17,7 @@ const theme = {
     danger: "#991B1B",
     warning: "#B45309",
 };
-
+ 
 const styles = StyleSheet.create({
     page: {
         paddingTop: 110,
@@ -28,7 +28,7 @@ const styles = StyleSheet.create({
         color: theme.textMain,
         backgroundColor: theme.white,
     },
-
+ 
     /* ---------- HEADER ---------- */
     headerContainer: {
         position: "absolute",
@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
     reportTitle: { fontSize: 10, color: theme.secondary, marginTop: 4, letterSpacing: 1 },
     headerMeta: { textAlign: "right", minWidth: 100 },
     metaText: { fontSize: 8, color: theme.textLight },
-
+ 
     /* ---------- FOOTER ---------- */
     footerContainer: {
         position: "absolute",
@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
         backgroundColor: theme.white,
     },
     footerText: { fontSize: 8, color: theme.textLight },
-
+ 
     /* ---------- SECTIONS & TYPOGRAPHY ---------- */
     section: {
         marginBottom: 15,
@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
         paddingBottom: 4,
         textTransform: "uppercase",
     },
-
+ 
     /* ---------- TABLES (Professional Grid) ---------- */
     // Strategy: Table has Top & Left border. Cells have Bottom & Right.
     // This prevents double borders.
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
         flexWrap: "wrap",
         wordBreak: "break-word"
     },
-
+ 
     /* ---------- INFO GRID (Key-Value Pairs) ---------- */
     infoCard: {
         borderWidth: 1,
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
         flex: 1,
         textAlign: "right",
     },
-
+ 
     /* ---------- NODE DETAILS ---------- */
     nodeContainer: {
         marginBottom: 15,
@@ -170,16 +170,13 @@ const styles = StyleSheet.create({
         backgroundColor: theme.primary,
         paddingVertical: 6,
         paddingHorizontal: 10,
-
         flexDirection: "row",
-        alignItems: "flex-start",   // 🔑 allow multi-line left side
-        flexWrap: "wrap",           // 🔑 allow wrapping
-
+        justifyContent: "space-between",
+        alignItems: "center",
         color: theme.white,
         fontSize: 10,
         fontWeight: "bold",
     },
-      
     nodeBody: {
         padding: 8,
         flexDirection: "row",
@@ -204,7 +201,7 @@ const styles = StyleSheet.create({
         color: theme.textDark,
         flex: 1,
     },
-
+ 
     /* ---------- DETAIL CARDS (Recs, Assignments) ---------- */
     detailCard: {
         marginBottom: 20,
@@ -234,7 +231,7 @@ const styles = StyleSheet.create({
         color: theme.secondary,
     },
     cardValue: { width: "70%", fontSize: 9, color: theme.textDark },
-
+ 
     /* ---------- INDEX TABLE SPECIFIC ---------- */
     indexRow: {
         flexDirection: "row",
@@ -250,12 +247,13 @@ const styles = StyleSheet.create({
         borderBottomWidth: 0
     },
     indexCol: { fontSize: 9, paddingHorizontal: 5 },
-
+ 
     /* ---------- UTILS ---------- */
     completed: { color: theme.success, fontWeight: "bold" },
     pending: { color: theme.danger, fontWeight: "bold" },
     linkText: { color: theme.link, textDecoration: "none" }
 });
-
+ 
 export default styles;
 export { theme }; // Export theme if needed elsewhere
+ 

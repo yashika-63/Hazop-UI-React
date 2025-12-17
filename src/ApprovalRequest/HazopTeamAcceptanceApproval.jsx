@@ -33,7 +33,7 @@ const HazopTeamAcceptanceApproval = () => {
                     actionTaken: 0
                 }
             });
-             const data = Array.isArray(response.data) ? response.data : [];
+            const data = Array.isArray(response.data)? response.data: []; 
             setTeamData(data);
         } catch (err) {
             console.error(err);

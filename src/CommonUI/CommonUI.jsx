@@ -72,6 +72,13 @@ export const truncateWords = (text, wordLimit = 3) => {
 
 
 
+export const truncateText = (text, maxLength = 80) => {
+  if (!text) return "-";
+  return text.length > maxLength
+      ? text.substring(0, maxLength) + "..."
+      : text;
+};
+
 export const getRiskClass = (risk) => {
   if (!risk) return "risk-default";
 
@@ -109,6 +116,9 @@ export const getBorderColor = (risk) => {
 
   return "#ccc";
 };
+
+
+
 
 export const root = document.documentElement;
 export const trivial = getComputedStyle(root).getPropertyValue("--trivial").trim();

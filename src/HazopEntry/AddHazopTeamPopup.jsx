@@ -12,7 +12,7 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
     const [confirmPopup, setConfirmPopup] = useState(null);
     const [originalTeam, setOriginalTeam] = useState([]);
     const [removeConfirmationPopup, setRemoveConfirmationPopup] = useState(null);
-
+  const companyId = localStorage.getItem("companyId");
     useEffect(() => {
         if (hazopData && hazopData.id) {
             fetchExistingTeam(hazopData.id);
@@ -158,7 +158,7 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
             if (newMembers.length > 0) {
                 await axios.post(
                     `http://${strings.localhost}/api/hazopTeam/saveTeam/${hazopId}`,
-                    newMembers.map((m) => ({ empCode: m.empCode, role: m.role }))  // Sending role along with empCode
+                    newMembers.map((m) => m.empCode)  // Sending role along with empCode
                 );
             }
 
@@ -204,7 +204,7 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
             )}
 
             <div className="modal-header">
-                Add Team Members to HAZOP
+                Create Team Members to HAZOP
                 <button className="close-btn" onClick={closePopup} disabled={loading}>
                     <FaTimes />
                 </button>

@@ -84,7 +84,7 @@ const RequestHandler = () => {
                         onClick={() => handleButtonClick('HazopApprove')}
                     >
                         <FaList />
-                        Hazop Review
+                        Hazop Sign Off
                         {counts.approvalPending > 0 && (
                             <span className="badge">{counts.approvalPending}</span>
                         )}

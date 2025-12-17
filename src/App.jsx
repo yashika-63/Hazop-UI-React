@@ -24,6 +24,8 @@ import "./styles/global.css";
 import RoleBasedHazopPage from './HazopEntry/RoleBasedHazopPage';
 import MainComponent from './CreateNodeDiscussion/mainComponent';
 import NodeRetrieve from './AddNodeScreen/NodeRetrieve';
+import ViewNodeDiscussion from './AddNodeScreen/ViewNodeDiscussion';
+import Dashboard from './Dashboard/Dashboard';
 
 const App = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -82,7 +84,9 @@ const App = () => {
                     <Route path="/NodePopup" element={<NodePopup />} />
                     <Route path="/MainComponent" element={<MainComponent />} />
                     <Route path='/NodeRetrieve' element={<NodeRetrieve />} />
+                    <Route path="/ViewNodeDiscussion" element={<ViewNodeDiscussion/>} />
                     <Route path="/HazopView" element={<HazopView />} />
+                    <Route path="/Dashboard" element={<Dashboard />} />
 
                     
                     <Route path="*" element={<Navigate to="/HazopPage" />} />

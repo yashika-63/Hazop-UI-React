@@ -2,12 +2,14 @@ import React, { useEffect, useState } from "react";
 import { FaHome, FaUser, FaProjectDiagram, FaFileArchive, FaFileAlt, FaList, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import "./Workflow.css";
 import { strings } from "../string";
+import { useParams } from "react-router-dom";
  
 export default function HazopWorkflow() {
   const [status, setStatus] = useState(null);
- 
+  const { id } = useParams(); 
   useEffect(() => {
-    fetch(`http://${strings.localhost}/api/hazop/status/34`)
+    if (!id) return;
+    fetch(`http://${strings.localhost}/api/hazop/status/${id}`)
       .then((res) => res.json())
       .then((data) => setStatus(data));
   }, []);

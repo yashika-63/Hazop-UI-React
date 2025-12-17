@@ -1,0 +1,420 @@
+/* --- HAZOP DASHBOARD SPECIFIC STYLES --- */
+
+/* Layout Wrapper */
+.hazop-dashboard-container {
+  min-height: 100vh;
+  background-color: #f9fafb; /* gray-50 */
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.hazop-max-w {
+  max-width: 80rem;
+  margin: 0 auto;
+}
+
+.hazop-p-6 {
+  padding: 1.5rem;
+}
+
+/* --- Navigation Tabs --- */
+.hazop-tabs-container {
+  background-color: #ffffff;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.hazop-tabs-list {
+  display: flex;
+  gap: 2rem;
+  padding: 0 1.5rem;
+}
+
+.hazop-tab-button {
+  padding: 1rem 0.5rem;
+  border: none;
+  background: none;
+  border-bottom: 2px solid transparent;
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: #6b7280; /* gray-500 */
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.hazop-tab-button:hover {
+  color: #374151; /* gray-700 */
+  border-color: #e5e7eb; /* gray-200 */
+}
+
+.hazop-tab-button.active {
+  border-color: #2563eb; /* blue-600 */
+  color: #2563eb;
+}
+
+/* --- Stats Cards (Top Row) --- */
+.hazop-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.hazop-stat-card {
+  background-color: #ffffff;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.3s, transform 0.2s;
+}
+
+.hazop-stat-card:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+}
+
+.hazop-stat-clickable {
+  cursor: pointer;
+}
+
+.hazop-stat-clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.15);
+}
+
+.hazop-stat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hazop-stat-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #4b5563; /* gray-600 */
+  margin: 0;
+}
+
+.hazop-stat-value {
+  font-size: 1.875rem;
+  font-weight: 700;
+  margin: 0.5rem 0 0 0;
+  color: #1f2937; /* gray-800 */
+}
+
+.hazop-stat-subtitle {
+  font-size: 0.875rem;
+  color: #6b7280; /* gray-500 */
+  margin-top: 0.25rem;
+}
+
+.hazop-icon-wrapper {
+  padding: 0.75rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* --- Charts Section --- */
+.hazop-charts-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .hazop-charts-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.hazop-charts-horizontal {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .hazop-charts-horizontal {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.hazop-chart-card {
+  background-color: #ffffff;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.4);
+  padding: 1.5rem;
+}
+
+.hazop-chart-compact {
+  padding: 1rem;
+}
+
+.hazop-chart-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1f2937; /* gray-800 */
+  margin-bottom: 1rem;
+}
+
+/* --- Progress Bars --- */
+.hazop-progress-container {
+  margin-top: 0.5rem;
+  background-color: #e5e7eb; /* gray-200 */
+  border-radius: 9999px;
+  height: 0.5rem;
+  width: 100%;
+}
+
+.hazop-progress-bar {
+  height: 0.5rem;
+  border-radius: 9999px;
+  transition: width 0.5s ease;
+}
+
+/* --- MOC List --- */
+.hazop-moc-item {
+  border-left: 4px solid #2563eb;
+  padding-left: 1rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.hazop-moc-title {
+  font-weight: 500;
+  margin: 0;
+  color: #1f2937;
+}
+
+.hazop-moc-meta {
+  font-size: 0.875rem;
+  color: #4b5563; /* gray-600 */
+  margin: 0;
+}
+
+/* --- Loading / Error States --- */
+.hazop-center-screen {
+  min-height: 50vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+}
+
+.hazop-loader-spin {
+  animation: hazop-spin 1s linear infinite;
+}
+
+@keyframes hazop-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.hazop-retry-btn {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+}
+.hazop-retry-btn:hover {
+  background-color: #1e40af;
+}
+
+/* --- Modal Styles (Prefixed) --- */
+.hazop-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1rem;
+  backdrop-filter: blur(2px);
+}
+
+.hazop-modal-content {
+  background-color: #ffffff;
+  border-radius: 0.75rem;
+  max-width: 900px;
+  width: 100%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  animation: hazop-slide-up 0.3s ease-out;
+}
+
+@keyframes hazop-slide-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.hazop-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.hazop-modal-header h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.hazop-modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #6b7280;
+  cursor: pointer;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.25rem;
+  transition: background-color 0.2s;
+}
+
+.hazop-modal-close:hover {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.hazop-modal-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+
+/* --- Detail Lists --- */
+.hazop-detail-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.hazop-detail-item {
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+.hazop-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.hazop-detail-header h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.hazop-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .hazop-detail-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.hazop-detail-grid div {
+  font-size: 0.875rem;
+  color: #374151;
+}
+
+.hazop-detail-grid strong {
+  color: #4b5563;
+  font-weight: 600;
+}
+
+/* --- Badges --- */
+.hazop-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.hazop-badge-success { background-color: #dcfce7; color: #16a34a; }
+.hazop-badge-warning { background-color: #ffedd5; color: #ea580c; }
+.hazop-badge-danger { background-color: #fee2e2; color: #dc2626; }
+.hazop-badge-info { background-color: #dbeafe; color: #2563eb; }
+
+/* --- Summary Counts --- */
+.hazop-summary-counts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.hazop-count-card {
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  text-align: center;
+  border: 2px solid transparent;
+}
+
+.hazop-count-card h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.hazop-count-value {
+  margin: 0;
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+.hazop-count-total {
+  background-color: #dbeafe;
+  border-color: #2563eb;
+}
+.hazop-count-total h4 { color: #2563eb; }
+.hazop-count-total .hazop-count-value { color: #2563eb; }
+
+.hazop-count-completed {
+  background-color: #dcfce7;
+  border-color: #16a34a;
+}
+.hazop-count-completed h4 { color: #16a34a; }
+.hazop-count-completed .hazop-count-value { color: #16a34a; }
+
+.hazop-count-pending {
+  background-color: #ffedd5;
+  border-color: #ea580c;
+}
+.hazop-count-pending h4 { color: #ea580c; }
+.hazop-count-pending .hazop-count-value { color: #ea580c; }
+
+/* --- Specific Text Colors --- */
+.text-blue-600 { color: #2563eb; }
+.text-green-600 { color: #16a34a; }
+.text-purple-600 { color: #9333ea; }
+.text-orange-600 { color: #ea580c; }
+.text-red-600 { color: #dc2626; }

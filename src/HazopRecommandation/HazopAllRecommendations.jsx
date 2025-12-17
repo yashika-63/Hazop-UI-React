@@ -1,20 +1,24 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { FaSearch } from 'react-icons/fa';
 import '../styles/global.css';
-import { getRiskClass, getRiskColor, getRiskLevelText, showToast, truncateWords } from '../CommonUI/CommonUI';
+import { getRiskClass, getRiskColor, getRiskLevelText, showToast, truncateText, truncateWords } from '../CommonUI/CommonUI';
 import { strings } from '../string';
 
 const HazopAllRecommendations = ({ hazopId }) => {
 
     const [recommendations, setRecommendations] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [expandedRowId, setExpandedRowId] = useState(null);
 
-    /** GLOBAL EMPLOYEE SEARCH **/
     const [globalSearch, setGlobalSearch] = useState("");
     const [globalResults, setGlobalResults] = useState([]);
     const [selectedGlobalEmployee, setSelectedGlobalEmployee] = useState(null);
-
+    const navigate = useNavigate();
+    const toggleRow = (id) => {
+        setExpandedRowId(expandedRowId === id ? null : id);
+    };
     /* =====================================
        FETCH DATA
        ===================================== */
@@ -40,8 +44,27 @@ const HazopAllRecommendations = ({ hazopId }) => {
     useEffect(() => {
         fetchRecommendations();
     }, [hazopId]);
+    // --- NEW: Navigation Handler ---
+    const handleNavigateToDetail = (e, rec) => {
+        e.stopPropagation();
 
+        // Find the Node ID (Logic handles both structure types)
+        const targetNodeId = rec.javaHazopNode?.id || hazopId;
 
+        // Find the Detail ID
+        const targetDetailId = rec.javaHazopNodeDetail?.id;
+
+        if (targetNodeId && targetDetailId) {
+            navigate('/ViewNodeDiscussion', {
+                state: {
+                    nodeId: targetNodeId,      // Key must be 'nodeId'
+                    detailId: targetDetailId   // Key must be 'detailId'
+                }
+            });
+        } else {
+            showToast("Navigation details missing", "error");
+        }
+    };
     /* =====================================
        HANDLE GLOBAL EMPLOYEE SEARCH
        ===================================== */
@@ -166,14 +189,12 @@ const HazopAllRecommendations = ({ hazopId }) => {
             </div>
 
 
-
-            {/* ============================ */}
-            {/*      RECOMMENDATION TABLE    */}
-            {/* ============================ */}
             <table className="assigned-table">
                 <thead>
                     <tr>
                         <th>Sr.No</th>
+                        <th>Node Reference No</th>
+                        <th>Deviation</th>
                         <th>Recommendation</th>
                         <th>Initial Risk rating</th>
                         <th>Final Risk rating</th>
@@ -188,9 +209,29 @@ const HazopAllRecommendations = ({ hazopId }) => {
                         </tr>
                     ) : (
                         recommendations.map((rec, index) => (
-                            <tr key={rec.id}>
+                            <tr key={rec.id} className={expandedRowId === rec.id ? "expanded-row" : ""}
+                                onClick={() => toggleRow(rec.id)}>
                                 <td>{index + 1}</td>
-                                <td>{truncateWords(rec.recommendation)}</td>
+                                <td>
+                                    {rec.javaHazopNode?.nodeNumber && rec.javaHazopNodeDetail?.nodeDetailNumber
+                                        ? `${rec.javaHazopNode.nodeNumber}.${rec.javaHazopNodeDetail.nodeDetailNumber}`
+                                        : '-'}
+                                </td>
+                                <td
+                                    className={`truncate-cell ${expandedRowId === rec.id ? "expanded-cell" : ""}`}
+                                    onClick={(e) => handleNavigateToDetail(e, rec)}
+                                    style={{ cursor: 'pointer', color: '#319795', fontWeight: '600' }}
+                                    title="Click to view discussion details"
+                                >
+                                    {expandedRowId === rec.id
+                                        ? rec.javaHazopNodeDetail?.deviation
+                                        : truncateText(rec.javaHazopNodeDetail?.deviation, 50)}
+                                </td>
+                                <td className={`truncate-cell ${expandedRowId === rec.id ? "expanded-cell" : ""}`}>
+                                    {expandedRowId === rec.id
+                                        ? rec.recommendation
+                                        : truncateText(rec.recommendation, 50)}
+                                </td>
                                 <td style={{ color: getRiskColor(rec.javaHazopNodeDetail?.riskRating || '-') }}>
                                     {rec.javaHazopNodeDetail?.riskRating || '-'}
                                 </td>
