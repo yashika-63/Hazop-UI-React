@@ -38,7 +38,7 @@ const CreateNodeDetails = () => {
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [recToDelete, setRecToDelete] = useState(null);
   const [recIndexToDelete, setRecIndexToDelete] = useState(null);
-const [currentDetailNo, setCurrentDetailNo] = useState(null);
+  const [currentDetailNo, setCurrentDetailNo] = useState(null);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -132,7 +132,7 @@ const [currentDetailNo, setCurrentDetailNo] = useState(null);
           setDetails(data);
           setCurrentIndex(0);
           const firstDetail = data[0];
-  setCurrentDetailNo(firstDetail.nodeDetailNumber);
+          setCurrentDetailNo(firstDetail.nodeDetailNumber);
           setForm({
             ...firstDetail,
             additionalControl:
@@ -278,9 +278,9 @@ const [currentDetailNo, setCurrentDetailNo] = useState(null);
     try {
       setLoading(true);
       const previousDetailNo =
-  currentDetailId === null && currentDetailNo
-    ? currentDetailNo
-    : currentDetailNo || 0;
+        currentDetailId === null && currentDetailNo
+          ? currentDetailNo
+          : currentDetailNo || 0;
       const nodeDetailResponse = await fetch(
         `http://${strings.localhost}/api/hazopNodeDetail/saveDetails/${currentNodeId}?previousDetailNo=${previousDetailNo}`,
         {
@@ -401,35 +401,34 @@ const [currentDetailNo, setCurrentDetailNo] = useState(null);
     fetchFirstNodeDetail();
   }, [nodeID]);
 
-const fetchDetailByDirection = async (direction) => {
-  if (!nodeID) return null;
+  const fetchDetailByDirection = async (direction) => {
+    if (!nodeID) return null;
 
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    // IMPORTANT: use nodeDetailNumber, not ID
-    const currentDetailNumberParam =
-      currentDetailNo ?? 0; // null-safe
+      // IMPORTANT: use nodeDetailNumber, not ID
+      const currentDetailNumberParam = currentDetailNo ?? 0; // null-safe
 
-    const res = await fetch(
-      `http://${strings.localhost}/api/hazopNodeDetail/getByDirectionNew` +
-        `?currentDetailNumber=${currentDetailNumberParam}` +
-        `&nodeId=${currentNodeId}` +
-        `&direction=${direction}`
-    );
+      const res = await fetch(
+        `http://${strings.localhost}/api/hazopNodeDetail/getByDirectionNew` +
+          `?currentDetailNumber=${currentDetailNumberParam}` +
+          `&nodeId=${currentNodeId}` +
+          `&direction=${direction}`
+      );
 
-    if (!res.ok) return null;
+      if (!res.ok) return null;
 
-    const data = await res.json();
-    return data || null;
-  } catch (error) {
-    console.error("Error fetching node detail by direction:", error);
-    showToast("Failed to load the discussion.", "error");
-    return null;
-  } finally {
-    setLoading(false);
-  }
-};
+      const data = await res.json();
+      return data || null;
+    } catch (error) {
+      console.error("Error fetching node detail by direction:", error);
+      showToast("Failed to load the discussion.", "error");
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSaveAndNext = async () => {
     if (!validate()) return;
@@ -458,10 +457,10 @@ const fetchDetailByDirection = async (direction) => {
         node: { id: nodeID },
       };
 
-const previousDetailNo =
-  currentDetailId === null && currentDetailNo
-    ? currentDetailNo
-    : currentDetailNo || 0;
+      const previousDetailNo =
+        currentDetailId === null && currentDetailNo
+          ? currentDetailNo
+          : currentDetailNo || 0;
       const detailRes = await fetch(
         `http://${strings.localhost}/api/hazopNodeDetail/saveDetails/${currentNodeId}?previousDetailNo=${previousDetailNo}`,
         {
@@ -627,24 +626,24 @@ const previousDetailNo =
 
     setTempRecommendations(recs);
     setCurrentDetailId(nextDetail.id);
-  setCurrentDetailNo(nextDetail.nodeDetailNumber);
+    setCurrentDetailNo(nextDetail.nodeDetailNumber);
   };
 
   const handleAddDiscussionNext = () => {
-  if (!isSaved) {
-    showToast("Please save the current discussion first.", "warn");
-    return;
-  }
+    if (!isSaved) {
+      showToast("Please save the current discussion first.", "warn");
+      return;
+    }
 
-  // Open a fresh blank form
-  setForm(initialState);
-  setTempRecommendations([]);
-  setCurrentDetailId(null);
-  setCurrentIndex(details.length); // optional, keeps index in sync
-  setIsSaved(true);
+    // Open a fresh blank form
+    setForm(initialState);
+    setTempRecommendations([]);
+    setCurrentDetailId(null);
+    setCurrentIndex(details.length); // optional, keeps index in sync
+    setIsSaved(true);
 
-  showToast("Blank form opened. Add new discussion.", "info");
-};
+    showToast("Blank form opened. Add new discussion.", "info");
+  };
 
   const loadRecommendations = async (detailId) => {
     try {
@@ -774,18 +773,21 @@ const previousDetailNo =
         if (!deleteRes.ok) throw new Error("Failed to delete recommendation");
       }
 
-      // 3️⃣ Update node details after deletion
-      const updateRes = await fetch(
-        `http://${strings.localhost}/api/hazopNodeDetail/update/${currentDetailId}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updatedForm),
+      // 3️⃣ Update node details ONLY if detail already exists
+      if (currentDetailId) {
+        const updateRes = await fetch(
+          `http://${strings.localhost}/api/hazopNodeDetail/update/${currentDetailId}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(updatedForm),
+          }
+        );
+
+        if (!updateRes.ok) {
+          throw new Error("Failed to update node details");
         }
-      );
-
-      if (!updateRes.ok) throw new Error("Failed to update node details");
-
+      }
       showToast("Recommendation deleted successfully.", "success");
     } catch (error) {
       console.error(error);
@@ -945,7 +947,7 @@ const previousDetailNo =
         <button className="nd-back-btn" onClick={() => navigate(-1)}>
           ← Back
         </button>
-        <h1>Add Discussion</h1>
+        <h1>Add Deviation</h1>
       </div>
 
       <div className="table-section">
@@ -988,8 +990,9 @@ const previousDetailNo =
                   maxLength={1000}
                 />
                 <small
-                  className={`char-count ${form.generalParameter.length >= 1000 ? "limit-reached" : ""
-                    }`}
+                  className={`char-count ${
+                    form.generalParameter.length >= 1000 ? "limit-reached" : ""
+                  }`}
                 >
                   {form.generalParameter.length}/1000
                 </small>
@@ -1007,8 +1010,9 @@ const previousDetailNo =
                   maxLength={1000}
                 />
                 <small
-                  className={`char-count ${form.specificParameter.length >= 1000 ? "limit-reached" : ""
-                    }`}
+                  className={`char-count ${
+                    form.specificParameter.length >= 1000 ? "limit-reached" : ""
+                  }`}
                 >
                   {form.specificParameter.length}/1000
                 </small>
@@ -1026,8 +1030,9 @@ const previousDetailNo =
                   maxLength={1000}
                 />
                 <small
-                  className={`char-count ${form.guidWord.length >= 1000 ? "limit-reached" : ""
-                    }`}
+                  className={`char-count ${
+                    form.guidWord.length >= 1000 ? "limit-reached" : ""
+                  }`}
                 >
                   {form.guidWord.length}/1000
                 </small>
@@ -1049,8 +1054,9 @@ const previousDetailNo =
                   maxLength={5000}
                 />
                 <small
-                  className={`char-count ${form.deviation.length >= 5000 ? "limit-reached" : ""
-                    }`}
+                  className={`char-count ${
+                    form.deviation.length >= 5000 ? "limit-reached" : ""
+                  }`}
                 >
                   {form.deviation.length}/5000
                 </small>
@@ -1069,8 +1075,9 @@ const previousDetailNo =
                   maxLength={5000}
                 />
                 <small
-                  className={`char-count ${form.causes.length >= 5000 ? "limit-reached" : ""
-                    }`}
+                  className={`char-count ${
+                    form.causes.length >= 5000 ? "limit-reached" : ""
+                  }`}
                 >
                   {form.causes.length}/5000
                 </small>
@@ -1089,8 +1096,9 @@ const previousDetailNo =
                   maxLength={5000}
                 />
                 <small
-                  className={`char-count ${form.consequences.length >= 5000 ? "limit-reached" : ""
-                    }`}
+                  className={`char-count ${
+                    form.consequences.length >= 5000 ? "limit-reached" : ""
+                  }`}
                 >
                   {form.consequences.length}/5000
                 </small>
@@ -1111,8 +1119,9 @@ const previousDetailNo =
                     maxLength={5000}
                   />
                   <small
-                    className={`char-count ${form.existineControl.length >= 5000 ? "limit-reached" : ""
-                      }`}
+                    className={`char-count ${
+                      form.existineControl.length >= 5000 ? "limit-reached" : ""
+                    }`}
                   >
                     {form.existineControl.length}/5000
                   </small>
@@ -1131,6 +1140,7 @@ const previousDetailNo =
                         borderColor: getBorderColor(form.riskRating),
                         borderWidth: "2px",
                         borderStyle: "solid",
+                        marginTop: "5px",
                         borderLeft: `5px solid ${getBorderColor(
                           form.riskRating
                         )}`,
@@ -1149,6 +1159,7 @@ const previousDetailNo =
                         borderColor: getBorderColor(form.riskRating),
                         borderWidth: "2px",
                         borderStyle: "solid",
+                        marginTop: "5px",
                         borderLeft: `5px solid ${getBorderColor(
                           form.riskRating
                         )}`,
@@ -1315,10 +1326,11 @@ const previousDetailNo =
                     ))}
                   </div>
                   <small
-                    className={`char-count ${form.additionalControl.length >= 5000
+                    className={`char-count ${
+                      form.additionalControl.length >= 5000
                         ? "limit-reached"
                         : ""
-                      }`}
+                    }`}
                     style={{ marginTop: "9px" }}
                   >
                     {form.additionalControl.length}/5000
@@ -1339,6 +1351,7 @@ const previousDetailNo =
                         borderColor: getBorderColor(form.additionalRiskRating),
                         borderWidth: "2px",
                         borderStyle: "solid",
+                        marginTop: "5px",
                         borderLeft: `5px solid ${getBorderColor(
                           form.additionalRiskRating
                         )}`,
@@ -1359,6 +1372,7 @@ const previousDetailNo =
                         borderColor: getBorderColor(form.additionalRiskRating),
                         borderWidth: "2px",
                         borderStyle: "solid",
+                        marginTop: "5px",
                         borderLeft: `5px solid ${getBorderColor(
                           form.additionalRiskRating
                         )}`,
@@ -1434,13 +1448,12 @@ const previousDetailNo =
                 disabled={loading}
                 onClick={handleAddDiscussionNext}
               >
-                Add Discussion next to this
+                Add Deviation next to this
               </button>
             </div>
-            <div className="center-controls">
+            <div className="table-header">
               <button
                 type="button"
-                className="save-btn"
                 disabled={loading}
                 onClick={() => handlePrevNextNode("previous")}
               >
@@ -1448,7 +1461,6 @@ const previousDetailNo =
               </button>
               <button
                 type="button"
-                className="save-btn"
                 disabled={loading}
                 onClick={() => handlePrevNextNode("next")}
               >

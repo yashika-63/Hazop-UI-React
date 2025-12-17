@@ -122,10 +122,10 @@ console.log("Using registrationId for POST:", registrationId);
         onSave();
       }
       navigate(-1);
-      showToast("Hazop note created successfully!", "success");
+      showToast("Hazop node created successfully!", "success");
     } catch (err) {
       console.error("Save failed:", err);
-      showToast("Failed to save Hazop note", "error");
+      showToast("Failed to save Hazop node", "error");
     } finally {
       setLoading(false);
     }
@@ -165,7 +165,7 @@ console.log("Using registrationId for POST:", registrationId);
                   <span className="required-marker">* </span>P&ID No. & Revision
                 </label>
                 <input
-                  type="number"
+                  type="text"
                   name="pIdRevision"
                   value={form.pIdRevision}
                   onChange={handleChange}

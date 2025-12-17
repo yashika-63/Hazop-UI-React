@@ -12,26 +12,25 @@ const SequenceUpdatePopup = ({ onClose, nodeId }) => {
   useEffect(() => {
     if (nodeId) fetchNodeDetails();
   }, [nodeId]);
- 
-const fetchNodeDetails = async () => {
-  try {
-    const response = await axios.get(
-      `http://${strings.localhost}/api/hazopNodeDetail/node/${nodeId}`
-    );
- 
-    if (Array.isArray(response.data)) {
-      setNodeDetails(response.data);
-    } else {
+
+  const fetchNodeDetails = async () => {
+    try {
+      const response = await axios.get(
+        `http://${strings.localhost}/api/hazopNodeDetail/node/${nodeId}`
+      );
+
+      if (Array.isArray(response.data)) {
+        setNodeDetails(response.data);
+      } else {
+        setNodeDetails([]);
+      }
+    } catch (err) {
+      console.error(err);
       setNodeDetails([]);
+      showToast("No node details found", "info");
     }
-  } catch (err) {
-    console.error(err);
-    setNodeDetails([]);
-    showToast("No node details found", "info");
-  }
-};
- 
- 
+  };
+
   // 🔁 Drag End Handler
   const handleDragEnd = async (result) => {
     const { source, destination } = result;
@@ -66,13 +65,18 @@ const fetchNodeDetails = async () => {
         {/* Header */}
         <div className="modal-content">
           <h2 className="modal-header">Sequence Details</h2>
-                    <button className="close-btn" onClick={onClose}>
+          <button className="close-btn" onClick={onClose}>
             <FaTimes />
           </button>
         </div>
  
         <DragDropContext onDragEnd={handleDragEnd}>
-            <div><strong>Note: </strong><small>Kindly drag and drop the table rows to update the sequence</small></div>
+          <div>
+            <strong>Note: </strong>
+            <small>
+              Kindly drag and drop the table rows to update the sequence
+            </small>
+          </div>
           <table className="hazoplist-table">
             <thead>
               <tr>
@@ -86,40 +90,42 @@ const fetchNodeDetails = async () => {
  
             <Droppable droppableId="table-rows" direction="vertical">
               {(provided) => (
-                <tbody
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                >
+                <tbody ref={provided.innerRef} {...provided.droppableProps}>
                   {nodeDetails.length > 0 ? (
-  nodeDetails.map((item, index) => (
-    <Draggable
-      key={item.id}
-      draggableId={String(item.id)}
-      index={index}
-    >
-      {(provided, snapshot) => (
-        <tr
-          ref={provided.innerRef}
-          {...provided.draggableProps}
-          {...provided.dragHandleProps}
-          className={snapshot.isDragging ? "dragging-row" : ""}
-        >
-          <td>{index + 1}</td>
-          <td>{item.generalParameter}</td>
-          <td>{item.specificParameter}</td>
-          <td>{item.guidWord}</td>
-          <td>{item.nodeDetailNumber}</td>
-        </tr>
-      )}
-    </Draggable>
-  ))
-) : (
-  <tr>
-    <td colSpan="5" style={{ textAlign: "center", padding: "16px" }}>
-      No sequence details available
-    </td>
-  </tr>
-)}
+                    nodeDetails.map((item, index) => (
+                      <Draggable
+                        key={item.id}
+                        draggableId={String(item.id)}
+                        index={index}
+                      >
+                        {(provided, snapshot) => (
+                          <tr
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            className={
+                              snapshot.isDragging ? "dragging-row" : ""
+                            }
+                          >
+                            <td>{index + 1}</td>
+                            <td>{item.generalParameter}</td>
+                            <td>{item.specificParameter}</td>
+                            <td>{item.guidWord}</td>
+                            <td>{item.nodeDetailNumber}</td>
+                          </tr>
+                        )}
+                      </Draggable>
+                    ))
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan="5"
+                        style={{ textAlign: "center", padding: "16px" }}
+                      >
+                        No sequence details available
+                      </td>
+                    </tr>
+                  )}
                   {provided.placeholder}
                 </tbody>
               )}

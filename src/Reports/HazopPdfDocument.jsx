@@ -112,7 +112,7 @@ const HazopPdfDocument = ({
                                 </View>
                                 <View style={styles.cardRow}>
                                     <Text style={styles.cardLabel}>MOC Date:</Text>
-                                    <Text style={styles.cardValue}>{moc.mocDate || '-'}</Text>
+                                    <Text style={styles.cardValue}>{formatDate(moc.mocDate || '-')}</Text>
                                 </View>
                             </View>
                         ))}
@@ -131,7 +131,7 @@ const HazopPdfDocument = ({
                         {team?.map((m, i) => (
                             <View key={i} style={[styles.tableRow, i % 2 !== 0 ? styles.tableRowEven : {}]}>
                                 <View style={[styles.tableCol, { width: '30%' }]}><Text style={styles.tableCell}>{m?.firstName || ''} {m?.middleName || ''} {m?.lastName || ''}</Text></View>
-                                <View style={[styles.tableCol, { width: '30%' }]}><Text style={styles.tableCell}>{m?.dimension3 || '-'}</Text></View>
+                                <View style={[styles.tableCol, { width: '30%' }]}><Text style={styles.tableCell}>{m?.dimension1 || '-'}</Text></View>
                                 <View style={[styles.tableCol, { width: '40%' }]}><Text style={styles.tableCell}>{m?.emailId || '-'}</Text></View>
                             </View>
                         ))}

@@ -1,6 +1,7 @@
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { formatDate } from "../CommonUI/CommonUI";
+import { formatDate } from "../CommonUI/CommonUI";
  
 // --- CONFIGURATION & COLORS ---
  
@@ -532,6 +533,8 @@ export async function generateHazopExcel({
         compSheet.mergeCells(`H${compRow}:I${compRow}`); compSheet.getCell(`H${compRow}`).value = ""; styleData(compSheet.getCell(`H${compRow}`));
         compRow++;
     });
+ 
+    styleA4Page(compSheet);
  
     styleA4Page(compSheet);
  

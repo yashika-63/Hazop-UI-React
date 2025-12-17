@@ -1167,6 +1167,7 @@ const previousDetailNo =
                         borderColor: getBorderColor(form.riskRating),
                         borderWidth: "2px",
                         borderStyle: "solid",
+                        marginTop: "5px",
                         borderLeft: `5px solid ${getBorderColor(
                           form.riskRating
                         )}`,
@@ -1185,6 +1186,7 @@ const previousDetailNo =
                         borderColor: getBorderColor(form.riskRating),
                         borderWidth: "2px",
                         borderStyle: "solid",
+                        marginTop: "5px",
                         borderLeft: `5px solid ${getBorderColor(
                           form.riskRating
                         )}`,
@@ -1375,6 +1377,7 @@ const previousDetailNo =
                         borderColor: getBorderColor(form.additionalRiskRating),
                         borderWidth: "2px",
                         borderStyle: "solid",
+                        marginTop: "5px",
                         borderLeft: `5px solid ${getBorderColor(
                           form.additionalRiskRating
                         )}`,
@@ -1395,6 +1398,7 @@ const previousDetailNo =
                         borderColor: getBorderColor(form.additionalRiskRating),
                         borderWidth: "2px",
                         borderStyle: "solid",
+                        marginTop: "5px",
                         borderLeft: `5px solid ${getBorderColor(
                           form.additionalRiskRating
                         )}`,
@@ -1446,7 +1450,7 @@ const previousDetailNo =
                 disabled={loading}
                 onClick={() => handlePrevNext("previous")}
               >
-                Previous Discussion
+                Previous Deviation
               </button>
               <button
                 type="button"
@@ -1462,7 +1466,7 @@ const previousDetailNo =
                 disabled={loading}
                 onClick={() => handlePrevNext("next")}
               >
-                Next Discussion
+                Next Deviation
               </button>
               <button
                 type="button"
@@ -1470,13 +1474,12 @@ const previousDetailNo =
                 disabled={loading}
                 onClick={handleAddDiscussionNext}
               >
-                Add Discussion next to this
+                Add Deviation next to this
               </button>
             </div>
-            <div className="center-controls">
+            <div className="discussion-header">
               <button
                 type="button"
-                className="save-btn"
                 disabled={loading}
                 onClick={() => handlePrevNextNode("previous")}
               >
@@ -1484,7 +1487,6 @@ const previousDetailNo =
               </button>
               <button
                 type="button"
-                className="save-btn"
                 disabled={loading}
                 onClick={() => handlePrevNextNode("next")}
               >

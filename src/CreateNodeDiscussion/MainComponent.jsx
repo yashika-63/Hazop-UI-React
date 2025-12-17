@@ -76,7 +76,7 @@ const MainComponent = () => {
         <button className="nd-back-btn" onClick={() => navigate(-1)}>
           ← Back
         </button>
-        <h1>Add Discussion</h1>
+        <h1>Add Deviation</h1>
       </div>
 
       <div className="table-section">
