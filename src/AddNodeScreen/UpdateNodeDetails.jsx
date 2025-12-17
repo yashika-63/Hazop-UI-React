@@ -460,7 +460,7 @@ const fetchDetailByDirection = async (direction) => {
     return data || null;
   } catch (error) {
     console.error("Error fetching node detail by direction:", error);
-    showToast("Failed to load the discussion.", "error");
+    showToast("Failed to load the deviation.", "error");
     return null;
   } finally {
     setLoading(false);
@@ -668,7 +668,7 @@ const previousDetailNo =
 
   const handleAddDiscussionNext = () => {
   if (!isSaved) {
-    showToast("Please save the current discussion first.", "warn");
+    showToast("Please save the current deviation first.", "warn");
     return;
   }
 
@@ -679,7 +679,7 @@ const previousDetailNo =
   setCurrentIndex(details.length); // optional, keeps index in sync
   setIsSaved(true);
 
-  showToast("Blank form opened. Add new discussion.", "info");
+  showToast("Blank form opened. Add new deviation.", "info");
 };
 
   const loadRecommendations = async (detailId) => {
@@ -981,7 +981,7 @@ const previousDetailNo =
         <button className="nd-back-btn" onClick={() => navigate(-1)}>
           ← Back
         </button>
-        <h1>Update Discussion</h1>
+        <h1>Update Deviation</h1>
       </div>
 
       <div className="table-section">
@@ -1499,7 +1499,7 @@ const previousDetailNo =
 
       {showConfirmation && (
         <ConfirmationPopup
-          message="Are you sure you want to save this discussion and proceed to next?"
+          message="Are you sure you want to save this deviation and proceed to next?"
           onConfirm={() => {
             setShowConfirmation(false);
             handleSaveAndNext();

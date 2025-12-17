@@ -584,7 +584,7 @@ const MainComponent = () => {
 
       {showConfirmation && (
         <ConfirmationPopup
-          message="Are you sure you want to save this discussion and proceed to next?"
+          message="Are you sure you want to save this deviation and proceed to next?"
           onConfirm={() => {
             setShowConfirmation(false);
             handleSaveAndNext();
