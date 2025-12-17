@@ -23,6 +23,7 @@ import './App.css';
 import "./styles/global.css";
 import RoleBasedHazopPage from './HazopEntry/RoleBasedHazopPage';
 import MainComponent from './CreateNodeDiscussion/mainComponent';
+import NodeRetrieve from './AddNodeScreen/NodeRetrieve';
 
 const App = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -80,7 +81,7 @@ const App = () => {
                     <Route path="/RoleBasedHazopPage" element={<RoleBasedHazopPage />} />
                     <Route path="/NodePopup" element={<NodePopup />} />
                     <Route path="/MainComponent" element={<MainComponent />} />
-
+                    <Route path='/NodeRetrieve' element={<NodeRetrieve />} />
                     <Route path="/HazopView" element={<HazopView />} />
 
                     

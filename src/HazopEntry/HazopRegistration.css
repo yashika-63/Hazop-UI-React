@@ -1,12 +1,3 @@
-.hazoptable-wrapper {
-  overflow-y: auto;
-  margin-top: 10px;
-  position: relative;
-  min-height: 500px;
-}
-
-
-
 .table-wrapper {
   max-height: 500px;
   overflow-y: auto;
@@ -60,8 +51,6 @@
   border: red;
 }
 
-
-
 .role-change-btn {
   background-color: #ce8c2f;
   margin-left: 10px;
@@ -78,18 +67,6 @@
 .role-change-btn:disabled {
   background-color: #d9534f;
   cursor: not-allowed;
-}
-
-/* ------------------------------------------------------
-   HAZOP LIST TABLE – Glass Look with Animated Header
--------------------------------------------------------*/
-
-.hazoplist-wrapper {
-  width: 100%;
-  overflow-x: auto;
-  padding: 20px;
-  background: #ffffff;
-  border-radius: 12px;
 }
 
 .hazoplist-table {
@@ -202,11 +179,6 @@
   font-weight: 500;
 }
 
-
-
-
-
-
 /* Optional: buttons inside dropdown more visible */
 .dropdown-content button {
   font-size: 14px;
@@ -235,7 +207,6 @@
 }
 
 @media (max-width: 768px) {
-
   .hazoplist-table th,
   .hazoplist-table td {
     font-size: 12px;
@@ -246,12 +217,6 @@
     max-width: 120px;
   }
 }
-
-
-
-
-
-
 
 .hazop-info {
   border: 1px solid #ddd;
@@ -306,9 +271,6 @@
     min-width: 100px;
   }
 }
-
-
-
 
 .pagination-btn {
   background: linear-gradient(270deg, #4b6cb7, #182848, #4b6cb7);

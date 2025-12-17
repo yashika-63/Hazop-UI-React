@@ -1,5 +1,6 @@
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
+import { formatDate } from "../CommonUI/CommonUI";
  
 // --- CONSTANTS & STYLES ---
  
@@ -11,13 +12,6 @@ const COLORS = {
     RED: 'FFC00000',      // 20-25 Intolerable (Dark Red)
     HEADER_BG: 'FFD9D9D9', // Light Grey for Table Headers
     SUB_HEADER_BG: 'FFEFEFEF' // Lighter Grey
-};
- 
-// Formats date to DD/MM/YYYY
-const formatDate = (dateString) => {
-    if (!dateString) return "-";
-    const date = new Date(dateString);
-    return isNaN(date.getTime()) ? "-" : date.toLocaleDateString("en-GB");
 };
  
 // Returns ARGB color based on Risk Score
@@ -211,7 +205,7 @@ export async function generateHazopExcel({
         const m = team[i] || {};
         coverSheet.getCell(`B${cRow}`).value = i + 1; applyBorder(coverSheet.getCell(`B${cRow}`));
         coverSheet.mergeCells(`C${cRow}:E${cRow}`); coverSheet.getCell(`C${cRow}`).value = m.firstName ? `${m.firstName} ${m.lastName}` : ''; applyBorder(coverSheet.getCell(`C${cRow}`));
-        coverSheet.mergeCells(`F${cRow}:H${cRow}`); coverSheet.getCell(`F${cRow}`).value = m.dimension3 || ''; applyBorder(coverSheet.getCell(`F${cRow}`));
+        coverSheet.mergeCells(`F${cRow}:H${cRow}`); coverSheet.getCell(`F${cRow}`).value = m.dimension1 || ''; applyBorder(coverSheet.getCell(`F${cRow}`));
         coverSheet.mergeCells(`I${cRow}:L${cRow}`); coverSheet.getCell(`I${cRow}`).value = m.emailId || ''; applyBorder(coverSheet.getCell(`I${cRow}`));
         cRow++;
     }
@@ -229,7 +223,7 @@ export async function generateHazopExcel({
     indexSheet.getCell('B12').font = { bold: true, underline: true };
  
     const idxHead = 14;
-    const idxHeaders = ['Node', 'Design Intent / Title', 'Reg. Date', 'Equipment', 'SOP No.', 'Status'];
+    const idxHeaders = ['Node', 'Design Intent / Title', 'Registration Date', 'Equipment', 'SOP No.', 'Status'];
     ['B', 'C', 'D', 'E', 'F', 'G'].forEach((col, i) => {
         const cell = indexSheet.getCell(`${col}${idxHead}`);
         cell.value = idxHeaders[i];
@@ -389,7 +383,7 @@ export async function generateHazopExcel({
     recSheet.mergeCells('B10:M10'); recSheet.getCell('B10').value = "ALL RECOMMENDATIONS"; recSheet.getCell('B10').font = { bold: true, underline: true };
    
     let rHead = 12;
-    const rHeaders = ['No.', 'Recommendation', 'Remark', 'Responsibility', 'Dept', 'Status', 'Date', 'Sent Verif?', 'Action', 'Verif Status', 'By', 'Email', 'V.Date'];
+    const rHeaders = ['No.', 'Recommendation', 'Remark', 'Responsibility', 'Department', 'Status', 'Date', 'Sent for Review', 'Action', 'Review Status', 'Reviewed By', 'Email', 'Review Date'];
     rHeaders.forEach((h, i) => {
         const c = recSheet.getCell(rHead, i + 2);
         c.value = h;
@@ -422,7 +416,7 @@ export async function generateHazopExcel({
     addCommonHeader(confSheet, hazop, 5, 7);
     confSheet.mergeCells('B10:G10'); confSheet.getCell('B10').value = "CONFIRMATION / VERIFICATION"; confSheet.getCell('B10').font = { bold: true, underline: true };
    
-    const cHeaders = ['No.', 'Recommendation', 'Status', 'Verif. Action', 'Verified By', 'Email', 'Date'];
+    const cHeaders = ['No.', 'Recommendation', 'Status', 'Review Action', 'Reviewed By', 'Email', 'Date'];
     cHeaders.forEach((h, i) => {
         const c = confSheet.getCell(12, i + 2);
         c.value = h;

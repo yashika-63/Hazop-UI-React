@@ -135,7 +135,7 @@ const HazopRevision = ({ hazopId, onClose }) => {
         },
         no: () => {
           setConfirmPopup(null);
-          showToast("Please click on Add HAZOP Team and proceed", "warn");
+          showToast("Please click on Create HAZOP Team and proceed", "warn");
         },
       });
       return;
@@ -321,7 +321,7 @@ const HazopRevision = ({ hazopId, onClose }) => {
               onClick={() => setShowTeamSearch(!showTeamSearch)}
               disabled={loading}
             >
-              + Add HAZOP Team
+              + Create HAZOP Team
             </button>
           </div>
 

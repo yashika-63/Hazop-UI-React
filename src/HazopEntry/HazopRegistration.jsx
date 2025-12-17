@@ -210,7 +210,7 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
         },
         no: () => {
           setConfirmPopup(null);
-          showToast("Please click on Add HAZOP Team and proceed", "warn");
+          showToast("Please click on Create HAZOP Team and proceed", "warn");
         }
       });
       return;
@@ -524,7 +524,7 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
             onClick={() => setShowTeamSearch(!showTeamSearch)}
             disabled={loading}
           >
-            + Add HAZOP Team
+            + Create HAZOP Team
           </button>
           <button
             type="button"
@@ -532,7 +532,7 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
             onClick={() => setShowDocumentUploader(!showDocumentUploader)}
             disabled={loading}
           >
-            + Add Document
+            + Upload Document
           </button>
         </div>
 

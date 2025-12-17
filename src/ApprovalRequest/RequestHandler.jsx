@@ -89,7 +89,7 @@ const RequestHandler = () => {
                             <span className="badge">{counts.approvalPending}</span>
                         )}
                     </button>
-                    {/* 
+                    
                     <button
                         type="button"
                         className={activeSection === 'HazopConfirmationApproval' ? 'active' : ''}
@@ -100,7 +100,7 @@ const RequestHandler = () => {
                         {counts.approvalPending > 0 && (
                             <span className="badge">{counts.approvalPending}</span>
                         )}
-                    </button> */}
+                    </button>
 
                     <button
                         type="button"
@@ -119,7 +119,7 @@ const RequestHandler = () => {
                     {activeSection === 'HazopTeamAcceptance' && <HazopTeamAcceptanceApproval />}
                     {activeSection === 'HazopRecommendationApproval' && <HazopRecommendationApproval />}
                     {activeSection === 'HazopApprove' && <HazopApprovalPage />}
-                    {/* {activeSection === 'HazopConfirmationApproval' && <HazopConfirmationApproval />} */}
+                    {activeSection === 'HazopConfirmationApproval' && <HazopConfirmationApproval />}
                     {activeSection === 'RecommendationApproval' && <RecommendationApproval />}
                 </div>
             </div>

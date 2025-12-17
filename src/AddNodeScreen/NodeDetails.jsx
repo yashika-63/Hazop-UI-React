@@ -487,7 +487,7 @@ const NodeDetails = () => {
           </div>
         </div>
         <div>
-          <strong>Design Intent:</strong>
+          <strong>Design Intent: </strong>
           {node?.designIntent}
         </div>
       </div>
@@ -525,7 +525,7 @@ const NodeDetails = () => {
               })
             }
           >
-            + Add Discussion
+            + Add Deviation
           </button>
         )}
       </div>
@@ -537,7 +537,7 @@ const NodeDetails = () => {
               <div ref={provided.innerRef} {...provided.droppableProps}>
                 {details.length === 0 ? (
                   <p className="error-text">
-                    No node details created yet. Click “Add Discussion” to add
+                    No node details created yet. Click "Add Deviation" to add
                     one.
                   </p>
                 ) : (

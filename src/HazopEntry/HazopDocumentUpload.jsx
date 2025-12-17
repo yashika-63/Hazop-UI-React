@@ -102,7 +102,7 @@ const HazopDocumentUpload = React.forwardRef(({ disabled }, ref) => {
                 onClick={addDocumentRow}
                 disabled={disabled || uploading}
             >
-                <FaFileAlt /> Add Document
+                <FaFileAlt /> Upload Document
             </button>
         </div>
     );

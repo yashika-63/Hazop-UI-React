@@ -33,7 +33,8 @@ const HazopTeamAcceptanceApproval = () => {
                     actionTaken: 0
                 }
             });
-            setTeamData(response.data || []);
+             const data = Array.isArray(response.data) ? response.data : [];
+            setTeamData(data);
         } catch (err) {
             console.error(err);
             setError("Failed to fetch HAZOP team data.");

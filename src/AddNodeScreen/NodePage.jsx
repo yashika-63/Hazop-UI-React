@@ -26,7 +26,6 @@ const NodePage = () => {
   const [documents, setDocuments] = useState([]);
   const [showDocuments, setShowDocuments] = useState(false);
 
-
   const toggleDropdown = (id) => {
     setOpenDropdown(openDropdown === id ? null : id);
   };
@@ -35,11 +34,6 @@ const NodePage = () => {
     console.log("Selected revision ID:", id);
     // Add your completion logic here later
   };
-
-
-
-
-
 
   useEffect(() => {
     // Retrieve the data from localStorage
@@ -78,7 +72,6 @@ const NodePage = () => {
     fetchNodes();
     fetchNodes();
   }, [hazopData]);
-
 
   const handleSaveNode = async () => {
     await fetchNodes();
@@ -144,8 +137,8 @@ const NodePage = () => {
           params: {
             companyId: localStorage.getItem("companyId") || 1,
             primeryKey: "HAZOPFIRSTPAGEID",
-            primeryKeyValue: hazopId
-          }
+            primeryKeyValue: hazopId,
+          },
         }
       );
       setDocuments(Array.isArray(res.data) ? res.data : []);
@@ -153,7 +146,6 @@ const NodePage = () => {
       console.error("Error loading HAZOP documents:", err);
     }
   };
-
 
   const fetchMocDetails = async () => {
     try {
@@ -200,7 +192,7 @@ const NodePage = () => {
               <strong>Department:</strong> {hazopData.department}
             </div>
             <div>
-              <strong>HAZOP Date:</strong> {formatDate(hazopData.hazopDate)}
+              <strong>Hazop Date:</strong> {formatDate(hazopData.hazopDate)}
             </div>
             <div>
               <strong>Completion Status:</strong>{" "}
@@ -259,7 +251,7 @@ const NodePage = () => {
 
         <div className="rightbtn-controls">
           <h6
-            style={{ cursor: "pointer", marginRight: '20px' }}
+            style={{ cursor: "pointer", marginRight: "20px" }}
             onClick={() => setShowDocuments(!showDocuments)}
           >
             View Hazop Documents: {documents.length}
@@ -268,7 +260,7 @@ const NodePage = () => {
             style={{ cursor: "pointer" }}
             onClick={() => setShowAllMembers(!showAllMembers)}
           >
-            View Total Group Members: {hazopTeam.length}
+            View Hazop Team
           </h6>
         </div>
 
@@ -288,7 +280,7 @@ const NodePage = () => {
                 <tbody>
                   {hazopTeam.length === 0 ? (
                     <tr>
-                      <td colSpan="4" className="no-data">
+                      <td colSpan="5" className="no-data">
                         No members added yet.
                       </td>
                     </tr>
@@ -370,20 +362,34 @@ const NodePage = () => {
       <div className="table-section">
         <div className="table-header">
           <h1>Nodes</h1>
-          <button
-            type="button"
-            className="add-btn"
-            onClick={() =>
-              navigate("/NodePopup", {
-                state: {
-                  hazopData: hazopData, 
-                  redirectTo: "/hazop-details",
-                },
-              })
-            }
-          >
-            + Add Node
-          </button>
+          <div className="rightbtn-controls">
+            <button
+              className="add-btn"
+              onClick={() =>
+                navigate("/NodeRetrieve", {
+                  state: {
+                    hazopRegistrationId: hazopData.id,
+                  },
+                })
+              }
+            >
+              Retrieve Nodes
+            </button>
+            <button
+              type="button"
+              className="add-btn"
+              onClick={() =>
+                navigate("/NodePopup", {
+                  state: {
+                    hazopData: hazopData,
+                    redirectTo: "/hazop-details",
+                  },
+                })
+              }
+            >
+              + Add Node
+            </button>
+          </div>
         </div>
 
         <div className="card table-card">
