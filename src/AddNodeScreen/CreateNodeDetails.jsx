@@ -423,7 +423,7 @@ const CreateNodeDetails = () => {
       return data || null;
     } catch (error) {
       console.error("Error fetching node detail by direction:", error);
-      showToast("Failed to load the discussion.", "error");
+      showToast("Failed to load the deviation.", "error");
       return null;
     } finally {
       setLoading(false);
@@ -631,7 +631,7 @@ const CreateNodeDetails = () => {
 
   const handleAddDiscussionNext = () => {
     if (!isSaved) {
-      showToast("Please save the current discussion first.", "warn");
+      showToast("Please save the current deviation first.", "warn");
       return;
     }
 
@@ -642,7 +642,7 @@ const CreateNodeDetails = () => {
     setCurrentIndex(details.length); // optional, keeps index in sync
     setIsSaved(true);
 
-    showToast("Blank form opened. Add new discussion.", "info");
+    showToast("Blank form opened. Add new deviation.", "info");
   };
 
   const loadRecommendations = async (detailId) => {
@@ -1424,7 +1424,7 @@ const CreateNodeDetails = () => {
                 disabled={loading}
                 onClick={() => handlePrevNext("previous")}
               >
-                Previous Discussion
+                Previous Deviation
               </button>
               <button
                 type="button"
@@ -1440,7 +1440,7 @@ const CreateNodeDetails = () => {
                 disabled={loading}
                 onClick={() => handlePrevNext("next")}
               >
-                Next Discussion
+                Next Deviation
               </button>
               <button
                 type="button"

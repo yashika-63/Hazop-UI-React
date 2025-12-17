@@ -258,7 +258,7 @@ const HazopPdfDocument = ({
                                     return (
                                         <View key={index} style={styles.detailCard}>
                                             <Text style={styles.sectionTitle}>
-                                                Discussion {index + 1}: {detail.designIntent || "-"}
+                                                Deviation {index + 1}: {detail.designIntent || "-"}
                                             </Text>
 
                                             {/* --- BIG TABLE START --- */}

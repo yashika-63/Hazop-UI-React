@@ -511,7 +511,7 @@ const NodeDetails = () => {
             className="add-btn"
             onClick={() => setSequenceUpdatePopup(true)}
           >
-            Update Discussion Sequence
+            Update Deviation Sequence
           </button>
         )}
 

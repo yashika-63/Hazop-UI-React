@@ -522,7 +522,7 @@ const CompleteHazopView = ({
                         details.map((detail, idx) => (
                           <div key={detail.id} className="node-detail-section">
                             <div className="node-detail-label">
-                              {idx + 1}. Discussion
+                              {idx + 1}. Deviation
 
                             </div>
                             <div >
