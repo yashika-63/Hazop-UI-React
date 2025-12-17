@@ -1,7 +1,8 @@
 // hazopPdfGenerator.js
 import { pdf } from "@react-pdf/renderer";
+// import MyDocument from "../components/hazop/HazopPdfDocument"; // adjust path
 import HazopPdfDocument from "./HazopPdfDocument";
-
+ 
 export async function generateHazopPdf({
     hazop,
     nodes,       // <--- Add this
@@ -20,6 +21,8 @@ export async function generateHazopPdf({
         const blob = await pdf(
             <HazopPdfDocument
                 hazop={hazop}
+                // nodes={hazop.nodes}
+                // team={hazop.teamMembers}
                 nodes={nodes} // <--- Use the passed parameter, not hazop.nodes
                 team={team}   // <--- Use the passed parameter, not hazop.teamMembers
                 nodeDetails={nodeDetails}
@@ -32,15 +35,16 @@ export async function generateHazopPdf({
                 downloadDate={downloadDate}
             />
         ).toBlob();
-
+ 
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
         link.download = `Hazop_Report_${hazopId}.pdf`;
         link.click();
         URL.revokeObjectURL(url);
-
+ 
     } catch (error) {
         console.error("PDF generation failed:", error);
     }
 }
+ 

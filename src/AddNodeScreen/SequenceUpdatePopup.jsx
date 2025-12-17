@@ -5,40 +5,48 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import "./Node.css";
 import { strings } from "../string";
 import { showToast } from "../CommonUI/CommonUI";
-
+ 
 const SequenceUpdatePopup = ({ onClose, nodeId }) => {
   const [nodeDetails, setNodeDetails] = useState([]);
-
+ 
   useEffect(() => {
     if (nodeId) fetchNodeDetails();
   }, [nodeId]);
-
-  const fetchNodeDetails = async () => {
-    try {
-      const response = await axios.get(
-        `http://${strings.localhost}/api/hazopNodeDetail/node/${nodeId}`
-      );
+ 
+const fetchNodeDetails = async () => {
+  try {
+    const response = await axios.get(
+      `http://${strings.localhost}/api/hazopNodeDetail/node/${nodeId}`
+    );
+ 
+    if (Array.isArray(response.data)) {
       setNodeDetails(response.data);
-    } catch (err) {
-      alert("Failed to load node details");
+    } else {
+      setNodeDetails([]);
     }
-  };
-
+  } catch (err) {
+    console.error(err);
+    setNodeDetails([]);
+    showToast("No node details found", "info");
+  }
+};
+ 
+ 
   // 🔁 Drag End Handler
   const handleDragEnd = async (result) => {
     const { source, destination } = result;
     if (!destination) return;
     if (source.index === destination.index) return;
-
+ 
     const reordered = Array.from(nodeDetails);
     const [moved] = reordered.splice(source.index, 1);
     reordered.splice(destination.index, 0, moved);
-
+ 
     setNodeDetails(reordered);
-
+ 
     // backend expects ONLY list of IDs in correct order
     const payload = reordered.map((item) => item.id);
-
+ 
     try {
       await axios.put(
         `http://${strings.localhost}/api/hazopNodeDetail/updateSequenceById/${nodeId}`,
@@ -51,7 +59,7 @@ const SequenceUpdatePopup = ({ onClose, nodeId }) => {
       showToast("Failed to update sequence", "error");
     }
   };
-
+ 
   return (
     <div className="modal-overlay">
       <div className="modal-box">
@@ -62,7 +70,7 @@ const SequenceUpdatePopup = ({ onClose, nodeId }) => {
             <FaTimes />
           </button>
         </div>
-
+ 
         <DragDropContext onDragEnd={handleDragEnd}>
             <div><strong>Note: </strong><small>Kindly drag and drop the table rows to update the sequence</small></div>
           <table className="hazoplist-table">
@@ -75,37 +83,43 @@ const SequenceUpdatePopup = ({ onClose, nodeId }) => {
                 <th>Sequence</th>
               </tr>
             </thead>
-
+ 
             <Droppable droppableId="table-rows" direction="vertical">
               {(provided) => (
                 <tbody
                   ref={provided.innerRef}
                   {...provided.droppableProps}
                 >
-                  {nodeDetails.map((item, index) => (
-                    <Draggable
-                      key={item.id}
-                      draggableId={String(item.id)}
-                      index={index}
-                    >
-                      {(provided, snapshot) => (
-                        <tr
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          className={
-                            snapshot.isDragging ? "dragging-row" : ""
-                          }
-                        >
-                          <td>{index + 1}</td>
-                          <td>{item.generalParameter}</td>
-                          <td>{item.specificParameter}</td>
-                          <td>{item.guidWord}</td>
-                          <td>{item.nodeDetailNumber}</td>
-                        </tr>
-                      )}
-                    </Draggable>
-                  ))}
+                  {nodeDetails.length > 0 ? (
+  nodeDetails.map((item, index) => (
+    <Draggable
+      key={item.id}
+      draggableId={String(item.id)}
+      index={index}
+    >
+      {(provided, snapshot) => (
+        <tr
+          ref={provided.innerRef}
+          {...provided.draggableProps}
+          {...provided.dragHandleProps}
+          className={snapshot.isDragging ? "dragging-row" : ""}
+        >
+          <td>{index + 1}</td>
+          <td>{item.generalParameter}</td>
+          <td>{item.specificParameter}</td>
+          <td>{item.guidWord}</td>
+          <td>{item.nodeDetailNumber}</td>
+        </tr>
+      )}
+    </Draggable>
+  ))
+) : (
+  <tr>
+    <td colSpan="5" style={{ textAlign: "center", padding: "16px" }}>
+      No sequence details available
+    </td>
+  </tr>
+)}
                   {provided.placeholder}
                 </tbody>
               )}
@@ -116,5 +130,5 @@ const SequenceUpdatePopup = ({ onClose, nodeId }) => {
     </div>
   );
 };
-
+ 
 export default SequenceUpdatePopup;

@@ -2,9 +2,10 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { strings } from "../string";
-import { showToast, formatDate, truncateWords } from "../CommonUI/CommonUI";
+import { showToast, formatDate, truncateWords, truncateText } from "../CommonUI/CommonUI";
 import { FaEdit, FaEllipsisV, FaSearch, FaUserPlus } from "react-icons/fa";
 import '../styles/global.css';
+import { useNavigate } from "react-router-dom";
 
 const HazopRecommendationsSecondScreen = ({ hazopId }) => {
     const [data, setData] = useState({
@@ -20,11 +21,33 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
     const [searchInputs, setSearchInputs] = useState({});
     const [selectedEmployees, setSelectedEmployees] = useState({});
     const [assigningIds, setAssigningIds] = useState([]);
-
+    const [expandedRowId, setExpandedRowId] = useState(null);
+    const navigate = useNavigate();
     const toggleDropdown = (id) => {
         setOpenDropdown(openDropdown === id ? null : id);
     };
+    const toggleRow = (id) => {
+        setExpandedRowId(expandedRowId === id ? null : id);
+    };
 
+    const handleNavigateToDetail = (e, rec) => {
+        e.stopPropagation();
+
+        const targetNodeId = rec.javaHazopNode?.id;
+        const targetDetailId = rec.javaHazopNodeDetail?.id;
+
+        if (targetNodeId && targetDetailId) {
+            navigate('/ViewNodeDiscussion', {
+                state: {
+                    nodeId: targetNodeId,      // Matches ViewNodeDiscussion destructuring
+                    detailId: targetDetailId   // Matches ViewNodeDiscussion destructuring
+                }
+            });
+        } else {
+            console.error("Missing IDs:", { targetNodeId, targetDetailId });
+            showToast("Navigation details missing", "error");
+        }
+    };
 
     const openUpdatePopup = (item) => {
         setSelectedHazop(item);
@@ -134,9 +157,11 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
                         <thead>
                             <tr>
                                 <th>Sr.No</th>
+                                <th>Node Reference No</th>
+                                <th>Deviation</th>
                                 <th>Recommendation</th>
-                                <th>Verification By</th>
-                                <th>Verification Date</th>
+                                {/* <th>Reviewed By</th>
+                                <th>Reviewed Date</th> */}
                                 <th>Assign Employee</th>
                                 <th>Action</th>
                             </tr>
@@ -144,17 +169,43 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
                         <tbody>
                             {data.notAssigned.length === 0 ? (
                                 <tr>
-                                    <td colSpan="7" className="no-data1">No data found</td>
+                                    <td colSpan="6" className="no-data1">No data found</td>
                                 </tr>
                             ) : (
                                 data.notAssigned.map((item, index) => (
-                                    <tr key={item.id}>
-                                        <td>{index + 1}</td>
-                                        <td>{truncateWords(item.recommendation ?? "-")}</td>
-                                        <td>{item.verificationResponsibleEmployeeName ?? "-"}</td>
-                                        <td>{item.verificationDate ? formatDate(item.verificationDate) : "-"}</td>
+                                    <tr
+                                        key={item.id}
+                                        className={expandedRowId === item.id ? "expanded-row" : ""}
+                                        onClick={() => toggleRow(item.id)}
+                                    >
+                                        <td className="sr-no">{index + 1}</td>
                                         <td>
-                                            <div className="search-bar-table">
+                                            {item.javaHazopNode?.nodeNumber && item.javaHazopNodeDetail?.nodeDetailNumber
+                                                ? `${item.javaHazopNode.nodeNumber}.${item.javaHazopNodeDetail.nodeDetailNumber}`
+                                                : '-'}
+                                        </td>
+                                        {/* <td className="sr-no">{item.javaHazopNode?.nodeNumber}</td> */}
+
+                                        {/* 4. Clickable Deviation Cell */}
+                                        <td
+                                            className={`truncate-cell ${expandedRowId === item.id ? "expanded-cell" : ""}`}
+                                            onClick={(e) => handleNavigateToDetail(e, item)}
+                                            style={{ cursor: 'pointer', color: '#319795', fontWeight: '600' }}
+                                            title="Click to view discussion details"
+                                        >
+                                            {expandedRowId === item.id
+                                                ? item.javaHazopNodeDetail?.deviation
+                                                : truncateText(item.javaHazopNodeDetail?.deviation, 50)}
+                                        </td>
+
+                                        <td className={`truncate-cell ${expandedRowId === item.id ? "expanded-cell" : ""}`}>
+                                            {expandedRowId === item.id
+                                                ? item.recommendation
+                                                : truncateText(item.recommendation, 50)}
+                                        </td>
+
+                                        <td className="assign-employee">
+                                            <div className="search-bar-table" onClick={e => e.stopPropagation()}>
                                                 <input
                                                     type="text"
                                                     placeholder="Search employee..."
@@ -176,10 +227,11 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
                                                 )}
                                             </div>
                                         </td>
+
                                         <td>
                                             <button
                                                 className="confirm-btn"
-                                                onClick={() => handleAssign(item.id)}
+                                                onClick={(e) => { e.stopPropagation(); handleAssign(item.id); }}
                                                 disabled={!selectedEmployees[item.id] || assigningIds.includes(item.id)}
                                                 title={!selectedEmployees[item.id] ? "Select employee first" : ""}
                                             >
@@ -190,6 +242,7 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
                                 ))
                             )}
                         </tbody>
+
                     </table>
                 </div>
             )}
@@ -202,6 +255,8 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
                         <thead>
                             <tr>
                                 <th>Sr.No</th>
+                                <th>Node Reference No</th>
+                                <th>Deviation</th>
                                 <th>Recommendation</th>
                                 <th>Created By</th>
                                 <th>Assigned To</th>
@@ -209,16 +264,38 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
                             </tr>
                         </thead>
                         <tbody>
-                            {data.assigned.map((item, index) => (
-                                <tr key={item.id}>
-                                    <td>{index + 1}</td>
-                                    <td>{truncateWords(item.javaHazopNodeRecommendation?.recommendation ?? "-")}</td>
-                                    <td>{item.createdByName || '-'}</td>
-                                    <td>{item.assignToEmpCode || '-'}</td>
-                                    <td>{item.assignWorkDate ? formatDate(item.assignWorkDate) : "-"}</td>
+                            {data.assigned.length === 0 ? (
+                                <tr>
+                                    <td colSpan="5" className="no-data1">No data found</td>
                                 </tr>
-                            ))}
+                            ) : (
+                                data.assigned.map((item, index) => (
+                                    <tr
+                                        key={item.id}
+                                        className={expandedRowId === item.id ? "expanded-row" : ""}
+                                        onClick={() => toggleRow(item.id)}
+                                    >
+                                        <td>{index + 1}</td>
+
+                                        <td className="sr-no">{item.javaHazopNodeRecommendation?.javaHazopNode?.nodeNumber}</td>
+                                        <td className={`truncate-cell ${expandedRowId === item.id ? "expanded-cell" : ""}`}>
+                                            {expandedRowId === item.id
+                                                ? item.javaHazopNodeRecommendation?.javaHazopNodeDetail?.deviation
+                                                : truncateText(item.javaHazopNodeRecommendation?.javaHazopNodeDetail?.deviation, 50)}
+                                        </td>
+                                        <td className={`truncate-cell ${expandedRowId === item.id ? "expanded-cell" : ""}`}>
+                                            {expandedRowId === item.id
+                                                ? item.javaHazopNodeRecommendation?.recommendation ?? "-"
+                                                : truncateText(item.javaHazopNodeRecommendation?.recommendation ?? "-", 50)}
+                                        </td>
+                                        <td>{item.createdByName || '-'}</td>
+                                        <td>{item.assignToEmpCode || '-'}</td>
+                                        <td>{item.assignWorkDate ? formatDate(item.assignWorkDate) : "-"}</td>
+                                    </tr>
+                                ))
+                            )}
                         </tbody>
+
                     </table>
                 </div>
             )}
@@ -231,6 +308,8 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
                         <thead>
                             <tr>
                                 <th>Sr.No</th>
+                                <th>Node Reference No</th>
+                                <th>Deviation</th>
                                 <th>Recommendation</th>
                                 <th>Created By</th>
                                 <th>Assigned To</th>
@@ -239,17 +318,38 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
                             </tr>
                         </thead>
                         <tbody>
-                            {data.accepted.map((item, index) => (
-                                <tr key={item.id}>
-                                    <td>{index + 1}</td>
-                                    <td>{truncateWords(item.javaHazopNodeRecommendation?.recommendation ?? "-")}</td>
-                                    <td>{item.createdByName || '-'}</td>
-                                    <td>{item.assignToEmpCode}</td>
-                                    <td>{item.acceptedByEmployeeName}</td>
-                                    <td>{item.assignWorkDate ? formatDate(item.assignWorkDate) : "-"}</td>
+                            {data.accepted.length === 0 ? (
+                                <tr>
+                                    <td colSpan="6" className="no-data1">No data found</td>
                                 </tr>
-                            ))}
+                            ) : (
+                                data.accepted.map((item, index) => (
+                                    <tr
+                                        key={item.id}
+                                        className={expandedRowId === item.id ? "expanded-row" : ""}
+                                        onClick={() => toggleRow(item.id)}
+                                    >
+                                        <td>{index + 1}</td>
+                                        <td className="sr-no">{item.javaHazopNodeRecommendation?.javaHazopNode?.nodeNumber}</td>
+                                        <td className={`truncate-cell ${expandedRowId === item.id ? "expanded-cell" : ""}`}>
+                                            {expandedRowId === item.id
+                                                ? item.javaHazopNodeRecommendation?.javaHazopNodeDetail?.deviation
+                                                : truncateText(item.javaHazopNodeRecommendation?.javaHazopNodeDetail?.deviation, 50)}
+                                        </td>
+                                        <td className={`truncate-cell ${expandedRowId === item.id ? "expanded-cell" : ""}`}>
+                                            {expandedRowId === item.id
+                                                ? item.javaHazopNodeRecommendation?.recommendation ?? "-"
+                                                : truncateText(item.javaHazopNodeRecommendation?.recommendation ?? "-", 50)}
+                                        </td>
+                                        <td>{item.createdByName || '-'}</td>
+                                        <td>{item.assignToEmpCode}</td>
+                                        <td>{item.acceptedByEmployeeName}</td>
+                                        <td>{item.assignWorkDate ? formatDate(item.assignWorkDate) : "-"}</td>
+                                    </tr>
+                                ))
+                            )}
                         </tbody>
+
                     </table>
                 </div>
             )}
@@ -262,6 +362,8 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
                         <thead>
                             <tr>
                                 <th>Sr.No</th>
+                                <th>Node Reference No</th>
+                                <th>Deviation</th>
                                 <th>Recommendation</th>
                                 <th>Created By</th>
                                 <th>Assigned To</th>
@@ -270,17 +372,39 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
                             </tr>
                         </thead>
                         <tbody>
-                            {data.rejected.map((item, index) => (
-                                <tr key={item.id}>
-                                    <td>{index + 1}</td>
-                                    <td>{truncateWords(item.javaHazopNodeRecommendation?.recommendation ?? "-")}</td>
-                                    <td>{item.createdByName || '-'}</td>
-                                    <td>{item.assignToEmpCode}</td>
-                                    <td>{item.acceptedByEmployeeName}</td>
-                                    <td>{item.assignWorkDate ? formatDate(item.assignWorkDate) : "-"}</td>
+                            {data.rejected.length === 0 ? (
+                                <tr>
+                                    <td colSpan="6" className="no-data1">No data found</td>
                                 </tr>
-                            ))}
+                            ) : (
+                                data.rejected.map((item, index) => (
+                                    <tr
+                                        key={item.id}
+                                        className={expandedRowId === item.id ? "expanded-row" : ""}
+                                        onClick={() => toggleRow(item.id)}
+                                    >
+                                        <td>{index + 1}</td>
+
+                                        <td className="sr-no">{item.javaHazopNodeRecommendation?.javaHazopNode?.nodeNumber}</td>
+                                        <td className={`truncate-cell ${expandedRowId === item.id ? "expanded-cell" : ""}`}>
+                                            {expandedRowId === item.id
+                                                ? item.javaHazopNodeRecommendation?.javaHazopNodeDetail?.deviation
+                                                : truncateText(item.javaHazopNodeRecommendation?.javaHazopNodeDetail?.deviation, 50)}
+                                        </td>
+                                        <td className={`truncate-cell ${expandedRowId === item.id ? "expanded-cell" : ""}`}>
+                                            {expandedRowId === item.id
+                                                ? item.javaHazopNodeRecommendation?.recommendation ?? "-"
+                                                : truncateText(item.javaHazopNodeRecommendation?.recommendation ?? "-", 50)}
+                                        </td>
+                                        <td>{item.createdByName || '-'}</td>
+                                        <td>{item.assignToEmpCode}</td>
+                                        <td>{item.acceptedByEmployeeName}</td>
+                                        <td>{item.assignWorkDate ? formatDate(item.assignWorkDate) : "-"}</td>
+                                    </tr>
+                                ))
+                            )}
                         </tbody>
+
                     </table>
                 </div>
             )}

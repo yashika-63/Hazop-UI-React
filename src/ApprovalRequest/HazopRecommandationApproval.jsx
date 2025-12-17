@@ -3,14 +3,19 @@ import axios from "axios";
 import "../styles/global.css";
 import { strings } from "../string";
 import { getRiskColor, truncateWords } from "../CommonUI/CommonUI";
+import { useNavigate } from "react-router-dom"; // 1. Import useNavigate
 
 const HazopRecommendationApproval = () => {
+    const navigate = useNavigate(); // 2. Initialize hook
     const [recommendations, setRecommendations] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showRejectModal, setShowRejectModal] = useState(false);
     const [selectedRejectId, setSelectedRejectId] = useState(null);
     const [rejectComment, setRejectComment] = useState("");
     const empCode = localStorage.getItem("empCode");
+    const [expandedRowId, setExpandedRowId] = useState(null);
+
+    const toggleRow = (id) => setExpandedRowId(expandedRowId === id ? null : id);
 
     const fetchRecommendations = async () => {
         if (!empCode) {
@@ -33,6 +38,30 @@ const HazopRecommendationApproval = () => {
     useEffect(() => {
         fetchRecommendations();
     }, []);
+
+    // --- 3. NEW: Navigation Handler ---
+    const handleNavigateToDetail = (e, rec) => {
+        e.stopPropagation(); // Stop row expansion
+
+        // Extract Node ID (Check root 'javaHazopNode' or nested inside detail)
+        // Based on your previous JSON, it's likely 'rec.javaHazopNode?.id'
+        const targetNodeId = rec.javaHazopNode?.id || rec.javaHazopNodeDetail?.hazopNodeId;
+
+        // Extract Detail ID
+        const targetDetailId = rec.javaHazopNodeDetail?.id;
+
+        if (targetNodeId && targetDetailId) {
+            navigate('/ViewNodeDiscussion', {
+                state: {
+                    nodeId: targetNodeId,      // Matches ViewNodeDiscussion expectations
+                    detailId: targetDetailId   // Matches ViewNodeDiscussion expectations
+                }
+            });
+        } else {
+            console.error("Missing ID. Node:", targetNodeId, "Detail:", targetDetailId);
+            // Optional: showToast("Navigation details missing", "error");
+        }
+    };
 
     const handleApprove = async (id) => {
         setLoading(true);
@@ -87,35 +116,60 @@ const HazopRecommendationApproval = () => {
                 <thead>
                     <tr>
                         <th>Sr.No</th>
+                        <th>Node Reference No</th>
+                        <th>Deviation</th> {/* Clickable */}
                         <th>Recommendation</th>
                         <th>Department</th>
                         <th>Initial Risk rating</th>
                         <th>Final Risk rating</th>
-                        {/* <th>Remark</th> */}
                         <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     {recommendations.length === 0 ? (
                         <tr>
-                            <td colSpan="5">No recommendations found.</td>
+                            <td colSpan="8">No recommendations found.</td>
                         </tr>
                     ) : (
                         recommendations.map((rec, index) => (
-                            <tr key={rec.id}>
+                            <tr
+                                key={rec.id}
+                                className={expandedRowId === rec.id ? "expanded-row" : ""}
+                                onClick={() => toggleRow(rec.id)}
+                            >
                                 <td>{index + 1}</td>
-                                <td className="description-cell" title={rec.recommendation}>
-                                    {rec.recommendation}
+                                <td>
+                                    {rec.javaHazopNode?.nodeNumber && rec.javaHazopNodeDetail?.nodeDetailNumber
+                                        ? `${rec.javaHazopNode.nodeNumber}.${rec.javaHazopNodeDetail.nodeDetailNumber}`
+                                        : '-'}
+                                </td>
+
+
+                                {/* 4. Clickable Deviation Cell */}
+                                <td
+                                    className={`truncate-cell ${expandedRowId === rec.id ? "expanded-cell" : ""}`}
+                                    title="Click to view discussion details"
+                                    onClick={(e) => handleNavigateToDetail(e, rec)}
+                                    style={{ cursor: 'pointer', color: '#319795', fontWeight: '600' }}
+                                >
+                                    {expandedRowId === rec.id
+                                        ? rec.javaHazopNodeDetail?.deviation
+                                        : truncateWords(rec.javaHazopNodeDetail?.deviation || "-", 10)}
+                                </td>
+
+                                <td className={`truncate-cell ${expandedRowId === rec.id ? "expanded-cell" : ""}`} title={rec.recommendation}>
+                                    {expandedRowId === rec.id
+                                        ? rec.recommendation
+                                        : truncateWords(rec.recommendation || "-", 10)}
                                 </td>
                                 <td>{rec.department || "N/A"}</td>
-                                <td style={{ color: getRiskColor(rec.javaHazopNodeDetail?.riskRating || '-') }}>
-                                    {rec.javaHazopNodeDetail?.riskRating || '-'}
+                                <td style={{ color: getRiskColor(rec.javaHazopNodeDetail?.riskRating || "-") }}>
+                                    {rec.javaHazopNodeDetail?.riskRating || "-"}
                                 </td>
-                                <td style={{ color: getRiskColor(rec.javaHazopNodeDetail?.additionalRiskRating || '-') }}>
-                                    {rec.javaHazopNodeDetail?.additionalRiskRating || '-'}
+                                <td style={{ color: getRiskColor(rec.javaHazopNodeDetail?.additionalRiskRating || "-") }}>
+                                    {rec.javaHazopNodeDetail?.additionalRiskRating || "-"}
                                 </td>
-                                {/* <td title={rec.remarkbyManagement || ""}>{truncateWords(rec.remarkbyManagement || "N/A")}</td> */}
-                                <td className="action-buttons">
+                                <td className="action-buttons" onClick={(e) => e.stopPropagation()}>
                                     <button
                                         className="approveBtn"
                                         onClick={() => handleApprove(rec.id)}
@@ -160,7 +214,6 @@ const HazopRecommendationApproval = () => {
                             >
                                 Save
                             </button>
-
                         </div>
                     </div>
                 </div>

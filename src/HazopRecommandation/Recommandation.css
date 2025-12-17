@@ -141,9 +141,6 @@
 
 
 
-
-
-
 .assigned-table-wrapper {
     margin-bottom: 25px;
     border-radius: 10px;
@@ -172,7 +169,6 @@
     height: 100%;
     border-radius: 3px;
     background: #8591fa;
-    /* Blue */
 }
 
 .assigned-table-wrapper.assigned h5::before {
@@ -184,7 +180,6 @@
     height: 100%;
     border-radius: 3px;
     background: #ed8936;
-    /* Orange */
 }
 
 .assigned-table-wrapper.accepted h5::before {
@@ -196,7 +191,6 @@
     height: 100%;
     border-radius: 3px;
     background: #319795;
-    /* Teal */
 }
 
 .assigned-table-wrapper.rejected h5::before {
@@ -208,7 +202,6 @@
     height: 100%;
     border-radius: 3px;
     background: #c53030;
-    /* Red */
 }
 
 /* Table */
@@ -227,16 +220,16 @@
     font-weight: 600;
     color: #2d3748;
     background: #f5f7fa;
-    /* light consistent header */
     border-bottom: 1px solid #e0e4ea;
 }
 
 /* Body */
 .assigned-table tbody tr {
     background: #fff;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
     z-index: 1;
     position: relative;
+    cursor: pointer;
 }
 
 .assigned-table tbody tr:nth-child(even) {
@@ -250,15 +243,70 @@
 }
 
 .assigned-table td {
-    padding: 10px;
+    padding: 8px;
     color: #4a5265;
     border-bottom: 1px solid #e0e4ea;
+    position: relative;
+    vertical-align: top;
+    max-width: 300px;
+    /* optional, for truncation */
+    /* word-break: break-word; */
+    white-space: pre-wrap;
+}
+
+
+/* 
+.assigned-table tbody tr:focus-within {
+    z-index: 100 !important; 
+    position: relative;   
+    transform: none; 
+} */
+
+
+.truncate-cell {
+    max-height: 80px;
+    /* collapsed height */
+    overflow: hidden;
+    position: relative;
+    transition: max-height 0.3s ease;
+}
+
+/* Expanded row */
+.expanded-row .truncate-cell {
+    max-height: 500px;
+    /* adjust for very long text */
+    overflow-y: auto;
+}
+
+/* Optional scrollbar styling for better UX */
+.truncate-cell::-webkit-scrollbar {
+    width: 6px;
+}
+
+.truncate-cell::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
 }
 
 .assigned-table tbody tr:last-child td {
     border-bottom: none;
 }
 
+.assign-employee {
+    width: 250px;
+    /* fixed width, adjust as needed */
+    min-width: 200px;
+    max-width: 200px;
+    vertical-align: top;
+}
+
+.sr-no {
+    width: 40px;
+    /* Serial number column */
+    min-width: 40px;
+    max-width: 40px;
+    text-align: center;
+}
 
 /* No Data Message */
 .no-data1 {
@@ -446,37 +494,34 @@ td > .dropdown:hover {
 
 
 
-.assigned-table td {
-    position: relative; /* needed for dropdown */
-    vertical-align: top;
-    padding: 8px;
-  }
-  .search-bar-table {
+
+.search-bar-table {
     position: relative;
-    width: 60%;  /* match input width */
-  }
-  
-  .search-bar-table input {
-    width: 100%; 
+    width: 70%;
+    /* match input width */
+}
+
+.search-bar-table input {
+    width: 100%;
     padding: 6px 30px 6px 8px;
     box-sizing: border-box;
     border: 1px solid #61b1f7;
     border-radius: 6px;
     font-size: 13px;
-  }
-  
-  .search-icon-table {
+}
+
+.search-icon-table {
     position: absolute;
     right: 8px;
     top: 50%;
     transform: translateY(-50%);
     color: #83acf1;
     pointer-events: none;
-  }
-  
-  
-  
-  .search-results-table {
+}
+
+
+
+.search-results-table {
     position: absolute;
     top: 100%;
     left: 0;
@@ -490,20 +535,20 @@ td > .dropdown:hover {
     border-radius: 4px;
     padding: 0;
     list-style: none;
-  }
-  
-  .search-results-table li {
+}
+
+.search-results-table li {
     padding: 6px 8px;
     cursor: pointer;
     font-size: 13px;
-  }
-  
-  .search-results-table li:hover {
+}
+
+.search-results-table li:hover {
     background-color: #f0f0f0;
-  }
+}
 
 
-  /* =============================== */
+/* =============================== */
 /* Selected Employee Tag           */
 /* =============================== */
 .selected-emp-tag {
@@ -516,29 +561,212 @@ td > .dropdown:hover {
     font-size: 14px;
     color: #182848;
     font-weight: 500;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
     animation: fadeIn 0.3s ease;
-  }
-  
-  .selected-emp-tag strong {
+}
+
+.selected-emp-tag strong {
     color: #4b6cb7;
     font-weight: 700;
-  }
-  .right-actions {
+}
+
+.right-actions {
     display: flex;
     align-items: center;
     gap: 15px;
-  }
-  
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-4px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .top-row {
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.top-row {
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
     width: 100%;
     margin-bottom: 20px;
-  }
-  
+}
+
+/* Inline Action Group Container */
+.inline-action-group {
+    display: flex;
+    flex-direction: column;
+    /* Stack input and buttons if narrow, or row if wide */
+    gap: 5px;
+    align-items: center;
+    justify-content: center;
+    min-width: 140px;
+    /* Ensure enough space for date input */
+}
+
+/* The Date Input */
+.inline-date-input {
+    padding: 4px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 12px;
+    width: 100%;
+}
+
+/* Button Group Wrapper */
+.inline-btn-group {
+    display: flex;
+    gap: 8px;
+    margin-top: 2px;
+}
+
+/* Save Button (Checkmark) */
+.inline-save-btn {
+    background-color: #319795;
+    /* Teal/Green */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.inline-save-btn:hover {
+    background-color: #2c8a88;
+}
+
+/* Cancel Button (Cross) */
+.inline-cancel-btn {
+    background-color: #e53e3e;
+    /* Red */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.inline-cancel-btn:hover {
+    background-color: #c53030;
+}
+
+/* --- Main Row Styling --- */
+.assigned-table tr.main-row {
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.assigned-table tr.main-row:hover {
+    background-color: #f7fafc;
+}
+
+.assigned-table tr.main-row.expanded {
+    background-color: #dddddd;
+    border-bottom: none;
+}
+
+.expand-icon-cell {
+    color: #718096;
+    font-size: 12px;
+    text-align: center;
+}
+
+/* --- Detail Row Styling --- */
+.detail-row td {
+    background-color: #fcfcfc;
+    padding: 0 !important;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.detail-panel {
+    padding: 20px;
+    border-left: 4px solid #73bbe2;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.detail-item.full-width {
+    grid-column: 1 / -1;
+    /* Span full width */
+}
+
+.detail-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #718096;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.detail-text {
+    font-size: 14px;
+    color: #2d3748;
+    background: white;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #edf2f7;
+    margin: 0;
+    white-space: pre-wrap;
+    /* Preserve line breaks in text */
+}
+
+.highlight-date {
+    color: #2b6cb0;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+/* History List Styling */
+.history-container {
+    max-height: 120px;
+    overflow-y: auto;
+}
+
+.history-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.history-list li {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+    border-bottom: 1px dashed #e2e8f0;
+    font-size: 13px;
+}
+
+.history-list li:last-child {
+    border-bottom: none;
+}
+
+.history-date {
+    font-weight: 600;
+    color: #2b6cb0;
+}
+
+.history-meta {
+    color: #718096;
+    font-size: 11px;
+}

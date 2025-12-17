@@ -6,10 +6,13 @@ import HazopPdfDocument from "./HazopPdfDocument";
 import { generateHazopExcel } from "./hazopExcelGenerator";
 import { generateHazopPdf } from "./hazopPdfGenerator";
 
-
 const HazopReportPage = ({ hazopId, onClose }) => {
 
-    const [loading, setLoading] = useState(true);
+    // 1. Split loading into Data Loading and PDF Rendering
+    const [isDataLoading, setIsDataLoading] = useState(true);
+    const [isPdfRendering, setIsPdfRendering] = useState(true);
+
+    // ... Data States ...
     const [hazop, setHazop] = useState({});
     const [team, setTeam] = useState([]);
     const [nodes, setNodes] = useState([]);
@@ -21,15 +24,14 @@ const HazopReportPage = ({ hazopId, onClose }) => {
     const [mocReferences, setMocReferences] = useState([]);
     const [registrationNodes, setRegistrationNodes] = useState([]);
 
-    const downloadDate = new Date().toLocaleString();
-
-
-
+    // ✅ FIX: Use state so this date doesn't change on every re-render
+    const [downloadDate] = useState(new Date().toLocaleString());
     useEffect(() => {
         if (!hazopId) return;
 
         const load = async () => {
-            setLoading(true);
+            setIsDataLoading(true);
+            setIsPdfRendering(true); // Reset PDF loading state on new fetch
             try {
                 const [
                     fullRes,
@@ -48,16 +50,14 @@ const HazopReportPage = ({ hazopId, onClose }) => {
                 ]);
 
                 const full = fullRes.data || {};
-
                 setHazop(full.hazopInfo || {});
                 setTeam(full.teamMembers || []);
                 setNodes(full.nodes || []);
                 setRegistrationNodes(regNodesRes.data || []);
 
-                // ⬇ Build details dynamically
                 const detailsObj = {};
                 (full.nodes || []).forEach(n => {
-                    const nodeId = n.nodeInfo?.id; // <- use nodeInfo.id
+                    const nodeId = n.nodeInfo?.id;
                     if (nodeId) {
                         detailsObj[nodeId] = (n.details || []).map(d => ({
                             ...d.detailInfo,
@@ -66,19 +66,13 @@ const HazopReportPage = ({ hazopId, onClose }) => {
                     }
                 });
                 setNodeDetails(detailsObj);
-
-
-                // setNodeRecommendations(recObj);
-
                 setAllRecommendations(allRecRes.data || []);
-
                 setAssignData({
                     rejected: assignRes.data?.rejected || [],
                     accepted: assignRes.data?.accepted || [],
                     assigned: assignRes.data?.assigned || [],
                     notAssigned: assignRes.data?.notAssigned || []
                 });
-
                 setVerificationData(verificationRes.data || []);
                 setMocReferences(mocRes.data || []);
 
@@ -86,13 +80,17 @@ const HazopReportPage = ({ hazopId, onClose }) => {
                 console.error("Data loading error:", err);
             }
 
-            setLoading(false);
+            // Data is ready, now we wait for PDF render
+            setIsDataLoading(false);
         };
 
         load();
     }, [hazopId]);
 
-
+    // Helper: Determine if we should show the spinner
+    // We show it if Data is loading OR (Data is done but PDF is still rendering)
+    // EXCEPTION: If there are no registrationNodes, the PDF won't mount, so we shouldn't wait for PDF render.
+    const showSpinner = isDataLoading || (isPdfRendering && registrationNodes.length > 0);
 
     return (
         <div style={{
@@ -111,7 +109,8 @@ const HazopReportPage = ({ hazopId, onClose }) => {
                 borderRadius: 8,
                 overflow: "hidden",
                 display: "flex",
-                flexDirection: "column"
+                flexDirection: "column",
+                position: "relative" // Needed for absolute positioning of spinner
             }}>
 
                 {/* HEADER BUTTONS */}
@@ -123,90 +122,77 @@ const HazopReportPage = ({ hazopId, onClose }) => {
                     backgroundColor: "#f8f9fa"
                 }}>
                     <button onClick={onClose}
-                        style={{
-                            backgroundColor: "#dc3545",
-                            color: "#fff",
-                            padding: "8px 16px",
-                            borderRadius: 4,
-                            border: "none",
-                            cursor: "pointer"
-                        }}>
+                        style={{ backgroundColor: "#dc3545", color: "#fff", padding: "8px 16px", borderRadius: 4, border: "none", cursor: "pointer" }}>
                         Close
                     </button>
 
                     <div>
+                        {/* Buttons only clickable when data is loaded */}
                         <button
-                            onClick={() =>
-                                generateHazopExcel({
-                                    hazop: hazop,
-                                    team: team,
-                                    nodes: nodes, // Full details for Sheet 3
-                                    registrationNodes: registrationNodes, // <--- ADD THIS for Sheet 2 (Index)
-                                    nodeDetailsState: nodeDetails,
-                                    allRecommendations: allRecommendations,
-                                    mocReferences: mocReferences,
-                                    verificationData: verificationData,
-                                    assignData: assignData,
-                                    hazopId: hazopId
-                                })
-                            }
-                            style={{
-                                backgroundColor: "#28a745",
-                                color: "#fff",
-                                padding: "8px 16px",
-                                borderRadius: 4,
-                                border: "none",
-                                cursor: "pointer",
-                                marginRight: 10
-                            }}
+                            disabled={showSpinner}
+                            onClick={() => generateHazopExcel({
+                                hazop, team, nodes, registrationNodes, nodeDetailsState: nodeDetails,
+                                allRecommendations, mocReferences, verificationData, assignData, hazopId
+                            })}
+                            style={{ backgroundColor: showSpinner ? "#94d3a2" : "#28a745", color: "#fff", padding: "8px 16px", borderRadius: 4, border: "none", cursor: "pointer", marginRight: 10 }}
                         >
                             Download Excel
                         </button>
 
                         <button
-                            onClick={() =>
-                                // ✅ FIXED: Pass a single object with all properties
-                                generateHazopPdf({
-                                    hazop: hazop,
-                                    team: team,
-                                    nodes: nodes,
-                                    nodeDetails: nodeDetails,
-                                    nodeDetailsState: nodeDetails, // Map this correctly based on generator expectation
-                                    nodeRecommendations: nodeRecommendations,
-                                    allRecommendations: allRecommendations,
-                                    verificationData: verificationData,
-                                    mocReferences: mocReferences,
-                                    assignData: assignData,
-                                    downloadDate: downloadDate,
-                                    hazopId: hazopId
-                                })
-                            }
-                            style={{
-                                backgroundColor: "#28a745",
-                                color: "#fff",
-                                padding: "8px 16px",
-                                borderRadius: 4,
-                                border: "none",
-                                cursor: "pointer"
-                            }}
+                            disabled={showSpinner}
+                            onClick={() => generateHazopPdf({
+                                hazop, team, nodes, nodeDetails, nodeDetailsState: nodeDetails,
+                                nodeRecommendations, allRecommendations, verificationData, mocReferences,
+                                assignData, downloadDate, hazopId
+                            })}
+                            style={{ backgroundColor: showSpinner ? "#94d3a2" : "#28a745", color: "#fff", padding: "8px 16px", borderRadius: 4, border: "none", cursor: "pointer" }}
                         >
                             Download PDF
                         </button>
                     </div>
                 </div>
 
+                {/* PDF VIEWER CONTAINER */}
+                <div style={{ flex: 1, backgroundColor: "#525659", position: "relative" }}>
 
-                {/* PDF VIEWER */}
-                <div style={{ flex: 1, backgroundColor: "#525659" }}>
-                    {loading ? (
-                        <div className="loading-overlay">
-                            <div className="loading-spinner"></div>
+                    {/* 2. SPINNER OVERLAY */}
+                    {showSpinner && (
+                        <div style={{
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            width: "100%",
+                            height: "100%",
+                            backgroundColor: "rgba(255, 255, 255, 0.3)",
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            zIndex: 10,
+                            flexDirection: 'column'
+                        }}>
+                            <div className="loading-spinner" style={{
+                                width: "50px",
+                                height: "50px",
+                                border: "5px solid #f3f3f3",
+                                borderTop: "5px solid #3498db",
+                                borderRadius: "50%",
+                                animation: "spin 1s linear infinite"
+                            }}></div>
+                            <span style={{ marginTop: 15, fontWeight: 'bold', color: '#333' }}>
+                                {isDataLoading ? "Fetching Data..." : "Generating Report..."}
+                            </span>
+                            <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
                         </div>
-                    ) : registrationNodes.length > 0 ? (
+                    )}
+
+                    {/* 3. PDF VIEWER - Rendered but hidden behind spinner until ready */}
+                    {!isDataLoading && registrationNodes.length > 0 ? (
                         <PDFViewer
-                            key={`${hazopId}-${downloadDate}`}   // ✅ IMPORTANT FIX
+                            key={`${hazopId}-${downloadDate}`}
                             width="100%"
                             height="100%"
+                            style={{ border: 'none' }}
                         >
                             <HazopPdfDocument
                                 hazop={hazop}
@@ -219,12 +205,19 @@ const HazopReportPage = ({ hazopId, onClose }) => {
                                 verificationData={verificationData}
                                 assignData={assignData}
                                 downloadDate={downloadDate}
+                                // 4. Callback to turn off spinner
+                                onRenderComplete={() => {
+                                    console.log("PDF Generation Complete");
+                                    setIsPdfRendering(false);
+                                }}
                             />
                         </PDFViewer>
                     ) : (
-                        <div style={{ color: "white", textAlign: "center", marginTop: 100 }}>
-                            No registration nodes found.
-                        </div>
+                        !isDataLoading && (
+                            <div style={{ color: "white", textAlign: "center", marginTop: 100 }}>
+                                No registration nodes found.
+                            </div>
+                        )
                     )}
                 </div>
 
