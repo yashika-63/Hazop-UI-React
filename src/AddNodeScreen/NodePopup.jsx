@@ -9,8 +9,8 @@ const NodePopup = ({ onSave }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
-const { registrationId: registrationId, hazopData } = location.state || {};
-console.log("Using registrationId for POST:", registrationId);
+  const { registrationId: registrationId, hazopData } = location.state || {};
+  console.log("Using registrationId for POST:", registrationId);
 
   if (!hazopData) {
     console.error("hazopData missing in NodePopup");
@@ -145,7 +145,6 @@ console.log("Using registrationId for POST:", registrationId);
           <div>
             {/* Node meta */}
             <div className="input-row">
-              
               <div className="form-group">
                 <label>
                   <span className="required-marker">* </span>Node Date
@@ -216,8 +215,6 @@ console.log("Using registrationId for POST:", registrationId);
 
             {/* SOP */}
             <div className="input-row">
-              
-
               <div className="form-group">
                 <label>
                   <span className="required-marker">* </span>Temperature
@@ -289,12 +286,13 @@ console.log("Using registrationId for POST:", registrationId);
               <label>
                 <span className="required-marker">* </span>Equipment
               </label>
-              <input
+              <textarea
                 type="text"
                 name="equipment"
                 value={form.equipment}
                 onChange={handleChange}
                 disabled={loading}
+                rows={3}
                 maxLength={2000}
               />
               <small
@@ -310,12 +308,13 @@ console.log("Using registrationId for POST:", registrationId);
               <label>
                 <span className="required-marker">* </span>Controls
               </label>
-              <input
+              <textarea
                 type="text"
                 name="controls"
                 value={form.controls}
                 onChange={handleChange}
                 disabled={loading}
+                rows={3}
                 maxLength={2000}
               />
               <small
@@ -333,13 +332,13 @@ console.log("Using registrationId for POST:", registrationId);
                 <span className="required-marker">* </span>Chemicals and
                 utilities
               </label>
-              <input
+              <textarea
                 type="text"
                 name="chemicalAndUtilities"
                 value={form.chemicalAndUtilities}
-                rows={2}
                 onChange={handleChange}
                 disabled={loading}
+                rows={3}
                 maxLength={1000}
               />
               <small
@@ -353,20 +352,20 @@ console.log("Using registrationId for POST:", registrationId);
               </small>
             </div>
           </div>
-          
-            <div className="form-group">
-              <label>
-                <span className="required-marker">* </span>Design Intent
-              </label>
-              <textarea
-                name="designIntent"
-                value={form.designIntent}
-                rows={3}
-                onChange={handleChange}
-                className="textareaFont"
-                disabled={loading}
-              />
-            </div>
+
+          <div className="form-group">
+            <label>
+              <span className="required-marker">* </span>Design Intent
+            </label>
+            <textarea
+              name="designIntent"
+              value={form.designIntent}
+              rows={4}
+              onChange={handleChange}
+              className="textareaFont"
+              disabled={loading}
+            />
+          </div>
         </div>
       </div>
 
