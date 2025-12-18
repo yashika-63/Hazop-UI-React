@@ -46,6 +46,7 @@ const CreateNodeDetails = () => {
   const nodeID = location.state?.nodeID;
   const [currentNodeId, setCurrentNodeId] = useState(nodeID); // initial node
   const [currentNodeData, setCurrentNodeData] = useState(null);
+  const department = currentNodeData?.javaHazopRegistration?.department || null;
 
   useEffect(() => {
     const fetchNode = async () => {
@@ -314,6 +315,7 @@ const CreateNodeDetails = () => {
               id: existingRec?.id,
               recommendation: text,
               remarkbyManagement: existingRec?.remarkbyManagement || "",
+              department: department,
             };
           }
         );
@@ -481,6 +483,7 @@ const CreateNodeDetails = () => {
 
       const recommendationsList = cleanedRecommendations.map((text) => ({
         recommendation: text,
+        department: department,
       }));
 
       if (recommendationsList.length > 0) {
@@ -714,6 +717,7 @@ const CreateNodeDetails = () => {
         const recPayload = {
           recommendation: rec.recommendation,
           remarkbyManagement: rec.remarkbyManagement,
+          department: department,
         };
 
         const url = rec.id
@@ -1281,7 +1285,12 @@ const CreateNodeDetails = () => {
                             onBlur={() => {
                               setTempRecommendations((prev) =>
                                 prev.map((r, i) =>
-                                  i === index ? { ...r, editing: false } : r
+                                  i === index
+                                    ? {
+                                        ...r,
+                                        editing: r.recommendation.trim() === "",
+                                      }
+                                    : r
                                 )
                               );
                             }}

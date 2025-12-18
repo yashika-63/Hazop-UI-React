@@ -461,7 +461,7 @@ const NodeDetails = () => {
         <button className="nd-back-btn" onClick={() => navigate(-1)}>
           ← Back
         </button>
-        <h1>Node {node?.nodeNumber || id} Details</h1>
+        <h1>Node {node?.nodeNumber || id} Deviation</h1>
       </div>
 
       <div className="hazop-info">
@@ -497,7 +497,7 @@ const NodeDetails = () => {
           View Risk Matrix
         </button>
 
-        {!node?.completionStatus && (
+        {!node?.completionStatus && details.length > 0 && (
           <button
             className="add-btn"
             onClick={() => setShowCompletePopup(true)}
@@ -506,7 +506,7 @@ const NodeDetails = () => {
           </button>
         )}
 
-        {!node?.completionStatus && (
+        {!node?.completionStatus && details.length > 0 && (
           <button
             className="add-btn"
             onClick={() => setSequenceUpdatePopup(true)}
@@ -556,10 +556,8 @@ const NodeDetails = () => {
                             d.riskRating || d.additionalRiskRating
                           )} ${snapshot.isDragging ? "dragging" : ""}`}
                         >
-                          {/* ---------- YOUR ORIGINAL CARD CONTENT START ---------- */}
-
                           {renderDropdown(d)}
-
+                          
                           <div className="nd-detail-header">
                             <div>
                               <h2>General Parameter: {d.generalParameter}</h2>
