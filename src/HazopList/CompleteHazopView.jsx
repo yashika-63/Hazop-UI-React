@@ -896,10 +896,10 @@ const CompleteHazopView = ({
                 </div>
 
                 <div className="recommendation-card">
-                  <h3>Verification Action Records</h3>
+                  <h3>Review Action Records</h3>
 
                   {verificationRecords.length === 0 ? (
-                    <p>No verification actions found.</p>
+                    <p>No Review actions found.</p>
                   ) : (
                     <table className="node-details-table">
                       <thead>
@@ -907,12 +907,12 @@ const CompleteHazopView = ({
                           <th>Recommendation</th>
                           <th>Remark</th>
                           <th>Completion Status</th>
-                          <th>Send for Verification</th>
-                          <th>Verification Action</th>
-                          <th>Verification Status</th>
+                          <th>Send for Review</th>
+                          <th>Review Action</th>
+                          <th>Review Status</th>
                           <th>Verified By</th>
                           <th>Email</th>
-                          <th>Verification Date</th>
+                          <th>Review Date</th>
                         </tr>
                       </thead>
                       <tbody>

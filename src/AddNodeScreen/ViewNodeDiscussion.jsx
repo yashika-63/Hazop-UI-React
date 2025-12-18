@@ -264,8 +264,7 @@ const ViewNodeDiscussion = () => {
                                             <th>Sr. No</th>
                                             <th>Recommendation</th>
                                             <th>Remarks</th>
-                                            <th>Date</th>
-                                            <th>Dept</th>
+                                            <th>Department</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -274,9 +273,8 @@ const ViewNodeDiscussion = () => {
                                                 <tr key={r.id}>
                                                     <td>{i + 1}</td>
                                                     <td>{r.recommendation}</td>
-                                                    <td>{r.remarkbyManagement}</td>
-                                                    <td>{formatDate(r.completionDate)}</td>
-                                                    <td>{r.department}</td>
+                                                    <td>{r.remarkbyManagement || '-'}</td>
+                                                    <td>{r.department ||'-'}</td>
                                                 </tr>
                                             ))
                                         ) : (

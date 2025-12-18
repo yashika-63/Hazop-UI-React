@@ -223,7 +223,6 @@ const PendingRecommendationApproval = () => {
         setLoading(true);
         try {
             // Step 1: Hit the SAVE API as requested
-            // http://localhost:5559/api/nodeRecommendation/saveRecord?assignmentId=55&targetDate=2025-12-20&createdByEmpCode=Dhananjay
             await axios.post(
                 `http://${strings.localhost}/api/nodeRecommendation/saveRecord`,
                 null, // No body, using params

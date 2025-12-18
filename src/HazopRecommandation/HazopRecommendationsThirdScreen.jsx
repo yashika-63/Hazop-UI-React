@@ -25,18 +25,18 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
     const [records, setRecords] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    // --- New State for Team Comments API ---
+    const [teamComments, setTeamComments] = useState([]);
+
     // --- Modal / Popup States ---
     const [showModal, setShowModal] = useState(false);
     const [showConfirmation, setShowConfirmation] = useState(false);
-    // 1. NEW STATE: For Team Completion Confirmation
-    const [showTeamCompletionPopup, setShowTeamCompletionPopup] = useState(false); 
-    
+    const [showTeamCompletionPopup, setShowTeamCompletionPopup] = useState(false);
     const [showReassignPopup, setShowReassignPopup] = useState(false);
     const [showSendReviewPopup, setShowSendReviewPopup] = useState(false);
-    const [teamMembers, setTeamMembers] = useState([]);
-    const [isSendingCompletion, setIsSendingCompletion] = useState(false);
-    
+
     // --- Data States ---
+    const [teamMembers, setTeamMembers] = useState([]);
     const [teamSearch, setTeamSearch] = useState("");
     const [searchResults, setSearchResults] = useState([]);
     const [selectedEmployee, setSelectedEmployee] = useState(null);
@@ -46,16 +46,19 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
 
     // --- UI States ---
     const [isSending, setIsSending] = useState(false);
+    const [isSendingCompletion, setIsSendingCompletion] = useState(false);
     const [openDropdown, setOpenDropdown] = useState(null);
     const [expandedRowId, setExpandedRowId] = useState(null);
-    const [historyData, setHistoryData] = useState({}); 
+    const [historyData, setHistoryData] = useState({});
     const [loadingHistory, setLoadingHistory] = useState(false);
-    
+
     // --- Inline Date Edit States ---
-    const [editingDateRowId, setEditingDateRowId] = useState(null); 
-    const [tempTargetDate, setTempTargetDate] = useState(""); 
+    const [editingDateRowId, setEditingDateRowId] = useState(null);
+    const [tempTargetDate, setTempTargetDate] = useState("");
 
     const empCode = localStorage.getItem("empCode");
+
+    // --- API Calls ---
 
     const fetchTeamMembers = async () => {
         try {
@@ -63,33 +66,6 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
             setTeamMembers(res.data || []);
         } catch (err) {
             console.error("Failed to fetch team members", err);
-        }
-    };
-
-    const fetchHistory = async (assignmentId) => {
-        if (historyData[assignmentId]) return;
-
-        setLoadingHistory(true);
-        try {
-            const res = await axios.get(`http://${strings.localhost}/api/nodeRecommendation/getByAssignment?assignmentId=${assignmentId}`);
-            setHistoryData(prev => ({
-                ...prev,
-                [assignmentId]: res.data || []
-            }));
-        } catch (err) {
-            console.error("Failed to fetch history", err);
-        } finally {
-            setLoadingHistory(false);
-        }
-    };
-    const toggleRow = (id) => {
-        if (editingDateRowId === id) return; 
-
-        const newExpandedId = expandedRowId === id ? null : id;
-        setExpandedRowId(newExpandedId);
-
-        if (newExpandedId) {
-            fetchHistory(id);
         }
     };
 
@@ -109,12 +85,74 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
         }
     };
 
+    // 1. NEW API: Fetch Team Comments / Status
+    const fetchTeamComments = async () => {
+        try {
+            const res = await axios.get(`http://${strings.localhost}/api/team-comments/getByHazop/${hazopId}`);
+            setTeamComments(res.data || []);
+        } catch (err) {
+            console.error("Failed to fetch team comments", err);
+        }
+    };
+
+    const fetchHistory = async (assignmentId) => {
+        if (historyData[assignmentId]) return;
+
+        setLoadingHistory(true);
+        try {
+            const res = await axios.get(`http://${strings.localhost}/api/nodeRecommendation/getByAssignment?assignmentId=${assignmentId}`);
+            setHistoryData(prev => ({
+                ...prev,
+                [assignmentId]: res.data || []
+            }));
+        } catch (err) {
+            console.error("Failed to fetch history", err);
+        } finally {
+            setLoadingHistory(false);
+        }
+    };
+
     useEffect(() => {
-        if (hazopId) fetchRecords();
+        if (hazopId) {
+            fetchRecords();
+            fetchTeamComments(); // Fetch new table data
+        }
         fetchTeamMembers();
     }, [hazopId]);
 
-    const allCompleted = records.length > 0 && records.every(r => r.completionStatus === true);
+    // --- Completion Logic Update ---
+
+    const isTeamSignOffInitiated = teamComments.length > 0;
+
+    // 2. CHECK ALL NODES: Every record must have completionStatus === true
+    const recordsCompleted = records.length > 0 && records.every(r => r.completionStatus === true);
+
+    // 3. CHECK TEAM SIGN OFF: Every team member must have signed
+    const teamCommentsCompleted = teamComments.length > 0 && teamComments.every(r => r.sendForReviewAction === true);
+
+    // 4. FINAL FLAG: Both conditions must be met to enable the review button
+    const allCompleted = recordsCompleted && teamCommentsCompleted;
+
+    // 5. Check if it was already sent (to keep button disabled after success)
+    const isAlreadySentForFinalReview = teamComments.length > 0 && teamComments.every(r => r.sendForReviewAction === true);
+
+    // Calculate Node Progress
+    const totalNodes = records.length;
+    const completedNodesCount = records.filter(r => r.completionStatus === true).length;
+    const nodeProgressPercent = totalNodes > 0 ? (completedNodesCount / totalNodes) * 100 : 0;
+
+    // Calculate Team Sign-off Progress
+    const totalTeam = teamComments.length;
+    const signedTeamCount = teamComments.filter(r => r.sendForReviewAction === true).length;
+    const teamProgressPercent = totalTeam > 0 ? (signedTeamCount / totalTeam) * 100 : 0;
+    const toggleRow = (id) => {
+        if (editingDateRowId === id) return;
+        const newExpandedId = expandedRowId === id ? null : id;
+        setExpandedRowId(newExpandedId);
+        if (newExpandedId) {
+            fetchHistory(id);
+        }
+    };
 
     // --- Search & Team Logic ---
     const handleTeamSearchChange = async (e) => {
@@ -207,7 +245,6 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
         try {
             const apiCalls = teamMembers.map((member) => {
                 const email = member.emailId || member.empEmail || "";
-
                 return axios.post(
                     `http://${strings.localhost}/api/team-comments/send-for-review`,
                     null,
@@ -223,12 +260,12 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
 
             await Promise.all(apiCalls);
             showToast("Sent for completion to all team members successfully.", "success");
+            fetchTeamComments(); // Refresh the lower table
         } catch (err) {
             console.error("Error sending for completion:", err);
             showToast("Failed to send to some or all team members.", "error");
         } finally {
             setIsSendingCompletion(false);
-            // 2. Close the confirmation popup after process finishes
             setShowTeamCompletionPopup(false);
         }
     };
@@ -300,7 +337,7 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
             showToast("Target date updated successfully", "success");
             setEditingDateRowId(null);
             setTempTargetDate("");
-            fetchRecords(); 
+            fetchRecords();
         } catch (err) {
             console.error("Error saving date:", err);
             showToast("Failed to update target date", "error");
@@ -324,6 +361,8 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
         </div>
     );
 
+
+
     return (
         <div>
             {loading && (
@@ -332,17 +371,30 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
                 </div>
             )}
 
+            {/* --- TABLE 1: Recommendations Records --- */}
+            <h4 ></h4>
+
+            <div className="table-header-stats">
+                <div className={`mini-badge ${completedNodesCount === totalNodes ? 'ready' : 'not-ready'}`}>
+                    <span className="badge-dot"></span>
+                    Nodes: {completedNodesCount}/{totalNodes}
+                </div>
+                <div className={`mini-badge ${signedTeamCount === totalTeam && totalTeam > 0 ? 'ready' : 'not-ready'}`}>
+                    <span className="badge-dot"></span>
+                    Sign-offs: {signedTeamCount}/{totalTeam}
+                </div>
+            </div>
+
             <table className="assigned-table">
                 <thead>
                     <tr>
                         <th style={{ width: '40px' }}></th>
                         <th>Sr.No</th>
-                        <th>Node Reference No</th>
+                        <th>Node Ref No</th>
                         <th>Deviation</th>
                         <th>Recommendation</th>
                         <th>Reviewed By</th>
                         <th>Completion Status</th>
-                        <th>Completion Date</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -399,8 +451,7 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
                                     </td>
                                     <td></td>
                                 </tr>
-
-                                {/* --- EXPANDED DETAIL ROW --- */}
+                                {/* Expanded Row Content (Details & History) - Same as before */}
                                 {expandedRowId === item.id && (
                                     <tr className="detail-row">
                                         <td colSpan="9">
@@ -464,37 +515,103 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
                 </tbody>
             </table>
 
-            <div className="rightbtn-controls">
+            {/* --- MIDDLE BUTTON: Send for Completion --- */}
+            <div className="middle-controls" style={{ marginTop: '15px', marginBottom: '20px' }}>
                 <button
                     className="confirm-btn completion-btn"
-                    style={{ marginRight: '10px', backgroundColor: '#e67e22' }} 
-                    // 3. TRIGGER POPUP INSTEAD OF DIRECT ACTION
-                    onClick={() => setShowTeamCompletionPopup(true)} 
-                    disabled={isSendingCompletion || teamMembers.length === 0}
-                    title={teamMembers.length === 0 ? "No team members found" : "Notify all team members"}
+                    style={{
+                        backgroundColor: isTeamSignOffInitiated ? '#bdc3c7' : '#e67e22',
+                        cursor: isTeamSignOffInitiated ? 'not-allowed' : 'pointer'
+                    }}
+                    onClick={() => setShowTeamCompletionPopup(true)}
+                    // UPDATED DISABLED LOGIC:
+                    disabled={isSendingCompletion || teamMembers.length === 0 || isTeamSignOffInitiated}
+                    title={
+                        isTeamSignOffInitiated
+                            ? "Team sign off has already been initiated."
+                            : teamMembers.length === 0 ? "No team members found" : "Notify all team members to sign"
+                    }
                 >
-                    {isSendingCompletion ? "Sending..." : "Send for Completion"}
-                </button>
-                <button
-                    className="confirm-btn review-btn"
-                    onClick={handleOpenSendReview}
-                    disabled={!allCompleted || isSending}
-                    title={!allCompleted ? "All records must be completed to enable this button" : ""}
-                >
-                    Send For Review
+                    {isSendingCompletion ? "Sending..." : "Send for team sign off"}
                 </button>
             </div>
 
-            {/* 4. TEAM COMPLETION CONFIRMATION POPUP */}
+            {/* --- TABLE 2: Team Comments / Verification Status --- */}
+            <h4 className="table-header-title">Sign Off Status</h4>
+            <table className="assigned-table" style={{ marginBottom: '20px' }}>
+                <thead>
+                    <tr>
+                        <th>Sr.No</th>
+                        <th>Employee Name</th>
+                        <th>Email</th>
+                        <th>Assigned Date</th>
+                        <th>Signed By</th>
+                        <th>Signed On</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {teamComments.length === 0 ? (
+                        <tr><td colSpan="7" className="no-data1">No Team Comments Available</td></tr>
+                    ) : (
+                        teamComments.map((item, index) => (
+                            <tr key={item.id} className="main-row">
+                                <td>{index + 1}</td>
+                                <td>{item.empCode}</td> {/* Displaying Name as per your API response */}
+                                <td>{item.empEmail}</td>
+                                <td>{formatDate(item.assignDate)}</td>
+                                <td>{item.signByEmpName || "-"}</td>
+                                <td>{formatDate(item.signedOn) || "-"}</td>
+                                <td>
+                                    <span
+                                        className={
+                                            item.sendForReviewStatus && item.sendForReviewAction
+                                                ? "status-completed"
+                                                : "status-pending"
+                                        }
+                                    >
+                                        {item.sendForReviewStatus && item.sendForReviewAction
+                                            ? "Signed"
+                                            : "Pending"}
+                                    </span>
+                                </td>
+
+                            </tr>
+                        ))
+                    )}
+                </tbody>
+            </table>
+
+            {/* --- BOTTOM BUTTON: Send For Review (Final Action) --- */}
+            <div className="rightbtn-controls" style={{ marginTop: '10px' }}>
+                <button
+                    className="confirm-btn review-btn"
+                    onClick={handleOpenSendReview}
+                    // Button is only clickable if all nodes AND team sign-offs are true
+                    disabled={!allCompleted || isSending}
+                    title={
+                        !allCompleted
+                            ? "All individual recommendations and team sign-offs must be 'Completed' first."
+                            : "Send Hazop for Final Review"
+                    }
+                >
+                    {isSending ? "Processing..." : "Send For Review"}
+                </button>
+            </div>
+
+            {/* --- POPUPS --- */}
+
+            {/* Team Completion Popup */}
             {showTeamCompletionPopup && (
                 <ConfirmationPopup
-                    message={`Are you sure you want to send for completion to all ${teamMembers.length} team members?`}
+                    message={`Are you sure you want to send for sign off to all ${teamMembers.length} team members?`}
                     onConfirm={handleSendForCompletion}
                     onCancel={() => setShowTeamCompletionPopup(false)}
                     isSending={isSendingCompletion}
                 />
             )}
 
+            {/* Modal for Assigning Complete (Used in Table 1) */}
             {showModal && (
                 <div className="modal-overlay">
                     <div className="modal-body">
@@ -546,7 +663,8 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
                     </div>
                 </div>
             )}
-            
+
+            {/* Reassign Popup */}
             {showReassignPopup && selectedRecommendation && (
                 <div className="modal-overlay">
                     <div className="modal-body">
@@ -604,6 +722,7 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
                 </div>
             )}
 
+            {/* Send For Review Popup */}
             {showSendReviewPopup && (
                 <div className="modal-overlay">
                     <div className="modal-body">
