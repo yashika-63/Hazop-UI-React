@@ -254,9 +254,6 @@
   margin-bottom: 6px;
 }
 
-
-
-
 @keyframes highlightPulse {
   0% { box-shadow: 0 0 0 0 rgba(255, 165, 0, 0.7); border-color: orange; transform: scale(1); }
   50% { box-shadow: 0 0 0 10px rgba(255, 165, 0, 0); border-color: orange; transform: scale(1.02); }
@@ -269,4 +266,125 @@
   background-color: #fffaf0 !important; /* Light orange background */
   transition: all 0.5s ease;
   z-index: 10; /* Ensure it sits above others during highlight */
+}
+
+.info-popup {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.info-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 350px;
+}
+
+.ribbon-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #eee;
+  border-bottom: 1px solid #ccc;
+}
+
+.ribbon-bar button:hover {
+  background: #e6e6e6;
+}
+
+.ribbon-deviation {
+  background-color: #d4f7d4;        /* light green */
+  border: 1px solid #3c9c3c;        /* dark green border */
+  color: #1f5e1f;                   /* optional: dark green icon/text */
+  padding: 2px 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.2s ease-in-out;
+}
+
+.ribbon-deviation:hover {
+  background-color: #c8f3c8;        /* slightly darker on hover */
+  border-color: #2d8a2d;
+  transform: translateY(-1px);
+}
+
+.ribbon-deviation:active {
+  transform: scale(0.97);
+}
+
+.ribbon-node {
+  background-color: #d9e8ff;        /* light blue */
+  border: 1px solid #2f6bcc;        /* dark blue border */
+  color: #1f3f8a;                   /* dark blue icon/text */
+  padding: 6px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.2s ease-in-out;
+}
+
+.ribbon-node:hover {
+  background-color: #cfe0ff;        /* slightly darker on hover */
+  border-color: #234fa3;
+  transform: translateY(-1px);
+}
+
+.ribbon-node:active {
+  transform: scale(0.97);
+}
+
+.ribbon-view {
+  background-color: #f3f3f3;        /* light blue */
+  border: 1px solid #56575a;        /* dark blue border */
+  color: grey;                   /* dark blue icon/text */
+  padding: 6px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.2s ease-in-out;
+}
+
+.ribbon-view:hover {
+  background-color: #e3e3e3;        /* slightly darker on hover */
+  border-color: grey;
+  transform: translateY(-1px);
+}
+
+.ribbon-view:active {
+  transform: scale(0.97);
+}
+
+.small-modal-box {
+  background: #fff;
+  border-radius: 10px;
+  width: 30%;
+  padding: 30px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  max-height: 80vh;
+  overflow-x: auto;
+}
+
+.small-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  backdrop-filter: blur(6px);
+  z-index: 1000;
+  overflow-y: auto;
+  /* allow scrolling if modal is taller than viewport */
 }

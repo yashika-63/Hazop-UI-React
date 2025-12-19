@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
 import { strings } from "../string";
-import { FaEllipsisV } from "react-icons/fa";
+import { FaEdit, FaEllipsisV } from "react-icons/fa";
 import { FaSquareCheck } from "react-icons/fa6";
 import NodePopup from "./NodePopup";
 
@@ -401,45 +401,45 @@ const NodePage = () => {
                 <th>Registration Date</th>
                 <th>Design Intent</th>
                 <th>Completion Status</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
-              {nodes.length === 0 ? (
-                <tr>
-                  <td colSpan="11" className="no-data">
-                    No nodes added yet.
-                  </td>
-                </tr>
-              ) : (
-                nodes.map((n, idx) => (
-                  <tr
-                    key={n.id}
-                    style={{ cursor: "pointer" }}
-                    onClick={() =>
-                      navigate(`/NodeDetails`, { state: { id: n.id } })
-                    }
-                  >
-                    <td>{idx + 1}</td>
-                    <td>{n.nodeNumber}</td>
-                    <td>{formatDate(n.registrationDate)}</td>
-                    <td>{n.designIntent}</td>
-                    <td>
-                      <span
-                        className={
-                          n.completionStatus === true
-                            ? "status-completed"
-                            : n.completionStatus === false
-                            ? "status-pending"
-                            : "status-pending"
-                        }
-                      >
-                        {n.completionStatus === true ? "Completed" : "Ongoing"}
-                      </span>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
+  {nodes.map((n, idx) => (
+    <tr
+      key={n.id}
+      onClick={() =>
+        navigate(`/NodeDetails`, { state: { id: n.id } })
+      }
+      style={{ cursor: "pointer" }}
+    >
+      <td>{idx + 1}</td>
+      <td>{n.nodeNumber}</td>
+      <td>{formatDate(n.registrationDate)}</td>
+      <td>{n.designIntent}</td>
+      <td>
+        <span
+          className={
+            n.completionStatus ? "status-completed" : "status-pending"
+          }
+        >
+          {n.completionStatus ? "Completed" : "Ongoing"}
+        </span>
+      </td>
+
+      <td onClick={(e) => e.stopPropagation()}>
+        <FaEdit
+          title="Update Node"
+          style={{ cursor: "pointer", color: "#1976d2" }}
+          onClick={() =>
+            navigate("/UpdateNode", { state: { nodeId: n.id } })
+          }
+        />
+      </td>
+    </tr>
+  ))}
+</tbody>
+
           </table>
         </div>
       </div>
