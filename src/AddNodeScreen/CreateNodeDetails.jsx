@@ -393,20 +393,29 @@ const CreateNodeDetails = () => {
     fetchFirstNodeDetail();
   }, [nodeID]);
 
+
   const fetchDetailByDirection = async (direction) => {
     if (!nodeID) return null;
 
     try {
       setLoading(true);
 
-      const currentDetailNumberParam = currentDetailNo ?? 0; // null-safe
+      // Start with mandatory parameters
+      let url = `http://${strings.localhost}/api/hazopNodeDetail/getByDirectionNew?nodeId=${currentNodeId}&direction=${direction}`;
 
-      const res = await fetch(
-        `http://${strings.localhost}/api/hazopNodeDetail/getByDirectionNew` +
-          `?currentDetailNumber=${currentDetailNumberParam}` +
-          `&nodeId=${currentNodeId}` +
-          `&direction=${direction}`
-      );
+      // CHANGE HERE: 
+      // We check if 'currentDetailId' exists. 
+      // If currentDetailId is null, it means we are on the Blank Page.
+      // If we are on the Blank Page, we DO NOT send the number, satisfying your request to pass nothing.
+      if (
+        currentDetailId !== null &&
+        currentDetailNo !== null &&
+        currentDetailNo !== undefined
+      ) {
+        url += `&currentDetailNumber=${currentDetailNo}`;
+      }
+
+      const res = await fetch(url);
 
       if (!res.ok) return null;
 
@@ -501,69 +510,69 @@ const CreateNodeDetails = () => {
     }
   };
 
-const handlePrevNextNode = async (direction) => {
-  if (!isSaved) {
-    showToast("Please save the form before switching nodes.", "warn");
-    return;
-  }
-
-  const nextNode = await fetchNodeByDirection(direction);
-
-  if (!nextNode) {
-    showToast(
-      direction === "previous"
-        ? "No previous node found."
-        : "No next node found.",
-      "info"
-    );
-    return;
-  }
-
-  setCurrentNodeId(nextNode.id);
-
-  try {
-    setLoading(true);
-
-    const res = await fetch(
-      `http://${strings.localhost}/api/hazopNodeDetail/node/${nextNode.id}`
-    );
-    const detailsData = await res.json();
-
-    // ✔ FIXED: Ensure it's an array before reading length
-    if (Array.isArray(detailsData) && detailsData.length > 0) {
-      const firstDetail = detailsData[0];
-      const recsRes = await fetch(
-        `http://${strings.localhost}/api/nodeRecommendation/getByDetailId/${firstDetail.id}`
-      );
-      const recommendations = await recsRes.json();
-
-      setForm({
-        ...firstDetail,
-        additionalControl:
-          recommendations.map((r) => r.recommendation).join("\n") || "• ",
-      });
-
-      setTempRecommendations(recommendations);
-      setCurrentDetailId(firstDetail.id);
-      setCurrentIndex(0);
-      setIsSaved(true);
-
-    } else {
-      // ✔ API sent "No node details found" → open blank form
-      setForm(initialState);
-      setTempRecommendations([]);
-      setCurrentDetailId(null);
-      setCurrentIndex(0);
-      setIsSaved(true);
-      showToast("Blank form opened for new node.", "info");
+  const handlePrevNextNode = async (direction) => {
+    if (!isSaved) {
+      showToast("Please save the form before switching nodes.", "warn");
+      return;
     }
 
-  } catch (err) {
-    console.error("Error loading node details:", err);
-  } finally {
-    setLoading(false);
-  }
-};
+    const nextNode = await fetchNodeByDirection(direction);
+
+    if (!nextNode) {
+      showToast(
+        direction === "previous"
+          ? "No previous node found."
+          : "No next node found.",
+        "info"
+      );
+      return;
+    }
+
+    setCurrentNodeId(nextNode.id);
+
+    try {
+      setLoading(true);
+
+      const res = await fetch(
+        `http://${strings.localhost}/api/hazopNodeDetail/node/${nextNode.id}`
+      );
+      const detailsData = await res.json();
+
+      // ✔ FIXED: Ensure it's an array before reading length
+      if (Array.isArray(detailsData) && detailsData.length > 0) {
+        const firstDetail = detailsData[0];
+        const recsRes = await fetch(
+          `http://${strings.localhost}/api/nodeRecommendation/getByDetailId/${firstDetail.id}`
+        );
+        const recommendations = await recsRes.json();
+
+        setForm({
+          ...firstDetail,
+          additionalControl:
+            recommendations.map((r) => r.recommendation).join("\n") || "• ",
+        });
+
+        setTempRecommendations(recommendations);
+        setCurrentDetailId(firstDetail.id);
+        setCurrentIndex(0);
+        setIsSaved(true);
+
+      } else {
+        // ✔ API sent "No node details found" → open blank form
+        setForm(initialState);
+        setTempRecommendations([]);
+        setCurrentDetailId(null);
+        setCurrentIndex(0);
+        setIsSaved(true);
+        showToast("Blank form opened for new node.", "info");
+      }
+
+    } catch (err) {
+      console.error("Error loading node details:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handlePrevNext = async (direction) => {
     if (!isSaved) {
@@ -893,11 +902,10 @@ const handlePrevNextNode = async (direction) => {
                     <span className="required-marker">*</span>General Parameter
                   </div>
                   <small
-                    className={`char-count ${
-                      form.generalParameter.length >= 1000
+                    className={`char-count ${form.generalParameter.length >= 1000
                         ? "limit-reached"
                         : ""
-                    }`}
+                      }`}
                   >
                     {form.generalParameter.length}/1000
                   </small>
@@ -916,11 +924,10 @@ const handlePrevNextNode = async (direction) => {
                     <span className="required-marker">*</span>Specific Parameter
                   </div>
                   <small
-                    className={`char-count ${
-                      form.specificParameter.length >= 1000
+                    className={`char-count ${form.specificParameter.length >= 1000
                         ? "limit-reached"
                         : ""
-                    }`}
+                      }`}
                   >
                     {form.specificParameter.length}/1000
                   </small>
@@ -939,9 +946,8 @@ const handlePrevNextNode = async (direction) => {
                     <span className="required-marker">*</span>Guide Word
                   </div>
                   <small
-                    className={`char-count ${
-                      form.guidWord.length >= 1000 ? "limit-reached" : ""
-                    }`}
+                    className={`char-count ${form.guidWord.length >= 1000 ? "limit-reached" : ""
+                      }`}
                   >
                     {form.guidWord.length}/1000
                   </small>
@@ -963,9 +969,8 @@ const handlePrevNextNode = async (direction) => {
                     <span className="required-marker">*</span>Deviation
                   </div>
                   <small
-                    className={`char-count ${
-                      form.deviation.length >= 5000 ? "limit-reached" : ""
-                    }`}
+                    className={`char-count ${form.deviation.length >= 5000 ? "limit-reached" : ""
+                      }`}
                   >
                     {form.deviation.length}/5000
                   </small>
@@ -985,9 +990,8 @@ const handlePrevNextNode = async (direction) => {
                     <span className="required-marker">*</span>Causes
                   </div>
                   <small
-                    className={`char-count ${
-                      form.causes.length >= 5000 ? "limit-reached" : ""
-                    }`}
+                    className={`char-count ${form.causes.length >= 5000 ? "limit-reached" : ""
+                      }`}
                   >
                     {form.causes.length}/5000
                   </small>
@@ -1007,9 +1011,8 @@ const handlePrevNextNode = async (direction) => {
                     <span className="required-marker">*</span>Consequences
                   </div>
                   <small
-                    className={`char-count ${
-                      form.consequences.length >= 5000 ? "limit-reached" : ""
-                    }`}
+                    className={`char-count ${form.consequences.length >= 5000 ? "limit-reached" : ""
+                      }`}
                   >
                     {form.consequences.length}/5000
                   </small>
@@ -1029,11 +1032,10 @@ const handlePrevNextNode = async (direction) => {
                   <label className="table-header">
                     <div>Existing Control</div>
                     <small
-                      className={`char-count ${
-                        form.existineControl.length >= 5000
+                      className={`char-count ${form.existineControl.length >= 5000
                           ? "limit-reached"
                           : ""
-                      }`}
+                        }`}
                     >
                       {form.existineControl.length}/5000
                     </small>
@@ -1204,9 +1206,9 @@ const handlePrevNextNode = async (direction) => {
                                 prev.map((r, i) =>
                                   i === index
                                     ? {
-                                        ...r,
-                                        editing: r.recommendation.trim() === "",
-                                      }
+                                      ...r,
+                                      editing: r.recommendation.trim() === "",
+                                    }
                                     : r
                                 )
                               );
@@ -1252,11 +1254,10 @@ const handlePrevNextNode = async (direction) => {
                     ))}
                   </div>
                   <small
-                    className={`char-count ${
-                      form.additionalControl.length >= 5000
+                    className={`char-count ${form.additionalControl.length >= 5000
                         ? "limit-reached"
                         : ""
-                    }`}
+                      }`}
                     style={{ marginTop: "9px" }}
                   >
                     {form.additionalControl.length}/5000
