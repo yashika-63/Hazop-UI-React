@@ -1,22 +1,20 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./Node.css";
 import { useLocation, useNavigate } from "react-router-dom";
 import { formatDateToBackend, showToast } from "../CommonUI/CommonUI";
 import { strings } from "../string";
 
-const NodePopup = ({ onSave }) => {
-  const location = useLocation();
+const UpdateNode = () => {
   const navigate = useNavigate();
+  const { state } = useLocation();
+  const nodeId = state?.nodeId;
 
-  const { registrationId: registrationId, hazopData } = location.state || {};
-  console.log("Using registrationId for POST:", registrationId);
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
 
-  if (!hazopData) {
-    console.error("hazopData missing in NodePopup");
-  }
   const [form, setForm] = useState({
-    date: "",
+    creationDate: "",
     designIntent: "",
     pIdRevision: "",
     sopNo: "",
@@ -29,8 +27,30 @@ const NodePopup = ({ onSave }) => {
     quantityFlowRate: "",
   });
 
-  const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState({});
+  useEffect(() => {
+    if (!nodeId) return;
+
+    axios
+      .get(`http://${strings.localhost}/api/hazopNode/${nodeId}`)
+      .then((res) => {
+        const data = res.data;
+
+        setForm({
+          creationDate: data.creationDate || "",
+          designIntent: data.designIntent || "",
+          pIdRevision: data.pIdRevision || "",
+          sopNo: data.sopNo || "",
+          sopDate: data.sopDate || "",
+          equipment: data.equipment || "",
+          controls: data.controls || "",
+          chemicalAndUtilities: data.chemicalAndUtilities || "",
+          temperature: data.temprature || "",
+          pressure: data.pressure || "",
+          quantityFlowRate: data.quantityFlowRate || "",
+        });
+      })
+      .catch(() => showToast("Failed to load node data", "error"));
+  }, [nodeId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -40,92 +60,52 @@ const NodePopup = ({ onSave }) => {
   const validate = () => {
     const newErrors = {};
 
-    if (!form.date) {
-      newErrors.date = "Date is required.";
-      showToast("Date is required", "warn");
-    }
-    if (!form.designIntent.trim()) {
-      newErrors.designIntent = "Design intent is required.";
-      showToast("Design Intent is required", "warn");
-    }
-    if (!form.pIdRevision) {
-      newErrors.pIdRevision = "P&ID No. & Revision is required.";
-      showToast("P&ID No. is required", "warn");
-    }
-    if (!form.sopNo.trim()) {
-      newErrors.sopNo = "SOP Number is required.";
-      showToast("SOP number is required", "warn");
-    }
-    if (!form.sopDate) {
-      newErrors.sopDate = "SOP Date is required.";
-      showToast("SOP date is required", "warn");
-    }
-    if (!form.equipment.trim()) {
-      newErrors.equipment = "Equipment is required.";
-      showToast("Equipment is required", "warn");
-    }
-    if (!form.controls.trim()) {
-      newErrors.controls = "Controls are required.";
-      showToast("Controls are required", "warn");
-    }
-    if (!form.chemicalAndUtilities.trim()) {
-      newErrors.chemicalAndUtilities = "Chemicals and utilities are required.";
+    if (!form.creationDate) showToast("Date is required", "warn");
+    if (!form.designIntent.trim()) showToast("Design Intent is required", "warn");
+    if (!form.pIdRevision) showToast("P&ID No. is required", "warn");
+    if (!form.sopNo.trim()) showToast("SOP number is required", "warn");
+    if (!form.sopDate) showToast("SOP date is required", "warn");
+    if (!form.equipment.trim()) showToast("Equipment is required", "warn");
+    if (!form.controls.trim()) showToast("Controls are required", "warn");
+    if (!form.chemicalAndUtilities.trim())
       showToast("Chemicals and utilities are required", "warn");
-    }
-    if (!form.temperature.trim()) {
-      newErrors.temperature = "Temperature is required.";
-      showToast("Temperature is required", "warn");
-    }
-    if (!form.pressure.trim()) {
-      newErrors.pressure = "Pressure is required.";
-      showToast("Pressure is required", "warn");
-    }
-    if (!form.quantityFlowRate.trim()) {
-      newErrors.quantityFlowRate = "Quantity is required.";
-      showToast("Quantity is required", "warn");
-    }
+    if (!form.temperature.trim()) showToast("Temperature is required", "warn");
+    if (!form.pressure.trim()) showToast("Pressure is required", "warn");
+    if (!form.quantityFlowRate.trim()) showToast("Quantity is required", "warn");
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0; // returns false if there are errors, true if no errors
+    return Object.keys(newErrors).length === 0;
   };
 
-  const handleSave = async () => {
+  const handleUpdate = async () => {
     if (!validate()) return;
 
     setLoading(true);
     try {
-      setErrors({});
-      const registrationId = hazopData?.id;
+      const payload = {
+        creationDate: formatDateToBackend(form.creationDate),
+        designIntent: form.designIntent,
+        pIdRevision: form.pIdRevision,
+        sopNo: form.sopNo,
+        sopDate: formatDateToBackend(form.sopDate),
+        equipment: form.equipment,
+        controls: form.controls,
+        chemicalAndUtilities: form.chemicalAndUtilities,
+        temprature: form.temperature,
+        pressure: form.pressure,
+        quantityFlowRate: form.quantityFlowRate,
+      };
 
-      const payload = [
-        {
-          date: formatDateToBackend(form.date),
-          designIntent: form.designIntent,
-          pIdRevision: form.pIdRevision,
-          sopNo: form.sopNo,
-          sopDate: formatDateToBackend(form.sopDate),
-          equipment: form.equipment,
-          controls: form.controls,
-          chemicalAndUtilities: form.chemicalAndUtilities,
-          temprature: form.temperature,
-          pressure: form.pressure,
-          quantityFlowRate: form.quantityFlowRate,
-        },
-      ];
-
-      const res = await axios.post(
-        `http://${strings.localhost}/api/hazopNode/saveNodes/${registrationId}`,
+      await axios.put(
+        `http://${strings.localhost}/api/hazopNode/update/${nodeId}`,
         payload
       );
 
-      if (onSave) {
-        onSave();
-      }
+      showToast("Node updated successfully!", "success");
       navigate(-1);
-      showToast("Hazop node created successfully!", "success");
     } catch (err) {
-      console.error("Save failed:", err);
-      showToast("Failed to save Hazop node", "error");
+      console.error(err);
+      showToast("Failed to update node", "error");
     } finally {
       setLoading(false);
     }
@@ -137,11 +117,11 @@ const NodePopup = ({ onSave }) => {
         <button className="nd-back-btn" onClick={() => navigate(-1)}>
           ← Back
         </button>
-        <h1>Create Node</h1>
+        <h1>Update Node</h1>
       </div>
 
       <div>
-        <div>
+        <div className="popup-body">
           <div>
             <div className="form-group">
             <label>
@@ -164,8 +144,8 @@ const NodePopup = ({ onSave }) => {
                 </label>
                 <input
                   type="date"
-                  name="date"
-                  value={form.date}
+                  name="creationDate"
+                  value={form.creationDate}
                   onChange={handleChange}
                   disabled={loading}
                   max={new Date().toISOString().split("T")[0]}
@@ -315,7 +295,6 @@ const NodePopup = ({ onSave }) => {
                 rows={3}
                 className="textareaFont"
                 maxLength={2000}
-                className="textareaFont"
               />
             </div>
 
@@ -376,10 +355,10 @@ const NodePopup = ({ onSave }) => {
         <button
           type="button"
           className="save-btn"
-          onClick={handleSave}
+          onClick={handleUpdate}
           disabled={loading}
         >
-          {loading ? "Saving..." : "Save Node"}
+          {loading ? "Updating..." : "Update Node"}
         </button>
       </div>
 
@@ -392,4 +371,4 @@ const NodePopup = ({ onSave }) => {
   );
 };
 
-export default NodePopup;
+export default UpdateNode;

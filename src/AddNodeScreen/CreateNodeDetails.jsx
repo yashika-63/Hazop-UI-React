@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { FaMinus, FaPlus } from "react-icons/fa";
+import { FaEye, FaMinus, FaPlus } from "react-icons/fa";
 import { showToast } from "../CommonUI/CommonUI";
 import "./Node.css";
 import { strings } from "../string";
 import { useLocation, useNavigate } from "react-router-dom";
 import NodeInfo from "./NodeInfo";
+import RiskLevelPopup from "./RiskLevelPopup";
+import RibbonButtons from "./RibbonButtons";
+import RibbonInfoModal from "./RibbonInfoModal";
 
 const initialState = {
   generalParameter: "",
@@ -25,8 +28,8 @@ const initialState = {
 
 const CreateNodeDetails = () => {
   const [form, setForm] = useState(initialState);
-  const [rows, setRows] = useState(15);
-  const [smallRows, setSmallRows] = useState(11);
+  const [rows, setRows] = useState(6);
+  const [smallRows, setSmallRows] = useState(4);
   const [loading, setLoading] = useState(false);
   const [tempRecommendations, setTempRecommendations] = useState([]);
   const additionalControlRef = React.useRef(null);
@@ -39,6 +42,7 @@ const CreateNodeDetails = () => {
   const [recToDelete, setRecToDelete] = useState(null);
   const [recIndexToDelete, setRecIndexToDelete] = useState(null);
   const [currentDetailNo, setCurrentDetailNo] = useState(null);
+  const [showRiskPopup, setShowRiskPopup] = useState(false);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -47,6 +51,7 @@ const CreateNodeDetails = () => {
   const [currentNodeId, setCurrentNodeId] = useState(nodeID); // initial node
   const [currentNodeData, setCurrentNodeData] = useState(null);
   const department = currentNodeData?.javaHazopRegistration?.department || null;
+  const [showRibbonInfo, setShowRibbonInfo] = useState(false);
 
   useEffect(() => {
     const fetchNode = async () => {
@@ -86,12 +91,12 @@ const CreateNodeDetails = () => {
         name === "deviation"
       ) {
         const lineCount = value.split("\n").length;
-        setRows(Math.min(20, Math.max(15, lineCount)));
+        setRows(Math.min(10, Math.max(6, lineCount)));
       }
 
       if (name === "additionalControl" || name === "existineControl") {
         const lineCount = value.split("\n").length;
-        setSmallRows(Math.min(15, Math.max(11, lineCount)));
+        setSmallRows(Math.min(8, Math.max(4, lineCount)));
       }
 
       if (name === "existineProbability" || name === "existingSeverity") {
@@ -180,10 +185,6 @@ const CreateNodeDetails = () => {
       showToast("Deviation is required.", "warn");
       return false;
     }
-    if (!form.existineControl.trim()) {
-      showToast("Existing Control is required.", "warn");
-      return false;
-    }
     if (!form.existineProbability) {
       showToast("Existing Probability is required.", "warn");
       return false;
@@ -262,15 +263,6 @@ const CreateNodeDetails = () => {
     }
   };
 
-  const reloadDetails = async () => {
-    const res = await fetch(
-      `http://${strings.localhost}/api/hazopNodeDetail/node/${currentNodeId}`
-    );
-    const data = await res.json();
-    setDetails(data);
-    return data;
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -301,13 +293,11 @@ const CreateNodeDetails = () => {
         const nodeDetailId = savedDetail.id;
         setCurrentDetailId(nodeDetailId);
 
-        // Extract recommendations from additionalControl textarea
         const cleanedRecommendations = form.additionalControl
           .split("\n")
           .map((line) => line.replace(/^•\s*/, "").trim())
           .filter((line) => line !== "");
 
-        // Prepare recommendations for save/update
         const recommendationsList = cleanedRecommendations.map(
           (text, index) => {
             const existingRec = tempRecommendations[index];
@@ -409,22 +399,14 @@ const CreateNodeDetails = () => {
     try {
       setLoading(true);
 
-      // Start with mandatory parameters
-      let url = `http://${strings.localhost}/api/hazopNodeDetail/getByDirectionNew?nodeId=${currentNodeId}&direction=${direction}`;
+      const currentDetailNumberParam = currentDetailNo ?? 0; // null-safe
 
-      // CHANGE HERE: 
-      // We check if 'currentDetailId' exists. 
-      // If currentDetailId is null, it means we are on the Blank Page.
-      // If we are on the Blank Page, we DO NOT send the number, satisfying your request to pass nothing.
-      if (
-        currentDetailId !== null && 
-        currentDetailNo !== null && 
-        currentDetailNo !== undefined
-      ) {
-        url += `&currentDetailNumber=${currentDetailNo}`;
-      }
-
-      const res = await fetch(url);
+      const res = await fetch(
+        `http://${strings.localhost}/api/hazopNodeDetail/getByDirectionNew` +
+          `?currentDetailNumber=${currentDetailNumberParam}` +
+          `&nodeId=${currentNodeId}` +
+          `&direction=${direction}`
+      );
 
       if (!res.ok) return null;
 
@@ -519,74 +501,75 @@ const CreateNodeDetails = () => {
     }
   };
 
-  const handlePrevNextNode = async (direction) => {
-    if (!isSaved) {
-      showToast("Please save the form before switching nodes.", "warn");
-      return;
-    }
+const handlePrevNextNode = async (direction) => {
+  if (!isSaved) {
+    showToast("Please save the form before switching nodes.", "warn");
+    return;
+  }
 
-    const nextNode = await fetchNodeByDirection(direction);
+  const nextNode = await fetchNodeByDirection(direction);
 
-    if (!nextNode) {
-      showToast(
-        direction === "previous"
-          ? "No previous node found."
-          : "No next node found.",
-        "info"
+  if (!nextNode) {
+    showToast(
+      direction === "previous"
+        ? "No previous node found."
+        : "No next node found.",
+      "info"
+    );
+    return;
+  }
+
+  setCurrentNodeId(nextNode.id);
+
+  try {
+    setLoading(true);
+
+    const res = await fetch(
+      `http://${strings.localhost}/api/hazopNodeDetail/node/${nextNode.id}`
+    );
+    const detailsData = await res.json();
+
+    // ✔ FIXED: Ensure it's an array before reading length
+    if (Array.isArray(detailsData) && detailsData.length > 0) {
+      const firstDetail = detailsData[0];
+      const recsRes = await fetch(
+        `http://${strings.localhost}/api/nodeRecommendation/getByDetailId/${firstDetail.id}`
       );
-      return;
+      const recommendations = await recsRes.json();
+
+      setForm({
+        ...firstDetail,
+        additionalControl:
+          recommendations.map((r) => r.recommendation).join("\n") || "• ",
+      });
+
+      setTempRecommendations(recommendations);
+      setCurrentDetailId(firstDetail.id);
+      setCurrentIndex(0);
+      setIsSaved(true);
+
+    } else {
+      // ✔ API sent "No node details found" → open blank form
+      setForm(initialState);
+      setTempRecommendations([]);
+      setCurrentDetailId(null);
+      setCurrentIndex(0);
+      setIsSaved(true);
+      showToast("Blank form opened for new node.", "info");
     }
 
-    // update currentNodeId
-    setCurrentNodeId(nextNode.id);
-
-    // reload first detail of the new node
-    try {
-      setLoading(true);
-      const res = await fetch(
-        `http://${strings.localhost}/api/hazopNodeDetail/node/${nextNode.id}`
-      );
-      const detailsData = await res.json();
-
-      if (detailsData && detailsData.length > 0) {
-        const firstDetail = detailsData[0];
-        const recsRes = await fetch(
-          `http://${strings.localhost}/api/nodeRecommendation/getByDetailId/${firstDetail.id}`
-        );
-        const recommendations = await recsRes.json();
-
-        setForm({
-          ...firstDetail,
-          additionalControl:
-            recommendations.map((r) => r.recommendation).join("\n") || "• ",
-        });
-        setTempRecommendations(recommendations);
-        setCurrentDetailId(firstDetail.id);
-        setCurrentIndex(0);
-        setIsSaved(true);
-      } else {
-        // if no details exist, open blank form
-        setForm(initialState);
-        setTempRecommendations([]);
-        setCurrentDetailId(null);
-        setCurrentIndex(0);
-        setIsSaved(true);
-        showToast("Blank form opened for new node.", "info");
-      }
-    } catch (err) {
-      console.error("Error loading node details:", err);
-      // showToast("Failed to load node details.", "error");
-    } finally {
-      setLoading(false);
-    }
-  };
+  } catch (err) {
+    console.error("Error loading node details:", err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handlePrevNext = async (direction) => {
     if (!isSaved) {
       showToast("Please save the form before navigating.", "warn");
       return;
     }
-    // CASE 1: You are on a blank new form and user clicked PREVIOUS
     if (!currentDetailId && direction === "previous") {
       const lastRecord = await fetchDetailByDirection("previous");
       if (!lastRecord) {
@@ -607,10 +590,8 @@ const CreateNodeDetails = () => {
       return;
     }
 
-    // CASE 2: Move to next/previous existing record
     const nextDetail = await fetchDetailByDirection(direction);
 
-    // If NEXT returns null → means no next → open blank form
     if (!nextDetail && direction === "next") {
       setForm(initialState);
       setTempRecommendations([]);
@@ -619,13 +600,11 @@ const CreateNodeDetails = () => {
       return;
     }
 
-    // If PREVIOUS returns null → means no previous
     if (!nextDetail && direction === "previous") {
       showToast("No previous record found.", "info");
       return;
     }
 
-    // Load recommendations for found record
     const recs = await loadRecommendations(nextDetail.id);
 
     setForm({
@@ -644,11 +623,10 @@ const CreateNodeDetails = () => {
       return;
     }
 
-    // Open a fresh blank form
     setForm(initialState);
     setTempRecommendations([]);
     setCurrentDetailId(null);
-    setCurrentIndex(details.length); // optional, keeps index in sync
+    setCurrentIndex(details.length);
     setIsSaved(true);
 
     showToast("Blank form opened. Add new deviation.", "info");
@@ -700,52 +678,6 @@ const CreateNodeDetails = () => {
     }
   };
 
-  const saveCurrentDetails = async (currentForm) => {
-    setIsSaved(true);
-    try {
-      setLoading(true);
-
-      // Update Node Detail
-      const nodeDetailRes = await fetch(
-        `http://${strings.localhost}/api/hazopNodeDetail/update/${currentForm.id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(currentForm),
-        }
-      );
-      await reloadDetails();
-
-      if (!nodeDetailRes.ok) throw new Error("Failed to update node detail");
-
-      // Save or update each recommendation
-      for (let rec of tempRecommendations) {
-        const recPayload = {
-          recommendation: rec.recommendation,
-          remarkbyManagement: rec.remarkbyManagement,
-          department: department,
-        };
-
-        const url = rec.id
-          ? `http://${strings.localhost}/api/nodeRecommendation/update/${rec.id}`
-          : `http://${strings.localhost}/api/nodeRecommendation/save/${currentNodeId}/${currentForm.id}`;
-
-        await fetch(url, {
-          method: rec.id ? "PUT" : "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(recPayload),
-        });
-      }
-
-      showToast("Saved Successfully", "success");
-    } catch (error) {
-      console.error("Error saving current form:", error);
-      showToast("Failed to save changes", "error");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleDeleteClick = (rec, index) => {
     setRecToDelete(rec);
     setRecIndexToDelete(index);
@@ -759,12 +691,10 @@ const CreateNodeDetails = () => {
     setLoading(true);
 
     try {
-      // 1️⃣ Remove recommendation from local state first
       const updatedRecs = tempRecommendations.filter(
         (_, i) => i !== recIndexToDelete
       );
 
-      // Update form's additionalControl so deleted recommendation is gone
       const updatedForm = {
         ...form,
         additionalControl: updatedRecs.map((r) => r.recommendation).join("\n"),
@@ -773,7 +703,6 @@ const CreateNodeDetails = () => {
       setTempRecommendations(updatedRecs);
       setForm(updatedForm);
 
-      // 2️⃣ Delete recommendation from backend (only if it exists in DB)
       if (recToDelete.id) {
         const deleteRes = await fetch(
           `http://${strings.localhost}/api/nodeRecommendation/delete/${recToDelete.id}`,
@@ -783,7 +712,6 @@ const CreateNodeDetails = () => {
         if (!deleteRes.ok) throw new Error("Failed to delete recommendation");
       }
 
-      // 3️⃣ Update node details ONLY if detail already exists
       if (currentDetailId) {
         const updateRes = await fetch(
           `http://${strings.localhost}/api/hazopNodeDetail/update/${currentDetailId}`,
@@ -934,23 +862,6 @@ const CreateNodeDetails = () => {
 
   const [isNodePopupOpen, setIsNodePopupOpen] = useState(false);
 
-  const handleOpenNodePopup = () => {
-    setIsNodePopupOpen(true);
-  };
-
-  const handleCloseNodePopup = () => {
-    setIsNodePopupOpen(false);
-  };
-
-  const handleSaveNode = async () => {
-    // After saving in NodePopup, refresh NodeInfo or currentNodeId as needed
-    if (currentNodeId) {
-      // reload current node details after adding new node
-      await loadNodeDetails(currentNodeId);
-    }
-    setIsNodePopupOpen(false);
-  };
-
   return (
     <div>
       <div className="node-header">
@@ -960,27 +871,16 @@ const CreateNodeDetails = () => {
         <h1>Add Deviation</h1>
       </div>
 
-      <div className="table-section">
-        <div className="table-header">
-          <h1></h1>
-          <button
-            type="button"
-            className="add-btn"
-            onClick={() =>
-              navigate("/NodePopup", {
-                state: {
-                  registrationId: currentNodeData?.javaHazopRegistration?.id, // explicitly name it registrationId
-                  hazopData: currentNodeData?.javaHazopRegistration,
-                  redirectTo: "/hazop-details",
-                },
-              })
-            }
-          >
-            + Add Node
-          </button>
-        </div>
-      </div>
-
+      <RibbonButtons
+        handleSubmit={handleSubmit}
+        handlePrevNext={handlePrevNext}
+        handleAddDiscussionNext={handleAddDiscussionNext}
+        handlePrevNextNode={handlePrevNextNode}
+        currentNodeData={currentNodeData}
+        setShowRiskPopup={setShowRiskPopup}
+        setShowRibbonInfo={setShowRibbonInfo}
+        navigate={navigate}
+      />
       <NodeInfo currentNodeId={currentNodeId} />
 
       <div>
@@ -988,9 +888,19 @@ const CreateNodeDetails = () => {
           <form onSubmit={handleSubmit}>
             <div className="input-row">
               <div className="form-group">
-                <label>
-                  {" "}
-                  <span className="required-marker">*</span>General Parameter
+                <label className="table-header">
+                  <div>
+                    <span className="required-marker">*</span>General Parameter
+                  </div>
+                  <small
+                    className={`char-count ${
+                      form.generalParameter.length >= 1000
+                        ? "limit-reached"
+                        : ""
+                    }`}
+                  >
+                    {form.generalParameter.length}/1000
+                  </small>
                 </label>
                 <input
                   type="text"
@@ -999,18 +909,21 @@ const CreateNodeDetails = () => {
                   onChange={handleChange}
                   maxLength={1000}
                 />
-                <small
-                  className={`char-count ${
-                    form.generalParameter.length >= 1000 ? "limit-reached" : ""
-                  }`}
-                >
-                  {form.generalParameter.length}/1000
-                </small>
               </div>
               <div className="form-group">
-                <label>
-                  {" "}
-                  <span className="required-marker">*</span>Specific Parameter
+                <label className="table-header">
+                  <div>
+                    <span className="required-marker">*</span>Specific Parameter
+                  </div>
+                  <small
+                    className={`char-count ${
+                      form.specificParameter.length >= 1000
+                        ? "limit-reached"
+                        : ""
+                    }`}
+                  >
+                    {form.specificParameter.length}/1000
+                  </small>
                 </label>
                 <input
                   type="text"
@@ -1019,18 +932,19 @@ const CreateNodeDetails = () => {
                   onChange={handleChange}
                   maxLength={1000}
                 />
-                <small
-                  className={`char-count ${
-                    form.specificParameter.length >= 1000 ? "limit-reached" : ""
-                  }`}
-                >
-                  {form.specificParameter.length}/1000
-                </small>
               </div>
               <div className="form-group">
-                <label>
-                  {" "}
-                  <span className="required-marker">*</span>Guide Word
+                <label className="table-header">
+                  <div>
+                    <span className="required-marker">*</span>Guide Word
+                  </div>
+                  <small
+                    className={`char-count ${
+                      form.guidWord.length >= 1000 ? "limit-reached" : ""
+                    }`}
+                  >
+                    {form.guidWord.length}/1000
+                  </small>
                 </label>
                 <input
                   type="text"
@@ -1039,21 +953,22 @@ const CreateNodeDetails = () => {
                   onChange={handleChange}
                   maxLength={1000}
                 />
-                <small
-                  className={`char-count ${
-                    form.guidWord.length >= 1000 ? "limit-reached" : ""
-                  }`}
-                >
-                  {form.guidWord.length}/1000
-                </small>
               </div>
             </div>
 
             <div className="input-row-node">
               <div className="form-group">
-                <label>
-                  {" "}
-                  <span className="required-marker">*</span>Deviation
+                <label className="table-header">
+                  <div>
+                    <span className="required-marker">*</span>Deviation
+                  </div>
+                  <small
+                    className={`char-count ${
+                      form.deviation.length >= 5000 ? "limit-reached" : ""
+                    }`}
+                  >
+                    {form.deviation.length}/5000
+                  </small>
                 </label>
                 <textarea
                   name="deviation"
@@ -1063,18 +978,19 @@ const CreateNodeDetails = () => {
                   className="textareaFont"
                   maxLength={5000}
                 />
-                <small
-                  className={`char-count ${
-                    form.deviation.length >= 5000 ? "limit-reached" : ""
-                  }`}
-                >
-                  {form.deviation.length}/5000
-                </small>
               </div>
               <div className="form-group">
-                <label>
-                  {" "}
-                  <span className="required-marker">*</span>Causes
+                <label className="table-header">
+                  <div>
+                    <span className="required-marker">*</span>Causes
+                  </div>
+                  <small
+                    className={`char-count ${
+                      form.causes.length >= 5000 ? "limit-reached" : ""
+                    }`}
+                  >
+                    {form.causes.length}/5000
+                  </small>
                 </label>
                 <textarea
                   name="causes"
@@ -1084,18 +1000,19 @@ const CreateNodeDetails = () => {
                   className="textareaFont"
                   maxLength={5000}
                 />
-                <small
-                  className={`char-count ${
-                    form.causes.length >= 5000 ? "limit-reached" : ""
-                  }`}
-                >
-                  {form.causes.length}/5000
-                </small>
               </div>
               <div className="form-group">
-                <label>
-                  {" "}
-                  <span className="required-marker">*</span>Consequences
+                <label className="table-header">
+                  <div>
+                    <span className="required-marker">*</span>Consequences
+                  </div>
+                  <small
+                    className={`char-count ${
+                      form.consequences.length >= 5000 ? "limit-reached" : ""
+                    }`}
+                  >
+                    {form.consequences.length}/5000
+                  </small>
                 </label>
                 <textarea
                   name="consequences"
@@ -1105,20 +1022,21 @@ const CreateNodeDetails = () => {
                   className="textareaFont"
                   maxLength={5000}
                 />
-                <small
-                  className={`char-count ${
-                    form.consequences.length >= 5000 ? "limit-reached" : ""
-                  }`}
-                >
-                  {form.consequences.length}/5000
-                </small>
               </div>
 
               <div>
                 <div className="form-group">
-                  <label>
-                    {" "}
-                    <span className="required-marker">*</span>Existing Control
+                  <label className="table-header">
+                    <div>Existing Control</div>
+                    <small
+                      className={`char-count ${
+                        form.existineControl.length >= 5000
+                          ? "limit-reached"
+                          : ""
+                      }`}
+                    >
+                      {form.existineControl.length}/5000
+                    </small>
                   </label>
                   <textarea
                     name="existineControl"
@@ -1128,13 +1046,6 @@ const CreateNodeDetails = () => {
                     className="textareaFont"
                     maxLength={5000}
                   />
-                  <small
-                    className={`char-count ${
-                      form.existineControl.length >= 5000 ? "limit-reached" : ""
-                    }`}
-                  >
-                    {form.existineControl.length}/5000
-                  </small>
                 </div>
 
                 <div className="metric-row">
@@ -1431,57 +1342,6 @@ const CreateNodeDetails = () => {
                 </small>
               </div>
             </div>
-
-            <div className="center-controls">
-              <button
-                type="button"
-                className="save-btn"
-                disabled={loading}
-                onClick={() => handlePrevNext("previous")}
-              >
-                Previous Deviation
-              </button>
-              <button
-                type="button"
-                className="save-btn"
-                disabled={loading}
-                onClick={handleSubmit}
-              >
-                Save
-              </button>
-              <button
-                type="button"
-                className="save-btn"
-                disabled={loading}
-                onClick={() => handlePrevNext("next")}
-              >
-                Next Deviation
-              </button>
-              <button
-                type="button"
-                className="save-btn"
-                disabled={loading}
-                onClick={handleAddDiscussionNext}
-              >
-                Add Deviation next to this
-              </button>
-            </div>
-            <div className="table-header">
-              <button
-                type="button"
-                disabled={loading}
-                onClick={() => handlePrevNextNode("previous")}
-              >
-                Previous Node
-              </button>
-              <button
-                type="button"
-                disabled={loading}
-                onClick={() => handlePrevNextNode("next")}
-              >
-                Next Node
-              </button>
-            </div>
           </form>
         </div>
       </div>
@@ -1509,6 +1369,17 @@ const CreateNodeDetails = () => {
         <div className="loading-overlay">
           <div className="loading-spinner"></div>
         </div>
+      )}
+
+      {showRibbonInfo && (
+        <RibbonInfoModal
+          show={showRibbonInfo}
+          onClose={() => setShowRibbonInfo(false)}
+        />
+      )}
+
+      {showRiskPopup && (
+        <RiskLevelPopup onClose={() => setShowRiskPopup(false)} />
       )}
     </div>
   );

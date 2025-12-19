@@ -757,3 +757,10 @@ p {
 .error-input:focus {
   outline: 1px solid red;
 }
+
+.center-controls1 {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  padding: 6px;
+}

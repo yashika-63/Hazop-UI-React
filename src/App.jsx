@@ -26,6 +26,7 @@ import MainComponent from './CreateNodeDiscussion/mainComponent';
 import NodeRetrieve from './AddNodeScreen/NodeRetrieve';
 import ViewNodeDiscussion from './AddNodeScreen/ViewNodeDiscussion';
 import Dashboard from './Dashboard/Dashboard';
+import UpdateNode from './AddNodeScreen/UpdateNode';
 
 const App = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -87,7 +88,7 @@ const App = () => {
                     <Route path="/ViewNodeDiscussion" element={<ViewNodeDiscussion/>} />
                     <Route path="/HazopView" element={<HazopView />} />
                     <Route path="/Dashboard" element={<Dashboard />} />
-
+                    <Route path='/UpdateNode' element={<UpdateNode />} />
                     
                     <Route path="*" element={<Navigate to="/HazopPage" />} />
                   </Routes>
