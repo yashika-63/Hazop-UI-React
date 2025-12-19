@@ -246,21 +246,20 @@ const PendingRecommendationApproval = () => {
       return showToast("Please select a target date", "error");
     }
 
-    setLoading(true);
-    try {
-      // Step 1: Hit the SAVE API as requested
-      // http://localhost:5559/api/nodeRecommendation/saveRecord?assignmentId=55&targetDate=2025-12-20&createdByEmpCode=Dhananjay
-      await axios.post(
-        `http://${strings.localhost}/api/nodeRecommendation/saveRecord`,
-        null, // No body, using params
-        {
-          params: {
-            assignmentId: selectedRecord.assignmentId,
-            targetDate: targetDate,
-            createdByEmpCode: empCode,
-          },
-        }
-      );
+        setLoading(true);
+        try {
+            // Step 1: Hit the SAVE API as requested
+            await axios.post(
+                `http://${strings.localhost}/api/nodeRecommendation/saveRecord`,
+                null, // No body, using params
+                {
+                    params: {
+                        assignmentId: selectedRecord.assignmentId,
+                        targetDate: targetDate,
+                        createdByEmpCode: empCode
+                    }
+                }
+            );
 
       // Step 2: Hit the ACCEPT API
       await axios.post(

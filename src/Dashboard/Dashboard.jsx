@@ -10,14 +10,19 @@ import Recommendations from './pages/pages/Recommendations';
 import Risks from './pages/pages/Risks';
 import DetailModal from './components/components/DetailModal';
 import Assignments from './pages/pages/Assignments';
+import { useNavigate } from 'react-router-dom';
+import { strings } from '../string';
 
 const Dashboard = () => {
     const [activeTab, setActiveTab] = useState('overview');
     const [loading, setLoading] = useState(true);
+    const storedHazopRaw = localStorage.getItem("hazopData");
+    const storedHazop = storedHazopRaw ? JSON.parse(storedHazopRaw) : null;
+    const storedHazopId = storedHazop?.id || '';
+    const [hazopId, setHazopId] = useState(storedHazopId);
+    const [tempId, setTempId] = useState(storedHazopId);
+    const navigate = useNavigate();
 
-    // --- SEARCH LOGIC FIX ---
-    const [hazopId, setHazopId] = useState('1'); // This triggers the API
-    const [tempId, setTempId] = useState('1');   // This handles typing input
 
     const [selectedDetail, setSelectedDetail] = useState(null);
     const [detailModalOpen, setDetailModalOpen] = useState(false);
@@ -38,6 +43,16 @@ const Dashboard = () => {
             setHazopId(tempId);
         }
     };
+    useEffect(() => {
+        const raw = localStorage.getItem("hazopData");
+        if (raw) {
+            const parsed = JSON.parse(raw);
+            if (parsed?.id) {
+                setHazopId(parsed.id);
+                setTempId(parsed.id);
+            }
+        }
+    }, []);
 
     useEffect(() => {
         const safeFetch = (url, fallbackValue) => {
@@ -67,12 +82,12 @@ const Dashboard = () => {
 
             try {
                 const [fullDetails, recommendations, assignments, verificationRecords, mocReferences, activeNodes] = await Promise.all([
-                    safeFetch(`http://localhost:5559/api/hazopRegistration/${hazopId}/full-details`, fallbackFullDetails),
-                    safeFetch(`http://localhost:5559/api/nodeRecommendation/getByHazopRegistration/${hazopId}`, []),
-                    safeFetch(`http://localhost:5559/api/recommendation/assign/getAllByRegistration/${hazopId}`, fallbackAssignments),
-                    safeFetch(`http://localhost:5559/api/nodeRecommendation/getVerificationActionRecords/${hazopId}`, []),
-                    safeFetch(`http://localhost:5559/api/moc-reference/by-hazop?hazopRegistrationId=${hazopId}`, []),
-                    safeFetch(`http://localhost:5559/api/hazopNode/by-registration-status?registrationId=${hazopId}&status=true`, [])
+                    safeFetch(`http://${strings.localhost}/api/hazopRegistration/${hazopId}/full-details`, fallbackFullDetails),
+                    safeFetch(`http://${strings.localhost}/api/nodeRecommendation/getByHazopRegistration/${hazopId}`, []),
+                    safeFetch(`http://${strings.localhost}/api/recommendation/assign/getAllByRegistration/${hazopId}`, fallbackAssignments),
+                    safeFetch(`http://${strings.localhost}/api/nodeRecommendation/getVerificationActionRecords/${hazopId}`, []),
+                    safeFetch(`http://${strings.localhost}/api/moc-reference/by-hazop?hazopRegistrationId=${hazopId}`, []),
+                    safeFetch(`http://${strings.localhost}/api/hazopNode/by-registration-status?registrationId=${hazopId}&status=true`, [])
                 ]);
 
                 setData({
@@ -142,14 +157,28 @@ const Dashboard = () => {
     };
 
 
+    if (loading) {
+        return (
+            <div className="loading-overlay">
+                <div className="loading-spinner"></div>
+            </div>
+        );
+    }
 
     if (!data.fullDetails || !metrics) {
         return (
             <div className="hazop-center-screen">
                 <div className="text-center">
-                    <AlertCircle style={{ width: 48, height: 48, color: '#dc2626', margin: '0 auto' }} />
-                    <p style={{ marginTop: '1rem', color: '#4b5563' }}>Failed to load HAZOP data</p>
-                    <button onClick={() => window.location.reload()} className="retry-btn">Retry</button>
+                    <AlertCircle style={{ width: 48, height: 48, color: '#dc2626' }} />
+                    <p style={{ marginTop: '1rem', color: '#4b5563' }}>
+                        Failed to load HAZOP data
+                    </p>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="retry-btn"
+                    >
+                        Retry
+                    </button>
                 </div>
             </div>
         );
@@ -163,6 +192,7 @@ const Dashboard = () => {
                     <div className="loading-spinner"></div>
                 </div>
             )}
+            <button className="nd-back-btn" onClick={() => navigate(-1)} style={{ marginBottom: '10px' }}>  ← Back </button>
             <DetailModal
                 isOpen={detailModalOpen}
                 onClose={() => setDetailModalOpen(false)}

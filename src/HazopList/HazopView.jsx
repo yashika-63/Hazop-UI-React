@@ -801,10 +801,10 @@ const HazopView = ({ onClose, mode = "view-only" }) => {
                                 </div>
 
                                 <div className="recommendation-card">
-                                    <h3>Verification Action Records</h3>
+                                    <h3>Review Action Records</h3>
 
                                     {verificationRecords.length === 0 ? (
-                                        <p>No verification actions found.</p>
+                                        <p>No Review actions found.</p>
                                     ) : (
                                         <table className="node-details-table">
                                             <thead>
@@ -815,7 +815,7 @@ const HazopView = ({ onClose, mode = "view-only" }) => {
                                                     <th>Send for Review</th>
                                                     <th>Reviewed Action</th>
                                                     <th>Reviewed Status</th>
-                                                    <th>Verified By</th>
+                                                    <th>Reviewed By</th>
                                                     <th>Email</th>
                                                     <th>Reviewed Date</th>
                                                 </tr>

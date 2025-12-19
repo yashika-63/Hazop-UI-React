@@ -24,7 +24,6 @@ const HazopApprovalPage = () => {
     const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
 
     const empCode = localStorage.getItem("empCode");
-    const empEmail = localStorage.getItem("userEmail"); 
 
     const fetchPendingActions = async () => {
         if (!empCode) {
@@ -58,7 +57,7 @@ const HazopApprovalPage = () => {
 
     // --- 3. Handle View Details Navigation (Updated) ---
     const handleViewDetails = (item) => {
-        localStorage.setItem("hazopId", item.id); 
+        localStorage.setItem("hazopId", item.javaHazopRegistration?.id); 
                 navigate("/HazopView");
     };
 
@@ -89,7 +88,7 @@ const HazopApprovalPage = () => {
                     params: {
                         commentId: selectedItem.id, 
                         empCode: empCode,
-                        empEmail: empEmail || "" 
+                        empEmail: selectedItem.empEmail || "" 
                     }
                 }
             );
@@ -118,7 +117,7 @@ const HazopApprovalPage = () => {
                     params: {
                         commentId: selectedItem.id,
                         empCode: empCode,
-                        empEmail: empEmail || "",
+                        empEmail: selectedItem.empEmail || "",
                         otp: otpValue
                     }
                 }
@@ -148,10 +147,10 @@ const HazopApprovalPage = () => {
                     <thead>
                         <tr>
                             <th style={{ width: '50px' }}>Sr.No</th>
-                            <th>Employee Code</th>
+                            <th>HAzop Title</th>
                             <th>Assigned Date</th>
-                            <th>Signed By</th>
-                            <th>Signed On</th>
+                            <th>Department</th>
+                            <th>Created By</th>
                             <th>Status</th>
                             <th>Action</th>
                         </tr>
@@ -167,10 +166,10 @@ const HazopApprovalPage = () => {
                             pendingActions.map((item, index) => (
                                 <tr key={item.id || index} className="main-row">
                                     <td>{index + 1}</td>
-                                    <td>{item.empCode || "-"}</td>
+                                    <td>{item.javaHazopRegistration?.hazopTitle || "-"}</td>
                                     <td>{formatDate(item.assignDate)}</td>
-                                    <td>{item.signByEmpCode || "-"}</td>
-                                    <td>{formatDate(item.signedOn)}</td>
+                                    <td>{item.javaHazopRegistration?.department || "-"}</td>
+                                    <td>{item.javaHazopRegistration?.createdBy || '-'}</td>
                                     <td>
                                         <span className={item.sendForReviewStatus ? "status-completed" : "status-pending"}>
                                             {item.sendForReviewStatus ? "Completed" : "Pending"}
@@ -241,7 +240,7 @@ const HazopApprovalPage = () => {
 
                         {!otpSent ? (
                             <div className="otp-init-section" style={{ textAlign: 'center', marginTop: '20px' }}>
-                                <p>To verify this action, please send an OTP to your registered email: <strong>{empEmail}</strong></p>
+                                <p>To verify this action, please send an OTP to your registered email: <strong>{selectedItem.empEmail}</strong></p>
                                 <div className="confirm-buttons" style={{ marginTop: '15px' }}>
                                     <button
                                         className="cancel-btn"

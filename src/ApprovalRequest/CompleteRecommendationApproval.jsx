@@ -47,7 +47,7 @@ const CompleteRecommendationApproval = () => {
     const toggleRow = (id) => {
         const newExpandedId = expandedRowId === id ? null : id;
         setExpandedRowId(newExpandedId);
-        
+
         // If opening a row, fetch history
         if (newExpandedId) {
             fetchHistory(id);
@@ -160,6 +160,20 @@ const CompleteRecommendationApproval = () => {
             return showToast("Please select a valid date", "error");
         }
 
+        // --- NEW VALIDATION LOGIC ---
+        // Find the current record in our state to get its original date
+        const currentRecord = completedAssignments.find(r => r.id === recordId);
+
+        if (currentRecord && currentRecord.targetDate) {
+            const originalDate = new Date(currentRecord.targetDate).setHours(0, 0, 0, 0);
+            const newSelectedDate = new Date(tempTargetDate).setHours(0, 0, 0, 0);
+
+            if (newSelectedDate <= originalDate) {
+                return showToast("New target date must be later than the current target date", "warning");
+            }
+        }
+        // ----------------------------
+
         setActionLoading(true);
         try {
             await axios.post(
@@ -178,7 +192,8 @@ const CompleteRecommendationApproval = () => {
             fetchCompletedAssignments();
             setEditingRowId(null);
             setTempTargetDate("");
-            // Clear history for this item so it re-fetches if opened again with new date
+
+            // Clear history cache for this item
             setHistoryData(prev => {
                 const newState = { ...prev };
                 delete newState[recordId];
@@ -192,7 +207,6 @@ const CompleteRecommendationApproval = () => {
             setActionLoading(false);
         }
     };
-
     // --- COMPLETE TASK HANDLERS ---
     const handleCompleteTask = () => {
         setConfirmation({
@@ -267,6 +281,7 @@ const CompleteRecommendationApproval = () => {
                     {inProgressList.length === 0 ? (
                         <tr><td colSpan={7}>No In-Progress Recommendations</td></tr>
                     ) : (
+
                         inProgressList.map((rec, idx) => (
                             <tr key={rec.id} className={expandedRowId === rec.id ? "expanded-row" : ""} onClick={() => toggleRow(rec.id)}>
                                 <td>{idx + 1}</td>
@@ -296,8 +311,30 @@ const CompleteRecommendationApproval = () => {
 
                                 <td>{rec.createdByName || "-"}</td>
 
-                                {/* NO INLINE EDIT for In-Progress */}
-                                <td>{formatDate(rec.targetDate || "-")}</td>
+                                {/* --- ADDED INLINE EDIT LOGIC HERE --- */}
+                                <td onClick={(e) => e.stopPropagation()}>
+                                    {editingRowId === rec.id ? (
+                                        <div className="inline-action-group">
+                                            <input
+                                                type="date"
+                                                className="inline-date-input"
+                                                value={tempTargetDate}
+                                                min={getTodayString()}
+                                                onChange={(e) => setTempTargetDate(e.target.value)}
+                                            />
+                                            <div className="inline-btn-group">
+                                                <button className="inline-save-btn" onClick={() => handleSaveDate(rec.id)} title="Save">
+                                                    <FaCheck />
+                                                </button>
+                                                <button className="inline-cancel-btn" onClick={handleCancelEdit} title="Cancel">
+                                                    <FaTimes />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        formatDate(rec.targetDate || "-")
+                                    )}
+                                </td>
 
                                 <td onClick={(e) => e.stopPropagation()}>
                                     <div className="dropdown" style={{ display: "inline-block" }}>
@@ -309,13 +346,17 @@ const CompleteRecommendationApproval = () => {
                                                 <button onClick={() => openUpdatePopup(rec)}>
                                                     <FaEye /> View
                                                 </button>
-                                                {/* REMOVED Change Target Date Option */}
+                                                {/* --- RE-ADDED CHANGE TARGET DATE BUTTON --- */}
+                                                <button onClick={() => handleEditClick(rec)}>
+                                                    <FaCalendarAlt /> Change target date
+                                                </button>
                                             </div>
                                         )}
                                     </div>
                                 </td>
                             </tr>
                         ))
+
                     )}
                 </tbody>
             </table>

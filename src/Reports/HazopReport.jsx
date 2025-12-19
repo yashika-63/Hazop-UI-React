@@ -23,6 +23,7 @@ const HazopReportPage = ({ hazopId, onClose }) => {
     const [verificationData, setVerificationData] = useState([]);
     const [mocReferences, setMocReferences] = useState([]);
     const [registrationNodes, setRegistrationNodes] = useState([]);
+    const [teamComments , setTeamComments ] = useState([]);
 
     // ✅ FIX: Use state so this date doesn't change on every re-render
     const [downloadDate] = useState(new Date().toLocaleString());
@@ -39,14 +40,16 @@ const HazopReportPage = ({ hazopId, onClose }) => {
                     assignRes,
                     verificationRes,
                     mocRes,
-                    regNodesRes
+                    regNodesRes,
+                    teamCommentsRes
                 ] = await Promise.all([
                     axios.get(`http://${strings.localhost}/api/hazopRegistration/${hazopId}/full-details`),
                     axios.get(`http://${strings.localhost}/api/nodeRecommendation/getByHazopRegistration/${hazopId}`).catch(() => ({ data: [] })),
                     axios.get(`http://${strings.localhost}/api/recommendation/assign/getAllByRegistration/${hazopId}`).catch(() => ({ data: {} })),
                     axios.get(`http://${strings.localhost}/api/nodeRecommendation/getVerificationActionRecords/${hazopId}`).catch(() => ({ data: [] })),
                     axios.get(`http://${strings.localhost}/api/moc-reference/by-hazop?hazopRegistrationId=${hazopId}`).catch(() => ({ data: [] })),
-                    axios.get(`http://${strings.localhost}/api/hazopNode/by-registration-status?registrationId=${hazopId}&status=true`).catch(() => ({ data: [] }))
+                    axios.get(`http://${strings.localhost}/api/hazopNode/by-registration-status?registrationId=${hazopId}&status=true`).catch(() => ({ data: [] })),
+                    axios.get(`http://${strings.localhost}/api/team-comments/getByHazop/${hazopId}`).catch(() => ({ data: [] }))
                 ]);
 
                 const full = fullRes.data || {};
@@ -75,11 +78,11 @@ const HazopReportPage = ({ hazopId, onClose }) => {
                 });
                 setVerificationData(verificationRes.data || []);
                 setMocReferences(mocRes.data || []);
+                setTeamComments(teamCommentsRes.data || []);
 
             } catch (err) {
                 console.error("Data loading error:", err);
             }
-
             // Data is ready, now we wait for PDF render
             setIsDataLoading(false);
         };
@@ -132,7 +135,7 @@ const HazopReportPage = ({ hazopId, onClose }) => {
                             disabled={showSpinner}
                             onClick={() => generateHazopExcel({
                                 hazop, team, nodes, registrationNodes, nodeDetailsState: nodeDetails,
-                                allRecommendations, mocReferences, verificationData, assignData, hazopId
+                                allRecommendations, mocReferences, verificationData, assignData, hazopId,teamComments
                             })}
                             style={{ backgroundColor: showSpinner ? "#94d3a2" : "#28a745", color: "#fff", padding: "8px 16px", borderRadius: 4, border: "none", cursor: "pointer", marginRight: 10 }}
                         >

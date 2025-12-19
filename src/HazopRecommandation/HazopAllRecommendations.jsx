@@ -100,40 +100,53 @@ const HazopAllRecommendations = ({ hazopId }) => {
 
         const empCode = selectedGlobalEmployee.empCode;
 
-        // Filter pending recommendations
-        const pendingRecs = recommendations.filter(
-            (rec) => rec.sendForVerificationActionStatus !== true
+        // Only target items that are NOT yet sent for review
+        const draftRecs = recommendations.filter(
+            (rec) => rec.sendForVerificationActionStatus === false && rec.completionStatus !== true
         );
 
-        if (pendingRecs.length === 0) {
-            showToast("No pending recommendations to send.", "info");
+        if (draftRecs.length === 0) {
+            showToast("No new draft recommendations to send.", "info");
             return;
         }
 
         setLoading(true);
-
         try {
-            for (const rec of pendingRecs) {
+            for (const rec of draftRecs) {
                 await axios.put(
                     `http://${strings.localhost}/api/nodeRecommendation/sendForVerification/${rec.id}/${empCode}`
                 );
             }
 
-            showToast("Pending recommendations sent successfully!", "success");
-            fetchRecommendations();
-
+            showToast(`${draftRecs.length} recommendations sent for review!`, "success");
+            fetchRecommendations(); // Refresh data to update status to "Pending Review"
         } catch (err) {
             console.error(err);
-            showToast("Failed to send pending recommendations", "error");
+            showToast("Failed to send recommendations", "error");
         } finally {
             setLoading(false);
         }
     };
 
+    const getStatusBadge = (rec) => {
+        // Priority 1: Check if final completion is done
+        if (rec.completionStatus === true) {
+            return <span className="status-badge-completed">Completed</span>;
+        }
 
+        // Priority 2: Check if it has been sent for review (Action Status)
+        // but the review is not yet finished (Action)
+        if (rec.sendForVerification === false && rec.sendForVerificationAction === false) {
+            return <span className="status-badge-pending">Pending</span>;
+        }
+
+        // Priority 3: Default state before any action is taken
+        return <span className="status-badge-draft">Not Sent</span>;
+    };
 
     return (
         <div>
+            <button className="nd-back-btn" onClick={() => navigate(-1)} style={{ marginBottom: '10px' }}>  ← Back </button>
 
             {/* ============================ */}
             {/* GLOBAL EMPLOYEE SELECTOR     */}
@@ -239,11 +252,7 @@ const HazopAllRecommendations = ({ hazopId }) => {
                                     {rec.javaHazopNodeDetail?.additionalRiskRating || '-'}
                                 </td>
                                 <td>
-                                    {rec.sendForVerificationActionStatus === true ? (
-                                        <span className="sent-badge">✔ Sent</span>
-                                    ) : (
-                                        <span className="pending-badge">Pending</span>
-                                    )}
+                                    {getStatusBadge(rec)}
                                 </td>
                             </tr>
                         ))
