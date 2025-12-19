@@ -71,7 +71,7 @@ const MainComponent = () => {
   };
 
   return (
-        <div>
+    <div>
       <div className="node-header">
         <button className="nd-back-btn" onClick={() => navigate(-1)}>
           ← Back
@@ -107,9 +107,16 @@ const MainComponent = () => {
           <form onSubmit={handleSubmit}>
             <div className="input-row">
               <div className="form-group">
-                <label>
-                  {" "}
-                  <span className="required-marker">*</span>General Parameter
+                <label className='table-header'>
+                  <div>
+                    <span className="required-marker">*</span>General Parameter
+                  </div>
+                  <small
+                    className={`char-count ${form.generalParameter.length >= 1000 ? "limit-reached" : ""
+                      }`}
+                  >
+                    {form.generalParameter.length}/1000
+                  </small>
                 </label>
                 <input
                   type="text"
@@ -118,17 +125,19 @@ const MainComponent = () => {
                   onChange={handleChange}
                   maxLength={1000}
                 />
-                <small
-                  className={`char-count ${form.generalParameter.length >= 1000 ? "limit-reached" : ""
-                    }`}
-                >
-                  {form.generalParameter.length}/1000
-                </small>
+
               </div>
               <div className="form-group">
-                <label>
-                  {" "}
-                  <span className="required-marker">*</span>Specific Parameter
+                <label className='table-header'>
+                  <div>
+                    <span className="required-marker">*</span>Specific Parameter
+                  </div>
+                  <small
+                    className={`char-count ${form.specificParameter.length >= 1000 ? "limit-reached" : ""
+                      }`}
+                  >
+                    {form.specificParameter.length}/1000
+                  </small>
                 </label>
                 <input
                   type="text"
@@ -137,17 +146,19 @@ const MainComponent = () => {
                   onChange={handleChange}
                   maxLength={1000}
                 />
-                <small
-                  className={`char-count ${form.specificParameter.length >= 1000 ? "limit-reached" : ""
-                    }`}
-                >
-                  {form.specificParameter.length}/1000
-                </small>
+
               </div>
               <div className="form-group">
-                <label>
-                  {" "}
-                  <span className="required-marker">*</span>Guide Word
+                <label className='table-header'>
+                  <div>
+                    <span className="required-marker">*</span>Guide Word
+                  </div>
+                  <small
+                    className={`char-count ${form.guidWord.length >= 1000 ? "limit-reached" : ""
+                      }`}
+                  >
+                    {form.guidWord.length}/1000
+                  </small>
                 </label>
                 <input
                   type="text"
@@ -156,20 +167,22 @@ const MainComponent = () => {
                   onChange={handleChange}
                   maxLength={1000}
                 />
-                <small
-                  className={`char-count ${form.guidWord.length >= 1000 ? "limit-reached" : ""
-                    }`}
-                >
-                  {form.guidWord.length}/1000
-                </small>
+
               </div>
             </div>
 
             <div className="input-row-node">
               <div className="form-group">
-                <label>
-                  {" "}
-                  <span className="required-marker">*</span>Deviation
+                <label className='table-header'>
+                  <div>
+                    <span className="required-marker">*</span>Deviation
+                  </div>
+                  <small
+                    className={`char-count ${form.deviation.length >= 5000 ? "limit-reached" : ""
+                      }`}
+                  >
+                    {form.deviation.length}/5000
+                  </small>
                 </label>
                 <textarea
                   name="deviation"
@@ -179,17 +192,19 @@ const MainComponent = () => {
                   className="textareaFont"
                   maxLength={5000}
                 />
-                <small
-                  className={`char-count ${form.deviation.length >= 5000 ? "limit-reached" : ""
-                    }`}
-                >
-                  {form.deviation.length}/5000
-                </small>
+
               </div>
               <div className="form-group">
-                <label>
-                  {" "}
-                  <span className="required-marker">*</span>Causes
+                <label className='table-header'>
+                  <div>
+                    <span className="required-marker">*</span>Causes
+                  </div>
+                  <small
+                    className={`char-count ${form.causes.length >= 5000 ? "limit-reached" : ""
+                      }`}
+                  >
+                    {form.causes.length}/5000
+                  </small>
                 </label>
                 <textarea
                   name="causes"
@@ -199,17 +214,19 @@ const MainComponent = () => {
                   className="textareaFont"
                   maxLength={5000}
                 />
-                <small
-                  className={`char-count ${form.causes.length >= 5000 ? "limit-reached" : ""
-                    }`}
-                >
-                  {form.causes.length}/5000
-                </small>
+
               </div>
               <div className="form-group">
-                <label>
-                  {" "}
-                  <span className="required-marker">*</span>Consequences
+                <label className='table-header'>
+                  <div>
+                    <span className="required-marker">*</span>Consequences
+                  </div>
+                  <small
+                    className={`char-count ${form.consequences.length >= 5000 ? "limit-reached" : ""
+                      }`}
+                  >
+                    {form.consequences.length}/5000
+                  </small>
                 </label>
                 <textarea
                   name="consequences"
@@ -219,19 +236,21 @@ const MainComponent = () => {
                   className="textareaFont"
                   maxLength={5000}
                 />
-                <small
-                  className={`char-count ${form.consequences.length >= 5000 ? "limit-reached" : ""
-                    }`}
-                >
-                  {form.consequences.length}/5000
-                </small>
+
               </div>
 
               <div>
                 <div className="form-group">
-                  <label>
-                    {" "}
-                    <span className="required-marker">*</span>Existing Control
+                  <label className='table-header'>
+                    <div>
+                      <span className="required-marker">*</span>Existing Control
+                    </div>
+                    <small
+                      className={`char-count ${form.existineControl.length >= 5000 ? "limit-reached" : ""
+                        }`}
+                    >
+                      {form.existineControl.length}/5000
+                    </small>
                   </label>
                   <textarea
                     name="existineControl"
@@ -241,12 +260,7 @@ const MainComponent = () => {
                     className="textareaFont"
                     maxLength={5000}
                   />
-                  <small
-                    className={`char-count ${form.existineControl.length >= 5000 ? "limit-reached" : ""
-                      }`}
-                  >
-                    {form.existineControl.length}/5000
-                  </small>
+
                 </div>
 
                 <div className="metric-row">
@@ -447,8 +461,8 @@ const MainComponent = () => {
                   </div>
                   <small
                     className={`char-count ${form.additionalControl.length >= 5000
-                        ? "limit-reached"
-                        : ""
+                      ? "limit-reached"
+                      : ""
                       }`}
                     style={{ marginTop: "9px" }}
                   >

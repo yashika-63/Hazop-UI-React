@@ -80,7 +80,7 @@ h6 {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 30px;
-  margin-bottom: 12px;
+  /* margin-bottom: 12px; */
 }
 
 .input-row-node {
@@ -342,7 +342,7 @@ button:focus-visible {
 .center-controls {
   display: flex;
   justify-content: center;
-  margin: 2%;
+  /* margin: 2%; */
   gap: 15px;
   padding: 10px;
 }

@@ -9,13 +9,13 @@ const columnWidths = {
     generalParam: "6%",
     specificParam: "6%",
     guidWord: "6%",
-    deviation: "16%",
-    causes: "16%",
-    consequences: "16%",
+    deviation: "17%",
+    causes: "17%",
+    consequences: "17%",
     existingControl: "14%",
-    P_existing: "4%",
-    S_existing: "4%",
-    R_existing: "4%",
+    P_existing: "3%",
+    S_existing: "3%",
+    R_existing: "3%",
     additionalControl: "14%",
     P_additional: "4%",
     S_additional: "4%",
@@ -125,14 +125,17 @@ const HazopPdfDocument = ({
                     <View style={styles.table}>
                         <View style={[styles.tableRow, styles.tableRowHeader]}>
                             <View style={[styles.tableCol, { width: '30%' }]}><Text style={styles.tableCellHeader}>Name</Text></View>
-                            <View style={[styles.tableCol, { width: '30%' }]}><Text style={styles.tableCellHeader}>Department</Text></View>
-                            <View style={[styles.tableCol, { width: '40%' }]}><Text style={styles.tableCellHeader}>Email</Text></View>
+                            <View style={[styles.tableCol, { width: '20%' }]}><Text style={styles.tableCellHeader}>Department</Text></View>
+                            <View style={[styles.tableCol, { width: '30%' }]}><Text style={styles.tableCellHeader}>Email</Text></View>
+                            <View style={[styles.tableCol, { width: '20%' }]}><Text style={styles.tableCellHeader}>Role</Text></View>
                         </View>
                         {team?.map((m, i) => (
                             <View key={i} style={[styles.tableRow, i % 2 !== 0 ? styles.tableRowEven : {}]}>
                                 <View style={[styles.tableCol, { width: '30%' }]}><Text style={styles.tableCell}>{m?.firstName || ''} {m?.middleName || ''} {m?.lastName || ''}</Text></View>
-                                <View style={[styles.tableCol, { width: '30%' }]}><Text style={styles.tableCell}>{m?.dimension1 || '-'}</Text></View>
-                                <View style={[styles.tableCol, { width: '40%' }]}><Text style={styles.tableCell}>{m?.emailId || '-'}</Text></View>
+                                <View style={[styles.tableCol, { width: '20%' }]}><Text style={styles.tableCell}>{m?.dimension1 || '-'}</Text></View>
+                                <View style={[styles.tableCol, { width: '30%' }]}><Text style={styles.tableCell}>{m?.emailId || '-'}</Text></View>
+                                <View style={[styles.tableCol, { width: '20%' }]}><Text style={styles.tableCell}>{m?.role || '-'}</Text></View>
+
                             </View>
                         ))}
                     </View>
@@ -351,35 +354,34 @@ const HazopPdfDocument = ({
             {/* ==================================================================================
                                 PAGE 5: ALL RECOMMENDATIONS
    ================================================================================== */}
-            {/* Updated Page 5: All Recommendations with Internal Links and wider columns */}
             <Page size="A4" style={styles.page} orientation="landscape">
                 <Header hazop={hazop} />
                 <Text style={styles.sectionTitle}>All Recommendations for HAZOP</Text>
 
                 <View style={styles.table}>
-                    {/* Table Header */}
                     <View style={[styles.tableRow, styles.tableRowHeader]}>
                         <View style={[styles.tableCol, { width: '4%' }]}><Text style={styles.tableCellHeader}>Sr.No</Text></View>
-                        <View style={[styles.tableCol, { width: '6%' }]}><Text style={styles.tableCellHeader}>Node Ref</Text></View>
-                        {/* Wider Columns */}
-                        <View style={[styles.tableCol, { width: '22%' }]}><Text style={styles.tableCellHeader}>Deviation (Click to jump)</Text></View>
-                        <View style={[styles.tableCol, { width: '22%' }]}><Text style={styles.tableCellHeader}>Recommendation</Text></View>
-
-                        <View style={[styles.tableCol, { width: '10%' }]}><Text style={styles.tableCellHeader}>Remark</Text></View>
-                        <View style={[styles.tableCol, { width: '8%' }]}><Text style={styles.tableCellHeader}>Department</Text></View>
-                        <View style={[styles.tableCol, { width: '8%' }]}><Text style={styles.tableCellHeader}>Status</Text></View>
-                        <View style={[styles.tableCol, { width: '8%' }]}><Text style={styles.tableCellHeader}>Comp. Date</Text></View>
-                        <View style={[styles.tableCol, { width: '12%' }]}><Text style={styles.tableCellHeader}>Reviewed By</Text></View>
+                        <View style={[styles.tableCol, { width: '5%' }]}><Text style={styles.tableCellHeader}>Node Reference</Text></View>
+                        <View style={[styles.tableCol, { width: '25%' }]}><Text style={styles.tableCellHeader}>Deviation</Text></View>
+                        <View style={[styles.tableCol, { width: '25%' }]}><Text style={styles.tableCellHeader}>Recommendation</Text></View>
+                        <View style={[styles.tableCol, { width: '5%' }]}><Text style={styles.tableCellHeader}>Initial Risk</Text></View>
+                        <View style={[styles.tableCol, { width: '5%' }]}><Text style={styles.tableCellHeader}>Final Risk</Text></View>
+                        <View style={[styles.tableCol, { width: '9%' }]}><Text style={styles.tableCellHeader}>Remark</Text></View>
+                        <View style={[styles.tableCol, { width: '7%' }]}><Text style={styles.tableCellHeader}>Status</Text></View>
+                        <View style={[styles.tableCol, { width: '8%' }]}><Text style={styles.tableCellHeader}>Date</Text></View>
+                        <View style={[styles.tableCol, { width: '10%' }]}><Text style={styles.tableCellHeader}>Review By</Text></View>
                     </View>
 
+                    {/* --- Table Body --- */}
                     {allRecommendations?.length > 0 ? allRecommendations.map((rec, idx) => {
-                        // Generate a unique ID for the link target (must match the ID on your Node Detail page)
                         const targetId = `node-${rec.javaHazopNode?.id}`;
+                        const initialRisk = rec.javaHazopNodeDetail?.riskRating || '-';
+                        const finalRisk = rec.javaHazopNodeDetail?.additionalRiskRating || '-';
 
                         return (
                             <View key={idx} style={[styles.tableRow, idx % 2 !== 0 ? styles.tableRowEven : {}]}>
                                 <View style={[styles.tableCol, { width: '4%' }]}><Text style={styles.tableCell}>{idx + 1}</Text></View>
-                                <View style={[styles.tableCol, { width: '6%' }]}>
+                                <View style={[styles.tableCol, { width: '5%' }]}>
                                     <Text style={styles.tableCell}>
                                         {rec.javaHazopNode?.nodeNumber && rec.javaHazopNodeDetail?.nodeDetailNumber
                                             ? `${rec.javaHazopNode.nodeNumber}.${rec.javaHazopNodeDetail.nodeDetailNumber}`
@@ -387,25 +389,31 @@ const HazopPdfDocument = ({
                                     </Text>
                                 </View>
 
-                                {/* DEVIATION COLUMN WITH LINK */}
-                                <View style={[styles.tableCol, { width: '22%' }]}>
+                                <View style={[styles.tableCol, { width: '25%' }]}>
                                     <Link src={`#${targetId}`} style={{ textDecoration: 'none' }}>
                                         <Text style={[styles.tableCell, { color: '#0056b3', textDecoration: 'underline' }]}>
                                             {rec.javaHazopNodeDetail?.deviation || '-'}
                                         </Text>
                                     </Link>
                                 </View>
-
-                                {/* RECOMMENDATION COLUMN */}
-                                <View style={[styles.tableCol, { width: '22%' }]}>
+                                <View style={[styles.tableCol, { width: '25%' }]}>
                                     <Text style={styles.tableCell}>{rec.recommendation || '-'}</Text>
                                 </View>
+                                <View style={[styles.tableCol, { width: '5%', backgroundColor: getRiskColor(initialRisk) }]}>
+                                    <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>{initialRisk}</Text>
+                                </View>
+                                <View style={[styles.tableCol, { width: '5%', backgroundColor: getRiskColor(finalRisk) }]}>
+                                    <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>{finalRisk}</Text>
+                                </View>
 
-                                <View style={[styles.tableCol, { width: '10%' }]}><Text style={styles.tableCell}>{rec.remarkbyManagement || '-'}</Text></View>
-                                <View style={[styles.tableCol, { width: '8%' }]}><Text style={styles.tableCell}>{rec.department || '-'}</Text></View>
-                                <View style={[styles.tableCol, { width: '8%' }]}><Text style={[styles.tableCell, rec.completionStatus ? styles.completed : styles.pending]}>{rec.completionStatus ? 'Completed' : 'Pending'}</Text></View>
+                                <View style={[styles.tableCol, { width: '9%' }]}><Text style={styles.tableCell}>{rec.remarkbyManagement || '-'}</Text></View>
+                                <View style={[styles.tableCol, { width: '7%' }]}>
+                                    <Text style={[styles.tableCell, rec.completionStatus ? styles.completed : styles.pending]}>
+                                        {rec.completionStatus ? 'Completed' : 'Pending'}
+                                    </Text>
+                                </View>
                                 <View style={[styles.tableCol, { width: '8%' }]}><Text style={styles.tableCell}>{rec.completionDate ? formatDate(rec.completionDate) : '-'}</Text></View>
-                                <View style={[styles.tableCol, { width: '12%' }]}><Text style={styles.tableCell}>{rec.verificationResponsibleEmployeeName || '-'}</Text></View>
+                                <View style={[styles.tableCol, { width: '10%' }]}><Text style={styles.tableCell}>{rec.verificationResponsibleEmployeeName || '-'}</Text></View>
                             </View>
                         );
                     }) : null}
@@ -423,7 +431,7 @@ const HazopPdfDocument = ({
                 <View style={styles.table}>
                     <View style={[styles.tableRow, styles.tableRowHeader]}>
                         <View style={[styles.tableCol, { width: '4%' }]}><Text style={styles.tableCellHeader}>Sr.No</Text></View>
-                        <View style={[styles.tableCol, { width: '6%' }]}><Text style={styles.tableCellHeader}>Node Ref</Text></View>
+                        <View style={[styles.tableCol, { width: '6%' }]}><Text style={styles.tableCellHeader}>Node Reference</Text></View>
                         {/* Wider Columns */}
                         <View style={[styles.tableCol, { width: '22%' }]}><Text style={styles.tableCellHeader}>Deviation (Click to jump)</Text></View>
                         <View style={[styles.tableCol, { width: '22%' }]}><Text style={styles.tableCellHeader}>Recommendation</Text></View>
@@ -489,7 +497,7 @@ const HazopPdfDocument = ({
                     <View style={styles.table}>
                         <View style={[styles.tableRow, styles.tableRowHeader]}>
                             <View style={[styles.tableCol, { width: '4%' }]}><Text style={styles.tableCellHeader}>Sr.No</Text></View>
-                            <View style={[styles.tableCol, { width: '6%' }]}><Text style={styles.tableCellHeader}>Node Ref</Text></View>
+                            <View style={[styles.tableCol, { width: '6%' }]}><Text style={styles.tableCellHeader}>Node Reference</Text></View>
                             <View style={[styles.tableCol, { width: '22%' }]}><Text style={styles.tableCellHeader}>Deviation (Click to jump)</Text></View>
                             <View style={[styles.tableCol, { width: '22%' }]}><Text style={styles.tableCellHeader}>Recommendation</Text></View>
 

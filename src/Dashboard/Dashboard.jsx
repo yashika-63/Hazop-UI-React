@@ -17,12 +17,14 @@ const Dashboard = () => {
     const [activeTab, setActiveTab] = useState('overview');
     const [loading, setLoading] = useState(true);
     const storedHazopRaw = localStorage.getItem("hazopData");
+    const storeSingleHazopId = localStorage.getItem("hazopId");
     const storedHazop = storedHazopRaw ? JSON.parse(storedHazopRaw) : null;
     const storedHazopId = storedHazop?.id || '';
-    const [hazopId, setHazopId] = useState(storedHazopId);
-    const [tempId, setTempId] = useState(storedHazopId);
+    const [hazopId, setHazopId] = useState(storeSingleHazopId);
+    const [tempId, setTempId] = useState(storeSingleHazopId);
     const navigate = useNavigate();
 
+    const effectiveHazopId = storeSingleHazopId || hazopData?.id;
 
     const [selectedDetail, setSelectedDetail] = useState(null);
     const [detailModalOpen, setDetailModalOpen] = useState(false);

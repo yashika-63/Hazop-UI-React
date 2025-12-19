@@ -49,13 +49,13 @@ const UpdateRecommendations = ({
   }, [nodeDetailId]);
 
   const handleAdd = () => {
-      const newList = [
-    ...recommendations,
-    { recommendation: "", remarkbyManagement: "" },
-  ];
+    const newList = [
+      ...recommendations,
+      { recommendation: "", remarkbyManagement: "" },
+    ];
 
-  setRecommendations(newList);
-  setEditIndex(newList.length - 1);
+    setRecommendations(newList);
+    setEditIndex(newList.length - 1);
   };
 
   const ConfirmationPopup = ({ message, onConfirm, onCancel }) => {
@@ -158,34 +158,60 @@ const UpdateRecommendations = ({
     setDeleteIndex(null);
   };
 
-const handleIndividualUpdate = async (index) => {
-  try {
-    const rec = recommendations[index];
+  const handleIndividualUpdate = async (index) => {
+    try {
+      const rec = recommendations[index];
 
-    if (!rec.id) {
+      if (!rec.id) {
+        const res = await fetch(
+          `http://${strings.localhost}/api/nodeRecommendation/save/${nodeID}/${nodeDetailId}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify([
+              {
+                recommendation: rec.recommendation,
+                remarkbyManagement: rec.remarkbyManagement,
+              },
+            ]),
+          }
+        );
+
+        if (res.ok) {
+          const createdList = await res.json();
+          const createdRec = createdList[0];
+
+          const updated = [...recommendations];
+          updated[index] = createdRec;
+          setRecommendations(updated);
+
+          showToast("Recommendation added successfully!", "success");
+
+          setPendingUpdates((prev) => {
+            const p = { ...prev };
+            delete p[index];
+            return p;
+          });
+
+          setEditIndex(null);
+        } else {
+          showToast("Failed to add recommendation!", "error");
+        }
+
+        return;
+      }
+
       const res = await fetch(
-        `http://${strings.localhost}/api/nodeRecommendation/save/${nodeID}/${nodeDetailId}`,
+        `http://${strings.localhost}/api/nodeRecommendation/update/${rec.id}`,
         {
-          method: "POST",
+          method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify([
-            {
-              recommendation: rec.recommendation,
-              remarkbyManagement: rec.remarkbyManagement,
-            },
-          ]),
+          body: JSON.stringify(rec),
         }
       );
 
       if (res.ok) {
-        const createdList = await res.json();
-        const createdRec = createdList[0]; 
-
-        const updated = [...recommendations];
-        updated[index] = createdRec; 
-        setRecommendations(updated);
-
-        showToast("Recommendation added successfully!", "success");
+        showToast("Updated successfully!", "success");
 
         setPendingUpdates((prev) => {
           const p = { ...prev };
@@ -195,39 +221,13 @@ const handleIndividualUpdate = async (index) => {
 
         setEditIndex(null);
       } else {
-        showToast("Failed to add recommendation!", "error");
+        showToast("Failed to update!", "error");
       }
-
-      return;
+    } catch (err) {
+      console.error(err);
+      showToast("Error updating record!", "error");
     }
-
-    const res = await fetch(
-      `http://${strings.localhost}/api/nodeRecommendation/update/${rec.id}`,
-      {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(rec),
-      }
-    );
-
-    if (res.ok) {
-      showToast("Updated successfully!", "success");
-
-      setPendingUpdates((prev) => {
-        const p = { ...prev };
-        delete p[index];
-        return p;
-      });
-
-      setEditIndex(null);
-    } else {
-      showToast("Failed to update!", "error");
-    }
-  } catch (err) {
-    console.error(err);
-    showToast("Error updating record!", "error");
-  }
-};
+  };
 
   return (
     <div className="modal-overlay">
@@ -254,28 +254,28 @@ const handleIndividualUpdate = async (index) => {
           {recommendations.map((rec, index) => (
             <div key={index} className="form-group">
               <label>
-                {" "}
-                <span className="required-marker">* </span>Recommendation
+                <div>
+                  <span className="required-marker">* </span>Recommendation
+                </div>
+                <small
+                  className={`char-count ${rec.recommendation.length >= 3000 ? "limit-reached" : ""
+                    }`}
+                >
+                  {rec.recommendation.length}/3000
+                </small>
               </label>
               <textarea
                 rows={5}
                 value={rec.recommendation}
                 readOnly={editIndex !== index}
-                className={`textareaFont ${
-                  editIndex !== index ? "readonly" : ""
-                }`}
+                className={`textareaFont ${editIndex !== index ? "readonly" : ""
+                  }`}
                 onChange={(e) =>
                   handleChange(index, "recommendation", e.target.value)
                 }
                 maxLength={3000}
               />
-              <small
-                className={`char-count ${
-                  rec.recommendation.length >= 3000 ? "limit-reached" : ""
-                }`}
-              >
-                {rec.recommendation.length}/3000
-              </small>
+
               <label>
                 {" "}
                 <span className="required-marker">* </span>Remarks by Management
@@ -287,14 +287,12 @@ const handleIndividualUpdate = async (index) => {
                   handleChange(index, "remarkbyManagement", e.target.value)
                 }
                 readOnly={editIndex !== index}
-                className={`textareaFont ${
-                  editIndex !== index ? "readonly" : ""
-                }`}
+                className={`textareaFont ${editIndex !== index ? "readonly" : ""
+                  }`}
               />
               <small
-                className={`char-count ${
-                  rec.remarkbyManagement.length >= 3000 ? "limit-reached" : ""
-                }`}
+                className={`char-count ${rec.remarkbyManagement.length >= 3000 ? "limit-reached" : ""
+                  }`}
               >
                 {rec.remarkbyManagement.length}/3000
               </small>

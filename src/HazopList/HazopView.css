@@ -20,6 +20,7 @@
   /* max-width: 1090px; */
   margin: 0 auto;
 }
+
 /* CARD HOVER */
 .node-card:hover,
 .recommendation-card:hover {
@@ -261,4 +262,50 @@
     font-size: 0.85rem;
     padding: 0.4rem;
   }
+}
+
+
+
+/* Base readonly input */
+input.readonly {
+  border: 2px solid #ccc;
+  border-left-width: 5px;
+  background-color: #f9f9f9;
+  text-align: center;
+}
+
+/* Trivial */
+input.readonly.risk-trivial-text {
+  border-color: #207229;
+  border-left-color: #207229;
+}
+
+/* Tolerable */
+input.readonly.risk-tolerable-text {
+  border-color: #56a744;
+  border-left-color: #56a744;
+}
+
+/* Moderate */
+input.readonly.risk-moderate-text {
+  border-color: #fef65e;
+  border-left-color: #fef65e;
+}
+
+/* Substantial */
+input.readonly.risk-substantial-text {
+  border-color: #fa9201;
+  border-left-color: #fa9201;
+}
+
+/* Intolerable */
+input.readonly.risk-intolerable-text {
+  border-color: #f91111;
+  border-left-color: #f91111;
+}
+
+/* Default */
+input.readonly.risk-default {
+  border-color: #ccc;
+  border-left-color: #ccc;
 }

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "../styles/global.css";
 import { strings } from "../string";
-import { getRiskColor, truncateWords } from "../CommonUI/CommonUI";
+import { getRiskColor, showToast, truncateWords } from "../CommonUI/CommonUI";
 import { useNavigate } from "react-router-dom"; // 1. Import useNavigate
 
 const HazopRecommendationApproval = () => {
@@ -59,7 +59,7 @@ const HazopRecommendationApproval = () => {
             });
         } else {
             console.error("Missing ID. Node:", targetNodeId, "Detail:", targetDetailId);
-            // Optional: showToast("Navigation details missing", "error");
+             showToast("Navigation details missing", "error");
         }
     };
 
@@ -70,8 +70,10 @@ const HazopRecommendationApproval = () => {
                 `http://${strings.localhost}/api/nodeRecommendation/verify/${id}/${empCode}/true?remark=Yes`
             );
             fetchRecommendations();
+            showToast("Approved successfully.", 'success');
         } catch (err) {
             console.error("Error approving recommendation:", err);
+            showToast("Failed to approve.", 'error');
         } finally {
             setLoading(false);
         }
@@ -92,9 +94,11 @@ const HazopRecommendationApproval = () => {
                 { comment: rejectComment }
             );
             fetchRecommendations();
+            showToast("Rejected successfully.", 'success');
             setShowRejectModal(false);
         } catch (err) {
             console.error("Error rejecting recommendation:", err);
+            showToast("Failed to reject.", 'error');
         } finally {
             setLoading(false);
         }
@@ -115,9 +119,8 @@ const HazopRecommendationApproval = () => {
             <table className="hazoplist-table">
                 <thead>
                     <tr>
-                        <th>Sr.No</th>
                         <th>Node Reference No</th>
-                        <th>Deviation</th> {/* Clickable */}
+                        <th>Deviation</th> 
                         <th>Recommendation</th>
                         <th>Department</th>
                         <th>Initial Risk rating</th>
@@ -137,7 +140,6 @@ const HazopRecommendationApproval = () => {
                                 className={expandedRowId === rec.id ? "expanded-row" : ""}
                                 onClick={() => toggleRow(rec.id)}
                             >
-                                <td>{index + 1}</td>
                                 <td>
                                     {rec.javaHazopNode?.nodeNumber && rec.javaHazopNodeDetail?.nodeDetailNumber
                                         ? `${rec.javaHazopNode.nodeNumber}.${rec.javaHazopNodeDetail.nodeDetailNumber}`

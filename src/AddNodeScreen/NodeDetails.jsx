@@ -7,10 +7,10 @@ import TextareaAutosize from "react-textarea-autosize";
 import RiskLevelPopup from "./RiskLevelPopup";
 import { strings } from "../string";
 import CreateNodeDetails from "./CreateNodeDetails";
-import MainComponent from "../CreateNodeDiscussion/mainComponent";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import axios from "axios";
 import SequenceUpdatePopup from "./SequenceUpdatePopup";
+import MainComponent from "../CreateNodeDiscussion/MainComponent";
 
 const NodeDetails = () => {
   const location = useLocation();

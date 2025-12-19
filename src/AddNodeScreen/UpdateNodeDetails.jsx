@@ -38,7 +38,7 @@ const CreateNodeDetails = () => {
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [recToDelete, setRecToDelete] = useState(null);
   const [recIndexToDelete, setRecIndexToDelete] = useState(null);
-const [currentDetailNo, setCurrentDetailNo] = useState(null);
+  const [currentDetailNo, setCurrentDetailNo] = useState(null);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -49,36 +49,36 @@ const [currentDetailNo, setCurrentDetailNo] = useState(null);
   const [currentNodeData, setCurrentNodeData] = useState(null);
 
   useEffect(() => {
-  if (!passedDetail) return;
+    if (!passedDetail) return;
 
-  const loadPassedDetail = async () => {
-    try {
-      setLoading(true);
+    const loadPassedDetail = async () => {
+      try {
+        setLoading(true);
 
-      const recRes = await fetch(
-        `http://${strings.localhost}/api/nodeRecommendation/getByDetailId/${passedDetail.id}`
-      );
-      const recommendations = recRes.ok ? await recRes.json() : [];
+        const recRes = await fetch(
+          `http://${strings.localhost}/api/nodeRecommendation/getByDetailId/${passedDetail.id}`
+        );
+        const recommendations = recRes.ok ? await recRes.json() : [];
 
-      setForm({
-        ...passedDetail,
-        additionalControl:
-          recommendations.map(r => r.recommendation).join("\n") || "• ",
-      });
+        setForm({
+          ...passedDetail,
+          additionalControl:
+            recommendations.map(r => r.recommendation).join("\n") || "• ",
+        });
 
-      setTempRecommendations(recommendations);
-      setCurrentDetailId(passedDetail.id);
-      setCurrentDetailNo(passedDetail.nodeDetailNumber);
-      setIsSaved(true);
-    } catch (e) {
-      console.error("Failed to load passed detail", e);
-    } finally {
-      setLoading(false);
-    }
-  };
+        setTempRecommendations(recommendations);
+        setCurrentDetailId(passedDetail.id);
+        setCurrentDetailNo(passedDetail.nodeDetailNumber);
+        setIsSaved(true);
+      } catch (e) {
+        console.error("Failed to load passed detail", e);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  loadPassedDetail();
-}, [passedDetail]);
+    loadPassedDetail();
+  }, [passedDetail]);
 
   useEffect(() => {
     const fetchNode = async () => {
@@ -145,7 +145,7 @@ const [currentDetailNo, setCurrentDetailNo] = useState(null);
 
   useEffect(() => {
     if (passedDetail) return;
-    
+
     fetch(
       `http://${strings.localhost}/api/hazopNodeDetail/node/${currentNodeId}`
     )
@@ -167,7 +167,7 @@ const [currentDetailNo, setCurrentDetailNo] = useState(null);
           setDetails(data);
           setCurrentIndex(0);
           const firstDetail = data[0];
-  setCurrentDetailNo(firstDetail.nodeDetailNumber);
+          setCurrentDetailNo(firstDetail.nodeDetailNumber);
           setForm({
             ...firstDetail,
             additionalControl:
@@ -313,9 +313,9 @@ const [currentDetailNo, setCurrentDetailNo] = useState(null);
     try {
       setLoading(true);
       const previousDetailNo =
-  currentDetailId === null && currentDetailNo
-    ? currentDetailNo
-    : currentDetailNo || 0;
+        currentDetailId === null && currentDetailNo
+          ? currentDetailNo
+          : currentDetailNo || 0;
       const nodeDetailResponse = await fetch(
         `http://${strings.localhost}/api/hazopNodeDetail/saveDetails/${currentNodeId}?previousDetailNo=${previousDetailNo}`,
         {
@@ -437,35 +437,35 @@ const [currentDetailNo, setCurrentDetailNo] = useState(null);
     fetchFirstNodeDetail();
   }, [nodeID, passedDetail]);
 
-const fetchDetailByDirection = async (direction) => {
-  if (!nodeID) return null;
+  const fetchDetailByDirection = async (direction) => {
+    if (!nodeID) return null;
 
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    // IMPORTANT: use nodeDetailNumber, not ID
-    const currentDetailNumberParam =
-      currentDetailNo ?? 0; // null-safe
+      // IMPORTANT: use nodeDetailNumber, not ID
+      const currentDetailNumberParam =
+        currentDetailNo ?? 0; // null-safe
 
-    const res = await fetch(
-      `http://${strings.localhost}/api/hazopNodeDetail/getByDirectionNew` +
+      const res = await fetch(
+        `http://${strings.localhost}/api/hazopNodeDetail/getByDirectionNew` +
         `?currentDetailNumber=${currentDetailNumberParam}` +
         `&nodeId=${currentNodeId}` +
         `&direction=${direction}`
-    );
+      );
 
-    if (!res.ok) return null;
+      if (!res.ok) return null;
 
-    const data = await res.json();
-    return data || null;
-  } catch (error) {
-    console.error("Error fetching node detail by direction:", error);
-    showToast("Failed to load the deviation.", "error");
-    return null;
-  } finally {
-    setLoading(false);
-  }
-};
+      const data = await res.json();
+      return data || null;
+    } catch (error) {
+      console.error("Error fetching node detail by direction:", error);
+      showToast("Failed to load the deviation.", "error");
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSaveAndNext = async () => {
     if (!validate()) return;
@@ -494,10 +494,10 @@ const fetchDetailByDirection = async (direction) => {
         node: { id: nodeID },
       };
 
-const previousDetailNo =
-  currentDetailId === null && currentDetailNo
-    ? currentDetailNo
-    : currentDetailNo || 0;
+      const previousDetailNo =
+        currentDetailId === null && currentDetailNo
+          ? currentDetailNo
+          : currentDetailNo || 0;
       const detailRes = await fetch(
         `http://${strings.localhost}/api/hazopNodeDetail/saveDetails/${currentNodeId}?previousDetailNo=${previousDetailNo}`,
         {
@@ -663,24 +663,24 @@ const previousDetailNo =
 
     setTempRecommendations(recs);
     setCurrentDetailId(nextDetail.id);
-  setCurrentDetailNo(nextDetail.nodeDetailNumber);
+    setCurrentDetailNo(nextDetail.nodeDetailNumber);
   };
 
   const handleAddDiscussionNext = () => {
-  if (!isSaved) {
-    showToast("Please save the current deviation first.", "warn");
-    return;
-  }
+    if (!isSaved) {
+      showToast("Please save the current deviation first.", "warn");
+      return;
+    }
 
-  // Open a fresh blank form
-  setForm(initialState);
-  setTempRecommendations([]);
-  setCurrentDetailId(null);
-  setCurrentIndex(details.length); // optional, keeps index in sync
-  setIsSaved(true);
+    // Open a fresh blank form
+    setForm(initialState);
+    setTempRecommendations([]);
+    setCurrentDetailId(null);
+    setCurrentIndex(details.length); // optional, keeps index in sync
+    setIsSaved(true);
 
-  showToast("Blank form opened. Add new deviation.", "info");
-};
+    showToast("Blank form opened. Add new deviation.", "info");
+  };
 
   const loadRecommendations = async (detailId) => {
     try {
@@ -1007,14 +1007,21 @@ const previousDetailNo =
 
       <NodeInfo currentNodeId={currentNodeId} />
 
-      <div>
+      <div className="popup-body">
         <div>
           <form onSubmit={handleSubmit}>
             <div className="input-row">
               <div className="form-group">
-                <label>
-                  {" "}
-                  <span className="required-marker">*</span>General Parameter
+                <label className="table-header">
+                  <div>
+                    <span className="required-marker">*</span>General Parameter
+                  </div>
+                  <small
+                    className={`char-count ${form.generalParameter.length >= 1000 ? "limit-reached" : ""
+                      }`}
+                  >
+                    {form.generalParameter.length}/1000
+                  </small>
                 </label>
                 <input
                   type="text"
@@ -1023,17 +1030,19 @@ const previousDetailNo =
                   onChange={handleChange}
                   maxLength={1000}
                 />
-                <small
-                  className={`char-count ${form.generalParameter.length >= 1000 ? "limit-reached" : ""
-                    }`}
-                >
-                  {form.generalParameter.length}/1000
-                </small>
+
               </div>
               <div className="form-group">
-                <label>
-                  {" "}
-                  <span className="required-marker">*</span>Specific Parameter
+                <label className="table-header">
+                  <div>
+                    <span className="required-marker">*</span>Specific Parameter
+                  </div>
+                  <small
+                    className={`char-count ${form.specificParameter.length >= 1000 ? "limit-reached" : ""
+                      }`}
+                  >
+                    {form.specificParameter.length}/1000
+                  </small>
                 </label>
                 <input
                   type="text"
@@ -1042,17 +1051,19 @@ const previousDetailNo =
                   onChange={handleChange}
                   maxLength={1000}
                 />
-                <small
-                  className={`char-count ${form.specificParameter.length >= 1000 ? "limit-reached" : ""
-                    }`}
-                >
-                  {form.specificParameter.length}/1000
-                </small>
+
               </div>
               <div className="form-group">
-                <label>
-                  {" "}
-                  <span className="required-marker">*</span>Guide Word
+                <label className="table-header">
+                  <div>
+                    <span className="required-marker">*</span>Guide Word
+                  </div>
+                  <small
+                    className={`char-count ${form.guidWord.length >= 1000 ? "limit-reached" : ""
+                      }`}
+                  >
+                    {form.guidWord.length}/1000
+                  </small>
                 </label>
                 <input
                   type="text"
@@ -1061,20 +1072,22 @@ const previousDetailNo =
                   onChange={handleChange}
                   maxLength={1000}
                 />
-                <small
-                  className={`char-count ${form.guidWord.length >= 1000 ? "limit-reached" : ""
-                    }`}
-                >
-                  {form.guidWord.length}/1000
-                </small>
+
               </div>
             </div>
 
             <div className="input-row-node">
               <div className="form-group">
-                <label>
-                  {" "}
-                  <span className="required-marker">*</span>Deviation
+                <label className="table-header">
+                  <div>
+                    <span className="required-marker">*</span>Deviation
+                  </div>
+                  <small
+                    className={`char-count ${form.deviation.length >= 5000 ? "limit-reached" : ""
+                      }`}
+                  >
+                    {form.deviation.length}/5000
+                  </small>
                 </label>
                 <textarea
                   name="deviation"
@@ -1084,17 +1097,19 @@ const previousDetailNo =
                   className="textareaFont"
                   maxLength={5000}
                 />
-                <small
-                  className={`char-count ${form.deviation.length >= 5000 ? "limit-reached" : ""
-                    }`}
-                >
-                  {form.deviation.length}/5000
-                </small>
+
               </div>
               <div className="form-group">
-                <label>
-                  {" "}
-                  <span className="required-marker">*</span>Causes
+                <label className="table-header">
+                  <div>
+                    <span className="required-marker">*</span>Causes
+                  </div>
+                  <small
+                    className={`char-count ${form.causes.length >= 5000 ? "limit-reached" : ""
+                      }`}
+                  >
+                    {form.causes.length}/5000
+                  </small>
                 </label>
                 <textarea
                   name="causes"
@@ -1104,17 +1119,20 @@ const previousDetailNo =
                   className="textareaFont"
                   maxLength={5000}
                 />
-                <small
-                  className={`char-count ${form.causes.length >= 5000 ? "limit-reached" : ""
-                    }`}
-                >
-                  {form.causes.length}/5000
-                </small>
+
               </div>
               <div className="form-group">
-                <label>
-                  {" "}
-                  <span className="required-marker">*</span>Consequences
+                <label className="table-header">
+                  <div>
+                    <span className="required-marker">*</span>Consequences
+                  </div>
+                  <small
+                    className={`char-count ${form.consequences.length >= 5000 ? "limit-reached" : ""
+                      }`}
+                  >
+                    {form.consequences.length}/5000
+                  </small>
+
                 </label>
                 <textarea
                   name="consequences"
@@ -1124,19 +1142,21 @@ const previousDetailNo =
                   className="textareaFont"
                   maxLength={5000}
                 />
-                <small
-                  className={`char-count ${form.consequences.length >= 5000 ? "limit-reached" : ""
-                    }`}
-                >
-                  {form.consequences.length}/5000
-                </small>
+
               </div>
 
               <div>
                 <div className="form-group">
-                  <label>
-                    {" "}
+                  <label className="table-header">
+                    <div>
                     <span className="required-marker">*</span>Existing Control
+                    </div>
+                    <small
+                    className={`char-count ${form.existineControl.length >= 5000 ? "limit-reached" : ""
+                      }`}
+                  >
+                    {form.existineControl.length}/5000
+                  </small>
                   </label>
                   <textarea
                     name="existineControl"
@@ -1146,12 +1166,7 @@ const previousDetailNo =
                     className="textareaFont"
                     maxLength={5000}
                   />
-                  <small
-                    className={`char-count ${form.existineControl.length >= 5000 ? "limit-reached" : ""
-                      }`}
-                  >
-                    {form.existineControl.length}/5000
-                  </small>
+                  
                 </div>
 
                 <div className="metric-row">
@@ -1208,6 +1223,7 @@ const previousDetailNo =
                       style={{
                         borderColor: getBorderColor(form.riskRating),
                         borderWidth: "2px",
+                        marginTop:'5px',
                         borderStyle: "solid",
                         borderLeft: `5px solid ${getBorderColor(
                           form.riskRating
@@ -1354,8 +1370,8 @@ const previousDetailNo =
                   </div>
                   <small
                     className={`char-count ${form.additionalControl.length >= 5000
-                        ? "limit-reached"
-                        : ""
+                      ? "limit-reached"
+                      : ""
                       }`}
                     style={{ marginTop: "9px" }}
                   >
@@ -1425,6 +1441,7 @@ const previousDetailNo =
                         borderColor: getBorderColor(form.additionalRiskRating),
                         borderWidth: "2px",
                         borderStyle: "solid",
+                        marginTop:'5px',
                         borderLeft: `5px solid ${getBorderColor(
                           form.additionalRiskRating
                         )}`,
@@ -1495,7 +1512,7 @@ const previousDetailNo =
             </div>
           </form>
         </div>
-      </div>
+      </div >
 
       {showConfirmation && (
         <ConfirmationPopup
@@ -1508,20 +1525,24 @@ const previousDetailNo =
         />
       )}
 
-      {showDeleteConfirmation && (
-        <ConfirmationPopup
-          message="Are you sure you want to delete this recommendation?"
-          onConfirm={confirmDelete}
-          onCancel={cancelDelete}
-        />
-      )}
+      {
+        showDeleteConfirmation && (
+          <ConfirmationPopup
+            message="Are you sure you want to delete this recommendation?"
+            onConfirm={confirmDelete}
+            onCancel={cancelDelete}
+          />
+        )
+      }
 
-      {loading && (
-        <div className="loading-overlay">
-          <div className="loading-spinner"></div>
-        </div>
-      )}
-    </div>
+      {
+        loading && (
+          <div className="loading-overlay">
+            <div className="loading-spinner"></div>
+          </div>
+        )
+      }
+    </div >
   );
 };
 

@@ -5,14 +5,15 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    background: linear-gradient(135deg, #f8fbff, #eef4ff);
+    /* background: linear-gradient(135deg, #f8fbff, #eef4ff); */
   }
    
   .workflow-title {
-    font-size: 28px;
-    font-weight: 800;
+    font-size: 24px;
+    font-weight: 600;
     color: #2e3a59;
     margin-bottom: 40px;
+    text-decoration: underline dashed;
   }
    
   .workflow-horizontal {
@@ -30,7 +31,7 @@
     flex-direction: column;
     align-items: center;
     position: relative;
-    gap: 8px;
+    gap: 10px;
   }
    
   .step-circle {

@@ -4,7 +4,6 @@ import "react-toastify/dist/ReactToastify.css";
 import { strings } from "../string";
 import axios from "axios";
 import { useEffect } from "react";
-const companyId = localStorage.getItem("companyId");
 
 export const formatDate = (dateString) => {
   if (!dateString) return "N/A";
@@ -158,6 +157,8 @@ export const getRiskTextClass = (risk) => {
   return "risk-default";
 };
 export const fetchDataByKey = async (keyvalue) => {
+  const companyId = localStorage.getItem("companyId");
+
   try {
     const response = await axios.get(`http://${strings.localhost}/api/JavaMasterData/getByKey/${companyId}/${keyvalue}`);
     if (response.data && Array.isArray(response.data)) {

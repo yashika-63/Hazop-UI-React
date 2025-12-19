@@ -201,7 +201,6 @@ const CompleteHazopView = ({
       setMocReferences(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error("Error loading MOC references:", err);
-      showToast("Failed to load MOC references", "error");
     }
   };
 

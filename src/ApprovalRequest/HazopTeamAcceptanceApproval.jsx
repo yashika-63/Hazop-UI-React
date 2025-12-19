@@ -128,7 +128,7 @@ const HazopTeamAcceptanceApproval = () => {
                 <tbody>
                     {teamData.length === 0 ? (
                         <tr>
-                            <td colSpan={5} className="no-data">
+                            <td colSpan={6} className="no-data">
                                 No pending HAZOP approvals.
                             </td>
                         </tr>

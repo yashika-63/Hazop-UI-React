@@ -50,25 +50,56 @@
   color: white;
   border: red;
 }
+/* Badge style for the Role Column */
+.role-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-block;
+  text-align: center;
+  min-width: 100px;
+}
 
-.role-change-btn {
-  background-color: #ce8c2f;
-  margin-left: 10px;
-  color: white;
-  border: none;
-  padding: 5px 8px;
+/* Gray styling for Team Member */
+.role-member {
+  background-color: #f0f2f5;
+  color: #555;
+  border: 1px solid #ddd;
+}
+
+/* Green/Gold styling for Team Lead */
+.role-lead {
+  background-color: #e6fffa;
+  color: #047857; /* Dark Green */
+  border: 1px solid #047857;
+  box-shadow: 0 2px 4px rgba(0, 128, 0, 0.1);
+}
+
+/* Button styling */
+.role-btn {
+  padding: 5px 10px;
   cursor: pointer;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  transition: all 0.2s ease;
 }
 
-.role-change-btn:hover {
-  background-color: #ec971f;
+.btn-make-lead {
+  background-color: #3f71c2; /* Blue */
+  color: white;
 }
 
-.role-change-btn:disabled {
-  background-color: #d9534f;
-  cursor: not-allowed;
+.btn-revoke-lead {
+  background-color: #e5e7eb;
+  color: #374151;
+  border: 1px solid #d1d5db;
 }
 
+.btn-make-lead:hover {
+  background-color: #2563eb;
+}
 .hazoplist-table {
   width: 100%;
   border-collapse: separate;
@@ -221,7 +252,7 @@
 .hazop-info {
   border: 1px solid #ddd;
   background-color: #fafafa;
-  padding: 16px 20px;
+  padding: 16px 16px;
   margin-bottom: 16px;
   border-radius: 6px;
   font-size: 13px;

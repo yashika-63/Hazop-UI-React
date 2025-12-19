@@ -5,7 +5,6 @@ import { FaSearch } from 'react-icons/fa';
 import '../styles/global.css';
 import { getRiskClass, getRiskColor, getRiskLevelText, showToast, truncateText, truncateWords } from '../CommonUI/CommonUI';
 import { strings } from '../string';
-
 const HazopAllRecommendations = ({ hazopId }) => {
 
     const [recommendations, setRecommendations] = useState([]);
@@ -129,19 +128,27 @@ const HazopAllRecommendations = ({ hazopId }) => {
     };
 
     const getStatusBadge = (rec) => {
-        // Priority 1: Check if final completion is done
         if (rec.completionStatus === true) {
-            return <span className="status-badge-completed">Completed</span>;
+            return (
+                <span className="status-badge1 status-badge1-completed">
+                    Completed
+                </span>
+            );
         }
 
-        // Priority 2: Check if it has been sent for review (Action Status)
-        // but the review is not yet finished (Action)
         if (rec.sendForVerification === false && rec.sendForVerificationAction === false) {
-            return <span className="status-badge-pending">Pending</span>;
+            return (
+                <span className="status-badge1 status-badge1-pending">
+                    Pending
+                </span>
+            );
         }
 
-        // Priority 3: Default state before any action is taken
-        return <span className="status-badge-draft">Not Sent</span>;
+        return (
+            <span className="status-badge1 status-badge1-draft">
+                Sent
+            </span>
+        );
     };
 
     return (
@@ -205,7 +212,6 @@ const HazopAllRecommendations = ({ hazopId }) => {
             <table className="assigned-table">
                 <thead>
                     <tr>
-                        <th>Sr.No</th>
                         <th>Node Reference No</th>
                         <th>Deviation</th>
                         <th>Recommendation</th>
@@ -224,7 +230,6 @@ const HazopAllRecommendations = ({ hazopId }) => {
                         recommendations.map((rec, index) => (
                             <tr key={rec.id} className={expandedRowId === rec.id ? "expanded-row" : ""}
                                 onClick={() => toggleRow(rec.id)}>
-                                <td>{index + 1}</td>
                                 <td>
                                     {rec.javaHazopNode?.nodeNumber && rec.javaHazopNodeDetail?.nodeDetailNumber
                                         ? `${rec.javaHazopNode.nodeNumber}.${rec.javaHazopNodeDetail.nodeDetailNumber}`

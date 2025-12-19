@@ -8,8 +8,8 @@ import { useNavigate } from "react-router-dom";
 const CompleteRecommendationApproval = () => {
     const [completedAssignments, setCompletedAssignments] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [selectedRecord, setSelectedRecord] = useState(null);
-    const [confirmation, setConfirmation] = useState(null);
+    // const [selectedRecord, setSelectedRecord] = useState(null);
+    // const [confirmation, setConfirmation] = useState(null);
 
     // Inline Edit States (Only for Overdue Rescheduling now)
     const [editingRowId, setEditingRowId] = useState(null);
@@ -216,6 +216,35 @@ const CompleteRecommendationApproval = () => {
         });
     };
 
+
+    const handleDirectComplete = async (assignmentId) => {
+        setActionLoading(true);
+        const currentDate = getTodayString();
+
+        try {
+            await axios.post(
+                `http://${strings.localhost}/api/recommendation/assign/completeTask`,
+                {},
+                {
+                    params: {
+                        assignmentId: assignmentId,
+                        empCode: empCode,
+                        completionDate: currentDate,
+                    },
+                }
+            );
+
+            showToast("Task marked as completed", "success");
+            fetchCompletedAssignments();
+        } catch (err) {
+            console.error(err);
+            showToast("Failed to complete task", "error");
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+
     const confirmCompletion = async () => {
         if (!confirmation) return;
         setActionLoading(true);
@@ -268,7 +297,6 @@ const CompleteRecommendationApproval = () => {
             <table className="hazoplist-table">
                 <thead>
                     <tr>
-                        <th>Sr.No</th>
                         <th>Node Ref No</th>
                         <th>Deviation</th>
                         <th>Recommendation</th>
@@ -284,7 +312,6 @@ const CompleteRecommendationApproval = () => {
 
                         inProgressList.map((rec, idx) => (
                             <tr key={rec.id} className={expandedRowId === rec.id ? "expanded-row" : ""} onClick={() => toggleRow(rec.id)}>
-                                <td>{idx + 1}</td>
                                 <td>
                                     {rec.javaHazopNodeRecommendation?.javaHazopNode?.nodeNumber
                                         ? rec.javaHazopNodeRecommendation.javaHazopNodeDetail?.nodeDetailNumber != null
@@ -343,12 +370,16 @@ const CompleteRecommendationApproval = () => {
                                         </button>
                                         {openDropdown === rec.id && (
                                             <div className="dropdown-content">
-                                                <button onClick={() => openUpdatePopup(rec)}>
+                                                {/* <button onClick={() => openUpdatePopup(rec)}>
                                                     <FaEye /> View
-                                                </button>
+                                                </button> */}
+
                                                 {/* --- RE-ADDED CHANGE TARGET DATE BUTTON --- */}
                                                 <button onClick={() => handleEditClick(rec)}>
                                                     <FaCalendarAlt /> Change target date
+                                                </button>
+                                                <button onClick={() => handleDirectComplete(rec.id)}>
+                                                    <FaCheck /> Complete
                                                 </button>
                                             </div>
                                         )}
@@ -367,7 +398,6 @@ const CompleteRecommendationApproval = () => {
             <table className="hazoplist-table">
                 <thead>
                     <tr>
-                        <th>Sr.No</th>
                         <th>Node Ref No</th>
                         <th>Deviation</th>
                         <th>Recommendation</th>
@@ -384,7 +414,6 @@ const CompleteRecommendationApproval = () => {
                         overdueList.map((rec, idx) => (
                             <React.Fragment key={rec.id}>
                                 <tr className={expandedRowId === rec.id ? "expanded-row" : ""} onClick={() => toggleRow(rec.id)}>
-                                    <td>{idx + 1}</td>
                                     <td>
                                         {rec.javaHazopNodeRecommendation?.javaHazopNode?.nodeNumber
                                             ? rec.javaHazopNodeRecommendation.javaHazopNodeDetail?.nodeDetailNumber != null
@@ -523,7 +552,7 @@ const CompleteRecommendationApproval = () => {
             {/* --- MODALS & POPUPS --- */}
 
             {/* View Popup - Only accessible via In-Progress table now */}
-            {selectedRecord && (
+            {/* {selectedRecord && (
                 <div className="modal-overlay">
                     <div className="modal-body">
                         <h5 className='centerText'>Recommendation Details</h5>
@@ -561,7 +590,7 @@ const CompleteRecommendationApproval = () => {
                     onConfirm={confirmCompletion}
                     onCancel={() => setConfirmation(null)}
                 />
-            )}
+            )} */}
 
             {actionLoading && (
                 <div className="loading-overlay">

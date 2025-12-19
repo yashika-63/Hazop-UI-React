@@ -409,15 +409,22 @@ const CreateNodeDetails = () => {
     try {
       setLoading(true);
 
-      // IMPORTANT: use nodeDetailNumber, not ID
-      const currentDetailNumberParam = currentDetailNo ?? 0; // null-safe
+      // Start with mandatory parameters
+      let url = `http://${strings.localhost}/api/hazopNodeDetail/getByDirectionNew?nodeId=${currentNodeId}&direction=${direction}`;
 
-      const res = await fetch(
-        `http://${strings.localhost}/api/hazopNodeDetail/getByDirectionNew` +
-          `?currentDetailNumber=${currentDetailNumberParam}` +
-          `&nodeId=${currentNodeId}` +
-          `&direction=${direction}`
-      );
+      // CHANGE HERE: 
+      // We check if 'currentDetailId' exists. 
+      // If currentDetailId is null, it means we are on the Blank Page.
+      // If we are on the Blank Page, we DO NOT send the number, satisfying your request to pass nothing.
+      if (
+        currentDetailId !== null && 
+        currentDetailNo !== null && 
+        currentDetailNo !== undefined
+      ) {
+        url += `&currentDetailNumber=${currentDetailNo}`;
+      }
+
+      const res = await fetch(url);
 
       if (!res.ok) return null;
 
@@ -431,7 +438,6 @@ const CreateNodeDetails = () => {
       setLoading(false);
     }
   };
-
   const handleSaveAndNext = async () => {
     if (!validate()) return;
 

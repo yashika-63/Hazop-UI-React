@@ -472,10 +472,17 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
             </select>
           </div>
         </div>
-        <div className="input-row">
+        <div>
           <div className="form-group">
-            <span className="required-marker">*</span>
-            <label>Title</label>
+            <label className="table-header">
+              <div>
+                <span className="required-marker">*</span>Title
+              </div>
+              <small
+                className={`char-count ${formData.hazopTitle.length >= 1000 ? "limit-reached" : ""}`}
+              >
+                {formData.hazopTitle.length}/1000
+              </small> </label>
             <input
               type="text"
               ref={refs.hazopTitle}
@@ -486,17 +493,22 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
               disabled={loading}
               maxLength={1000}
             />
-            <small
-              className={`char-count ${formData.hazopTitle.length >= 1000 ? "limit-reached" : ""}`}
-            >
-              {formData.hazopTitle.length}/1000
-            </small>
+
           </div>
         </div>
-        <div className="input-row">
+        <div >
           <div className="form-group">
-            <span className="required-marker">*</span>
-            <label>Description</label>
+            <label className="table-header">
+              <div>
+                <span className="required-marker">*</span>Description
+              </div>
+              <small
+                className={`char-count ${formData.description.length >= 5000 ? "limit-reached" : ""
+                  }`}
+              >
+                {formData.description.length}/5000
+              </small>
+            </label>
             <textarea
               name="description"
               ref={refs.description}
@@ -508,12 +520,7 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
               maxLength={5000}
             />
 
-            <small
-              className={`char-count ${formData.description.length >= 5000 ? "limit-reached" : ""
-                }`}
-            >
-              {formData.description.length}/5000
-            </small>
+
           </div>
         </div>
 

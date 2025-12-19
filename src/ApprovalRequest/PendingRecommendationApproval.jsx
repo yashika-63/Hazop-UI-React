@@ -311,7 +311,6 @@ const PendingRecommendationApproval = () => {
       <table className="hazoplist-table">
         <thead>
           <tr>
-            <th>Sr.No</th>
             <th>Node Reference No</th>
             <th>Deviation</th>
             <th>Recommendation</th>
@@ -331,7 +330,6 @@ const PendingRecommendationApproval = () => {
                 className={expandedRowId === rec.id ? "expanded-row" : ""}
                 onClick={() => toggleRow(rec.id)}
               >
-                <td>{idx + 1}</td>
                 <td>
                   {rec.javaHazopNodeRecommendation?.javaHazopNode?.nodeNumber &&
                   rec.javaHazopNodeRecommendation?.javaHazopNodeDetail

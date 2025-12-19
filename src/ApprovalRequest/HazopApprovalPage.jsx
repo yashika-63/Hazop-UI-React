@@ -40,7 +40,7 @@ const HazopApprovalPage = () => {
             setPendingActions(response.data || []);
         } catch (error) {
             console.error("Error fetching pending actions:", error);
-            showToast("Failed to fetch pending actions.", "error");
+            // showToast("Failed to fetch pending actions.", "error");
             setPendingActions([]);
         } finally {
             setLoading(false);

@@ -141,8 +141,22 @@ const NodePopup = ({ onSave }) => {
       </div>
 
       <div>
-        <div className="popup-body">
+        <div>
           <div>
+
+          <div className="form-group">
+            <label>
+              <span className="required-marker">* </span>Design Intent
+            </label>
+            <textarea
+              name="designIntent"
+              value={form.designIntent}
+              rows={4}
+              onChange={handleChange}
+              className="textareaFont"
+              disabled={loading}
+            />
+          </div>
             {/* Node meta */}
             <div className="input-row">
               <div className="form-group">
@@ -294,6 +308,7 @@ const NodePopup = ({ onSave }) => {
                 disabled={loading}
                 rows={3}
                 maxLength={2000}
+                className="textareaFont"
               />
               <small
                 className={`char-count ${
@@ -316,6 +331,7 @@ const NodePopup = ({ onSave }) => {
                 disabled={loading}
                 rows={3}
                 maxLength={2000}
+                className="textareaFont"
               />
               <small
                 className={`char-count ${
@@ -340,6 +356,7 @@ const NodePopup = ({ onSave }) => {
                 disabled={loading}
                 rows={3}
                 maxLength={1000}
+                className="textareaFont"
               />
               <small
                 className={`char-count ${
@@ -353,19 +370,7 @@ const NodePopup = ({ onSave }) => {
             </div>
           </div>
 
-          <div className="form-group">
-            <label>
-              <span className="required-marker">* </span>Design Intent
-            </label>
-            <textarea
-              name="designIntent"
-              value={form.designIntent}
-              rows={4}
-              onChange={handleChange}
-              className="textareaFont"
-              disabled={loading}
-            />
-          </div>
+         
         </div>
       </div>
 

@@ -389,7 +389,6 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
                 <thead>
                     <tr>
                         <th style={{ width: '40px' }}></th>
-                        <th>Sr.No</th>
                         <th>Node Ref No</th>
                         <th>Deviation</th>
                         <th>Recommendation</th>
@@ -411,7 +410,6 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
                                     <td className="expand-icon-cell">
                                         {expandedRowId === item.id ? <FaChevronUp /> : <FaChevronDown />}
                                     </td>
-                                    <td>{index + 1}</td>
                                     <td>
                                         {item.javaHazopNode?.nodeNumber && item.javaHazopNodeDetail?.nodeDetailNumber
                                             ? `${item.javaHazopNode.nodeNumber}.${item.javaHazopNodeDetail.nodeDetailNumber}`
@@ -541,7 +539,6 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
             <table className="assigned-table" style={{ marginBottom: '20px' }}>
                 <thead>
                     <tr>
-                        <th>Sr.No</th>
                         <th>Employee Name</th>
                         <th>Email</th>
                         <th>Assigned Date</th>
@@ -556,7 +553,6 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
                     ) : (
                         teamComments.map((item, index) => (
                             <tr key={item.id} className="main-row">
-                                <td>{index + 1}</td>
                                 <td>{item.empCode}</td> {/* Displaying Name as per your API response */}
                                 <td>{item.empEmail}</td>
                                 <td>{formatDate(item.assignDate)}</td>

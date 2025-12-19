@@ -198,7 +198,6 @@ const HazopView = ({ onClose, mode = "view-only" }) => {
             setMocReferences(Array.isArray(res.data) ? res.data : []);
         } catch (err) {
             console.error("Error loading MOC references:", err);
-            showToast("Failed to load MOC references", "error");
         }
     };
 
@@ -293,7 +292,7 @@ const HazopView = ({ onClose, mode = "view-only" }) => {
                                         <h3>Documents</h3>
                                         <ul className="document-list">
                                             {documents.map((doc) => {
-                                                const fileName = doc.filePath.split("\\").pop(); 
+                                                const fileName = doc.filePath.split("\\").pop();
                                                 return (
                                                     <li key={doc.id}>
                                                         <a
@@ -506,45 +505,44 @@ const HazopView = ({ onClose, mode = "view-only" }) => {
                                                                             />
                                                                         </div>
 
+                                                                        {/* P S R in ONE line */}
                                                                         <div className="metric-row">
                                                                             <div className="form-group">
-                                                                                <label>Probability</label>
+                                                                                <label>P</label>
                                                                                 <input
                                                                                     className={`readonly ${getRiskClass(detail.existineProbability)}`}
                                                                                     value={detail.existineProbability}
                                                                                     readOnly
-                                                                                    style={{ borderColor: getBorderColor(detail.existineProbability), width: '80px' }}
                                                                                 />
                                                                             </div>
 
                                                                             <div className="form-group">
-                                                                                <label>Severity</label>
+                                                                                <label>S</label>
                                                                                 <input
                                                                                     className={`readonly ${getRiskClass(detail.existingSeverity)}`}
                                                                                     value={detail.existingSeverity}
                                                                                     readOnly
-                                                                                    style={{ borderColor: getBorderColor(detail.existingSeverity), width: '80px' }}
+                                                                                />
+                                                                            </div>
+
+                                                                            <div className="form-group">
+                                                                                <label>R</label>
+                                                                                <input
+                                                                                    className={`readonly ${getRiskClass(detail.riskRating)}`}
+                                                                                    value={detail.riskRating}
+                                                                                    readOnly
                                                                                 />
                                                                             </div>
                                                                         </div>
-
                                                                         <div className="form-group metric-single">
-                                                                            <label>Risk Rating</label>
-                                                                            <input
-                                                                                className={`readonly ${getRiskClass(detail.riskRating)}`}
-                                                                                value={detail.riskRating}
-                                                                                readOnly
-                                                                                style={{ borderColor: getBorderColor(detail.riskRating) }}
-                                                                            />
                                                                             <small
-                                                                                className={`risk-text ${getRiskTextClass(
-                                                                                    detail.riskRating
-                                                                                )} center-controls`} style={{ textAlign: 'center' }}
+                                                                                className={`risk-text ${getRiskTextClass(detail.riskRating)} center-controls`}
                                                                             >
                                                                                 {getRiskLevelText(detail.riskRating)}
                                                                             </small>
                                                                         </div>
                                                                     </div>
+
 
                                                                     <div>
                                                                         <div className="form-group">
@@ -557,43 +555,45 @@ const HazopView = ({ onClose, mode = "view-only" }) => {
                                                                             />
                                                                         </div>
 
-                                                                        <div className="metric-row">
-                                                                            <div className="form-group">
-                                                                                <label>Probability</label>
-                                                                                <input
-                                                                                    className={`readonly ${getRiskClass(detail.additionalProbability)}`}
-                                                                                    value={detail.additionalProbability}
-                                                                                    readOnly
-                                                                                    style={{ borderColor: getBorderColor(detail.additionalProbability), width: '80px' }}
-                                                                                />
+                                                                        <div>
+                                                                            <div className="metric-row">
+                                                                                <div className="form-group">
+                                                                                    <label>P</label>
+                                                                                    <input
+                                                                                        className={`readonly ${getRiskClass(detail.additionalProbability)}`}
+                                                                                        value={detail.additionalProbability || "-"}
+                                                                                        readOnly
+                                                                                    />
+                                                                                </div>
+
+                                                                                <div className="form-group">
+                                                                                    <label>S</label>
+                                                                                    <input
+                                                                                        className={`readonly ${getRiskClass(detail.additionalSeverity)}`}
+                                                                                        value={detail.additionalSeverity || "-"}
+                                                                                        readOnly
+                                                                                    />
+                                                                                </div>
+
+                                                                                <div className="form-group">
+                                                                                    <label>R</label>
+                                                                                    <input
+                                                                                        className={`readonly ${getRiskClass(detail.additionalRiskRating)}`}
+                                                                                        value={detail.additionalRiskRating || "-"}
+                                                                                        readOnly
+                                                                                    />
+                                                                                </div>
                                                                             </div>
 
-                                                                            <div className="form-group">
-                                                                                <label>Severity</label>
-                                                                                <input
-                                                                                    className={`readonly ${getRiskClass(detail.additionalSeverity)}`}
-                                                                                    value={detail.additionalSeverity}
-                                                                                    readOnly
-                                                                                    style={{ borderColor: getBorderColor(detail.additionalSeverity), width: '80px' }}
-                                                                                />
+                                                                            <div className="form-group metric-single">
+                                                                                <small
+                                                                                    className={`risk-text ${getRiskTextClass(detail.additionalRiskRating)} center-controls`}
+                                                                                    style={{ textAlign: 'center' }}
+                                                                                >
+                                                                                    {getRiskLevelText(detail.additionalRiskRating)}
+                                                                                </small>
                                                                             </div>
-                                                                        </div>
 
-                                                                        <div className="form-group metric-single">
-                                                                            <label>Additional Risk Rating</label>
-                                                                            <input
-                                                                                className={`readonly ${getRiskClass(detail.additionalRiskRating)}`}
-                                                                                value={detail.additionalRiskRating}
-                                                                                readOnly
-                                                                                style={{ borderColor: getBorderColor(detail.additionalRiskRating) }}
-                                                                            />
-                                                                            <small
-                                                                                className={`risk-text ${getRiskTextClass(
-                                                                                    detail.additionalRiskRating
-                                                                                )} center-controls`} style={{ textAlign: 'center' }}
-                                                                            >
-                                                                                {getRiskLevelText(detail.additionalRiskRating)}
-                                                                            </small>
                                                                         </div>
                                                                     </div>
 

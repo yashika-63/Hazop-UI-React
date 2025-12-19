@@ -71,7 +71,6 @@ const HazopConfirmationApproval = () => {
             <table className="hazoplist-table">
                 <thead>
                     <tr>
-                        <th>Sr.No</th>
                         <th>Title</th>
                         <th>Site</th>
                         <th>Department</th>
@@ -88,7 +87,6 @@ const HazopConfirmationApproval = () => {
                     ) : (
                         hazopList.map((item, idx) => (
                             <tr key={idx}>
-                                <td>{idx + 1}</td>
                                 <td>{truncateWords(item.hazopTitle || '-')}</td>
                                 <td>{truncateWords(item.site || "-")}</td>
                                 <td>{item.department || '-'}</td>

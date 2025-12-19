@@ -156,7 +156,6 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
                     <table className="assigned-table">
                         <thead>
                             <tr>
-                                <th>Sr.No</th>
                                 <th>Node Reference No</th>
                                 <th>Deviation</th>
                                 <th>Recommendation</th>
@@ -174,7 +173,6 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
                             ) : (
                                 data.notAssigned.map((item, index) => (
                                     <tr
-                                        key={item.id}
                                         className={expandedRowId === item.id ? "expanded-row" : ""}
                                         onClick={() => toggleRow(item.id)}
                                     >
@@ -254,7 +252,6 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
                     <table className="assigned-table">
                         <thead>
                             <tr>
-                                <th>Sr.No</th>
                                 <th>Node Reference No</th>
                                 <th>Deviation</th>
                                 <th>Recommendation</th>
@@ -275,7 +272,6 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
                                         className={expandedRowId === item.id ? "expanded-row" : ""}
                                         onClick={() => toggleRow(item.id)}
                                     >
-                                        <td>{index + 1}</td>
 
                                         <td className="sr-no">{item.javaHazopNodeRecommendation?.javaHazopNode?.nodeNumber}</td>
                                         <td className={`truncate-cell ${expandedRowId === item.id ? "expanded-cell" : ""}`}>
@@ -307,7 +303,6 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
                     <table className="assigned-table">
                         <thead>
                             <tr>
-                                <th>Sr.No</th>
                                 <th>Node Reference No</th>
                                 <th>Deviation</th>
                                 <th>Recommendation</th>
@@ -329,7 +324,6 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
                                         className={expandedRowId === item.id ? "expanded-row" : ""}
                                         onClick={() => toggleRow(item.id)}
                                     >
-                                        <td>{index + 1}</td>
                                         <td className="sr-no">{item.javaHazopNodeRecommendation?.javaHazopNode?.nodeNumber}</td>
                                         <td className={`truncate-cell ${expandedRowId === item.id ? "expanded-cell" : ""}`}>
                                             {expandedRowId === item.id
@@ -361,7 +355,6 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
                     <table className="assigned-table">
                         <thead>
                             <tr>
-                                <th>Sr.No</th>
                                 <th>Node Reference No</th>
                                 <th>Deviation</th>
                                 <th>Recommendation</th>
@@ -383,7 +376,6 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
                                         className={expandedRowId === item.id ? "expanded-row" : ""}
                                         onClick={() => toggleRow(item.id)}
                                     >
-                                        <td>{index + 1}</td>
 
                                         <td className="sr-no">{item.javaHazopNodeRecommendation?.javaHazopNode?.nodeNumber}</td>
                                         <td className={`truncate-cell ${expandedRowId === item.id ? "expanded-cell" : ""}`}>
