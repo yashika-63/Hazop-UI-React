@@ -27,7 +27,6 @@ import NodeRetrieve from './AddNodeScreen/NodeRetrieve';
 import ViewNodeDiscussion from './AddNodeScreen/ViewNodeDiscussion';
 import Dashboard from './Dashboard/Dashboard';
 import UpdateNode from './AddNodeScreen/UpdateNode';
-import MainComponent from './CreateNodeDiscussion/MainComponent';
 
 /* Role Imports */
 import { PERMISSIONS } from "./RBAC/Permissions";
@@ -86,11 +85,9 @@ const App = () => {
                     {/* Node Management (Creator Only) */}
                     <Route path="/NodePage" element={<PrivateRoute allowedRoles={PERMISSIONS.NodePages}><NodePage /></PrivateRoute>} />
                     <Route path="/CreateNodeDetails" element={<PrivateRoute allowedRoles={PERMISSIONS.NodePages}><CreateNodeDetails /></PrivateRoute>} />
-                    <Route path="/UpdateNodeDetails" element={<PrivateRoute allowedRoles={PERMISSIONS.NodePages}><UpdateNodeDetails /></PrivateRoute>} />
                     <Route path="/NodeDetails" element={<PrivateRoute allowedRoles={PERMISSIONS.NodePages}><NodeDetails /></PrivateRoute>} />
                     <Route path="/NodeRetrieve" element={<PrivateRoute allowedRoles={PERMISSIONS.NodePages}><NodeRetrieve /></PrivateRoute>} />
                     <Route path="/UpdateNode" element={<PrivateRoute allowedRoles={PERMISSIONS.NodePages}><UpdateNode /></PrivateRoute>} />
-                    <Route path="/MainComponent" element={<PrivateRoute allowedRoles={PERMISSIONS.NodePages}><MainComponent /></PrivateRoute>} />
                     <Route path="/NodePopup/:id" element={<PrivateRoute allowedRoles={PERMISSIONS.NodePages}><NodePopup /></PrivateRoute>} />
                     <Route path="/NodePopup" element={<PrivateRoute allowedRoles={PERMISSIONS.NodePages}><NodePopup /></PrivateRoute>} />
 
