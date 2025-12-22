@@ -149,9 +149,9 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
         if (editingDateRowId === id) return;
         const newExpandedId = expandedRowId === id ? null : id;
         setExpandedRowId(newExpandedId);
-        if (newExpandedId) {
-            fetchHistory(id);
-        }
+        // if (newExpandedId) {
+        //     fetchHistory(id);
+        // }
     };
 
     // --- Search & Team Logic ---
@@ -355,9 +355,9 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
             <button onClick={(e) => { e.stopPropagation(); handleView(item); }}>
                 <FaExchangeAlt /> Re-assign
             </button>
-            <button onClick={(e) => { e.stopPropagation(); handleEditDateClick(item); }}>
+            {/* <button onClick={(e) => { e.stopPropagation(); handleEditDateClick(item); }}>
                 <FaCalendarAlt /> Change Target Date
-            </button>
+            </button> */}
         </div>
     );
 
@@ -467,7 +467,7 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
                                                         <span className="detail-label">Management Remark:</span>
                                                         <p className="detail-text">{item.remarkbyManagement || "No remarks"}</p>
                                                     </div>
-                                                    <div className="detail-item">
+                                                    {/* <div className="detail-item">
                                                         <span className="detail-label"><FaHistory /> Target Date History:</span>
                                                         <div className="history-container detail-text">
                                                             {loadingHistory ? (
@@ -493,14 +493,14 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
                                                                 )
                                                             )}
                                                         </div>
-                                                    </div>
+                                                    </div> */}
                                                     <div className="detail-item">
                                                         <span className="detail-label">Completion Date:</span>
-                                                        <p className="detail-text">{formatDate(item.CompletionDate || "-")}</p>
+                                                        <p className="detail-text">{formatDate(item.completionDate || "-")}</p>
                                                     </div>
                                                     <div className="detail-item">
                                                         <span className="detail-label">Assigned To:</span>
-                                                        <p className="detail-text">{item.verificationResponsibleEmployeeName} ({item.verificationResponsibleEmployeeCode})</p>
+                                                        <p className="detail-text">{item.verificationResponsibleEmployeeName} ({item.department || '-'})</p>
                                                     </div>
                                                 </div>
                                             </div>
@@ -556,7 +556,7 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
                                 <td>{item.empCode}</td> {/* Displaying Name as per your API response */}
                                 <td>{item.empEmail}</td>
                                 <td>{formatDate(item.assignDate)}</td>
-                                <td>{item.signByEmpName || "-"}</td>
+                                <td>{item.signByEmpCode || "-"}</td>
                                 <td>{formatDate(item.signedOn) || "-"}</td>
                                 <td>
                                     <span

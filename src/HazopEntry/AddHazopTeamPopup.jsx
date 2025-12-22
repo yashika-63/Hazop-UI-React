@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { FaSearch, FaTimes, FaUserTie, FaUser } from "react-icons/fa"; // Added icons
+import { FaSearch, FaTimes, FaUserTie, FaUser, FaFileAlt, FaEye } from "react-icons/fa";
 import { showToast } from "../CommonUI/CommonUI";
 import { strings } from "../string";
+import HazopDocumentUpload from "./HazopDocumentUpload";
 
 const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
     const [teamSearch, setTeamSearch] = useState("");
@@ -12,13 +13,53 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
     const [confirmPopup, setConfirmPopup] = useState(null);
     const [originalTeam, setOriginalTeam] = useState([]);
     const [removeConfirmationPopup, setRemoveConfirmationPopup] = useState(null);
+
+    // Document States
+    const [existingDocuments, setExistingDocuments] = useState([]);
+    const [showDocumentUploader, setShowDocumentUploader] = useState(false);
+
+    // Refs
+    const documentUploadRef = useRef(); // For calling child method
+    const scrollRef = useRef(null);     // For auto-scrolling
+
     const companyId = localStorage.getItem("companyId");
 
     useEffect(() => {
         if (hazopData && hazopData.id) {
             fetchExistingTeam(hazopData.id);
+            loadDocuments(hazopData.id);
         }
     }, [hazopData]);
+
+    // --- NEW: AUTO SCROLL EFFECT ---
+    useEffect(() => {
+        // If the uploader is shown, scroll to it
+        if (showDocumentUploader && scrollRef.current) {
+            // Slight timeout ensures DOM is rendered before scrolling
+            setTimeout(() => {
+                scrollRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+            }, 100);
+        }
+    }, [showDocumentUploader]);
+
+    // --- FETCH EXISTING DOCUMENTS ---
+    const loadDocuments = async (hazopId) => {
+        try {
+            const res = await axios.get(
+                `http://${strings.localhost}/api/javaHazopDocument/getByKeys`,
+                {
+                    params: {
+                        companyId: localStorage.getItem("companyId") || 1,
+                        primeryKey: "HAZOPFIRSTPAGEID",
+                        primeryKeyValue: hazopId,
+                    },
+                }
+            );
+            setExistingDocuments(Array.isArray(res.data) ? res.data : []);
+        } catch (err) {
+            console.error("Error loading HAZOP documents:", err);
+        }
+    };
 
     const fetchExistingTeam = async (hazopId) => {
         setLoading(true);
@@ -59,7 +100,6 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
             showToast("This employee is already added.", "warn");
             return;
         }
-        // Default role is Team Member
         setHazopTeam([...hazopTeam, { ...member, role: "Team Member" }]);
         setTeamSearch("");
         setSearchResults([]);
@@ -113,20 +153,21 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
             (m) => !originalTeam.some((o) => o.empCode === m.empCode)
         );
 
-        // Allow saving if roles changed even if no new members added
-        // (You might want to add a check for modified roles here if strictly needed, 
-        // but for now, we follow your logic or just allow save)
-        if (newMembers.length === 0 && JSON.stringify(hazopTeam) === JSON.stringify(originalTeam)) {
-             showToast("No changes to save.", "warn");
-             return;
+        const isTeamChanged = !(newMembers.length === 0 && JSON.stringify(hazopTeam) === JSON.stringify(originalTeam));
+        const isUploadVisible = showDocumentUploader;
+
+        if (!isTeamChanged && !isUploadVisible) {
+            showToast("No changes to save.", "warn");
+            return;
         }
 
         if (hazopTeam.length === 0) {
             showToast("Please add at least one team member.", "warn");
             return;
         }
+
         setConfirmPopup({
-            message: "Do you want to save this HAZOP team?",
+            message: "Do you want to save changes?",
             yes: async () => {
                 setConfirmPopup(null);
                 await saveHazop(newMembers);
@@ -141,6 +182,7 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
         try {
             const hazopId = hazopData.id;
 
+            // 1. Save New Team Members
             if (newMembers.length > 0) {
                 await axios.post(
                     `http://${strings.localhost}/api/hazopTeam/saveTeam/${hazopId}`,
@@ -148,49 +190,39 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
                 );
             }
 
+            // 2. Save Roles
             for (const member of hazopTeam) {
                 await axios.post(
                     `http://${strings.localhost}/api/hazopTeamRole/save?companyId=${companyId}&empCode=${member.empCode}&hazopRole=${member.role}&hazopId=${hazopId}`
                 );
             }
 
-            showToast("HAZOP updated with new team!", "success");
+            // 3. Upload New Documents (if any)
+            if (documentUploadRef.current) {
+                await documentUploadRef.current.uploadDocuments(hazopId);
+            }
+
+            showToast("HAZOP updated successfully!", "success");
             closePopup();
         } catch (err) {
-            console.error("Error saving HAZOP with new team:", err);
-            showToast("Failed to update team.", "error");
+            console.error("Error saving HAZOP:", err);
+            showToast("Failed to update.", "error");
         }
 
         setLoading(false);
     };
 
-    const ConfirmationPopup = ({ message, onConfirm, onCancel }) => {
-        return (
-            <div className="confirm-overlay">
-                <div className="confirm-box">
-                    <p>{message}</p>
-                    <div className="confirm-buttons">
-                        <button type="button" onClick={onCancel} className="cancel-btn">No</button>
-                        <button type="button" onClick={onConfirm} className="confirm-btn">Yes</button>
-                    </div>
+    const ConfirmationPopup = ({ message, onConfirm, onCancel }) => (
+        <div className="confirm-overlay">
+            <div className="confirm-box">
+                <p>{message}</p>
+                <div className="confirm-buttons">
+                    <button type="button" onClick={onCancel} className="cancel-btn">No</button>
+                    <button type="button" onClick={onConfirm} className="confirm-btn">Yes</button>
                 </div>
             </div>
-        );
-    };
-
-    const RemoveConfirmationPopup = ({ message, onConfirm, onCancel }) => {
-        return (
-            <div className="confirm-overlay">
-                <div className="confirm-box">
-                    <p>{message}</p>
-                    <div className="confirm-buttons">
-                        <button type="button" className="cancel-btn" onClick={onCancel}>No</button>
-                        <button type="button" className="confirm-btn" onClick={onConfirm} >Yes</button>
-                    </div>
-                </div>
-            </div>
-        );
-    };
+        </div>
+    );
 
     return (
         <div>
@@ -201,7 +233,7 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
             )}
 
             <div className="modal-header">
-                Create Team Members to HAZOP
+                Manage Team & Documents
                 <button className="close-btn" onClick={closePopup} disabled={loading}>
                     <FaTimes />
                 </button>
@@ -231,7 +263,6 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
                             disabled={loading}
                         />
                         <FaSearch className="search-icon" />
-
                         <ul className="search-results">
                             {searchResults.map((user) => (
                                 <li key={user.empCode} onClick={() => addTeamMember(user)}>
@@ -242,15 +273,27 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
                     </div>
                 </div>
 
+                <div style={{ float: 'right' }}>
+                    <button
+                        type="button"
+                        className="add-btn"
+                        onClick={() => setShowDocumentUploader(!showDocumentUploader)}
+                        disabled={loading}
+                    >
+                        {showDocumentUploader ? "Hide Upload Section" : "+ Upload New Document"}
+                    </button>
+                </div>
+
+                {/* --- TEAM TABLE SECTION --- */}
                 {hazopTeam.length > 0 && (
                     <div className="table-wrapper">
                         <table className="team-table">
                             <thead>
                                 <tr>
-                                    <th>Employee Code</th>
+                                    <th>Emp Code</th>
                                     <th>Employee Name</th>
                                     <th>Role</th>
-                                    <th>Action</th>
+                                    <th>Role Action</th>
                                     <th>Remove</th>
                                 </tr>
                             </thead>
@@ -259,22 +302,12 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
                                     <tr key={member.empCode}>
                                         <td>{member.empCode}</td>
                                         <td>{member.firstName} {member.lastName}</td>
-                                        
-                                        {/* 1. ROLE COLUMN WITH CONDITIONAL STYLING */}
-                                        <td style={{textAlign:'center'}}>
-                                            <span 
-                                                className={`role-badge ${
-                                                    member.role === "Team Lead" 
-                                                    ? "role-lead" 
-                                                    : "role-member"
-                                                }`}
-                                            >
-                                                {member.role === "Team Lead" ? <FaUserTie style={{marginRight:5}}/> : <FaUser style={{marginRight:5}}/>}
+                                        <td style={{ textAlign: 'center' }}>
+                                            <span className={`role-badge ${member.role === "Team Lead" ? "role-lead" : "role-member"}`}>
+                                                {member.role === "Team Lead" ? <FaUserTie style={{ marginRight: 5 }} /> : <FaUser style={{ marginRight: 5 }} />}
                                                 {member.role}
                                             </span>
                                         </td>
-
-                                        {/* 2. ACTION COLUMN WITH TOGGLE BUTTON */}
                                         <td>
                                             <button
                                                 type="button"
@@ -285,7 +318,6 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
                                                 {member.role === "Team Lead" ? "Set as Member" : "Set as Team Lead"}
                                             </button>
                                         </td>
-
                                         <td>
                                             <button
                                                 type="button"
@@ -303,6 +335,52 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
                     </div>
                 )}
 
+                {/* --- EXISTING DOCUMENTS LIST SECTION --- */}
+                {existingDocuments.length > 0 && (
+                    <div className="existing-documents-section" style={{ marginTop: '20px' }}>
+                        <h4 style={{ borderBottom: '1px solid #eee', paddingBottom: '10px' }}>Attached Documents</h4>
+                        <ul className="document-list" style={{ listStyle: 'none', padding: 0 }}>
+                            {existingDocuments.map((doc) => {
+                                const fileName = doc.filePath ? doc.filePath.split(/[\\/]/).pop() : "Unnamed Document";
+                                return (
+                                    <li key={doc.id} style={{ display: 'flex', alignItems: 'center', padding: '8px', borderBottom: '1px solid #f0f0f0' }}>
+                                        <FaFileAlt style={{ color: '#555', marginRight: '10px' }} />
+                                        <a
+                                            href={`http://${strings.localhost}/api/javaHazopDocument/view/${doc.id}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            style={{ flexGrow: 1, textDecoration: 'none', color: '#007bff' }}
+                                        >
+                                            {fileName}
+                                        </a>
+                                        <a
+                                            href={`http://${strings.localhost}/api/javaHazopDocument/view/${doc.id}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="view-icon-btn"
+                                            title="View"
+                                        >
+                                            <FaEye />
+                                        </a>
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    </div>
+                )}
+
+                {/* --- DRAG AND DROP UPLOADER COMPONENT --- */}
+                {showDocumentUploader && (
+                    <div ref={scrollRef} style={{ marginTop: '15px' }}>
+                        {/* Added wrapper div with ref for scrolling */}
+                        <HazopDocumentUpload
+                            ref={documentUploadRef}
+                            hazopId={hazopData.id}
+                            disabled={loading}
+                        />
+                    </div>
+                )}
+
                 {confirmPopup && (
                     <ConfirmationPopup
                         message={confirmPopup.message}
@@ -311,7 +389,7 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
                     />
                 )}
                 {removeConfirmationPopup && (
-                    <RemoveConfirmationPopup
+                    <ConfirmationPopup
                         message={removeConfirmationPopup.message}
                         onConfirm={removeConfirmationPopup.yes}
                         onCancel={removeConfirmationPopup.no}
@@ -334,7 +412,7 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
                         onClick={handleSave}
                         disabled={loading}
                     >
-                        {loading ? "Saving..." : "Save Team"}
+                        {loading ? "Saving..." : "Save Changes"}
                     </button>
                 </div>
             </div>

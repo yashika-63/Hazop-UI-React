@@ -269,6 +269,7 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
                     companyId,
                     empCode: member.empCode,
                     hazopRole: member.role,
+                    hazopId: hazopId
                   },
                 }
               );

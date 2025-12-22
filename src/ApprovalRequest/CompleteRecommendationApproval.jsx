@@ -10,7 +10,7 @@ const CompleteRecommendationApproval = () => {
     const [loading, setLoading] = useState(true);
     // const [selectedRecord, setSelectedRecord] = useState(null);
     // const [confirmation, setConfirmation] = useState(null);
-
+    const [dateLimits, setDateLimits] = useState({ min: "", max: "" });
     // Inline Edit States (Only for Overdue Rescheduling now)
     const [editingRowId, setEditingRowId] = useState(null);
     const [tempTargetDate, setTempTargetDate] = useState("");
@@ -146,7 +146,22 @@ const CompleteRecommendationApproval = () => {
 
     const handleEditClick = (record) => {
         setEditingRowId(record.id);
-        setTempTargetDate(record.targetDate ? record.targetDate.split('T')[0] : "");
+        const currentTargetDateStr = record.targetDate ? record.targetDate.split('T')[0] : getTodayString();
+        setTempTargetDate(currentTargetDateStr);
+
+        const baseDate = new Date(currentTargetDateStr);
+
+        // Min Date: Current Target + 1 Day (Tomorrow relative to target)
+        const minDateObj = new Date(baseDate);
+        minDateObj.setDate(baseDate.getDate() + 1);
+        const minDateStr = minDateObj.toISOString().split('T')[0];
+
+        // Max Date: Current Target + 7 Days
+        const maxDateObj = new Date(baseDate);
+        maxDateObj.setDate(baseDate.getDate() + 7);
+        const maxDateStr = maxDateObj.toISOString().split('T')[0];
+
+        setDateLimits({ min: minDateStr, max: maxDateStr });
         setOpenDropdown(null);
     };
 
@@ -159,7 +174,9 @@ const CompleteRecommendationApproval = () => {
         if (!tempTargetDate) {
             return showToast("Please select a valid date", "error");
         }
-
+        if (tempTargetDate < dateLimits.min || tempTargetDate > dateLimits.max) {
+            return showToast(`Please select a date between ${formatDate(dateLimits.min)} and ${formatDate(dateLimits.max)}`, "warning");
+        }
         // --- NEW VALIDATION LOGIC ---
         // Find the current record in our state to get its original date
         const currentRecord = completedAssignments.find(r => r.id === recordId);
@@ -497,11 +514,11 @@ const CompleteRecommendationApproval = () => {
                                                         <span className="detail-label">Recommendation:</span>
                                                         <p className="detail-text">{rec.javaHazopNodeRecommendation?.recommendation}</p>
                                                     </div>
-                                                    <div className="detail-item">
+                                                    {/* <div className="detail-item">
                                                         <span className="detail-label">Management Remark:</span>
                                                         <p className="detail-text">{rec.javaHazopNodeRecommendation?.remarkbyManagement || "No remarks"}</p>
-                                                    </div>
-                                                    <div className="detail-item">
+                                                    </div> */}
+                                                    <div className="detail-item full-width">
                                                         <span className="detail-label"><FaHistory /> Target Date History:</span>
                                                         <div className="history-container detail-text">
                                                             {loadingHistory ? (

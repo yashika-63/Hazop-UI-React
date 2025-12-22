@@ -12,7 +12,7 @@ const HazopReportPage = ({ hazopId, onClose }) => {
 
     // 1. Force a fresh PDF generation every time data loads
     const [uniqueIdentifier, setUniqueIdentifier] = useState(Date.now());
-
+   const  companyId = localStorage.getItem("companyId");
     // Data States
     const [hazop, setHazop] = useState({});
     const [team, setTeam] = useState([]);
@@ -24,7 +24,7 @@ const HazopReportPage = ({ hazopId, onClose }) => {
     const [mocReferences, setMocReferences] = useState([]);
     const [registrationNodes, setRegistrationNodes] = useState([]);
     const [teamComments, setTeamComments] = useState([]);
-
+    const [documents , setDocuments] = useState([]);
     const [downloadDate] = useState(new Date().toLocaleString());
 
     useEffect(() => {
@@ -40,7 +40,7 @@ const HazopReportPage = ({ hazopId, onClose }) => {
                     verificationRes,
                     mocRes,
                     regNodesRes,
-                    teamCommentsRes
+                    teamCommentsRes,documentsRes,
                 ] = await Promise.all([
                     axios.get(`http://${strings.localhost}/api/hazopRegistration/${hazopId}/full-details`),
                     axios.get(`http://${strings.localhost}/api/nodeRecommendation/getByHazopRegistration/${hazopId}`).catch(() => ({ data: [] })),
@@ -48,7 +48,15 @@ const HazopReportPage = ({ hazopId, onClose }) => {
                     axios.get(`http://${strings.localhost}/api/nodeRecommendation/getVerificationActionRecords/${hazopId}`).catch(() => ({ data: [] })),
                     axios.get(`http://${strings.localhost}/api/moc-reference/by-hazop?hazopRegistrationId=${hazopId}`).catch(() => ({ data: [] })),
                     axios.get(`http://${strings.localhost}/api/hazopNode/by-registration-status?registrationId=${hazopId}&status=true`).catch(() => ({ data: [] })),
-                    axios.get(`http://${strings.localhost}/api/team-comments/getByHazop/${hazopId}`).catch(() => ({ data: [] }))
+                    axios.get(`http://${strings.localhost}/api/team-comments/getByHazop/${hazopId}`).catch(() => ({ data: [] })),
+                    axios.get(`http://${strings.localhost}/api/javaHazopDocument/getByKeys`, {
+                        params: {
+                            companyId: companyId,
+                            primeryKey: "HAZOPFIRSTPAGEID",
+                            primeryKeyValue: hazopId,
+                        },
+                    }).catch(() => ({ data: [] }))
+                
                 ]);
 
                 const full = fullRes.data || {};
@@ -78,7 +86,7 @@ const HazopReportPage = ({ hazopId, onClose }) => {
                 setVerificationData(verificationRes.data || []);
                 setMocReferences(mocRes.data || []);
                 setTeamComments(teamCommentsRes.data || []);
-
+                setDocuments(Array.isArray(documentsRes.data) ? documentsRes.data : []);
                 // Update identifier to force fresh PDF
                 setUniqueIdentifier(Date.now());
 
@@ -130,8 +138,8 @@ const HazopReportPage = ({ hazopId, onClose }) => {
                 <div style={{ display: "flex", justifyContent: "space-between", padding: 15, borderBottom: "1px solid #ddd", backgroundColor: "#f8f9fa" }}>
                     <button onClick={onClose} style={{ backgroundColor: "#dc3545", color: "#fff", padding: "8px 16px", borderRadius: 4, border: "none", cursor: "pointer" }}>Close</button>
                     <div>
-                        <button disabled={isDataLoading} onClick={() => generateHazopExcel({ hazop, team, nodes, registrationNodes, nodeDetailsState: nodeDetails, allRecommendations, mocReferences, verificationData, assignData, hazopId, teamComments })} style={{ backgroundColor: isDataLoading ? "#94d3a2" : "#28a745", color: "#fff", padding: "8px 16px", borderRadius: 4, border: "none", cursor: "pointer", marginRight: 10 }}>Download Excel</button>
-                        <button disabled={isDataLoading} onClick={() => generateHazopPdf({ hazop, team, nodes, nodeDetails, nodeDetailsState: nodeDetails, nodeRecommendations, allRecommendations, verificationData, mocReferences, assignData, downloadDate, hazopId })} style={{ backgroundColor: isDataLoading ? "#94d3a2" : "#28a745", color: "#fff", padding: "8px 16px", borderRadius: 4, border: "none", cursor: "pointer" }}>Download PDF</button>
+                        <button disabled={isDataLoading} onClick={() => generateHazopExcel({ hazop, team, nodes, registrationNodes, nodeDetailsState: nodeDetails, allRecommendations, mocReferences, verificationData, assignData, hazopId, teamComments ,documents})} style={{ backgroundColor: isDataLoading ? "#94d3a2" : "#28a745", color: "#fff", padding: "8px 16px", borderRadius: 4, border: "none", cursor: "pointer", marginRight: 10 }}>Download Excel</button>
+                        <button disabled={isDataLoading} onClick={() => generateHazopPdf({ hazop, team, nodes, nodeDetails, nodeDetailsState: nodeDetails, allRecommendations, verificationData, mocReferences, assignData, downloadDate, hazopId ,registrationNodes, documents })} style={{ backgroundColor: isDataLoading ? "#94d3a2" : "#28a745", color: "#fff", padding: "8px 16px", borderRadius: 4, border: "none", cursor: "pointer" }}>Download PDF</button>
                     </div>
                 </div>
 
@@ -157,6 +165,7 @@ const HazopReportPage = ({ hazopId, onClose }) => {
                                     verificationData={verificationData}
                                     assignData={assignData}
                                     downloadDate={downloadDate}
+                                    documents={documents}
                                 />
                             }
                         >
