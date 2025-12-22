@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
 import { formatDate, showToast } from "../CommonUI/CommonUI";
-import NodeDetailsUpdatePopup from "./UpdateNodeDetails";
 import { FaEdit, FaEllipsisV, FaTrash } from "react-icons/fa";
 import TextareaAutosize from "react-textarea-autosize";
 import RiskLevelPopup from "./RiskLevelPopup";
@@ -10,7 +9,6 @@ import CreateNodeDetails from "./CreateNodeDetails";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import axios from "axios";
 import SequenceUpdatePopup from "./SequenceUpdatePopup";
-import MainComponent from "../CreateNodeDiscussion/MainComponent";
 
 const NodeDetails = () => {
   const location = useLocation();
@@ -59,8 +57,12 @@ const NodeDetails = () => {
       {openDropdown === item.id && (
         <div className="dropdown-content">
           <button
-            onClick={() => openUpdatePopup(item)}
-            disabled={node?.completionStatus} // disable if node is completed
+            onClick={() =>
+              navigate("/CreateNodeDetails", {
+                state: { detail: item, nodeID: id },
+              })
+            }
+            disabled={node?.completionStatus}
             style={{
               cursor: node?.completionStatus ? "not-allowed" : "pointer",
               opacity: node?.completionStatus ? 0.6 : 1,
@@ -122,12 +124,6 @@ const NodeDetails = () => {
     await fetchDetails();
   };
 
-  const openUpdatePopup = (detail) => {
-    navigate("/UpdateNodeDetails", {
-      state: { detail, node: node, nodeID: id },
-    });
-  };
-
   const getBorderColor = (risk) => {
     const r = Number(risk);
 
@@ -176,7 +172,7 @@ const NodeDetails = () => {
     if ([16, 18].includes(r)) return "risk-badge risk-substantial";
     if ([20, 25].includes(r)) return "risk-badge risk-intolerable";
 
-    return "risk-default";
+    return "risk-badge risk-default";
   };
 
   const reorder = (list, startIndex, endIndex) => {
@@ -557,12 +553,13 @@ const NodeDetails = () => {
                           )} ${snapshot.isDragging ? "dragging" : ""}`}
                         >
                           {renderDropdown(d)}
-                          
+
                           <div className="nd-detail-header">
                             <div>
                               <h2>General Parameter: {d.generalParameter}</h2>
                               <p>Specific Parameter: {d.specificParameter}</p>
                               <p>Guide Word: {d.guidWord}</p>
+                              <p>Team Members: {d.discussionContributors}</p>
                             </div>
 
                             <div className="nd-detail-badges">
@@ -821,7 +818,7 @@ const NodeDetails = () => {
       )} */}
 
       {showDetailPopup && (
-        <MainComponent
+        <CreateNodeDetails
           onClose={() => setShowDetailPopup(false)}
           onSave={handleSaveDetail}
           nodeID={id}

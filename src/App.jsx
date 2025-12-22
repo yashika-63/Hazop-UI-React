@@ -11,7 +11,6 @@ import RequestHandler from './ApprovalRequest/RequestHandler';
 import RecommandationHandler from './HazopRecommandation/RecommandationHandler';
 import HazopApprovalViewPage from './ApprovalRequest/HazopApprovalViewPage';
 import HazopConfirmationViewPage from './ApprovalRequest/HazopConfirmationViewPage';
-import UpdateNodeDetails from './AddNodeScreen/UpdateNodeDetails';
 import HazopWorkflow from './HazopWorkflow/HazopStatus';
 import MOCList from './MOC/MOCList';
 import HazopStatusPage from './HazopList/HazopStatusPage';
@@ -22,7 +21,6 @@ import { ToastContainer } from 'react-toastify';
 import './App.css';
 import "./styles/global.css";
 import RoleBasedHazopPage from './HazopEntry/RoleBasedHazopPage';
-import MainComponent from './CreateNodeDiscussion/mainComponent';
 import NodeRetrieve from './AddNodeScreen/NodeRetrieve';
 import ViewNodeDiscussion from './AddNodeScreen/ViewNodeDiscussion';
 import Dashboard from './Dashboard/Dashboard';
@@ -75,7 +73,6 @@ const App = () => {
                     <Route path="/hazop-approval-view" element={<HazopApprovalViewPage />} />
                     <Route path="/hazop-confirmation-view" element={<HazopConfirmationViewPage />} />
                     <Route path="/CreateNodeDetails" element={<CreateNodeDetails />} />
-                    <Route path="/UpdateNodeDetails" element={<UpdateNodeDetails />} />
                     <Route path="/complete-hazop-view" element={<HazopView />} />
                     <Route path="/MOCList" element={<MOCList />} />
                     <Route path="/NodePopup/:id" element={<NodePopup />} />
@@ -83,7 +80,6 @@ const App = () => {
                     <Route path="/HazopStatusPage" element={<HazopStatusPage />} />
                     <Route path="/RoleBasedHazopPage" element={<RoleBasedHazopPage />} />
                     <Route path="/NodePopup" element={<NodePopup />} />
-                    <Route path="/MainComponent" element={<MainComponent />} />
                     <Route path='/NodeRetrieve' element={<NodeRetrieve />} />
                     <Route path="/ViewNodeDiscussion" element={<ViewNodeDiscussion/>} />
                     <Route path="/HazopView" element={<HazopView />} />

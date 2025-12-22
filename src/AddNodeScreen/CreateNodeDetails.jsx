@@ -13,6 +13,7 @@ const initialState = {
   generalParameter: "",
   specificParameter: "",
   guidWord: "",
+  discussionContributors: "",
   deviation: "",
   causes: "",
   consequences: "",
@@ -28,8 +29,8 @@ const initialState = {
 
 const CreateNodeDetails = () => {
   const [form, setForm] = useState(initialState);
-  const [rows, setRows] = useState(6);
-  const [smallRows, setSmallRows] = useState(4);
+  const [rows, setRows] = useState(11);
+  const [smallRows, setSmallRows] = useState(6);
   const [loading, setLoading] = useState(false);
   const [tempRecommendations, setTempRecommendations] = useState([]);
   const additionalControlRef = React.useRef(null);
@@ -52,6 +53,32 @@ const CreateNodeDetails = () => {
   const [currentNodeData, setCurrentNodeData] = useState(null);
   const department = currentNodeData?.javaHazopRegistration?.department || null;
   const [showRibbonInfo, setShowRibbonInfo] = useState(false);
+  const passedDetail = location.state?.detail || null;
+
+  useEffect(() => {
+    const loadPassedDetail = async () => {
+      if (!passedDetail) return;
+
+      setCurrentDetailId(passedDetail.id);
+      setCurrentDetailNo(passedDetail.nodeDetailNumber);
+
+      // Load recommendations for this detail
+      const recRes = await fetch(
+        `http://${strings.localhost}/api/nodeRecommendation/getByDetailId/${passedDetail.id}`
+      );
+      const recs = await recRes.json();
+
+      setForm({
+        ...passedDetail,
+        additionalControl: recs.map((r) => r.recommendation).join("\n") || "• ",
+      });
+
+      setTempRecommendations(recs);
+      setIsSaved(true);
+    };
+
+    loadPassedDetail();
+  }, [passedDetail]);
 
   useEffect(() => {
     const fetchNode = async () => {
@@ -91,12 +118,12 @@ const CreateNodeDetails = () => {
         name === "deviation"
       ) {
         const lineCount = value.split("\n").length;
-        setRows(Math.min(10, Math.max(6, lineCount)));
+        setRows(Math.min(15, Math.max(11, lineCount)));
       }
 
       if (name === "additionalControl" || name === "existineControl") {
         const lineCount = value.split("\n").length;
-        setSmallRows(Math.min(8, Math.max(4, lineCount)));
+        setSmallRows(Math.min(8, Math.max(6, lineCount)));
       }
 
       if (name === "existineProbability" || name === "existingSeverity") {
@@ -117,14 +144,16 @@ const CreateNodeDetails = () => {
   };
 
   useEffect(() => {
+    if (passedDetail) return;
     fetch(
       `http://${strings.localhost}/api/hazopNodeDetail/node/${currentNodeId}`
     )
       .then((res) => res.json())
       .then((data) => setDetails(data));
-  }, [nodeID]);
+  }, [nodeID, passedDetail]);
 
   useEffect(() => {
+    if (passedDetail) return;
     const fetchAllDetails = async () => {
       if (!nodeID) return;
       try {
@@ -158,7 +187,7 @@ const CreateNodeDetails = () => {
     };
 
     fetchAllDetails();
-  }, [nodeID]);
+  }, [nodeID, passedDetail]);
 
   const validate = () => {
     if (!form.generalParameter.trim()) {
@@ -172,6 +201,9 @@ const CreateNodeDetails = () => {
     if (!form.guidWord.trim()) {
       showToast("Guide Word is required.", "warn");
       return false;
+    }
+    if (!form.discussionContributors.trim()) {
+      showToast("Team Members are required.", "warn");
     }
     if (!form.causes.trim()) {
       showToast("Causes is required.", "warn");
@@ -221,46 +253,7 @@ const CreateNodeDetails = () => {
         return false;
       }
     }
-
     return true;
-  };
-
-  const loadNodeDetails = async (nodeId) => {
-    try {
-      setLoading(true);
-      const res = await fetch(
-        `http://${strings.localhost}/api/hazopNodeDetail/node/${nodeId}`
-      );
-      const data = await res.json();
-      setDetails(data);
-
-      if (data.length > 0) {
-        const firstDetail = data[0];
-        const recsRes = await fetch(
-          `http://${strings.localhost}/api/nodeRecommendation/getByDetailId/${firstDetail.id}`
-        );
-        const recommendations = await recsRes.json();
-
-        setForm({
-          ...firstDetail,
-          additionalControl:
-            recommendations.map((r) => r.recommendation).join("\n") || "• ",
-        });
-        setTempRecommendations(recommendations);
-        setCurrentDetailId(firstDetail.id);
-        setCurrentIndex(0);
-      } else {
-        setForm(initialState);
-        setTempRecommendations([]);
-        setCurrentDetailId(null);
-        setCurrentIndex(0);
-      }
-    } catch (err) {
-      console.error(err);
-      // showToast("Failed to load node details.", "error");
-    } finally {
-      setLoading(false);
-    }
   };
 
   const handleSubmit = async (e) => {
@@ -355,6 +348,7 @@ const CreateNodeDetails = () => {
   };
 
   useEffect(() => {
+    if (passedDetail) return;
     const fetchFirstNodeDetail = async () => {
       if (!nodeID) return;
 
@@ -391,22 +385,14 @@ const CreateNodeDetails = () => {
     };
 
     fetchFirstNodeDetail();
-  }, [nodeID]);
-
+  }, [nodeID, passedDetail]);
 
   const fetchDetailByDirection = async (direction) => {
     if (!nodeID) return null;
 
     try {
       setLoading(true);
-
-      // Start with mandatory parameters
       let url = `http://${strings.localhost}/api/hazopNodeDetail/getByDirectionNew?nodeId=${currentNodeId}&direction=${direction}`;
-
-      // CHANGE HERE: 
-      // We check if 'currentDetailId' exists. 
-      // If currentDetailId is null, it means we are on the Blank Page.
-      // If we are on the Blank Page, we DO NOT send the number, satisfying your request to pass nothing.
       if (
         currentDetailId !== null &&
         currentDetailNo !== null &&
@@ -414,11 +400,8 @@ const CreateNodeDetails = () => {
       ) {
         url += `&currentDetailNumber=${currentDetailNo}`;
       }
-
       const res = await fetch(url);
-
       if (!res.ok) return null;
-
       const data = await res.json();
       return data || null;
     } catch (error) {
@@ -429,6 +412,7 @@ const CreateNodeDetails = () => {
       setLoading(false);
     }
   };
+
   const handleSaveAndNext = async () => {
     if (!validate()) return;
 
@@ -439,6 +423,7 @@ const CreateNodeDetails = () => {
         generalParameter: form.generalParameter,
         specificParameter: form.specificParameter,
         guidWord: form.guidWord,
+        discussionContributors: form.discussionContributors,
         deviation: form.deviation,
         causes: form.causes,
         consequences: form.consequences,
@@ -515,9 +500,7 @@ const CreateNodeDetails = () => {
       showToast("Please save the form before switching nodes.", "warn");
       return;
     }
-
     const nextNode = await fetchNodeByDirection(direction);
-
     if (!nextNode) {
       showToast(
         direction === "previous"
@@ -527,46 +510,52 @@ const CreateNodeDetails = () => {
       );
       return;
     }
-
     setCurrentNodeId(nextNode.id);
-
     try {
       setLoading(true);
-
       const res = await fetch(
         `http://${strings.localhost}/api/hazopNodeDetail/node/${nextNode.id}`
       );
-      const detailsData = await res.json();
+      const contentType = res.headers.get("content-type");
+      let detailsData = null;
 
-      // ✔ FIXED: Ensure it's an array before reading length
-      if (Array.isArray(detailsData) && detailsData.length > 0) {
-        const firstDetail = detailsData[0];
-        const recsRes = await fetch(
-          `http://${strings.localhost}/api/nodeRecommendation/getByDetailId/${firstDetail.id}`
-        );
-        const recommendations = await recsRes.json();
-
-        setForm({
-          ...firstDetail,
-          additionalControl:
-            recommendations.map((r) => r.recommendation).join("\n") || "• ",
-        });
-
-        setTempRecommendations(recommendations);
-        setCurrentDetailId(firstDetail.id);
-        setCurrentIndex(0);
-        setIsSaved(true);
-
+      if (contentType && contentType.includes("application/json")) {
+        detailsData = await res.json();
       } else {
-        // ✔ API sent "No node details found" → open blank form
+        const textResponse = await res.text();
+        detailsData = textResponse;
+      }
+      const noDeviation =
+        !detailsData ||
+        typeof detailsData === "string" ||
+        (detailsData.message &&
+          detailsData.message.includes("No node details")) ||
+        (Array.isArray(detailsData) && detailsData.length === 0);
+
+      if (noDeviation) {
         setForm(initialState);
         setTempRecommendations([]);
         setCurrentDetailId(null);
         setCurrentIndex(0);
         setIsSaved(true);
-        showToast("Blank form opened for new node.", "info");
-      }
 
+        showToast("Blank form opened for this node.", "info");
+        return;
+      }
+      const firstDetail = detailsData[0];
+      const recsRes = await fetch(
+        `http://${strings.localhost}/api/nodeRecommendation/getByDetailId/${firstDetail.id}`
+      );
+      const recommendations = await recsRes.json();
+      setForm({
+        ...firstDetail,
+        additionalControl:
+          recommendations.map((r) => r.recommendation).join("\n") || "• ",
+      });
+      setTempRecommendations(recommendations);
+      setCurrentDetailId(firstDetail.id);
+      setCurrentIndex(0);
+      setIsSaved(true);
     } catch (err) {
       console.error("Error loading node details:", err);
     } finally {
@@ -585,9 +574,7 @@ const CreateNodeDetails = () => {
         showToast("No previous record found.", "info");
         return;
       }
-
       const recs = await loadRecommendations(lastRecord.id);
-
       setForm({
         ...lastRecord,
         additionalControl: recs.map((r) => r.recommendation).join("\n") || "• ",
@@ -598,9 +585,7 @@ const CreateNodeDetails = () => {
       setCurrentDetailNo(lastRecord.nodeDetailNumber);
       return;
     }
-
     const nextDetail = await fetchDetailByDirection(direction);
-
     if (!nextDetail && direction === "next") {
       setForm(initialState);
       setTempRecommendations([]);
@@ -608,19 +593,15 @@ const CreateNodeDetails = () => {
       showToast("Blank form opened. Enter new details.", "info");
       return;
     }
-
     if (!nextDetail && direction === "previous") {
       showToast("No previous record found.", "info");
       return;
     }
-
     const recs = await loadRecommendations(nextDetail.id);
-
     setForm({
       ...nextDetail,
       additionalControl: recs.map((r) => r.recommendation).join("\n") || "• ",
     });
-
     setTempRecommendations(recs);
     setCurrentDetailId(nextDetail.id);
     setCurrentDetailNo(nextDetail.nodeDetailNumber);
@@ -631,13 +612,11 @@ const CreateNodeDetails = () => {
       showToast("Please save the current deviation first.", "warn");
       return;
     }
-
     setForm(initialState);
     setTempRecommendations([]);
     setCurrentDetailId(null);
     setCurrentIndex(details.length);
     setIsSaved(true);
-
     showToast("Blank form opened. Add new deviation.", "info");
   };
 
@@ -757,14 +736,8 @@ const CreateNodeDetails = () => {
     return riskRating >= 12;
   };
 
-  const renderScaleSelect = (name, value, style, className) => (
-    <select
-      name={name}
-      value={value}
-      onChange={handleChange}
-      className={className}
-      style={style}
-    >
+  const renderScaleSelect = (name, value, style) => (
+    <select name={name} value={value} onChange={handleChange} style={style}>
       <option value="">Select</option>
       {[1, 2, 3, 4, 5].map((n) => (
         <option key={n} value={n}>
@@ -869,17 +842,8 @@ const CreateNodeDetails = () => {
     }
   }, []);
 
-  const [isNodePopupOpen, setIsNodePopupOpen] = useState(false);
-
   return (
     <div>
-      <div className="node-header">
-        <button className="nd-back-btn" onClick={() => navigate(-1)}>
-          ← Back
-        </button>
-        <h1>Add Deviation</h1>
-      </div>
-
       <RibbonButtons
         handleSubmit={handleSubmit}
         handlePrevNext={handlePrevNext}
@@ -902,10 +866,11 @@ const CreateNodeDetails = () => {
                     <span className="required-marker">*</span>General Parameter
                   </div>
                   <small
-                    className={`char-count ${form.generalParameter.length >= 1000
+                    className={`char-count ${
+                      form.generalParameter.length >= 1000
                         ? "limit-reached"
                         : ""
-                      }`}
+                    }`}
                   >
                     {form.generalParameter.length}/1000
                   </small>
@@ -924,10 +889,11 @@ const CreateNodeDetails = () => {
                     <span className="required-marker">*</span>Specific Parameter
                   </div>
                   <small
-                    className={`char-count ${form.specificParameter.length >= 1000
+                    className={`char-count ${
+                      form.specificParameter.length >= 1000
                         ? "limit-reached"
                         : ""
-                      }`}
+                    }`}
                   >
                     {form.specificParameter.length}/1000
                   </small>
@@ -946,8 +912,9 @@ const CreateNodeDetails = () => {
                     <span className="required-marker">*</span>Guide Word
                   </div>
                   <small
-                    className={`char-count ${form.guidWord.length >= 1000 ? "limit-reached" : ""
-                      }`}
+                    className={`char-count ${
+                      form.guidWord.length >= 1000 ? "limit-reached" : ""
+                    }`}
                   >
                     {form.guidWord.length}/1000
                   </small>
@@ -956,6 +923,20 @@ const CreateNodeDetails = () => {
                   type="text"
                   name="guidWord"
                   value={form.guidWord}
+                  onChange={handleChange}
+                  maxLength={1000}
+                />
+              </div>
+              <div className="form-group">
+                <label className="table-header">
+                  <div>
+                    <span className="required-marker">*</span>Team Members
+                  </div>
+                </label>
+                <input
+                  type="text"
+                  name="discussionContributors"
+                  value={form.discussionContributors}
                   onChange={handleChange}
                   maxLength={1000}
                 />
@@ -969,8 +950,9 @@ const CreateNodeDetails = () => {
                     <span className="required-marker">*</span>Deviation
                   </div>
                   <small
-                    className={`char-count ${form.deviation.length >= 5000 ? "limit-reached" : ""
-                      }`}
+                    className={`char-count ${
+                      form.deviation.length >= 5000 ? "limit-reached" : ""
+                    }`}
                   >
                     {form.deviation.length}/5000
                   </small>
@@ -990,8 +972,9 @@ const CreateNodeDetails = () => {
                     <span className="required-marker">*</span>Causes
                   </div>
                   <small
-                    className={`char-count ${form.causes.length >= 5000 ? "limit-reached" : ""
-                      }`}
+                    className={`char-count ${
+                      form.causes.length >= 5000 ? "limit-reached" : ""
+                    }`}
                   >
                     {form.causes.length}/5000
                   </small>
@@ -1011,8 +994,9 @@ const CreateNodeDetails = () => {
                     <span className="required-marker">*</span>Consequences
                   </div>
                   <small
-                    className={`char-count ${form.consequences.length >= 5000 ? "limit-reached" : ""
-                      }`}
+                    className={`char-count ${
+                      form.consequences.length >= 5000 ? "limit-reached" : ""
+                    }`}
                   >
                     {form.consequences.length}/5000
                   </small>
@@ -1032,10 +1016,11 @@ const CreateNodeDetails = () => {
                   <label className="table-header">
                     <div>Existing Control</div>
                     <small
-                      className={`char-count ${form.existineControl.length >= 5000
+                      className={`char-count ${
+                        form.existineControl.length >= 5000
                           ? "limit-reached"
                           : ""
-                        }`}
+                      }`}
                     >
                       {form.existineControl.length}/5000
                     </small>
@@ -1053,7 +1038,6 @@ const CreateNodeDetails = () => {
                 <div className="metric-row">
                   <div className="form-group">
                     <label>
-                      {" "}
                       <span className="required-marker">*</span>P
                     </label>
                     {renderScaleSelect(
@@ -1063,7 +1047,6 @@ const CreateNodeDetails = () => {
                         borderColor: getBorderColor(form.riskRating),
                         borderWidth: "2px",
                         borderStyle: "solid",
-                        marginTop: "5px",
                         borderLeft: `5px solid ${getBorderColor(
                           form.riskRating
                         )}`,
@@ -1072,7 +1055,6 @@ const CreateNodeDetails = () => {
                   </div>
                   <div className="form-group">
                     <label>
-                      {" "}
                       <span className="required-marker">*</span>S
                     </label>
                     {renderScaleSelect(
@@ -1082,7 +1064,6 @@ const CreateNodeDetails = () => {
                         borderColor: getBorderColor(form.riskRating),
                         borderWidth: "2px",
                         borderStyle: "solid",
-                        marginTop: "5px",
                         borderLeft: `5px solid ${getBorderColor(
                           form.riskRating
                         )}`,
@@ -1153,23 +1134,7 @@ const CreateNodeDetails = () => {
                       <FaPlus />
                     </div>
                   </div>
-                  <div
-                    className="textareaFont"
-                    style={{
-                      width: "100%",
-                      padding: "5.5px",
-                      borderRadius: "9px",
-                      border: "1px solid #ccc",
-                      fontSize: "14px",
-                      outline: "none",
-                      background: "transparent",
-                      transition: "all 0.2s ease",
-                      boxShadow: "0 1px 2px rgba(0, 0, 0, 0.05)",
-                      maxHeight: "300px",
-                      minHeight: "220px",
-                      overflowY: "auto",
-                    }}
-                  >
+                  <div className="textareaFont recommendation-textarea-style">
                     {tempRecommendations.map((rec, index) => (
                       <div
                         key={index}
@@ -1206,9 +1171,9 @@ const CreateNodeDetails = () => {
                                 prev.map((r, i) =>
                                   i === index
                                     ? {
-                                      ...r,
-                                      editing: r.recommendation.trim() === "",
-                                    }
+                                        ...r,
+                                        editing: r.recommendation.trim() === "",
+                                      }
                                     : r
                                 )
                               );
@@ -1254,11 +1219,11 @@ const CreateNodeDetails = () => {
                     ))}
                   </div>
                   <small
-                    className={`char-count ${form.additionalControl.length >= 5000
+                    className={`char-count ${
+                      form.additionalControl.length >= 5000
                         ? "limit-reached"
                         : ""
-                      }`}
-                    style={{ marginTop: "9px" }}
+                    }`}
                   >
                     {form.additionalControl.length}/5000
                   </small>
@@ -1278,7 +1243,6 @@ const CreateNodeDetails = () => {
                         borderColor: getBorderColor(form.additionalRiskRating),
                         borderWidth: "2px",
                         borderStyle: "solid",
-                        marginTop: "5px",
                         borderLeft: `5px solid ${getBorderColor(
                           form.additionalRiskRating
                         )}`,
@@ -1299,7 +1263,6 @@ const CreateNodeDetails = () => {
                         borderColor: getBorderColor(form.additionalRiskRating),
                         borderWidth: "2px",
                         borderStyle: "solid",
-                        marginTop: "5px",
                         borderLeft: `5px solid ${getBorderColor(
                           form.additionalRiskRating
                         )}`,
