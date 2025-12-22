@@ -4,6 +4,8 @@ import { FaEllipsisV, FaEye, FaTimes } from "react-icons/fa";
 import './Approval.css';
 import { formatDate, showToast, truncateWords } from "../CommonUI/CommonUI";
 import { strings } from "../string";
+import { useNavigate } from "react-router-dom";
+
 
 const HazopTeamAcceptanceApproval = () => {
     const [teamData, setTeamData] = useState([]);
@@ -17,6 +19,7 @@ const HazopTeamAcceptanceApproval = () => {
     const [confirmAction, setConfirmAction] = useState(null);
     const [hazopLoading, setHazopLoading] = useState(false);
 
+    const navigate = useNavigate();
     const empCode = localStorage.getItem("empCode");
 
     const toggleDropdown = (id) => {
@@ -33,7 +36,7 @@ const HazopTeamAcceptanceApproval = () => {
                     actionTaken: 0
                 }
             });
-            const data = Array.isArray(response.data)? response.data: []; 
+            const data = Array.isArray(response.data) ? response.data : [];
             setTeamData(data);
         } catch (err) {
             console.error(err);
@@ -57,7 +60,9 @@ const HazopTeamAcceptanceApproval = () => {
                     <button type="button" onClick={() => openRecordModal(item)}>
                         <FaEye /> View
                     </button>
-
+                    <button type="button" onClick={() => handleViewClick(item)}>
+                        <FaEye /> View Hazop
+                    </button>
                 </div>
             )}
         </div>
@@ -67,8 +72,10 @@ const HazopTeamAcceptanceApproval = () => {
         setSelectedRecord(record);
         setShowModal(true);
     };
-
-
+    const handleViewClick = (item) => {
+        localStorage.setItem("hazopId", item.javaHazopRegistration?.id);
+        navigate("/HazopView");
+    };
     const closeModal = () => {
         setSelectedRecord(null);
         setShowModal(false);

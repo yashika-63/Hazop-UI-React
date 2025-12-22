@@ -21,7 +21,8 @@ const RequestHandler = () => {
         registrationVerificationPending: 0,
         approvalPending: 0,
         assignmentPending: 0,
-        totalPendingCount: 0
+        totalPendingCount: 0,
+        signOffPending: 0
 
     });
 
@@ -85,11 +86,11 @@ const RequestHandler = () => {
                     >
                         <FaList />
                         Hazop Sign Off
-                        {counts.approvalPending > 0 && (
-                            <span className="badge">{counts.approvalPending}</span>
+                        {counts.signOffPending > 0 && (
+                            <span className="badge">{counts.signOffPending}</span>
                         )}
                     </button>
-                    
+
                     <button
                         type="button"
                         className={activeSection === 'HazopConfirmationApproval' ? 'active' : ''}

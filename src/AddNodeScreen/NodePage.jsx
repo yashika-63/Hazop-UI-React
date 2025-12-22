@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./Node.css";
 import { formatDate, showToast } from "../CommonUI/CommonUI";
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
 import { strings } from "../string";
-import { FaEdit, FaEllipsisV } from "react-icons/fa";
+import { FaEdit, FaEllipsisV, FaUpload } from "react-icons/fa";
 import { FaSquareCheck } from "react-icons/fa6";
 import NodePopup from "./NodePopup";
+import HazopDocumentUpload from "../HazopEntry/HazopDocumentUpload";
 
 const NodePage = () => {
   const [showPopup, setShowPopup] = useState(false);
@@ -25,6 +26,11 @@ const NodePage = () => {
   const [hazopData, setHazopData] = useState();
   const [documents, setDocuments] = useState([]);
   const [showDocuments, setShowDocuments] = useState(false);
+  const [showUploadSection, setShowUploadSection] = useState(false);
+  
+  // Refs
+  const documentUploadRef = useRef();
+  const uploadSectionContainerRef = useRef(null); // Ref for scrolling
 
   const toggleDropdown = (id) => {
     setOpenDropdown(openDropdown === id ? null : id);
@@ -167,6 +173,26 @@ const NodePage = () => {
     fetchMocDetails();
     loadDocuments(hazopData.id);
   }, [hazopData]);
+
+  const handleUploadSubmit = async () => {
+    if (documentUploadRef.current && hazopData?.id) {
+      await documentUploadRef.current.uploadDocuments(hazopData.id);
+      loadDocuments(hazopData.id);
+      setShowUploadSection(false);
+    }
+  };
+
+  // Scroll to section when opened
+  useEffect(() => {
+    if (showUploadSection && uploadSectionContainerRef.current) {
+      setTimeout(() => {
+        uploadSectionContainerRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }, 100); // Small delay to ensure render
+    }
+  }, [showUploadSection]);
 
   return (
     <div>
@@ -389,6 +415,14 @@ const NodePage = () => {
             >
               + Add Node
             </button>
+            <button
+              className="add-btn"
+              onClick={() => setShowUploadSection(!showUploadSection)}
+              style={{ display: "flex", alignItems: "center", gap: "5px" }}
+            >
+              <FaUpload />{" "}
+              {showUploadSection ? "Hide Upload" : "Upload Document"}
+            </button>
           </div>
         </div>
 
@@ -405,42 +439,69 @@ const NodePage = () => {
               </tr>
             </thead>
             <tbody>
-  {nodes.map((n, idx) => (
-    <tr
-      key={n.id}
-      onClick={() =>
-        navigate(`/NodeDetails`, { state: { id: n.id } })
-      }
-      style={{ cursor: "pointer" }}
-    >
-      <td>{idx + 1}</td>
-      <td>{n.nodeNumber}</td>
-      <td>{formatDate(n.registrationDate)}</td>
-      <td>{n.designIntent}</td>
-      <td>
-        <span
-          className={
-            n.completionStatus ? "status-completed" : "status-pending"
-          }
-        >
-          {n.completionStatus ? "Completed" : "Ongoing"}
-        </span>
-      </td>
+              {nodes.map((n, idx) => (
+                <tr
+                  key={n.id}
+                  onClick={() =>
+                    navigate(`/NodeDetails`, { state: { id: n.id } })
+                  }
+                  style={{ cursor: "pointer" }}
+                >
+                  <td>{idx + 1}</td>
+                  <td>{n.nodeNumber}</td>
+                  <td>{formatDate(n.registrationDate)}</td>
+                  <td>{n.designIntent}</td>
+                  <td>
+                    <span
+                      className={
+                        n.completionStatus
+                          ? "status-completed"
+                          : "status-pending"
+                      }
+                    >
+                      {n.completionStatus ? "Completed" : "Ongoing"}
+                    </span>
+                  </td>
 
-      <td onClick={(e) => e.stopPropagation()}>
-        <FaEdit
-          title="Update Node"
-          style={{ cursor: "pointer", color: "#1976d2" }}
-          onClick={() =>
-            navigate("/UpdateNode", { state: { nodeId: n.id } })
-          }
-        />
-      </td>
-    </tr>
-  ))}
-</tbody>
-
+                  <td onClick={(e) => e.stopPropagation()}>
+                    <FaEdit
+                      title="Update Node"
+                      style={{ cursor: "pointer", color: "#1976d2" }}
+                      onClick={() =>
+                        navigate("/UpdateNode", { state: { nodeId: n.id } })
+                      }
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
           </table>
+          
+          {showUploadSection && (
+            <div 
+                ref={uploadSectionContainerRef} 
+                className="upload-section-container highlight-section" 
+                style={{ 
+                    padding: '20px', 
+                    borderTop: '2px solid #3498db', 
+                    backgroundColor: '#f0f8ff', 
+                    marginTop: '20px',
+                    borderRadius: '8px',
+                    transition: 'all 0.3s ease-in-out'
+                }}
+            >
+                <h3>Document Upload</h3>
+                <HazopDocumentUpload 
+                    ref={documentUploadRef} 
+                    hazopId={hazopData?.id} 
+                />
+                <div className="center-controls">
+                    <button className="save-btn" onClick={handleUploadSubmit} disabled={loading}>
+                        {loading ? "Uploading..." : "Submit Upload"}
+                    </button>
+                </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

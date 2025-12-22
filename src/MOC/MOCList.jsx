@@ -35,7 +35,7 @@ const MOCList = () => {
         setLoading(true);
         try {
             const url = search
-                ? `http://${strings.localhost}/api/moc/search/hazop-yes?keyword=${search}`
+                ? `http://${strings.localhost}/api/moc/search/hazop-yes?keyword=${search}&page=${page}&size=${pageSize}`
                 : `http://${strings.localhost}/api/moc/hazop-yes?page=${page}&size=${pageSize}`;
 
             console.log("FETCH:", url);
@@ -47,17 +47,19 @@ const MOCList = () => {
             let pageNumber = 0;
             let pageCount = 0;
 
-            // 🔥 Search API case
             if (search) {
-                content = result.data || [];
-
-                pageNumber = (result.currentPage || 1) - 1;   // convert to zero-based
-                pageCount = result.totalPages || 1;
-
+                // 🔥 Handle Flat List Response (The fix for your specific issue)
+                if (Array.isArray(result)) {
+                    content = result;
+                    pageNumber = 0;
+                    pageCount = 1; // Pagination won't work perfectly with flat lists
+                } else {
+                    content = result.data || [];
+                    pageNumber = (result.currentPage || 1) - 1;
+                    pageCount = result.totalPages || 1;
+                }
             } else {
-                // 🔥 Normal API case
                 content = result.data || [];
-
                 pageNumber = (result.currentPage || 1) - 1;
                 pageCount = result.totalPages || 0;
             }
@@ -68,11 +70,11 @@ const MOCList = () => {
         } catch (error) {
             console.error("Error fetching MOC data:", error);
             setData([]);
-            setCurrentPage(0);
-            setTotalPages(0);
         }
         setLoading(false);
     };
+
+
 
 
 
@@ -138,7 +140,7 @@ const MOCList = () => {
                 <tbody>
                     {data.length === 0 ? (
                         <tr>
-                            <td colSpan="7" className="no-data1">
+                            <td colSpan="8" className="no-data1">
                                 No Data Found
                             </td>
                         </tr>

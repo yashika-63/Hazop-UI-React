@@ -5,6 +5,7 @@ import styles, { theme } from "./pdfStyles";
 import Header from "./Header";
 import Footer from "./Footer";
 import { memo } from "react";
+import { strings } from "../string";
 const columnWidths = {
     generalParam: "6%",
     specificParam: "6%",
@@ -30,6 +31,7 @@ const HazopPdfDocument = ({
     registrationNodes = [],
     nodeDetailsState = {},
     mocReferences = [],
+    documents = [],
     allRecommendations = [],
     verificationData = [],
     assignData = { rejected: [], accepted: [], assigned: [], notAssigned: [] },
@@ -131,7 +133,7 @@ const HazopPdfDocument = ({
                         </View>
                         {team?.map((m, i) => (
                             <View key={i} style={[styles.tableRow, i % 2 !== 0 ? styles.tableRowEven : {}]}>
-                                <View style={[styles.tableCol, { width: '30%' }]}><Text style={styles.tableCell}>{m?.firstName || ''} {m?.middleName || ''} {m?.lastName || ''}</Text></View>
+                                <View style={[styles.tableCol, { width: '30%' }]}><Text style={styles.tableCell}>{m?.firstName || ''} {m?.middleName || ''} {m?.lastName || ''} </Text></View>
                                 <View style={[styles.tableCol, { width: '20%' }]}><Text style={styles.tableCell}>{m?.dimension1 || '-'}</Text></View>
                                 <View style={[styles.tableCol, { width: '30%' }]}><Text style={styles.tableCell}>{m?.emailId || '-'}</Text></View>
                                 <View style={[styles.tableCol, { width: '20%' }]}><Text style={styles.tableCell}>{m?.role || '-'}</Text></View>
@@ -140,6 +142,35 @@ const HazopPdfDocument = ({
                         ))}
                     </View>
                 </View>
+                {documents && documents.length > 0 && (
+                    <View style={styles.section} wrap={false}>
+                        <Text style={styles.sectionTitle}>Attached Documents</Text>
+                        <View style={styles.table}>
+                            <View style={[styles.tableRow, styles.tableRowHeader]}>
+                                <View style={[styles.tableCol, { width: '10%' }]}><Text style={styles.tableCellHeader}>Sr No.</Text></View>
+                                <View style={[styles.tableCol, { width: '90%' }]}><Text style={styles.tableCellHeader}>Document Name</Text></View>
+                            </View>
+                            {documents.map((doc, i) => {
+                                const fileName = doc.filePath ? doc.filePath.split(/[\\/]/).pop() : "Unnamed Document";
+                                // const fileUrl = `http://${strings.localhost}/api/javaHazopDocument/view/${doc.id}`;
+                                return (
+                                    <View key={i} style={[styles.tableRow, i % 2 !== 0 ? styles.tableRowEven : {}]}>
+                                        <View style={[styles.tableCol, { width: '10%' }]}>
+                                            <Text style={styles.tableCell}>{i + 1}</Text>
+                                        </View>
+                                        <View style={[styles.tableCol, { width: '90%' }]}>
+                                            {/* <Link src={fileUrl} style={{ textDecoration: 'none' }}> */}
+                                                <Text style={[styles.tableCell, { color: '#007bff' }]}>
+                                                    {fileName}
+                                                </Text>
+                                            {/* </Link> */}
+                                        </View>
+                                    </View>
+                                );
+                            })}
+                        </View>
+                    </View>
+                )}
                 <Footer downloadDate={downloadDate} />
             </Page>
 

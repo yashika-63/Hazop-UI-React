@@ -2,18 +2,19 @@ import React, { useEffect, useState } from "react";
 import { FaHome, FaUser, FaProjectDiagram, FaFileArchive, FaFileAlt, FaList, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import "./Workflow.css";
 import { strings } from "../string";
-import { useParams } from "react-router-dom";
- 
+import { useParams, useNavigate } from "react-router-dom";
+
 export default function HazopWorkflow() {
   const [status, setStatus] = useState(null);
-  const { id } = useParams(); 
+  const navigate = useNavigate();
+  const { id } = useParams();
   useEffect(() => {
     if (!id) return;
     fetch(`http://${strings.localhost}/api/hazop/status/${id}`)
       .then((res) => res.json())
       .then((data) => setStatus(data));
   }, []);
- 
+
   const steps = [
     { key: "registration", label: "Create New HAZOP", color: "#1abc9c", icon: <FaHome /> },
     { key: "teamCreated", label: "Select Team & Management", color: "#3498db", icon: <FaUser /> },
@@ -24,13 +25,16 @@ export default function HazopWorkflow() {
     { key: "recommendationsCompleted", label: "Verify Details", color: "#2ecc71", icon: <FaCheckCircle /> },
     { key: "hazopFinalCompleted", label: "Close the HAZOP", color: "#34495e", icon: <FaTimesCircle /> },
   ];
- 
+
   if (!status) return <div className="loading-screen">Loading HAZOP Workflow...</div>;
- 
+
   return (
-    <div className="workflow-container">
+    <div>
+      <button type="button" className="nd-back-btn" onClick={() => navigate(-1)}>
+        ← Back
+      </button>
       <h2 className="workflow-title">HAZOP Workflow Progress</h2>
- 
+
       <div className="workflow-horizontal">
         {steps.map((step, i) => {
           const completed = status[step.key];
@@ -43,7 +47,7 @@ export default function HazopWorkflow() {
                 {React.cloneElement(step.icon, { color: completed ? "#fff" : step.color, size: 24 })}
               </div>
               <div className="step-label">{step.label}</div>
- 
+
               {i < steps.length - 1 && (
                 <div
                   className="connector"

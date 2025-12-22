@@ -372,7 +372,7 @@ const PendingRecommendationApproval = () => {
                         10
                       )}
                 </td>
-                <td>{rec.createdByName}</td>
+                <td>{rec.createdByName || '-'}</td>
                 <td onClick={(e) => e.stopPropagation()}>
                   <div className="dropdown">
                     <button

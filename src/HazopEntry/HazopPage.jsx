@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios, { formToJSON } from "axios";
 import "./HazopPage.css";
-import { FaEllipsisV, FaEye, FaEdit, FaTrash, FaTimes, FaLightbulb, FaSearch, FaCheckCircle, FaPlusCircle, FaSpinner, FaTasks, FaTachometerAlt } from "react-icons/fa";
+import { FaEllipsisV, FaEye, FaEdit, FaTrash, FaTimes, FaLightbulb, FaSearch, FaCheckCircle, FaPlusCircle, FaSpinner, FaTasks, FaTachometerAlt, FaChartPie } from "react-icons/fa";
 import AddHazopTeamPopup from "./AddHazopTeamPopup";
 import { strings } from "../string";
 import "../styles/global.css";
@@ -9,6 +9,7 @@ import { StatusIcon, formatDate, showToast } from "../CommonUI/CommonUI";
 import NodePage from "../AddNodeScreen/NodePage";
 import { useNavigate } from "react-router-dom";
 import HazopRegistration from "./HazopRegistration";
+import { FaArrowsSpin, FaCircleHalfStroke } from "react-icons/fa6";
 
 const HazopPage = () => {
   const [newRegistered, setNewRegistered] = useState([]);
@@ -270,13 +271,13 @@ const HazopPage = () => {
               )} */}
 
               <button type="button" onClick={() => handleNavigate(item)}>
-                <StatusIcon status={item.status} />
+                <FaArrowsSpin status={item.status} />
                 HAZOP Status
               </button>
             </>
           )}
           <button type="button" onClick={() => handleViewDashboard(item)}>
-            <FaTachometerAlt /> Dashboard
+            <FaChartPie /> Dashboard
           </button>
           {/* 🔹 Pending & Completed → View only */}
           {(columnType === "pending" || columnType === "completed") && (
