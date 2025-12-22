@@ -1,6 +1,6 @@
 export const ROLES = {
-    HAZOP_CREATOR: "HAZOP_CREATOR",
-    TEAM_LEAD: "TEAM_LEAD",
-    TEAM_MEMBER: "TEAM_MEMBER",
+    HAZOP_CREATOR: "Creator",
+    TEAM_LEAD: "Team Lead",
+    TEAM_MEMBER: "Team Member",
   };
   
