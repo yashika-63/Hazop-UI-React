@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import {
-  FaHouseChimney,     // Home / Main
-  FaListCheck,        // Checklist / Records
-  FaSitemap,          // Process / MOC
-  FaBell,             // Notifications / Approvals
-  FaChartSimple,      // Analytics / Status
-  FaUsersGear         // Team / Overview
+  FaHouseChimney,    
+  FaListCheck,
+  FaSitemap,         
+  FaBell,             
+  FaChartSimple,      
+  FaUsersGear        
 } from "react-icons/fa6";
 
 import "./CommonCss/Sidebar.css";
