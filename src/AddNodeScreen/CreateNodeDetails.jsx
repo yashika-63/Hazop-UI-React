@@ -9,6 +9,7 @@ import RiskLevelPopup from "./RiskLevelPopup";
 import RibbonButtons from "./RibbonButtons";
 import RibbonInfoModal from "./RibbonInfoModal";
 import HazopReportPage from "../Reports/HazopReport";
+import RibbonNodeList from "./RibbonNodeList";
 
 const initialState = {
   generalParameter: "",
@@ -54,7 +55,9 @@ const CreateNodeDetails = () => {
   const [currentNodeData, setCurrentNodeData] = useState(null);
   const department = currentNodeData?.javaHazopRegistration?.department || null;
   const [showRibbonInfo, setShowRibbonInfo] = useState(false);
+  const [showRibbonNodeList, setShowRibbonNodeList] = useState(false);
   const passedDetail = location.state?.detail || null;
+  const hazopRegistrationId = currentNodeData?.javaHazopRegistration?.id;
 
   useEffect(() => {
     const loadPassedDetail = async () => {
@@ -853,6 +856,7 @@ const CreateNodeDetails = () => {
         currentNodeData={currentNodeData}
         setShowRiskPopup={setShowRiskPopup}
         setShowRibbonInfo={setShowRibbonInfo}
+        setShowRibbonNodeList={setShowRibbonNodeList}
         navigate={navigate}
         handleOpenReport={() => setShowReportPopup(true)}
       />
@@ -1098,7 +1102,7 @@ const CreateNodeDetails = () => {
                 </small>
               </div>
               <div>
-                <div className="form-group existing-control">
+                <div className="form-group">
                   <div className="label-row">
                     <div style={{ marginBottom: '1px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div >
@@ -1340,6 +1344,14 @@ const CreateNodeDetails = () => {
           show={showRibbonInfo}
           onClose={() => setShowRibbonInfo(false)}
         />
+      )}
+
+      {showRibbonNodeList && (
+        <RibbonNodeList
+          show={showRibbonNodeList}
+          onClose={() => setShowRibbonNodeList(false)}
+          registrationId = {hazopRegistrationId}
+          />
       )}
 
       {showRiskPopup && (
