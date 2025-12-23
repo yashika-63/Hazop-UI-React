@@ -4,6 +4,7 @@ import "./Node.css";
 import { useLocation, useNavigate } from "react-router-dom";
 import { formatDateToBackend, showToast } from "../CommonUI/CommonUI";
 import { strings } from "../string";
+import { FaSubscript, FaSuperscript } from "react-icons/fa"; // 1. Added Import
 
 const UpdateNode = () => {
   const navigate = useNavigate();
@@ -27,6 +28,49 @@ const UpdateNode = () => {
     quantityFlowRate: "",
   });
 
+  // --- 2. Mappings for Subscript and Superscript ---
+  const subMap = {
+    '0': '₀', '1': '₁', '2': '₂', '3': '₃', '4': '₄', '5': '₅', '6': '₆', '7': '₇', '8': '₈', '9': '₉',
+    '+': '₊', '-': '₋', '=': '₌', '(': '₍', ')': '₎', 'x': 'ₓ', 'y': 'ᵧ'
+  };
+
+  const supMap = {
+    '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹',
+    '+': '⁺', '-': '⁻', '=': '⁼', '(': '⁽', ')': '⁾', 'n': 'ⁿ', 'x': 'ˣ', 'y': 'ʸ'
+  };
+
+  // --- 3. Helper to Format Selected Text ---
+  const formatSelection = (fieldName, type) => {
+    const input = document.getElementById(fieldName); // IDs are crucial here
+    if (!input) return;
+
+    const start = input.selectionStart;
+    const end = input.selectionEnd;
+    const currentText = form[fieldName] || "";
+
+    if (start === end) {
+      showToast("Please highlight the text/numbers you want to format first.", "info");
+      return;
+    }
+
+    const selectedText = currentText.substring(start, end);
+    const map = type === 'sub' ? subMap : supMap;
+
+    let convertedText = "";
+    for (let char of selectedText) {
+      convertedText += map[char] || char;
+    }
+
+    const newText = currentText.substring(0, start) + convertedText + currentText.substring(end);
+
+    setForm(prev => ({ ...prev, [fieldName]: newText }));
+
+    setTimeout(() => {
+      input.focus();
+      input.setSelectionRange(start + convertedText.length, start + convertedText.length);
+    }, 0);
+  };
+
   useEffect(() => {
     if (!nodeId) return;
 
@@ -44,7 +88,7 @@ const UpdateNode = () => {
           equipment: data.equipment || "",
           controls: data.controls || "",
           chemicalAndUtilities: data.chemicalAndUtilities || "",
-          temperature: data.temprature || "",
+          temperature: data.temprature || "", // Note backend spelling
           pressure: data.pressure || "",
           quantityFlowRate: data.quantityFlowRate || "",
         });
@@ -111,6 +155,48 @@ const UpdateNode = () => {
     }
   };
 
+  // --- 4. Reusable Toolbar Component ---
+  const FormatButtons = ({ fieldName }) => (
+    <div style={{ display: 'inline-flex', gap: '5px', marginLeft: '10px' }}>
+      <button
+        type="button"
+        onClick={() => formatSelection(fieldName, 'sub')}
+        className="fmt-btn"
+        title="Subscript (Select text first)"
+        style={{
+          cursor: 'pointer',
+          padding: '2px 6px',
+          background: '#f0f0f0',
+          border: '1px solid #ccc',
+          borderRadius: '3px',
+          fontSize: '10px',
+          display: 'flex',
+          alignItems: 'center'
+        }}
+      >
+        <FaSubscript />
+      </button>
+      <button
+        type="button"
+        onClick={() => formatSelection(fieldName, 'sup')}
+        className="fmt-btn"
+        title="Superscript (Select text first)"
+        style={{
+          cursor: 'pointer',
+          padding: '2px 6px',
+          background: '#f0f0f0',
+          border: '1px solid #ccc',
+          borderRadius: '3px',
+          fontSize: '10px',
+          display: 'flex',
+          alignItems: 'center'
+        }}
+      >
+        <FaSuperscript />
+      </button>
+    </div>
+  );
+
   return (
     <div>
       <div className="node-header">
@@ -124,18 +210,18 @@ const UpdateNode = () => {
         <div>
           <div>
             <div className="form-group">
-            <label>
-              <span className="required-marker">* </span>Design Intent
-            </label>
-            <textarea
-              name="designIntent"
-              value={form.designIntent}
-              rows={4}
-              onChange={handleChange}
-              className="textareaFont"
-              disabled={loading}
-            />
-          </div>
+              <label>
+                <span className="required-marker">* </span>Design Intent
+              </label>
+              <textarea
+                name="designIntent"
+                value={form.designIntent}
+                rows={4}
+                onChange={handleChange}
+                className="textareaFont"
+                disabled={loading}
+              />
+            </div>
             {/* Node meta */}
             <div className="input-row">
               <div className="form-group">
@@ -191,35 +277,23 @@ const UpdateNode = () => {
                   max={new Date().toISOString().split("T")[0]}
                 />
               </div>
-
-              {/* <div className="form-group ">
-                  <label>
-                    <span className="required-marker">* </span>Node Title
-                  </label>
-                  <input
-                    type="text"
-                    name="hazopTitle"
-                    value={form.hazopTitle}
-                    onChange={handleChange}
-                    disabled={loading}
-                  />
-                </div> */}
             </div>
 
             {/* SOP */}
             <div className="input-row">
+              {/* 5. TEMPERATURE: Buttons Added */}
               <div className="form-group">
-                <label className="table-header">
-                  <div><span className="required-marker">* </span>Temperature</div>
-                <small
-                  className={`char-count ${
-                    form.temperature.length >= 1000 ? "limit-reached" : ""
-                  }`}
-                >
-                  {form.temperature.length}/1000
-                </small>
+                <label className="table-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <span className="required-marker">* </span>Temperature
+                    <FormatButtons fieldName="temperature" />
+                  </div>
+                  <small className={`char-count ${form.temperature.length >= 1000 ? "limit-reached" : ""}`}>
+                    {form.temperature.length}/1000
+                  </small>
                 </label>
                 <input
+                  id="temperature" // Added ID
                   type="text"
                   name="temperature"
                   value={form.temperature}
@@ -229,18 +303,19 @@ const UpdateNode = () => {
                 />
               </div>
 
+              {/* 6. PRESSURE: Buttons Added */}
               <div className="form-group">
-                <label className="table-header">
-                  <div><span className="required-marker">* </span>Pressure, barg</div>
-                <small
-                  className={`char-count ${
-                    form.pressure.length >= 1000 ? "limit-reached" : ""
-                  }`}
-                >
-                  {form.pressure.length}/1000
-                </small>
+                <label className="table-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <span className="required-marker">* </span>Pressure, barg
+                    <FormatButtons fieldName="pressure" />
+                  </div>
+                  <small className={`char-count ${form.pressure.length >= 1000 ? "limit-reached" : ""}`}>
+                    {form.pressure.length}/1000
+                  </small>
                 </label>
                 <input
+                  id="pressure" // Added ID
                   type="text"
                   name="pressure"
                   value={form.pressure}
@@ -250,18 +325,19 @@ const UpdateNode = () => {
                 />
               </div>
 
+              {/* 7. QUANTITY: Buttons Added */}
               <div className="form-group">
-                <label className="table-header">
-                  <div><span className="required-marker">* </span>Quantity</div>
-                <small
-                  className={`char-count ${
-                    form.quantityFlowRate.length >= 1000 ? "limit-reached" : ""
-                  }`}
-                >
-                  {form.quantityFlowRate.length}/1000
-                </small>
+                <label className="table-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <span className="required-marker">* </span>Quantity
+                    <FormatButtons fieldName="quantityFlowRate" />
+                  </div>
+                  <small className={`char-count ${form.quantityFlowRate.length >= 1000 ? "limit-reached" : ""}`}>
+                    {form.quantityFlowRate.length}/1000
+                  </small>
                 </label>
                 <input
+                  id="quantityFlowRate" // Added ID
                   type="text"
                   name="quantityFlowRate"
                   value={form.quantityFlowRate}
@@ -278,13 +354,12 @@ const UpdateNode = () => {
             <div className="form-group">
               <label className="table-header">
                 <div><span className="required-marker">* </span>Equipment</div>
-              <small
-                className={`char-count ${
-                  form.equipment.length >= 2000 ? "limit-reached" : ""
-                }`}
-              >
-                {form.equipment.length}/2000
-              </small>
+                <small
+                  className={`char-count ${form.equipment.length >= 2000 ? "limit-reached" : ""
+                    }`}
+                >
+                  {form.equipment.length}/2000
+                </small>
               </label>
               <textarea
                 type="text"
@@ -301,13 +376,12 @@ const UpdateNode = () => {
             <div className="form-group">
               <label className="table-header">
                 <div><span className="required-marker">* </span>Controls</div>
-              <small
-                className={`char-count ${
-                  form.controls.length >= 2000 ? "limit-reached" : ""
-                }`}
-              >
-                {form.controls.length}/2000
-              </small>
+                <small
+                  className={`char-count ${form.controls.length >= 2000 ? "limit-reached" : ""
+                    }`}
+                >
+                  {form.controls.length}/2000
+                </small>
               </label>
               <textarea
                 type="text"
@@ -322,21 +396,24 @@ const UpdateNode = () => {
             </div>
 
             {/* Chemicals */}
+            {/* 8. CHEMICALS: Buttons Added */}
             <div className="form-group full-width">
-              <label className="table-header">
-                <div><span className="required-marker">* </span>Chemicals and
-                utilities</div>
-              <small
-                className={`char-count ${
-                  form.chemicalAndUtilities.length >= 1000
+              <label className="table-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <span className="required-marker">* </span>Chemicals and utilities
+                  <FormatButtons fieldName="chemicalAndUtilities" />
+                </div>
+                <small
+                  className={`char-count ${form.chemicalAndUtilities.length >= 1000
                     ? "limit-reached"
                     : ""
-                }`}
-              >
-                {form.chemicalAndUtilities.length}/1000
-              </small>
+                    }`}
+                >
+                  {form.chemicalAndUtilities.length}/1000
+                </small>
               </label>
               <textarea
+                id="chemicalAndUtilities" // Added ID
                 type="text"
                 name="chemicalAndUtilities"
                 value={form.chemicalAndUtilities}

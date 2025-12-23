@@ -31,11 +31,9 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
         }
     }, [hazopData]);
 
-    // --- NEW: AUTO SCROLL EFFECT ---
+    // --- AUTO SCROLL EFFECT ---
     useEffect(() => {
-        // If the uploader is shown, scroll to it
         if (showDocumentUploader && scrollRef.current) {
-            // Slight timeout ensures DOM is rendered before scrolling
             setTimeout(() => {
                 scrollRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
             }, 100);
@@ -67,8 +65,16 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
             const response = await axios.get(
                 `http://${strings.localhost}/api/hazopTeam/teamByHazop/${hazopId}?status=true`
             );
-            setHazopTeam(response.data || []);
-            setOriginalTeam(response.data || []);
+
+            // Map response to ensure we use 'role' for display in frontend
+            // If backend sends 'hazopRole', we map it to 'role' for the UI
+            const mappedData = (response.data || []).map(member => ({
+                ...member,
+                role: member.hazopRole || member.role || "Team Member" // Fallback to ensure UI shows something
+            }));
+
+            setHazopTeam(mappedData);
+            setOriginalTeam(mappedData);
         } catch (err) {
             console.error("Error fetching team:", err);
             showToast("Failed to load existing team.", "error");
@@ -100,6 +106,7 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
             showToast("This employee is already added.", "warn");
             return;
         }
+        // Default role for new members is "Team Member" (Display Name)
         setHazopTeam([...hazopTeam, { ...member, role: "Team Member" }]);
         setTeamSearch("");
         setSearchResults([]);
@@ -149,14 +156,17 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
     };
 
     const handleSave = () => {
+        // Calculate changes
         const newMembers = hazopTeam.filter(
             (m) => !originalTeam.some((o) => o.empCode === m.empCode)
         );
 
-        const isTeamChanged = !(newMembers.length === 0 && JSON.stringify(hazopTeam) === JSON.stringify(originalTeam));
+        // Simple check if roles changed or members added/removed
+        const isTeamChanged = !(newMembers.length === 0 && JSON.stringify(hazopTeam) !== JSON.stringify(originalTeam));
         const isUploadVisible = showDocumentUploader;
 
-        if (!isTeamChanged && !isUploadVisible) {
+        // If no logic changes and no upload, warn user
+        if (!isTeamChanged && !isUploadVisible && newMembers.length === 0) {
             showToast("No changes to save.", "warn");
             return;
         }
@@ -182,7 +192,7 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
         try {
             const hazopId = hazopData.id;
 
-            // 1. Save New Team Members
+            // 1. Save New Team Members (Bulk add)
             if (newMembers.length > 0) {
                 await axios.post(
                     `http://${strings.localhost}/api/hazopTeam/saveTeam/${hazopId}`,
@@ -190,10 +200,14 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
                 );
             }
 
-            // 2. Save Roles
+            // 2. Save Roles (Iterate and update roles)
             for (const member of hazopTeam) {
+                // LOGIC: Check UI role. If 'Team Lead', send 'Team Lead'. 
+                // For anything else (including 'Team Member'), send 'Team Member'.
+                const roleToSend = member.role === "Team Lead" ? "Team Lead" : "Team Member";
+
                 await axios.post(
-                    `http://${strings.localhost}/api/hazopTeamRole/save?companyId=${companyId}&empCode=${member.empCode}&hazopRole=${member.role}&hazopId=${hazopId}`
+                    `http://${strings.localhost}/api/hazopTeamRole/save?companyId=${companyId}&empCode=${member.empCode}&hazopRole=${roleToSend}&hazopId=${hazopId}`
                 );
             }
 
@@ -292,7 +306,7 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
                                 <tr>
                                     <th>Emp Code</th>
                                     <th>Employee Name</th>
-                                    <th>Role</th>
+                                    <th>Role</th> {/* Showing as 'Role' in UI */}
                                     <th>Role Action</th>
                                     <th>Remove</th>
                                 </tr>
@@ -303,6 +317,7 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
                                         <td>{member.empCode}</td>
                                         <td>{member.firstName} {member.lastName}</td>
                                         <td style={{ textAlign: 'center' }}>
+                                            {/* Displaying 'role' from state */}
                                             <span className={`role-badge ${member.role === "Team Lead" ? "role-lead" : "role-member"}`}>
                                                 {member.role === "Team Lead" ? <FaUserTie style={{ marginRight: 5 }} /> : <FaUser style={{ marginRight: 5 }} />}
                                                 {member.role}
@@ -370,16 +385,19 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
                 )}
 
                 {/* --- DRAG AND DROP UPLOADER COMPONENT --- */}
-                {showDocumentUploader && (
-                    <div ref={scrollRef} style={{ marginTop: '15px' }}>
-                        {/* Added wrapper div with ref for scrolling */}
-                        <HazopDocumentUpload
-                            ref={documentUploadRef}
-                            hazopId={hazopData.id}
-                            disabled={loading}
-                        />
-                    </div>
-                )}
+                <div
+                    ref={scrollRef}
+                    style={{
+                        marginTop: '15px',
+                        display: showDocumentUploader ? 'block' : 'none'
+                    }}
+                >
+                    <HazopDocumentUpload
+                        ref={documentUploadRef}
+                        hazopId={hazopData.id} 
+                        disabled={loading}
+                    />
+                </div>
 
                 {confirmPopup && (
                     <ConfirmationPopup

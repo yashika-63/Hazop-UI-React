@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { FaSearch, FaTimes, FaUser, FaUserTie } from "react-icons/fa";
 import "./HazopRegistration.css";
@@ -33,9 +33,15 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
   const [showDocumentUploader, setShowDocumentUploader] = useState(false);
   const [savedHazopId, setSavedHazopId] = useState(hazopId || null);
   const documentUploadRef = React.useRef();
+  const scrollRef = useRef(null);
 
-
-
+  useEffect(() => {
+    if (showDocumentUploader && scrollRef.current) {
+      setTimeout(() => {
+        scrollRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 100);
+    }
+  }, [showDocumentUploader]);
 
   useEffect(() => {
     if (hazopId) {
@@ -581,11 +587,23 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
             loading={loading}
           />
         )}
-
+        {/* 
         {showDocumentUploader && (
           <HazopDocumentUpload ref={documentUploadRef} hazopId={savedHazopId} />
-        )}
-
+        )} */}
+        <div
+          ref={scrollRef}
+          style={{
+            marginTop: '15px',
+            display: showDocumentUploader ? 'block' : 'none'
+          }}
+        >
+          <HazopDocumentUpload
+            ref={documentUploadRef}
+            hazopId={savedHazopId}
+            disabled={loading}
+          />
+        </div>
         {hazopId && <HazopDocumentUpload hazopId={hazopId} />}
         {confirmPopup && (
           <ConfirmationPopup

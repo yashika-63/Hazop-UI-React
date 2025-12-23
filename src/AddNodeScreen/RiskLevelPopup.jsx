@@ -67,11 +67,11 @@ const RiskLevelPopup = ({ onClose }) => {
   };
 
   const severityLabels = [
-    { p: "Slight injury", a: "Slight damage", e: "Slight effect" },
-    { p: "Minor injury", a: "Minor damage", e: "Minor effect" },
-    { p: "Major injury", a: "Localised damage", e: "Localised effect" },
-    { p: "Single Fatality", a: "Major damage", e: "Major effect" },
-    { p: "Multiple Fatalities", a: "Extensive damage", e: "Extensive effect" },
+    { p: "Slight injury", a: "Slight damage (<1 Lakh INR)", e: "Slight effect" },
+    { p: "Minor injury", a: "Minor damage (1 to 10 Lakh INR)", e: "Minor effect" },
+    { p: "Major injury", a: "Localised damage (10 Lakh to 1 Cr INR)", e: "Localised effect" },
+    { p: "Single Fatality", a: "Major damage (1 to 10 Cr INR)", e: "Major effect" },
+    { p: "Multiple Fatalities", a: "Extensive damage (1 to 100 Cr INR)", e: "Extensive effect" },
   ];
 
   const frequencyLabels = [

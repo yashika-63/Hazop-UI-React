@@ -109,10 +109,16 @@ const addCompactHeader = (sheet, hazop, pageNo, totalPages) => {
     sheet.getCell('I7').value = "Approved By"; styleHeader(sheet.getCell('I7'), true);
 
     // Row 8: Signatures / Names
+    // sheet.getCell('F8').value = "Sign"; styleHeader(sheet.getCell('F8'), true);
+    // sheet.getCell('G8').value = hazop?.createdBy || "-"; styleData(sheet.getCell('G8'));
+    // sheet.getCell('H8').value = hazop?.verificationemployeeName || "-"; styleData(sheet.getCell('H8'));
+    // sheet.getCell('I8').value = hazop?.completionEmployeeName || "-"; styleData(sheet.getCell('I8'));
     sheet.getCell('F8').value = "Sign"; styleHeader(sheet.getCell('F8'), true);
-    sheet.getCell('G8').value = hazop?.createdBy || "-"; styleData(sheet.getCell('G8'));
-    sheet.getCell('H8').value = hazop?.verificationemployeeName || "-"; styleData(sheet.getCell('H8'));
-    sheet.getCell('I8').value = hazop?.completionEmployeeName || "-"; styleData(sheet.getCell('I8'));
+
+    // Set these values to empty strings to keep the cells blank
+    sheet.getCell('G8').value = ""; styleData(sheet.getCell('G8'));
+    sheet.getCell('H8').value = ""; styleData(sheet.getCell('H8'));
+    sheet.getCell('I8').value = ""; styleData(sheet.getCell('I8'));
 };
 
 
@@ -729,11 +735,11 @@ export async function generateHazopExcel({
     t1Sheet.getCell('E14').value = "Environment (E)"; styleHeader(t1Sheet.getCell('E14'), true);
 
     const matrixRows = [
-        { idx: 1, p: "Slight injury", a: "Slight damage", e: "Slight effect", vals: [1, 2, 3, 4, 5] },
-        { idx: 2, p: "Minor injury", a: "Minor damage", e: "Minor effect", vals: [2, 4, 6, 8, 10] },
-        { idx: 3, p: "Major injury", a: "Localised damage", e: "Localised effect", vals: [3, 6, 9, 12, 15] },
-        { idx: 4, p: "Single Fatality", a: "Major damage", e: "Major effect", vals: [4, 8, 12, 16, 20] },
-        { idx: 5, p: "Multiple\nFatalities", a: "Extensive damage", e: "Extensive effect", vals: [5, 10, 15, 20, 25] },
+        { idx: 1, p: "Slight injury", a: "Slight damage (<1 Lakh INR)", e: "Slight effect", vals: [1, 2, 3, 4, 5] },
+        { idx: 2, p: "Minor injury", a: "Minor damage (1 to 10 Lakh INR)", e: "Minor effect", vals: [2, 4, 6, 8, 10] },
+        { idx: 3, p: "Major injury", a: "Localised damage (10 Lakh to 1 Cr INR)", e: "Localised effect", vals: [3, 6, 9, 12, 15] },
+        { idx: 4, p: "Single Fatality", a: "Major damage (1 to 10 Cr INR)", e: "Major effect", vals: [4, 8, 12, 16, 20] },
+        { idx: 5, p: "Multiple\nFatalities", a: "Extensive damage (1 to 100 Cr INR)", e: "Extensive effect", vals: [5, 10, 15, 20, 25] },
     ];
 
     let mRow = 15;

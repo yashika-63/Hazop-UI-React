@@ -355,10 +355,15 @@
   cursor: pointer;
   transition: 0.2s ease-in-out;
 }
+.ribbon-document:hover {
+  background-color: #d8b2fc;        /* slightly darker on hover */
+  border-color: #69339b;
+  transform: translateY(-1px);
+}
 .ribbon-view {
-  background-color: #f3f3f3;        /* light blue */
-  border: 1px solid #56575a;        /* dark blue border */
-  color: grey;                   /* dark blue icon/text */
+  background-color: #dbfff7;        
+  border: 1px solid #0e8d71;  
+  color: #105244;                
   padding: 6px 10px;
   border-radius: 5px;
   cursor: pointer;
@@ -366,8 +371,8 @@
 }
 
 .ribbon-view:hover {
-  background-color: #e3e3e3;        /* slightly darker on hover */
-  border-color: grey;
+  background-color: #bcfcee;      
+  border-color: #0a322a;
   transform: translateY(-1px);
 }
 

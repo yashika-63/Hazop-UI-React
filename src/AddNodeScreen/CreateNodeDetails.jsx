@@ -203,9 +203,9 @@ const CreateNodeDetails = () => {
       showToast("Guide Word is required.", "warn");
       return false;
     }
-    if (!form.discussionContributors.trim()) {
-      showToast("Team Members are required.", "warn");
-    }
+    // if (!form.discussionContributors.trim()) {
+    //   showToast("Team Members are required.", "warn");
+    // }
     if (!form.causes.trim()) {
       showToast("Causes is required.", "warn");
       return false;
@@ -929,7 +929,7 @@ const CreateNodeDetails = () => {
               <div className="form-group">
                 <label className="table-header">
                   <div>
-                    <span className="required-marker">*</span>Team Members
+                    Team Members
                   </div>
                 </label>
                 <input
