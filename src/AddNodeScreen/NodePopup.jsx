@@ -315,7 +315,6 @@ const NodePopup = ({ onSave }) => {
                 rows={3}
                 className="textareaFont"
                 maxLength={2000}
-              
               />
             </div>
 
