@@ -425,6 +425,7 @@
   max-height: 150px;
   min-height: 160px;
   overflow-y: auto;
+  margin-bottom: 6px;
 }
 
 .recommendation-item {

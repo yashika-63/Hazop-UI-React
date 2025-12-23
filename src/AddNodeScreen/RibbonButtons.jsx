@@ -13,7 +13,8 @@ import {
   FaFileExcel,
   FaCloudUploadAlt,
   FaTimes,
-  FaCheck
+  FaCheck,
+  FaListOl
 } from "react-icons/fa";
 import HazopDocumentUpload from "../HazopEntry/HazopDocumentUpload";
 
@@ -25,6 +26,7 @@ const RibbonButtons = ({
   currentNodeData,
   setShowRiskPopup,
   setShowRibbonInfo,
+  setShowRibbonNodeList,
   navigate,
   handleOpenReport,
   handleGeneratePdf,
@@ -118,6 +120,14 @@ const RibbonButtons = ({
               <FaPlus />
             </button>
 
+              <button
+              className="ribbon-node"
+              title="View Nodes"
+              onClick={() => setShowRibbonNodeList(true)}
+            >
+              <FaListOl />
+            </button>
+
             <button
               className="ribbon-document"
               title="Generate Reports (PDF/Excel)"
@@ -125,8 +135,7 @@ const RibbonButtons = ({
             >
               <FaFilePdf />
             </button>
-
-            {/* --- UPLOAD BUTTON --- */}
+            
             <button
               className="ribbon-document"
               title="Upload Documents"
