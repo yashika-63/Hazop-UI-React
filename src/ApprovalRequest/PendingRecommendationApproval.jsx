@@ -246,20 +246,20 @@ const PendingRecommendationApproval = () => {
       return showToast("Please select a target date", "error");
     }
 
-        setLoading(true);
-        try {
-            // Step 1: Hit the SAVE API as requested
-            await axios.post(
-                `http://${strings.localhost}/api/nodeRecommendation/saveRecord`,
-                null, // No body, using params
-                {
-                    params: {
-                        assignmentId: selectedRecord.assignmentId,
-                        targetDate: targetDate,
-                        createdByEmpCode: empCode
-                    }
-                }
-            );
+    setLoading(true);
+    try {
+      // Step 1: Hit the SAVE API as requested
+      await axios.post(
+        `http://${strings.localhost}/api/nodeRecommendation/saveRecord`,
+        null, // No body, using params
+        {
+          params: {
+            assignmentId: selectedRecord.assignmentId,
+            targetDate: targetDate,
+            createdByEmpCode: empCode
+          }
+        }
+      );
 
       // Step 2: Hit the ACCEPT API
       await axios.post(
@@ -331,17 +331,16 @@ const PendingRecommendationApproval = () => {
                 onClick={() => toggleRow(rec.id)}
               >
                 <td>
-                  {rec.javaHazopNodeRecommendation?.javaHazopNode?.nodeNumber &&
-                  rec.javaHazopNodeRecommendation?.javaHazopNodeDetail
-                    ?.nodeDetailNumber
-                    ? `${rec.javaHazopNodeRecommendation.javaHazopNode.nodeNumber}.${rec.javaHazopNodeRecommendation.javaHazopNodeDetail.nodeDetailNumber}`
+                  {rec.javaHazopNodeRecommendation?.javaHazopNode?.nodeNumber
+                    ? (rec.javaHazopNodeRecommendation.javaHazopNodeDetail?.nodeDetailNumber
+                      ? `${rec.javaHazopNodeRecommendation.javaHazopNode.nodeNumber}.${rec.javaHazopNodeRecommendation.javaHazopNodeDetail.nodeDetailNumber}`
+                      : `${rec.javaHazopNodeRecommendation.javaHazopNode.nodeNumber}`)
                     : "-"}
                 </td>
 
                 <td
-                  className={`truncate-cell ${
-                    expandedRowId === rec.id ? "expanded-cell" : ""
-                  }`}
+                  className={`truncate-cell ${expandedRowId === rec.id ? "expanded-cell" : ""
+                    }`}
                   onClick={(e) => handleNavigateToDetail(e, rec)}
                   style={{
                     cursor: "pointer",
@@ -352,25 +351,24 @@ const PendingRecommendationApproval = () => {
                 >
                   {expandedRowId === rec.id
                     ? rec.javaHazopNodeRecommendation?.javaHazopNodeDetail
-                        ?.deviation
+                      ?.deviation
                     : truncateWords(
-                        rec.javaHazopNodeRecommendation?.javaHazopNodeDetail
-                          ?.deviation || "-",
-                        10
-                      )}
+                      rec.javaHazopNodeRecommendation?.javaHazopNodeDetail
+                        ?.deviation || "-",
+                      10
+                    )}
                 </td>
 
                 <td
-                  className={`truncate-cell ${
-                    expandedRowId === rec.id ? "expanded-cell" : ""
-                  }`}
+                  className={`truncate-cell ${expandedRowId === rec.id ? "expanded-cell" : ""
+                    }`}
                 >
                   {expandedRowId === rec.id
                     ? rec.javaHazopNodeRecommendation?.recommendation
                     : truncateWords(
-                        rec.javaHazopNodeRecommendation?.recommendation || "-",
-                        10
-                      )}
+                      rec.javaHazopNodeRecommendation?.recommendation || "-",
+                      10
+                    )}
                 </td>
                 <td>{rec.createdByName || '-'}</td>
                 <td onClick={(e) => e.stopPropagation()}>

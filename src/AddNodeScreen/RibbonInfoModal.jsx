@@ -10,6 +10,9 @@ import {
   FaPlus,
   FaEye,
   FaTimes,
+  FaFilePdf,   // Import PDF Icon
+  FaFileExcel,
+  FaCloudUploadAlt, // Import Excel Icon
 } from "react-icons/fa";
 
 const RibbonInfoModal = ({ show, onClose }) => {
@@ -26,73 +29,77 @@ const RibbonInfoModal = ({ show, onClose }) => {
         </div>
 
         {/* Table Format */}
-        <table className="hazoplist-table">
-          <thead>
-            <tr>
-              <th>Sr. No.</th>
-              <th>Icon</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>1</td>
-              <td>
-                <FaSave />
-              </td>
-              <td>Save</td>
-            </tr>
-            <tr>
-              <td>2</td>
-              <td>
-                <FaArrowLeft />
-              </td>
-              <td>Previous Deviation</td>
-            </tr>
-            <tr>
-              <td>3</td>
-              <td>
-                <FaArrowRight />
-              </td>
-              <td>Next Deviation</td>
-            </tr>
-            <tr>
-              <td>4</td>
-              <td>
-                <FaPlusSquare />
-              </td>
-              <td>Add Deviation Next</td>
-            </tr>
-            <tr>
-              <td>5</td>
-              <td>
-                <FaStepBackward />
-              </td>
-              <td>Previous Node</td>
-            </tr>
-            <tr>
-              <td>6</td>
-              <td>
-                <FaStepForward />
-              </td>
-              <td>Next Node</td>
-            </tr>
-            <tr>
-              <td>7</td>
-              <td>
-                <FaPlus />
-              </td>
-              <td>Add Node</td>
-            </tr>
-            <tr>
-              <td>8</td>
-              <td>
-                <FaEye />
-              </td>
-              <td>View Risk Matrix</td>
-            </tr>
-          </tbody>
-        </table>
+        <div className="table-responsive">
+            <table className="node-details-table">
+            <thead>
+                <tr>
+                <th>Sr. No.</th>
+                <th>Icon</th>
+                <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                <td>1</td>
+                <td><FaSave /></td>
+                <td>Save</td>
+                </tr>
+                <tr>
+                <td>2</td>
+                <td><FaArrowLeft /></td>
+                <td>Previous Deviation</td>
+                </tr>
+                <tr>
+                <td>3</td>
+                <td><FaArrowRight /></td>
+                <td>Next Deviation</td>
+                </tr>
+                <tr>
+                <td>4</td>
+                <td><FaPlusSquare /></td>
+                <td>Add Deviation Next</td>
+                </tr>
+                <tr>
+                <td>5</td>
+                <td><FaStepBackward /></td>
+                <td>Previous Node</td>
+                </tr>
+                <tr>
+                <td>6</td>
+                <td><FaStepForward /></td>
+                <td>Next Node</td>
+                </tr>
+                <tr>
+                <td>7</td>
+                <td><FaPlus /></td>
+                <td>Add Node</td>
+                </tr>
+                
+                {/* --- NEW ROWS ADDED HERE --- */}
+                <tr>
+                <td>8</td>
+                <td><FaFilePdf /> / <FaFileExcel /></td>
+                <td>Generate Reports (PDF / Excel)</td>
+                </tr>
+                <tr>
+                <td>9</td>
+                <td><FaCloudUploadAlt/> </td>
+                <td>Upload Documents</td>
+                </tr>
+                <tr>
+                <td>10</td>
+                <td><FaEye /></td>
+                <td>View Risk Matrix</td>
+                </tr>
+                
+                <tr>
+                <td>11</td>
+                <td><FaInfoCircle /></td>
+                <td>Ribbon Information</td>
+                </tr>
+            </tbody>
+            </table>
+        </div>
       </div>
     </div>
   );

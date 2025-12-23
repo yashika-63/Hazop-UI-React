@@ -121,7 +121,7 @@ const UpdateNode = () => {
       </div>
 
       <div>
-        <div className="popup-body">
+        <div>
           <div>
             <div className="form-group">
             <label>
@@ -292,7 +292,7 @@ const UpdateNode = () => {
                 value={form.equipment}
                 onChange={handleChange}
                 disabled={loading}
-                rows={3}
+                rows={5}
                 className="textareaFont"
                 maxLength={2000}
               />
@@ -315,7 +315,7 @@ const UpdateNode = () => {
                 value={form.controls}
                 onChange={handleChange}
                 disabled={loading}
-                rows={3}
+                rows={5}
                 maxLength={2000}
                 className="textareaFont"
               />
@@ -342,7 +342,7 @@ const UpdateNode = () => {
                 value={form.chemicalAndUtilities}
                 onChange={handleChange}
                 disabled={loading}
-                rows={3}
+                rows={5}
                 maxLength={1000}
                 className="textareaFont"
               />

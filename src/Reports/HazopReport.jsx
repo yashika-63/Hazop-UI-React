@@ -6,7 +6,7 @@ import HazopPdfDocument from "./HazopPdfDocument";
 import { generateHazopExcel } from "./hazopExcelGenerator";
 import { generateHazopPdf } from "./hazopPdfGenerator";
 
-const HazopReportPage = ({ hazopId, onClose }) => {
+const HazopReportPage= ({ hazopId, onClose }) => {
 
     const [isDataLoading, setIsDataLoading] = useState(true);
 

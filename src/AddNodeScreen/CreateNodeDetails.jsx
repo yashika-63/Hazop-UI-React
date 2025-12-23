@@ -8,6 +8,7 @@ import NodeInfo from "./NodeInfo";
 import RiskLevelPopup from "./RiskLevelPopup";
 import RibbonButtons from "./RibbonButtons";
 import RibbonInfoModal from "./RibbonInfoModal";
+import HazopReportPage from "../Reports/HazopReport";
 
 const initialState = {
   generalParameter: "",
@@ -30,7 +31,7 @@ const initialState = {
 const CreateNodeDetails = () => {
   const [form, setForm] = useState(initialState);
   const [rows, setRows] = useState(11);
-  const [smallRows, setSmallRows] = useState(6);
+  const [smallRows, setSmallRows] = useState(8);
   const [loading, setLoading] = useState(false);
   const [tempRecommendations, setTempRecommendations] = useState([]);
   const additionalControlRef = React.useRef(null);
@@ -44,7 +45,7 @@ const CreateNodeDetails = () => {
   const [recIndexToDelete, setRecIndexToDelete] = useState(null);
   const [currentDetailNo, setCurrentDetailNo] = useState(null);
   const [showRiskPopup, setShowRiskPopup] = useState(false);
-
+  const [showReportPopup, setShowReportPopup] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -123,7 +124,7 @@ const CreateNodeDetails = () => {
 
       if (name === "additionalControl" || name === "existineControl") {
         const lineCount = value.split("\n").length;
-        setSmallRows(Math.min(8, Math.max(6, lineCount)));
+        setSmallRows(Math.min(9, Math.max(8, lineCount)));
       }
 
       if (name === "existineProbability" || name === "existingSeverity") {
@@ -843,7 +844,7 @@ const CreateNodeDetails = () => {
   }, []);
 
   return (
-    <div>
+    <div style={{ marginTop: '-20px' }}>
       <RibbonButtons
         handleSubmit={handleSubmit}
         handlePrevNext={handlePrevNext}
@@ -853,6 +854,7 @@ const CreateNodeDetails = () => {
         setShowRiskPopup={setShowRiskPopup}
         setShowRibbonInfo={setShowRibbonInfo}
         navigate={navigate}
+        handleOpenReport={() => setShowReportPopup(true)}
       />
       <NodeInfo currentNodeId={currentNodeId} />
 
@@ -866,11 +868,10 @@ const CreateNodeDetails = () => {
                     <span className="required-marker">*</span>General Parameter
                   </div>
                   <small
-                    className={`char-count ${
-                      form.generalParameter.length >= 1000
-                        ? "limit-reached"
-                        : ""
-                    }`}
+                    className={`char-count ${form.generalParameter.length >= 1000
+                      ? "limit-reached"
+                      : ""
+                      }`}
                   >
                     {form.generalParameter.length}/1000
                   </small>
@@ -889,11 +890,10 @@ const CreateNodeDetails = () => {
                     <span className="required-marker">*</span>Specific Parameter
                   </div>
                   <small
-                    className={`char-count ${
-                      form.specificParameter.length >= 1000
-                        ? "limit-reached"
-                        : ""
-                    }`}
+                    className={`char-count ${form.specificParameter.length >= 1000
+                      ? "limit-reached"
+                      : ""
+                      }`}
                   >
                     {form.specificParameter.length}/1000
                   </small>
@@ -912,9 +912,8 @@ const CreateNodeDetails = () => {
                     <span className="required-marker">*</span>Guide Word
                   </div>
                   <small
-                    className={`char-count ${
-                      form.guidWord.length >= 1000 ? "limit-reached" : ""
-                    }`}
+                    className={`char-count ${form.guidWord.length >= 1000 ? "limit-reached" : ""
+                      }`}
                   >
                     {form.guidWord.length}/1000
                   </small>
@@ -950,9 +949,8 @@ const CreateNodeDetails = () => {
                     <span className="required-marker">*</span>Deviation
                   </div>
                   <small
-                    className={`char-count ${
-                      form.deviation.length >= 5000 ? "limit-reached" : ""
-                    }`}
+                    className={`char-count ${form.deviation.length >= 5000 ? "limit-reached" : ""
+                      }`}
                   >
                     {form.deviation.length}/5000
                   </small>
@@ -972,9 +970,8 @@ const CreateNodeDetails = () => {
                     <span className="required-marker">*</span>Causes
                   </div>
                   <small
-                    className={`char-count ${
-                      form.causes.length >= 5000 ? "limit-reached" : ""
-                    }`}
+                    className={`char-count ${form.causes.length >= 5000 ? "limit-reached" : ""
+                      }`}
                   >
                     {form.causes.length}/5000
                   </small>
@@ -994,9 +991,8 @@ const CreateNodeDetails = () => {
                     <span className="required-marker">*</span>Consequences
                   </div>
                   <small
-                    className={`char-count ${
-                      form.consequences.length >= 5000 ? "limit-reached" : ""
-                    }`}
+                    className={`char-count ${form.consequences.length >= 5000 ? "limit-reached" : ""
+                      }`}
                   >
                     {form.consequences.length}/5000
                   </small>
@@ -1016,11 +1012,10 @@ const CreateNodeDetails = () => {
                   <label className="table-header">
                     <div>Existing Control</div>
                     <small
-                      className={`char-count ${
-                        form.existineControl.length >= 5000
-                          ? "limit-reached"
-                          : ""
-                      }`}
+                      className={`char-count ${form.existineControl.length >= 5000
+                        ? "limit-reached"
+                        : ""
+                        }`}
                     >
                       {form.existineControl.length}/5000
                     </small>
@@ -1105,12 +1100,20 @@ const CreateNodeDetails = () => {
               <div>
                 <div className="form-group existing-control">
                   <div className="label-row">
-                    <label>
-                      {isAdditionalRequired() && (
-                        <span className="required-marker">*</span>
-                      )}
-                      Additional Control
-                    </label>
+                    <div style={{ marginBottom: '1px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div >
+                        {isAdditionalRequired() && <span className="required-marker">*</span>}
+                        <span style={{ fontSize: '14px' }}> Additional Control</span>
+                        <span style={{
+                          fontSize: '12px',
+                          fontWeight: 'normal',
+                          marginLeft: '4px',
+                          color: form.additionalControl.length >= 5000 ? 'red' : '#666'
+                        }}>
+                          ({form.additionalControl.length}/5000)
+                        </span>
+                      </div>
+                    </div>
 
                     <div
                       onClick={addBulletPoint}
@@ -1171,9 +1174,9 @@ const CreateNodeDetails = () => {
                                 prev.map((r, i) =>
                                   i === index
                                     ? {
-                                        ...r,
-                                        editing: r.recommendation.trim() === "",
-                                      }
+                                      ...r,
+                                      editing: r.recommendation.trim() === "",
+                                    }
                                     : r
                                 )
                               );
@@ -1218,15 +1221,7 @@ const CreateNodeDetails = () => {
                       </div>
                     ))}
                   </div>
-                  <small
-                    className={`char-count ${
-                      form.additionalControl.length >= 5000
-                        ? "limit-reached"
-                        : ""
-                    }`}
-                  >
-                    {form.additionalControl.length}/5000
-                  </small>
+
                 </div>
                 <div className="metric-row">
                   <div className="form-group">
@@ -1309,7 +1304,12 @@ const CreateNodeDetails = () => {
           </form>
         </div>
       </div>
-
+      {showReportPopup && currentNodeData?.javaHazopRegistration?.id && (
+        <HazopReportPage
+          hazopId={currentNodeData.javaHazopRegistration.id}
+          onClose={() => setShowReportPopup(false)}
+        />
+      )}
       {showConfirmation && (
         <ConfirmationPopup
           message="Are you sure you want to save this discussion and proceed to next?"

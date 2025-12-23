@@ -332,8 +332,12 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
                                             {expandedRowId === item.id ? <FaChevronUp /> : <FaChevronDown />}
                                         </td>
 
-                                        <td>{item.javaHazopNodeRecommendation?.javaHazopNode?.nodeNumber}</td>
-
+                                        <td>
+                                            {item.javaHazopNodeRecommendation?.javaHazopNode?.nodeNumber &&
+                                                item.javaHazopNodeRecommendation?.javaHazopNodeDetail?.nodeDetailNumber
+                                                ? `${item.javaHazopNodeRecommendation.javaHazopNode.nodeNumber}.${item.javaHazopNodeRecommendation.javaHazopNodeDetail.nodeDetailNumber}`
+                                                : (item.javaHazopNodeRecommendation?.javaHazopNode?.nodeNumber || '-')}
+                                        </td>
                                         <td className="truncate-cell" title="Click to view details" onClick={(e) => handleNavigateToDetail(e, item)} style={{ cursor: 'pointer', color: '#319795' }}>
                                             {truncateText(item.javaHazopNodeRecommendation?.javaHazopNodeDetail?.deviation, 30)}
                                         </td>

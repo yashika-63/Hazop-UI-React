@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { FaSearch, FaTimes } from "react-icons/fa";
+import { FaSearch, FaTimes, FaUser, FaUserTie } from "react-icons/fa";
 import "./HazopRegistration.css";
 import { fetchDataByKey, fetchSitesByDepartment, showToast } from "../CommonUI/CommonUI";
 import { strings } from "../string";
@@ -366,6 +366,7 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
           <th>Name</th>
           <th>Email</th>
           <th>Role</th>
+          <th>Role Action</th>
           <th>Action</th>
         </tr>
       </thead>
@@ -375,15 +376,20 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
             <td>{member.empCode}</td>
             <td>{member.firstName} {member.lastName}</td>
             <td>{member.emailId || "NA"}</td>
+            <td style={{ textAlign: 'center' }}>
+              <span className={`role-badge ${member.role === "Team Lead" ? "role-lead" : "role-member"}`}>
+                {member.role === "Team Lead" ? <FaUserTie style={{ marginRight: 5 }} /> : <FaUser style={{ marginRight: 5 }} />}
+                {member.role}
+              </span>
+            </td>
             <td>
-              {member.role}
               <button
                 type="button"
                 onClick={() => toggleRole(member.empCode)}
                 disabled={loading}
-                className="role-change-btn"
+                className={`role-btn ${member.role === "Team Lead" ? "btn-revoke-lead" : "btn-make-lead"}`}
               >
-                {member.role === "Team Lead" ? "✔ Team Lead" : "Set as Team Lead"}
+                {member.role === "Team Lead" ? "Set as Member" : "Set as Team Lead"}
               </button>
             </td>
             <td>
