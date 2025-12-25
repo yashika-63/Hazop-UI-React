@@ -1,37 +1,54 @@
 :root {
-  /* font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif; */
-  font-family: sans-serif;
-  line-height: 1.5;
+  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.2;
   font-weight: 400;
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 
+  /* Hazop Specific Colors (Risk Levels) - Keeping these global */
   --trivial: #207229;
   --tolerable: #56a744;
   --moderate: #fef65e;
   --substantial: #fa9201;
   --intolerable: #f91111;
+  
+  /* Scrollbar hiding logic can stay */
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
+/* 1. Base Styles - Use variables from global.css here */
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  
+  /* CONNECTING TO YOUR THEME HERE */
+  background-color: var(--bg-body); 
+  color: var(--text-main);
+  
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* 2. Link Styles */
 a {
-  font-weight: 500;
-  color: #646cff;
+  font-weight: 400;
+  color: #646cff; /* You can make this var(--link-color) if you want */
   text-decoration: inherit;
 }
 a:hover {
   color: #535bf2;
 }
 
+/* 3. Heading Styles */
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
+  color: var(--text-main); /* Ensure headers adapt to theme */
 }
 
+/* 4. Button Styles (Base Reset) */
+/* Note: Your specific buttons like .add-btn in global.css will override this */
 button {
   border-radius: 8px;
   border: 1px solid transparent;
@@ -39,9 +56,14 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: var(--bg-input); /* Adapts to theme */
+  color: var(--text-main);
   cursor: pointer;
   transition: border-color 0.25s;
+}
+
+button:hover {
+  border-color: #646cff;
 }
 
 button:focus,
@@ -49,26 +71,12 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
-}
-
-/* Hide scrollbar for Chrome, Safari, Edge */
+/* 5. Scrollbar Management */
 ::-webkit-scrollbar {
   width: 0px;
   background: transparent;
 }
 
-/* Hide scrollbar for Firefox */
 html {
   scrollbar-width: none;
 }

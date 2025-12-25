@@ -236,7 +236,7 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
                         <tbody>
                             {data.notAssigned.map((item, index) => (
                                 <tr key={item.id} className={expandedRowId === item.id ? "expanded-row" : ""} onClick={() => toggleRow(item.id)}>
-                                    <td className="sr-no">{index + 1}</td>
+                                    {/* <td className="sr-no">{index + 1}</td> */}
                                     <td>
                                         {item.javaHazopNode?.nodeNumber && item.javaHazopNodeDetail?.nodeDetailNumber
                                             ? `${item.javaHazopNode.nodeNumber}.${item.javaHazopNodeDetail.nodeDetailNumber}`

@@ -1,5 +1,5 @@
 /* ------------------------------------------- */
-/*                 TOPBAR                      */
+/* TOPBAR                                      */
 /* ------------------------------------------- */
 .topbar {
     position: fixed;
@@ -7,47 +7,52 @@
     left: 0;
     height: 50px;
     width: 100%;
-    background: linear-gradient(190deg, #121212, #1a1a1a);
+    background: var(--bg-topbar);
+    color: var(--sidebar-text);
     backdrop-filter: blur(10px);
-    color: #fff;
     display: flex;
     align-items: center;
     padding: 0 30px;
     z-index: 1000;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    transition: background 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: var(--topbar-shadow);
+    border-bottom: 1px solid var(--sidebar-border);
+    transition: background 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+}
+
+/* Logo styling */
+.topbar-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 0 15px;
+
+    color: var(--sidebar-text);
+    /* Use sidebar-text */
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    transition: 0.3s ease;
 }
 
 .topbar-logo img {
-    margin-top: 10px;
-    width: 90px;
-    height: 46px;
-    left: 10px;
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(6px) saturate(150%);
-    -webkit-backdrop-filter: blur(6px) saturate(150%);
-
-    box-shadow:
-        0 2px 6px rgba(0, 0, 0, 0.35),
-        inset 0 1px 2px rgba(255, 255, 255, 0.2);
-
+    height: 32px;
+    width: auto;
+    object-fit: contain;
+    /* Optional: Brightness filter if you have a dark logo */
+    /* filter: brightness(0) invert(1); */
     transition: all 0.3s ease;
 }
 
-/* Hover effect */
-.topbar-logo img:hover {
-    transform: scale(1.1);
-    box-shadow:
-        0 4px 12px rgba(0, 0, 0, 0.45),
-        inset 0 2px 4px rgba(255, 255, 255, 0.25);
-    background: rgba(255, 255, 255, 0.1);
+.topbar-logo:hover img {
+    transform: scale(1.05);
+    filter: brightness(1.2);
 }
-
 
 .sidebar-toggle {
     font-size: 26px;
-    color: #fff;
+    color: var(--sidebar-text);
+    /* Use sidebar-text */
     background: none;
     border: none;
     cursor: pointer;
@@ -58,6 +63,7 @@
 .sidebar-toggle:hover {
     transform: scale(1.2);
     color: #ffffff;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
 }
 
 .topbar-left {
@@ -66,31 +72,41 @@
     gap: 20px;
 }
 
-.topbar-logo {
-    font-size: 24px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
+/* --- THEME TOGGLE BUTTON --- */
+/* --- THEME TOGGLE BUTTON --- */
+.theme-toggle-btn {
+    background: transparent;
+    border: 1px solid var(--sidebar-border);
+    border-radius: 50%;
+    
+    /* INCREASED SIZE HERE */
+    width: 45px;   /* Was 35px */
+    height: 45px;  /* Was 35px */
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin-right: 15px;
+    color: var(--sidebar-text);
+    
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.theme-toggle-btn:hover {
+    background-color: var(--sidebar-active-bg);
+    transform: rotate(15deg) scale(1.1);
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.4); /* Stronger glow */
+    border-color: #ffffff;
     color: #ffffff;
-
-    text-shadow:
-        0 0 8px rgba(255, 255, 255, 0.4),
-        0 0 16px rgba(255, 255, 255, 0.2),
-        0 2px 6px rgba(0, 0, 0, 0.4);
-    transition: 0.3s ease;
 }
 
-.topbar-logo:hover {
-    text-shadow:
-        0 0 10px rgba(255, 255, 255, 0.6),
-        0 0 20px rgba(255, 255, 255, 0.3),
-        0 2px 6px rgba(0, 0, 0, 0.45);
-    transform: scale(1.08);
+.theme-toggle-btn:active {
+    transform: scale(0.95);
 }
-
-
 
 /* ------------------------------------------- */
-/*                 SIDEBAR                     */
+/* SIDEBAR                                     */
 /* ------------------------------------------- */
 .sidebar {
     position: fixed;
@@ -98,54 +114,94 @@
     left: 0;
     height: calc(100vh - 60px);
     width: 220px;
-    background: linear-gradient(190deg, #121212, #1a1a1a);
-    color: #fff;
-    overflow: hidden;
+
+    /* USE VARIABLE HERE */
+    background: var(--bg-sidebar);
+    color: var(--sidebar-text);
+
+    overflow-x: auto;
+    overflow-y: scroll;
     transition: width 0.4s ease, background 0.3s ease, box-shadow 0.3s ease;
-    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    border-right: 1px solid var(--sidebar-border);
     z-index: 1000;
-    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.4);
+    box-shadow: 2px 0 15px rgba(0, 0, 0, 0.2);
 }
 
 .sidebar.closed {
     width: 70px;
 }
 
-.sidebar:not(.closed):hover {
-    background: linear-gradient(180deg, #181818, #252525);
-}
-.sidebar-logo {
-    cursor: pointer;
+/* ------------------------------------------- */
+/* SIDEBAR BADGE                               */
+/* ------------------------------------------- */
+.sidebar-badge {
+    background-color: #ff4d4f;
+    /* Notification Red */
+    color: white;
+    border-radius: 10px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.2;
+
+    /* Center text */
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+    /* Animation */
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 2px 5px rgba(255, 77, 79, 0.4);
 }
 
-.sidebar-logo img {
-    height: 30px;
-    object-fit: contain;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+/* --- STATE: OPEN SIDEBAR --- */
+/* Push badge to the far right */
+.sidebar:not(.closed) .sidebar-badge {
+    margin-left: auto;
+    /* Magic CSS to push element to end of flex container */
+    position: relative;
+    transform: scale(1);
 }
 
-.welcome-message {
-    font-size: 16px;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    text-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
-  }
-  
-  .welcome-message strong {
-    color: #ffffff; /* golden accent for the name */
-  }
-  
+/* --- STATE: CLOSED SIDEBAR --- */
+/* Float above the icon */
+.sidebar.closed .sidebar-badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
 
+    /* Make it a small dot */
+    padding: 0;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    font-size: 9px;
 
+    /* Add a border matching sidebar bg to create a 'cutout' look */
+    border: 2px solid var(--bg-sidebar);
+
+    /* Pop animation effect */
+    animation: bounceIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes bounceIn {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    60% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
 
 /* ------------------------------------------- */
-/*               MENU LIST                     */
+/* MENU LIST                                   */
 /* ------------------------------------------- */
 .menu-list {
     padding: 18px 10px;
@@ -165,95 +221,59 @@
     position: relative;
     text-decoration: none;
     font-size: 14px;
-    color: #d6d6d6;
+
+    /* Adapts to theme */
+    color: var(--sidebar-text);
+
     border-radius: 12px;
     border: 1px solid transparent;
-
     transition: 0.25s ease;
 }
 
-/* -------- ULTRA GLOSSY TRANSPARENT HOVER -------- */
+/* Hover Effect */
 .menu-link:hover {
     color: #ffffff;
 
-    /* Transparent glass background */
-    background: rgba(255, 255, 255, 0.10);
+    /* Using active-bg for hover to keep it glossy in light mode */
+    background: var(--sidebar-active-bg);
 
-    /* Strong glass shine */
-    background: linear-gradient(145deg,
-            rgba(255, 255, 255, 0.22),
-            rgba(255, 255, 255, 0.05));
-
-    /* Glass border */
-    border-color: rgba(255, 255, 255, 0.28);
-
-    /* Glass blur + glow */
-    backdrop-filter: blur(10px) saturate(160%);
-    -webkit-backdrop-filter: blur(10px) saturate(160%);
-
-    /* Glossy shadow */
-    box-shadow:
-        0 4px 18px rgba(255, 255, 255, 0.08),
-        inset 0 2px 4px rgba(255, 255, 255, 0.25);
-
+    border-color: var(--sidebar-border);
     transform: translateX(5px);
-    transition: 0.25s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
-
-/* -------- ULTRA GLOSSY TRANSPARENT ACTIVE -------- */
+/* Active State */
 .menu-link.active {
     color: #ffffff;
 
-    /* More intense shine */
-    background: linear-gradient(145deg,
-            rgba(255, 255, 255, 0.30),
-            rgba(255, 255, 255, 0.08));
+    /* USE VARIABLE HERE */
+    background: var(--sidebar-active-bg);
 
-    border-color: rgba(255, 255, 255, 0.40);
-
+    border-color: var(--sidebar-border);
     backdrop-filter: blur(12px) saturate(180%);
-    -webkit-backdrop-filter: blur(12px) saturate(180%);
-
-    /* Deeper internal gloss */
-    box-shadow:
-        0 6px 20px rgba(255, 255, 255, 0.10),
-        inset 0 2px 5px rgba(255, 255, 255, 0.28);
-
-    transition: 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    font-weight: 600;
 }
 
-
-/* -------- ICON GLOSS -------- */
 .menu-link .icon {
     font-size: 18px;
-    color: #f0f0f0;
-    text-shadow: 0 2px 8px rgba(255, 255, 255, 0.25);
+    color: inherit;
 }
 
-
-
-/* ------------ BADGE STYLE ------------- */
-/* Sidebar badge */
-.sidebar-badge {
-    position: absolute;
-    top: 1px;
-    right: 6px;
-    background-color: #ff4d4f;
-    color: #fff;
-    font-size: 11px;
-    font-weight: bold;
-    padding: 2px 6px;
-    border-radius: 12px;
-    pointer-events: none;
+/* ---------------- Profile & Popup ---------------- */
+.welcome-message {
+    font-size: 16px;
+    color: var(--sidebar-text);
+    /* Use sidebar-text */
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
+.welcome-message strong {
+    color: #ffffff;
+}
 
-
-
-
-/* ---------------- Profile Section ---------------- */
-/* Profile wrapper remains same */
 .profile-wrapper {
     position: relative;
     display: flex;
@@ -265,7 +285,6 @@
     margin-right: 60px;
 }
 
-/* Flip container */
 .profile-flip {
     width: 40px;
     height: 40px;
@@ -277,10 +296,10 @@
     justify-content: center;
     transition: transform 0.6s;
     transform-style: preserve-3d;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--sidebar-border);
 }
 
-/* Front side */
 .profile-front {
     position: absolute;
     width: 100%;
@@ -292,11 +311,9 @@
     justify-content: center;
     font-size: 16px;
     backface-visibility: hidden;
-    box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.1),
-        0 2px 6px rgba(0, 0, 0, 0.4);
+    color: white !important;
 }
 
-/* Back side with white & 3D glossy effect */
 .profile-back {
     position: absolute;
     width: 100%;
@@ -309,34 +326,28 @@
     font-size: 16px;
     backface-visibility: hidden;
     transform: rotateY(180deg);
-    box-shadow:
-        0 4px 8px rgba(0, 0, 0, 0.4),
-        inset 0 2px 4px rgba(255, 255, 255, 0.6);
-    background: linear-gradient(145deg, #ffffff 0%, #f2f2f2 50%, #d9d9d9 100%);
-    color: #333;
-    /* darker icon for contrast */
 }
 
-/* Flip on hover */
 .profile-wrapper:hover .profile-flip {
     transform: rotateY(180deg);
 }
 
-
-/* ---------------- Popup ---------------- */
+/* Popup */
 .profile-popup {
     position: absolute;
     top: 50px;
-    /* Below profile */
     right: 0;
-    background: rgba(30, 30, 30, 0.95);
-    backdrop-filter: blur(10px);
+
+    /* USE VARIABLE HERE */
+    background: var(--popup-bg);
+    color: var(--text-main);
+    /* Text inside popup follows content theme (light/dark) */
+    border: 1px solid var(--border-color);
+
     padding: 12px 20px;
     border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-    color: #fff;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     min-width: 190px;
-    max-width: calc(100vw - 20px);
     z-index: 2000;
     opacity: 0;
     pointer-events: none;
@@ -344,7 +355,6 @@
     transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-/* Show popup when active */
 .profile-popup.active {
     opacity: 1;
     pointer-events: auto;
@@ -352,52 +362,55 @@
 }
 
 .profile-popup p {
-    margin: 5px 0;
-    font-size: 14px;
+    color: var(--text-main);
 }
 
-.profile-popup button {
-    margin-top: 10px;
-    width: 100%;
-    padding: 6px 10px;
-    background: #ff4d4d;
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 14px;
-    transition: 0.3s ease;
-}
-
-.profile-popup button:hover {
-    background: #e04343;
-}
-
-/* Right alignment of logo + profile */
-.topbar-right {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin-left: auto;
-    flex-shrink: 0;
-}
-
-
-
-
-/* ------------------------------------------- */
-/*              CONTENT SHIFT                  */
-/* ------------------------------------------- */
+/* ---------------- Content Area ---------------- */
 .content-area {
     margin-top: 60px;
     margin-left: 60px;
     padding: 25px;
     transition: margin-left 0.3s ease, padding 0.3s ease;
+    background-color: transparent;
 }
 
 .content-area.shifted {
     margin-left: 200px;
-    /* opened */
     padding: 35px;
+}
+
+/* Logout Button Style */
+.logout-btn {
+    width: 100%;
+    margin-top: 12px;
+    padding: 8px 12px;
+    background-color: #ff4d4f;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 6px rgba(255, 77, 79, 0.2);
+}
+
+.logout-btn:hover {
+    background-color: #d9363e;
+    box-shadow: 0 6px 12px rgba(255, 77, 79, 0.3);
+    transform: translateY(-1px);
+}
+
+.logout-btn:active {
+    transform: scale(0.98);
+    box-shadow: 0 2px 4px rgba(255, 77, 79, 0.2);
+}
+
+.sidebar-logo {
+    cursor: pointer;
+    margin-right: 10px;
 }

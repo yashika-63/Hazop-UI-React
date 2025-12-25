@@ -7,6 +7,8 @@ import { ToastContainer } from 'react-toastify';
 import './App.css';
 import "./styles/global.css";
 
+/* Context Import */
+
 /* Pages */
 import NodePage from "./AddNodeScreen/NodePage";
 import NodeDetails from './AddNodeScreen/NodeDetails';
@@ -30,32 +32,32 @@ import UpdateNode from './AddNodeScreen/UpdateNode';
 
 /* Role Imports */
 import { PERMISSIONS } from "./RBAC/Permissions";
-import PrivateRoute from "./RBAC/PrivateRoute"; // Ensure this path is correct
-
-const ROLES = {
-  CREATOR: "HAZOP_CREATOR",
-  LEAD: "TEAM_LEAD",
-  MEMBER: "TEAM_MEMBER",
-};
-
+import PrivateRoute from "./RBAC/PrivateRoute"; 
+import { ROLES } from './RBAC/roles';
+import { useTheme } from './Context/ThemeContext';
 const App = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
+  // 1. Get current theme from Context (to style the main container)
+  const { theme } = useTheme(); 
+console.log("📱 App Component Rendered with Theme:", theme);
+
   const isAuthenticated = !!localStorage.getItem('empCode');
   const userRole = localStorage.getItem("Role");
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
-  const handleLogin = () => window.location.reload(); // Simple reload to refresh state
+
+  const handleLogin = () => window.location.reload();
+  
   const handleLogout = () => {
     localStorage.clear();
     window.location.href = "/login";
   };
 
-  // --- Logic 1: Determine Landing Page ---
   const getDefaultRoute = () => {
     if (userRole === ROLES.LEAD) return "/RoleBasedHazopPage";
     if (userRole === ROLES.MEMBER) return "/HazopStatusPage";
-    return "/HazopPage"; // Default for Creator
+    return "/HazopPage";
   };
 
   return (
@@ -70,8 +72,13 @@ const App = () => {
           path="/*"
           element={
             isAuthenticated ? (
-              <div className="app-container">
-                <Topbar toggleSidebar={toggleSidebar} isOpen={isSidebarOpen} handleLogout={handleLogout} />
+              // 2. Apply the theme class to the main wrapper
+              <div className={`app-container ${theme}`}>
+                <Topbar 
+                   toggleSidebar={toggleSidebar} 
+                   isOpen={isSidebarOpen} 
+                   handleLogout={handleLogout}
+                />
                 <Sidebar isOpen={isSidebarOpen} />
 
                 <div className={`content-area ${isSidebarOpen ? 'shifted' : ''}`}>
@@ -79,7 +86,7 @@ const App = () => {
                     
                     {/* --- 1. HAZOP CREATOR ONLY --- */}
                     <Route path="/HazopPage" element={<PrivateRoute allowedRoles={PERMISSIONS.HazopPage}><HazopPage /></PrivateRoute>} />
-                    <Route path="/HazopList" element={<PrivateRoute allowedRoles={PERMISSIONS.HazopList}><HazopList /></PrivateRoute>} />
+                    <Route path="/HazopList" element={<PrivateRoute allowedRoles={PERMISSIONS.HazopList}><HazopList/></PrivateRoute>} />
                     <Route path="/MOCList" element={<PrivateRoute allowedRoles={PERMISSIONS.MOCList}><MOCList /></PrivateRoute>} />
                     
                     {/* Node Management (Creator Only) */}
@@ -110,32 +117,10 @@ const App = () => {
 
                     {/* Fallback */}
                     <Route path="*" element={<Navigate to={getDefaultRoute()} />} />
-                    <Route path="/NodePage" element={<NodePage />} />
-                    <Route path="/HazopPage" element={<HazopPage />} />
-                    <Route path="/HazopList" element={<HazopList />} />
-                    <Route path="/RequestHandler" element={<RequestHandler />} />
-                    <Route path="/NodeDetails" element={<NodeDetails />} />
-                    <Route path="/RecommandationHandler" element={<RecommandationHandler />} />
-                    <Route path="/hazop-approval-view" element={<HazopApprovalViewPage />} />
-                    <Route path="/hazop-confirmation-view" element={<HazopConfirmationViewPage />} />
-                    <Route path="/CreateNodeDetails" element={<CreateNodeDetails />} />
-                    <Route path="/complete-hazop-view" element={<HazopView />} />
-                    <Route path="/MOCList" element={<MOCList />} />
-                    <Route path="/NodePopup/:id" element={<NodePopup />} />
-                    <Route path="/HazopWorkflow/:id" element={<HazopWorkflow />} />
-                    <Route path="/HazopStatusPage" element={<HazopStatusPage />} />
-                    <Route path="/RoleBasedHazopPage" element={<RoleBasedHazopPage />} />
-                    <Route path="/NodePopup" element={<NodePopup />} />
-                    <Route path='/NodeRetrieve' element={<NodeRetrieve />} />
-                    <Route path="/ViewNodeDiscussion" element={<ViewNodeDiscussion/>} />
-                    <Route path="/HazopView" element={<HazopView />} />
-                    <Route path="/Dashboard" element={<Dashboard />} />
-                    <Route path='/UpdateNode' element={<UpdateNode />} />
-                    
-                    <Route path="*" element={<Navigate to="/HazopPage" />} />
                   </Routes>
                 </div>
-                <ToastContainer position="top-right" autoClose={3000} />
+                {/* 3. Pass theme to ToastContainer */}
+                <ToastContainer position="top-right" autoClose={3000} theme={theme} /> 
               </div>
             ) : (
               <Navigate to="/login" />

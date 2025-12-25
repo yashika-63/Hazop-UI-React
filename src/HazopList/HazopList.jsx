@@ -177,16 +177,7 @@ const HazopList = () => {
       </div>
 
       {/* --- FILTERS SECTION --- */}
-      <div className="filters-container" style={{
-        display: "flex",
-        gap: "10px",
-        marginBottom: "20px",
-        flexWrap: "wrap",
-        padding: "15px",
-        backgroundColor: "#f8f9fa",
-        borderRadius: "8px",
-        border: "1px solid #e9ecef"
-      }}>
+      <div className="filters-container" >
         {/* Status */}
         <div className="filter-group">
           <select

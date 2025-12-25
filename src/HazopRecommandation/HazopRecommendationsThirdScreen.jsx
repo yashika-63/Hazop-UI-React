@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { formatDate, showToast, truncateText } from "../CommonUI/CommonUI";
 import { strings } from "../string";
-import { FaTimes, FaSearch, FaEllipsisV, FaExchangeAlt, FaCalendarAlt, FaCheck, FaUndo, FaChevronUp, FaChevronDown, FaHistory } from "react-icons/fa";
+import { FaTimes, FaSearch, FaEllipsisV, FaExchangeAlt, FaCalendarAlt, FaCheck, FaUndo, FaChevronUp, FaChevronDown, FaHistory, FaUser, FaUserTie } from "react-icons/fa";
 import './Recommandation.css';
 
 const ConfirmationPopup = ({ message, onConfirm, onCancel, isSending }) => {
@@ -24,18 +24,13 @@ const ConfirmationPopup = ({ message, onConfirm, onCancel, isSending }) => {
 const HazopRecommendationsThirdScreen = ({ hazopId }) => {
     const [records, setRecords] = useState([]);
     const [loading, setLoading] = useState(true);
-
-    // --- New State for Team Comments API ---
     const [teamComments, setTeamComments] = useState([]);
-
-    // --- Modal / Popup States ---
     const [showModal, setShowModal] = useState(false);
     const [showConfirmation, setShowConfirmation] = useState(false);
     const [showTeamCompletionPopup, setShowTeamCompletionPopup] = useState(false);
     const [showReassignPopup, setShowReassignPopup] = useState(false);
     const [showSendReviewPopup, setShowSendReviewPopup] = useState(false);
-
-    // --- Data States ---
+    const [hazopTeam, setHazopTeam] = useState([]);
     const [teamMembers, setTeamMembers] = useState([]);
     const [teamSearch, setTeamSearch] = useState("");
     const [searchResults, setSearchResults] = useState([]);
@@ -43,16 +38,12 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
     const [selectedReviewEmployee, setSelectedReviewEmployee] = useState(null);
     const [selectedRecommendation, setSelectedRecommendation] = useState(null);
     const [reassignComment, setReassignComment] = useState("");
-
-    // --- UI States ---
     const [isSending, setIsSending] = useState(false);
     const [isSendingCompletion, setIsSendingCompletion] = useState(false);
     const [openDropdown, setOpenDropdown] = useState(null);
     const [expandedRowId, setExpandedRowId] = useState(null);
     const [historyData, setHistoryData] = useState({});
     const [loadingHistory, setLoadingHistory] = useState(false);
-
-    // --- Inline Date Edit States ---
     const [editingDateRowId, setEditingDateRowId] = useState(null);
     const [tempTargetDate, setTempTargetDate] = useState("");
 
@@ -85,7 +76,6 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
         }
     };
 
-    // 1. NEW API: Fetch Team Comments / Status
     const fetchTeamComments = async () => {
         try {
             const res = await axios.get(`http://${strings.localhost}/api/team-comments/getByHazop/${hazopId}`);
@@ -95,33 +85,38 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
         }
     };
 
-    const fetchHistory = async (assignmentId) => {
-        if (historyData[assignmentId]) return;
-
-        setLoadingHistory(true);
+    const fetchPreSignOffData = async () => {
+        setLoading(true);
         try {
-            const res = await axios.get(`http://${strings.localhost}/api/nodeRecommendation/getByAssignment?assignmentId=${assignmentId}`);
-            setHistoryData(prev => ({
-                ...prev,
-                [assignmentId]: res.data || []
+            const response = await axios.get(
+                `http://${strings.localhost}/api/hazopTeam/teamByHazop/${hazopId}?status=true`
+            );
+
+            const mappedData = (response.data || []).map(member => ({
+                ...member,
+                role: member.hazopRole || member.role || "Team Member"
             }));
+
+            setHazopTeam(mappedData);
         } catch (err) {
-            console.error("Failed to fetch history", err);
-        } finally {
-            setLoadingHistory(false);
+            console.error("Error fetching team:", err);
+            showToast("Failed to load existing team.", "error");
         }
+        setLoading(false);
     };
+
 
     useEffect(() => {
         if (hazopId) {
             fetchRecords();
-            fetchTeamComments(); // Fetch new table data
+            fetchTeamComments();
+            fetchPreSignOffData();
         }
         fetchTeamMembers();
     }, [hazopId]);
 
     // --- Completion Logic Update ---
-
+    const allEmployeesAccepted = hazopTeam.length > 0 && hazopTeam.every(member => member.employeeActionTaken === true && member.employeeAction === true);
     const isTeamSignOffInitiated = teamComments.length > 0;
 
     // 2. CHECK ALL NODES: Every record must have completionStatus === true
@@ -149,12 +144,8 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
         if (editingDateRowId === id) return;
         const newExpandedId = expandedRowId === id ? null : id;
         setExpandedRowId(newExpandedId);
-        // if (newExpandedId) {
-        //     fetchHistory(id);
-        // }
     };
 
-    // --- Search & Team Logic ---
     const handleTeamSearchChange = async (e) => {
         const value = e.target.value;
         setTeamSearch(value);
@@ -235,6 +226,30 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
         }
     };
 
+
+    const handleSendCompletionClick = () => {
+        // Validation 1: Already Initiated
+        if (isTeamSignOffInitiated) {
+            showToast("Team sign off has already been initiated.", "info");
+            return;
+        }
+
+        // Validation 2: No Team Members
+        if (teamMembers.length === 0) {
+            showToast("No team members found for this Hazop.", "warning");
+            return;
+        }
+
+        // Validation 3: Not all employees accepted role
+        if (!allEmployeesAccepted) {
+            showToast("All team members must accept their roles before initiating sign-off.", "warning");
+            return;
+        }
+
+        // If all validations pass, open the confirmation popup
+        setShowTeamCompletionPopup(true);
+    };
+
     const handleSendForCompletion = async () => {
         if (!teamMembers || teamMembers.length === 0) {
             showToast("No team members found for this Hazop.", "warning");
@@ -260,7 +275,7 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
 
             await Promise.all(apiCalls);
             showToast("Sent for completion to all team members successfully.", "success");
-            fetchTeamComments(); // Refresh the lower table
+            fetchTeamComments();
         } catch (err) {
             console.error("Error sending for completion:", err);
             showToast("Failed to send to some or all team members.", "error");
@@ -300,8 +315,6 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
             setIsSending(false);
         }
     };
-
-    // --- Inline Date Edit Logic ---
     const handleEditDateClick = (item) => {
         setEditingDateRowId(item.id);
         setOpenDropdown(null);
@@ -371,8 +384,6 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
                 </div>
             )}
 
-            {/* --- TABLE 1: Recommendations Records --- */}
-            <h4 ></h4>
 
             <div className="table-header-stats">
                 <div className={`mini-badge ${completedNodesCount === totalNodes ? 'ready' : 'not-ready'}`}>
@@ -514,28 +525,115 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
             </table>
 
             {/* --- MIDDLE BUTTON: Send for Completion --- */}
-            <div className="middle-controls" style={{ marginTop: '15px', marginBottom: '20px' }}>
+            <div className="middle-controls" style={{ marginTop: '15px', marginBottom: '20px', float: 'right' }}>
                 <button
                     className="confirm-btn completion-btn"
                     style={{
-                        backgroundColor: isTeamSignOffInitiated ? '#bdc3c7' : '#e67e22',
-                        cursor: isTeamSignOffInitiated ? 'not-allowed' : 'pointer'
+                        backgroundColor: (isTeamSignOffInitiated || !allEmployeesAccepted) ? '#bdc3c7' : '#e67e22',
+                        cursor: (isTeamSignOffInitiated || !allEmployeesAccepted) ? 'not-allowed' : 'pointer'
                     }}
-                    onClick={() => setShowTeamCompletionPopup(true)}
-                    // UPDATED DISABLED LOGIC:
-                    disabled={isSendingCompletion || teamMembers.length === 0 || isTeamSignOffInitiated}
+                    disabled={isSendingCompletion}
+                    onClick={handleSendCompletionClick}
                     title={
                         isTeamSignOffInitiated
                             ? "Team sign off has already been initiated."
-                            : teamMembers.length === 0 ? "No team members found" : "Notify all team members to sign"
+                            : !allEmployeesAccepted
+                                ? "All team members must accept their roles first."
+                                : "Notify all team members to sign"
                     }
                 >
                     {isSendingCompletion ? "Sending..." : "Send for team sign off"}
                 </button>
             </div>
 
+            {/* --- TABLE 2: Hazop Team Sign Off Status --- */}
+            <h4>Pre-Execution Sign Off Data</h4>
+            {hazopTeam.length > 0 && (
+                <div className="table-wrapper">
+                    <table className="assigned-table">
+                        <thead>
+                            <tr>
+                                <th>Emp Code</th>
+                                <th>Employee Name</th>
+                                <th>Role</th>
+                                <th>Employee Action Taken Date</th>
+                                <th>Employee Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {hazopTeam.map((member) => (
+                                <tr key={member.empCode}>
+                                    <td>{member.empCode}</td>
+                                    <td>{member.firstName} {member.lastName}</td>
+                                    <td>
+                                        <span className={`role-badge ${member.role === "Team Lead" ? "role-lead" : "role-member"}`}>
+                                            {member.role === "Team Lead" ? <FaUserTie style={{ marginRight: 5 }} /> : <FaUser style={{ marginRight: 5 }} />}
+                                            {member.role}
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        {formatDate(member.employeeActionTakenDate) || '-'}
+                                    </td>
+                                    <td>
+                                        {!member.employeeActionTaken ? (
+                                            <span
+                                                className="status-pending"
+                                                style={{
+                                                    color: '#ea580c',
+                                                    backgroundColor: '#ffedd5',
+                                                    padding: '2px 8px',
+                                                    borderRadius: '10px',
+                                                    fontSize: '12px',
+                                                    fontWeight: '600'
+                                                }}
+                                            >
+                                                Pending
+                                            </span>
+                                        ) : (
+                                            // CASE 2 & 3: Action IS Taken (Check if Completed or Rejected)
+                                            <div>
+                                                {member.employeeAction ? (
+                                                    <span
+                                                        className="status-completed"
+                                                        style={{
+                                                            color: '#16a34a',
+                                                            backgroundColor: '#dcfce7',
+                                                            padding: '2px 8px',
+                                                            borderRadius: '10px',
+                                                            fontSize: '12px',
+                                                            fontWeight: '600'
+                                                        }}
+                                                    >
+                                                        Completed
+                                                    </span>
+                                                ) : (
+                                                    // Action Taken is true, but Action is false -> Rejected
+                                                    <span
+                                                        className="status-rejected"
+                                                        style={{
+                                                            color: '#dc2626', // Red
+                                                            backgroundColor: '#fee2e2', // Light Red
+                                                            padding: '2px 8px',
+                                                            borderRadius: '10px',
+                                                            fontSize: '12px',
+                                                            fontWeight: '600'
+                                                        }}
+                                                    >
+                                                        Rejected
+                                                    </span>
+                                                )}
+                                            </div>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
             {/* --- TABLE 2: Team Comments / Verification Status --- */}
-            <h4 className="table-header-title">Sign Off Status</h4>
+            <h4>Post-Execution Sign Off Data</h4>
             <table className="assigned-table" style={{ marginBottom: '20px' }}>
                 <thead>
                     <tr>
@@ -553,7 +651,7 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
                     ) : (
                         teamComments.map((item, index) => (
                             <tr key={item.id} className="main-row">
-                                <td>{item.empCode}</td> {/* Displaying Name as per your API response */}
+                                <td>{item.empCode}</td>
                                 <td>{item.empEmail}</td>
                                 <td>{formatDate(item.assignDate)}</td>
                                 <td>{item.signByEmpCode || "-"}</td>

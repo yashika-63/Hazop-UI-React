@@ -175,24 +175,14 @@ const NodePopup = ({ onSave }) => {
     }
   };
 
-  // --- Reusable Toolbar Component ---
+  // --- Reusable Toolbar Component (Cleaned up styles) ---
   const FormatButtons = ({ fieldName }) => (
-    <div style={{ display: 'inline-flex', gap: '5px', marginLeft: '10px' }}>
+    <div className="fmt-btn-container">
       <button
         type="button"
         onClick={() => formatSelection(fieldName, 'sub')}
         className="fmt-btn"
         title="Subscript (Select text first)"
-        style={{
-          cursor: 'pointer',
-          padding: '2px 6px',
-          background: '#f0f0f0',
-          border: '1px solid #ccc',
-          borderRadius: '3px',
-          fontSize: '10px',
-          display: 'flex',
-          alignItems: 'center'
-        }}
       >
         <FaSubscript />
       </button>
@@ -201,16 +191,6 @@ const NodePopup = ({ onSave }) => {
         onClick={() => formatSelection(fieldName, 'sup')}
         className="fmt-btn"
         title="Superscript (Select text first)"
-        style={{
-          cursor: 'pointer',
-          padding: '2px 6px',
-          background: '#f0f0f0',
-          border: '1px solid #ccc',
-          borderRadius: '3px',
-          fontSize: '10px',
-          display: 'flex',
-          alignItems: 'center'
-        }}
       >
         <FaSuperscript />
       </button>
@@ -230,9 +210,10 @@ const NodePopup = ({ onSave }) => {
         <div>
           <div>
             <div className="form-group">
-              <label style={{ display: 'flex', alignItems: 'center' }}>
-                <span className="required-marker">* </span>Design Intent
-                {/* REMOVED FormatButtons from here */}
+              <label className="header-label-row">
+                <div>
+                  <span className="required-marker">* </span>Design Intent
+                </div>
               </label>
               <textarea
                 id="designIntent"
@@ -306,8 +287,8 @@ const NodePopup = ({ onSave }) => {
             <div className="input-row">
               <div className="form-group">
                 {/* 1. TEMPERATURE: KEPT BUTTONS */}
-                <label className="table-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                <label className="header-label-row">
+                  <div>
                     <span className="required-marker">* </span>Temperature
                     <FormatButtons fieldName="temperature" />
                   </div>
@@ -328,8 +309,8 @@ const NodePopup = ({ onSave }) => {
 
               <div className="form-group">
                 {/* 2. PRESSURE: KEPT BUTTONS */}
-                <label className="table-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                <label className="header-label-row">
+                  <div>
                     <span className="required-marker">* </span>Pressure, barg
                     <FormatButtons fieldName="pressure" />
                   </div>
@@ -349,9 +330,9 @@ const NodePopup = ({ onSave }) => {
               </div>
 
               <div className="form-group">
-                {/* 3. QUANTITY: KEPT BUTTONS (Recommended for m3, etc) */}
-                <label className="table-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                {/* 3. QUANTITY: KEPT BUTTONS */}
+                <label className="header-label-row">
+                  <div>
                     <span className="required-marker">* </span>Quantity
                     <FormatButtons fieldName="quantityFlowRate" />
                   </div>
@@ -375,10 +356,9 @@ const NodePopup = ({ onSave }) => {
           {/* Equipment / controls */}
           <div className="input-row">
             <div className="form-group">
-              <label className="table-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
+              <label className="header-label-row">
+                <div>
                   <span className="required-marker">* </span>Equipment
-                  {/* REMOVED FormatButtons from here */}
                 </div>
                 <small className={`char-count ${form.equipment.length >= 2000 ? "limit-reached" : ""}`}>
                   {form.equipment.length}/2000
@@ -398,10 +378,9 @@ const NodePopup = ({ onSave }) => {
             </div>
 
             <div className="form-group">
-              <label className="table-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
+              <label className="header-label-row">
+                <div>
                   <span className="required-marker">* </span>Controls
-                  {/* REMOVED FormatButtons from here */}
                 </div>
                 <small className={`char-count ${form.controls.length >= 2000 ? "limit-reached" : ""}`}>
                   {form.controls.length}/2000
@@ -422,9 +401,9 @@ const NodePopup = ({ onSave }) => {
 
             {/* Chemicals */}
             <div className="form-group full-width">
-              {/* 4. CHEMICALS: KEPT BUTTONS (Recommended for Formulas like H2O) */}
-              <label className="table-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
+              {/* 4. CHEMICALS: KEPT BUTTONS */}
+              <label className="header-label-row">
+                <div>
                   <span className="required-marker">* </span>Chemicals and utilities
                   <FormatButtons fieldName="chemicalAndUtilities" />
                 </div>

@@ -1,488 +1,437 @@
 .kanban-container {
-  max-width: 1080px;
-  margin: auto;
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  padding: 10px 0;
+    max-width: 1080px;
+    margin: auto;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 10px 0;
 }
 
 /* ================================
-KANBAN COLUMN
+   KANBAN COLUMN
 ===================================*/
+/* In HazopPage.css */
 .kanban-column {
-  width: 33%;
-  background: #edf0fc;
-  padding: 20px;
-  border-radius: 20px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05), 0 2px 6px rgba(0, 0, 0, 0.03);
-  position: relative;
-  overflow: hidden;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+    width: 33%;
+    background: var(--bg-row-even);
+    padding: 20px;
+    border-radius: 20px;
+    
+    /* CHANGE THIS: */
+    /* overflow: hidden;  <-- Remove this */
+    overflow: visible; /* <-- Add this so dropdowns can stick out */
+    
+    /* If you absolutely need a scrollbar on the column, use this instead: */
+    /* overflow-y: auto; overflow-x: visible; */
+
+    position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+    border: 1px solid var(--border-color);
 }
 
 .kanban-column:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.08), 0 4px 8px rgba(0, 0, 0, 0.04);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.08), 0 4px 8px rgba(0, 0, 0, 0.04);
 }
 
+/* ================================
+   KANBAN COLUMN GLOW (Light Theme Only)
+===================================*/
+
+/* 1. Default (Light Theme) - Shows the Glow */
 .kanban-column::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 6px;
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
-  background: linear-gradient(135deg, #a0c4ff, #bdb2ff);
-  box-shadow: 0 0 10px rgba(160, 196, 255, 0.6),
-    0 0 14px rgba(189, 178, 255, 0.7);
-  animation: glowPulse 3s ease-in-out infinite;
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 6px;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    background: linear-gradient(135deg, #a0c4ff, #bdb2ff);
+    box-shadow: 0 0 10px rgba(160, 196, 255, 0.6),
+        0 0 14px rgba(189, 178, 255, 0.7);
+    animation: glowPulse 3s ease-in-out infinite;
+    
+    /* Ensure it doesn't block clicks on the card underneath */
+    pointer-events: none; 
 }
 
 @keyframes glowPulse {
-  0%, 100% {
-    opacity: 0.8;
-  }
-
-  50% {
-    opacity: 1;
-  }
+    0%, 100% { opacity: 0.8; }
+    50% { opacity: 1; }
 }
 
+/* 2. Dark Theme Override - Hides the Glow */
+body.dark .kanban-column::before {
+    display: none;
+    /* or content: none; */
+}
 .kanban-column::-webkit-scrollbar {
-  width: 6px;
+    width: 6px;
 }
 
 .kanban-column::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.15);
-  border-radius: 3px;
+    background: var(--border-color); /* Variable */
+    border-radius: 3px;
 }
 
 .kanban-column::-webkit-scrollbar-track {
-  background: transparent;
+    background: transparent;
 }
 
 
 .column-header {
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 18px;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 18px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    color: var(--text-main); /* Variable */
 }
-
-
 
 /* ================================
-CARD DESIGN MATCHING UI
+   CARD DESIGN MATCHING UI
 ===================================*/
+/* In HazopPage.css */
 .kanban-card {
-  background: #fff;
-  border-radius: 14px;
-  padding: 15px;
-  margin-bottom: 18px;
-  box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.08);
-  border-left: 6px solid #7a6ff0;
-  transition: .25s;
+    background: var(--bg-card);
+    border-radius: 14px;
+    padding: 15px;
+    margin-bottom: 18px;
+    box-shadow: 0px 6px 20px var(--shadow-color);
+    border-left: 6px solid #7a6ff0;
+    transition: .25s;
+    color: var(--text-main);
+    
+    /* UPDATE THIS: */
+    position: relative; /* Ensure it creates a context */
+    z-index: 1;         /* Default low level */
 }
 
+/* ADD/UPDATE THIS HOVER STATE: */
 .kanban-card:hover {
-  transform: translateY(-4px);
+    transform: translateY(-4px);
+    z-index: 100; /* CRITICAL: Brings this card (and its dropdown) above the next card */
 }
-
 
 .kanban-wrapper {
-  max-width: 1080px;
-  margin: auto;
-  padding: 20px 10px;
+    max-width: 1080px;
+    margin: auto;
+    padding: 20px 10px;
 }
 
 /* Container for Kanban Titles */
 .kanban-titles {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  gap: 20px;
-  flex-wrap: wrap;
-  padding: 0 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 20px;
+    flex-wrap: wrap;
+    padding: 0 10px;
 }
+
 .kanban-title {
-  flex: 1 1 30%;
-  text-align: center;
-  font-weight: 700;
-  font-size: 16px;
-  color: #222;
-  padding: 14px 0;
-  border-radius: 14px;
-  position: relative;
-  overflow: hidden;
+    flex: 1 1 30%;
+    text-align: center;
+    font-weight: 700;
+    font-size: 16px;
+    color: #222; /* Keep dark text for readability on light gradient */
+    padding: 14px 0;
+    border-radius: 14px;
+    position: relative;
+    overflow: hidden;
 
-  /* Gradient base */
-  background: linear-gradient(135deg, #c6daf9, #d6cefe);
+    /* Gradient base - Keeping generic decorative gradient */
+    background: linear-gradient(135deg, #c6daf9, #d6cefe);
 
-  /* Glass/glossy effect */
-  backdrop-filter: blur(8px) saturate(180%);
-  -webkit-backdrop-filter: blur(8px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-
-  /* Shadow for depth */
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12), 0 4px 10px rgba(0, 0, 0, 0.06);
-
-  /* Smooth transitions */
-  transition: transform 0.35s ease, box-shadow 0.35s ease, background 0.35s ease;
+    backdrop-filter: blur(8px) saturate(180%);
+    -webkit-backdrop-filter: blur(8px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12), 0 4px 10px rgba(0, 0, 0, 0.06);
+    transition: transform 0.35s ease, box-shadow 0.35s ease, background 0.35s ease;
 }
 
 /* Floating moving shine */
 .kanban-title::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: -50%;
-  width: 200%;
-  height: 100%;
-  background: linear-gradient(120deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0) 60%);
-  transform: rotate(25deg) translateY(-50%);
-  pointer-events: none;
-  filter: blur(6px);
-  animation: shineMove 3s infinite linear;
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: -50%;
+    width: 200%;
+    height: 100%;
+    background: linear-gradient(120deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0) 60%);
+    transform: rotate(25deg) translateY(-50%);
+    pointer-events: none;
+    filter: blur(6px);
+    animation: shineMove 3s infinite linear;
 }
 
-/* Hover lift and glow intensify */
 .kanban-title:hover {
-  transform: translateY(-6px) scale(1.02);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2), 0 6px 14px rgba(0, 0, 0, 0.1);
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2), 0 6px 14px rgba(0, 0, 0, 0.1);
 }
 
-/* Shine animation */
 @keyframes shineMove {
-  0% { left: -50%; }
-  100% { left: 100%; }
+    0% { left: -50%; }
+    100% { left: 100%; }
 }
 
-/* Subtle inner glow for text */
 .kanban-title span {
-  position: relative;
-  z-index: 2;
-  text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+    position: relative;
+    z-index: 2;
+    text-shadow: 0 1px 2px rgba(255,255,255,0.8);
 }
-
-
 
 /* Top line */
 .card-top {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  font-size: 11px;
-  color: #6d6d6d;
-  margin-bottom: 8px;
-  gap: 6px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    font-size: 11px;
+    color: var(--text-secondary); /* Variable */
+    margin-bottom: 8px;
+    gap: 6px;
 }
 
 .card-date {
-  font-size: 11px;
-  font-weight: 500;
-  color: #254693;
-  background: rgba(75, 108, 183, 0.12);
-  padding: 3px 10px;
-  border-radius: 8px;
-  display: inline-block;
-  margin-right: auto;
-  backdrop-filter: blur(4px);
-  border: 1px solid rgba(75, 108, 183, 0.2);
+    font-size: 11px;
+    font-weight: 500;
+    color: #254693;
+    background: rgba(75, 108, 183, 0.12);
+    padding: 3px 10px;
+    border-radius: 8px;
+    display: inline-block;
+    margin-right: auto;
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(75, 108, 183, 0.2);
 }
 
 .verified-badge {
-  background: #28a745;
-  color: white;
-  padding: 4px 10px;
-  font-size: 11px;
-  border-radius: 12px;
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  animation: pop 0.3s ease;
+    background: #28a745;
+    color: white;
+    padding: 4px 10px;
+    font-size: 11px;
+    border-radius: 12px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    animation: pop 0.3s ease;
 }
 
 @keyframes pop {
-  0% {
-    transform: scale(0.6);
-    opacity: 0;
-  }
-
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
+    0% { transform: scale(0.6); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
 }
 
 /* Title */
 .card-title {
-  font-size: 15px;
-  font-weight: 700;
-  margin-bottom: 6px;
-  color: #222;
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: var(--text-main); /* Variable */
 }
 
 /* Subtitle */
 .card-sub {
-  font-size: 12px;
-  color: #666;
-  margin-bottom: 10px;
+    font-size: 12px;
+    color: var(--text-secondary); /* Variable */
+    margin-bottom: 10px;
+}
+
+.card-sub a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.card-sub a:hover {
+    text-decoration: underline;
 }
 
 /* Footer */
 .card-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .people-count {
-  font-size: 11px;
-  font-weight: 500;
-  color: #444;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-secondary); /* Variable */
 }
 
 /* Avatar Group */
 .avatar-group {
-  display: flex;
+    display: flex;
 }
 
 .avatar {
-  width: 30px;
-  height: 30px;
-  background: #59ace0;
-  color: #fff;
-  font-size: 10px;
-  font-weight: bold;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-left: -8px;
-  border: 2px solid #fff;
-  text-transform: uppercase;
+    width: 30px;
+    height: 30px;
+    background: #59ace0;
+    color: #fff;
+    font-size: 10px;
+    font-weight: bold;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: -8px;
+    border: 2px solid var(--bg-card); /* Variable: border matches card background */
+    text-transform: uppercase;
 }
 
 /* Priority border colors */
-.priority-pending {
-  border-left-color: #e9771a !important;
-}
-
-.priority-medium {
-  border-left-color: #0791d6 !important;
-}
-
-.priority-low {
-  border-left-color: #2ecc71 !important;
-}
+.priority-pending { border-left-color: #e9771a !important; }
+.priority-medium { border-left-color: #0791d6 !important; }
+.priority-low { border-left-color: #2ecc71 !important; }
 
 /* Expand/Collapse button */
 .toggle-btn {
-  display: inline-flex;
-  justify-content: center;
-  align-items: right;
-  width: 32px;
-  height: 32px;
-  font-size: 20px;
-  font-weight: 700;
-  cursor: pointer;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #a870e4, #9fb7e2);
-  color: #fff;
-  transition: all 0.3s ease;
-  user-select: none;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: inline-flex;
+    justify-content: center;
+    align-items: right;
+    width: 32px;
+    height: 32px;
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #a870e4, #9fb7e2);
+    color: #fff;
+    transition: all 0.3s ease;
+    user-select: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .toggle-btn:hover {
-  transform: scale(1.1);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
 }
 
 .toggle-btn:active {
-  transform: scale(0.95);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transform: scale(0.95);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* subtle floating/bounce animation */
 @keyframes bounce {
-  0%, 100% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(-3px);
-  }
-}
-
-.card-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: #333;
-}
-
-.card-sub {
-  font-size: 15px;
-  color: #555;
-  opacity: 0.8;
-  margin-top: 10px;
-}
-
-.card-sub a {
-  color: #007bff;
-  text-decoration: none;
-}
-
-.card-sub a:hover {
-  text-decoration: underline;
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
 }
 
 /* Modal Styles */
 .modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.6);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 10px;
-  backdrop-filter: blur(6px);
-  z-index: 1000;
-  overflow-y: auto;
-  /* allow scrolling if modal is taller than viewport */
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    backdrop-filter: blur(6px);
+    z-index: 1000;
+    overflow-y: auto;
 }
 
 .modal-body {
-  background: #fff;
-  border-radius: 10px;
-  width: 40%;
-  max-width: 600px;
-  /* optional max width for large screens */
-  padding: 30px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-  position: relative;
-  display: flex;
-  flex-direction: column;
-
-  /* Scrollable content */
-  max-height: 75vh;
-  /* max height relative to viewport */
-  overflow-y: auto;
-  /* scroll if content exceeds max height */
+    background: var(--bg-card); /* Variable */
+    border-radius: 10px;
+    width: 40%;
+    max-width: 600px;
+    padding: 30px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    max-height: 75vh;
+    overflow-y: auto;
+    color: var(--text-main); /* Variable */
+    border: 1px solid var(--border-color);
 }
 
-/* Optional: Smooth fade-in animation */
 @keyframes modalFadeIn {
-  0% {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
+    0% { opacity: 0; transform: translateY(-10px); }
+    100% { opacity: 1; transform: translateY(0); }
 }
 
 .modal-body {
-  animation: modalFadeIn 0.3s ease-in-out;
+    animation: modalFadeIn 0.3s ease-in-out;
 }
-
-
 
 .modal-box {
-  background: #fff;
-  border-radius: 10px;
-  width: 90%;
-  max-width: 1000px;
-  padding: 30px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  max-height: 80vh;
-  overflow-x: auto;
+    background: var(--bg-card); /* Variable */
+    border-radius: 10px;
+    width: 90%;
+    max-width: 1000px;
+    padding: 30px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    max-height: 80vh;
+    overflow-x: auto;
+    color: var(--text-main); /* Variable */
+    border: 1px solid var(--border-color);
 }
 
 .modal-header {
-  font-size: 1rem;
-  font-weight: bold;
-  border-bottom: 1px solid #ddd;
-  background: #fff;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  padding: 10px 0;
-  height: 20px;
+    font-size: 1rem;
+    font-weight: bold;
+    border-bottom: 1px solid var(--border-color); /* Variable */
+    background: var(--bg-card); /* Variable */
+    color: var(--text-main); /* Variable */
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    padding: 10px 0;
+    height: 20px;
 }
 
 .modal-content {
-  max-width: 1080px;
-  max-height: calc(80vh - 50px);
+    max-width: 1080px;
+    max-height: calc(80vh - 50px);
 }
 
 body.modal-open {
-  overflow: hidden;
+    overflow: hidden;
 }
 
 @keyframes modalSlideIn {
-  0% {
-    transform: translateY(-30px);
-    opacity: 0;
-  }
-
-  100% {
-    transform: translateY(0);
-    opacity: 1;
-  }
+    0% { transform: translateY(-30px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
 }
 
 @media (max-width: 768px) {
-  .kanban-container {
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  .kanban-column {
-    min-height: auto;
-  }
-
-  .create-btn {
-    padding: 12px 18px;
-    font-size: 14px;
-  }
-
-  .modal-box {
-    width: 90%;
-    padding: 30px;
-  }
-
-  .kanban-card {
-    padding: 18px;
-  }
-
-  .kanban-column h3 {
-    font-size: 18px;
-  }
-
-  .card-title {
-    font-size: 16px;
-  }
-
-  .card-sub {
-    font-size: 14px;
-  }
+    .kanban-container {
+        flex-direction: column;
+        gap: 20px;
+    }
+    .kanban-column {
+        min-height: auto;
+    }
+    .create-btn {
+        padding: 12px 18px;
+        font-size: 14px;
+    }
+    .modal-box {
+        width: 90%;
+        padding: 30px;
+    }
+    .kanban-card {
+        padding: 18px;
+    }
+    .kanban-column h3 {
+        font-size: 18px;
+    }
+    .card-title {
+        font-size: 16px;
+    }
+    .card-sub {
+        font-size: 14px;
+    }
 }
-

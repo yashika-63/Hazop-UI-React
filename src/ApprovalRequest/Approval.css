@@ -8,13 +8,14 @@
 .verticalForm {
   width: 200px;
   min-height: auto;
-  background-color: white;
+  background-color: var(--bg-card); /* Variable */
   padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 10px;
   border-radius: 8px;
   box-shadow: 5px 2px 5px 5px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--border-color); /* Variable */
 }
 
 .verticalForm button {
@@ -22,7 +23,7 @@
   border: none;
   padding: 10px;
   font-size: 14px;
-  color: #333;
+  color: var(--text-main); /* Variable */
   display: flex;
   align-items: center;
   gap: 10px;
@@ -32,20 +33,19 @@
 }
 
 .verticalForm button:hover {
-  background-color: #eaeaea;
+  background-color: var(--bg-hover); /* Variable */
 }
 
 .verticalForm button.active {
   background: linear-gradient(#4b6cb7, #182848);
-  color: white;
+  color: white; /* Active state usually keeps white text */
   border-radius: 5px;
 }
 
-
 .verticalForm button .badge {
   position: absolute;
-  top: 4px;       /* distance from top of button */
-  right: 8px;     /* distance from right of button */
+  top: 4px;
+  right: 8px;
   background-color: #ff4d4f;
   color: #fff;
   font-size: 12px;
@@ -53,15 +53,14 @@
   padding: 2px 6px;
   border-radius: 12px;
   pointer-events: none;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* subtle shadow */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
+
 /* Content styling */
 .Companycontent {
   flex: 1;
   padding: 20px;
 }
-
-
 
 .approveBtn {
   background-color: #28a745;
@@ -81,10 +80,6 @@
   cursor: pointer;
 }
 
-
-
-
-
 .details-container {
   max-width: 600px;
 }
@@ -92,12 +87,12 @@
 .details-row {
   display: flex;
   padding: 8px 10px;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--border-color); /* Variable */
 }
 
 .details-row .label {
   font-weight: bold;
-  color: #333;
+  color: var(--text-main); /* Variable */
   width: 40%;
   font-size: 12px;
 }
@@ -105,7 +100,7 @@
 .details-row .value {
   width: 55%;
   text-align: right;
-  color: #555;
+  color: var(--text-secondary); /* Variable */
   font-size: 13px;
 }
 
@@ -122,13 +117,8 @@
 }
 
 @keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-
-  100% {
-    transform: rotate(360deg);
-  }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .action-buttons {

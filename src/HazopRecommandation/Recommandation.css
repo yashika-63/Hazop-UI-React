@@ -1,23 +1,20 @@
+/* =======================================
+   TOP FORM BAR
+======================================= */
 .TopFormBar {
   width: 100%;
   max-width: 1090px;
   display: flex;
-  justify-content: space-between;
+  justify-content: space-between; /* Merged duplicate properties */
   margin: 0 auto;
   margin-bottom: 10px;
-  border: 1px solid #ccc;
-  background-color: #fff;
+  border: 1px solid var(--border-color); /* Updated */
+  background-color: var(--bg-card); /* Updated */
   padding: 5px;
   box-sizing: border-box;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.TopFormBar button {
-  background-color: transparent;
-  border: none;
-  cursor: pointer;
-  font-size: 16px;
-  color: #333;
+  box-shadow: 0 4px 8px var(--shadow-color); /* Updated */
+  position: relative;
+  align-items: center;
 }
 
 .TopFormBarcontainer {
@@ -27,24 +24,16 @@
   position: relative;
 }
 
-.TopFormBar {
-  display: flex;
-  justify-content: space-around;
-  background-color: white;
-  width: 100%;
-  position: relative;
-}
-
 .TopFormBar button {
   background-color: transparent;
   border: none;
+  cursor: pointer;
   font-size: 14px;
-  color: #888888;
+  color: var(--text-secondary); /* Updated */
   position: relative;
   display: flex;
   flex-direction: row;
   align-items: center;
-  cursor: pointer;
 }
 
 .TopFormBar button .icon {
@@ -52,33 +41,26 @@
   font-size: 18px;
 }
 
+/* Active State */
 .TopFormBar .active {
   border-radius: 25px;
   position: relative;
   overflow: visible;
   cursor: pointer;
-  color: #6a0dad;
-  /* color: #718eb0; */
-
+  color: #6a0dad; /* Keeping brand purple */
+  font-weight: 600;
 }
 
-
-
-
-
-
-
-/* Recommandation Table CSS */
-/* Glassmorphic Recommendation Table */
-
+/* =======================================
+   RECOMMENDATION TABLE (Glassmorphic)
+======================================= */
 .recommendation-table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
   border-radius: 12px;
-  background: #f1f1f1;
-  /* white base */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  background: var(--bg-row-even); /* Updated */
+  box-shadow: 0 4px 12px var(--shadow-color); /* Updated */
   transition: all 0.3s ease;
 }
 
@@ -87,66 +69,43 @@
   padding: 8px 12px;
   text-align: left;
   font-size: 14px;
-  color: #1f2937;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  color: var(--text-main); /* Updated */
+  border-bottom: 1px solid var(--border-color); /* Updated */
 }
 
 .recommendation-table tbody tr:nth-child(odd) {
-  background: #f9f9f9;
+  background: var(--bg-row-even); /* Updated */
 }
 
 .recommendation-table tbody tr:nth-child(even) {
-  background: #ffffff;
+  background: var(--bg-card); /* Updated */
 }
 
 .recommendation-table tbody tr:hover {
-  background: rgba(0, 0, 0, 0.03);
+  background: var(--bg-hover); /* Updated */
 }
 
-/* Status-based headers */
-.recommendation-table.not-assigned thead {
-  background: #e2e8f0;
-  /* light grey */
-  color: #1f2937;
-}
-
-.recommendation-table.assigned thead {
-  background: #e3ae69;
-  /* soft orange */
-  color: #b45309;
-}
-
-.recommendation-table.accepted thead {
-  background: #dcfce7;
-  /* soft green */
-  color: #15803d;
-}
-
-.recommendation-table.rejected thead {
-  background: #fee2e2;
-  /* soft red */
-  color: #b91c1c;
-}
+/* Status-based headers - Keeping specific colors for status recognition */
+.recommendation-table.not-assigned thead { background: #e2e8f0; color: #1f2937; }
+.recommendation-table.assigned thead { background: #e3ae69; color: #b45309; }
+.recommendation-table.accepted thead { background: #dcfce7; color: #15803d; }
+.recommendation-table.rejected thead { background: #fee2e2; color: #b91c1c; }
 
 /* Rounded corners for headers */
-.recommendation-table th:first-child {
-  border-top-left-radius: 12px;
-}
+.recommendation-table th:first-child { border-top-left-radius: 12px; }
+.recommendation-table th:last-child { border-top-right-radius: 12px; }
 
-.recommendation-table th:last-child {
-  border-top-right-radius: 12px;
-}
-
-
-
-
+/* =======================================
+   ASSIGNED TABLE WRAPPER
+======================================= */
 .assigned-table-wrapper {
   margin-bottom: 25px;
   border-radius: 10px;
-  background: #fff;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
+  background: var(--bg-card); /* Updated */
+  box-shadow: 0 6px 20px var(--shadow-color); /* Updated */
   padding: 15px;
   position: relative;
+  border: 1px solid var(--border-color); /* Added border */
 }
 
 .assigned-table-wrapper h5 {
@@ -154,56 +113,19 @@
   font-weight: 600;
   margin-bottom: 10px;
   padding-left: 20px;
-  color: #2d3748;
+  color: var(--text-main); /* Updated */
   position: relative;
 }
 
 /* Bookmark style for each type */
-.assigned-table-wrapper.not-assigned h5::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 8px;
-  height: 100%;
-  border-radius: 3px;
-  background: #8591fa;
-}
+.assigned-table-wrapper.not-assigned h5::before { content: ""; position: absolute; left: 0; top: 0; width: 8px; height: 100%; border-radius: 3px; background: #8591fa; }
+.assigned-table-wrapper.assigned h5::before { content: ""; position: absolute; left: 0; top: 0; width: 8px; height: 100%; border-radius: 3px; background: #ed8936; }
+.assigned-table-wrapper.accepted h5::before { content: ""; position: absolute; left: 0; top: 0; width: 10px; height: 100%; border-radius: 3px; background: #319795; }
+.assigned-table-wrapper.rejected h5::before { content: ""; position: absolute; left: 0; top: 0; width: 8px; height: 100%; border-radius: 3px; background: #c53030; }
 
-.assigned-table-wrapper.assigned h5::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 8px;
-  height: 100%;
-  border-radius: 3px;
-  background: #ed8936;
-}
-
-.assigned-table-wrapper.accepted h5::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 10px;
-  height: 100%;
-  border-radius: 3px;
-  background: #319795;
-}
-
-.assigned-table-wrapper.rejected h5::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 8px;
-  height: 100%;
-  border-radius: 3px;
-  background: #c53030;
-}
-
-/* Table */
+/* =======================================
+   ASSIGNED TABLE
+======================================= */
 .assigned-table {
   width: 100%;
   border-collapse: collapse;
@@ -217,104 +139,72 @@
   text-align: left;
   padding: 12px;
   font-weight: 600;
-  color: #2d3748;
-  background: #f5f7fa;
-  border-bottom: 1px solid #e0e4ea;
+  color: var(--text-main); /* Updated */
+  background: var(--bg-header); /* Updated */
+  border-bottom: 1px solid var(--border-color); /* Updated */
 }
 
 /* Body */
 .assigned-table tbody tr {
-  background: #fff;
+  background: var(--bg-card); /* Updated */
   transition: all 0.3s ease;
   z-index: 1;
   position: relative;
   cursor: pointer;
+  color: var(--text-main); /* Updated */
 }
 
 .assigned-table tbody tr:nth-child(even) {
-  background-color: #f9fafc;
+  background-color: var(--bg-row-even); /* Updated */
 }
 
 .assigned-table tbody tr:hover {
-  background-color: #eef1f7;
+  background-color: var(--bg-hover); /* Updated */
   transform: scale(1.003);
   z-index: 5;
+  box-shadow: 0 4px 6px var(--shadow-color);
 }
 
 .assigned-table td {
   padding: 8px;
-  color: #4a5265;
-  border-bottom: 1px solid #e0e4ea;
+  color: var(--text-secondary); /* Updated */
+  border-bottom: 1px solid var(--border-color); /* Updated */
   position: relative;
   vertical-align: top;
   max-width: 300px;
-  /* optional, for truncation */
-  /* word-break: break-word; */
   white-space: pre-wrap;
 }
 
-
-/* 
-.assigned-table tbody tr:focus-within {
-    z-index: 100 !important; 
-    position: relative;   
-    transform: none; 
-} */
-
-
 .truncate-cell {
   max-height: 80px;
-  /* collapsed height */
   overflow: hidden;
   position: relative;
   transition: max-height 0.3s ease;
 }
 
-/* Expanded row */
+/* Expanded row styling */
 .expanded-row .truncate-cell {
   max-height: 500px;
-  /* adjust for very long text */
   overflow-y: auto;
 }
 
-/* Optional scrollbar styling for better UX */
-.truncate-cell::-webkit-scrollbar {
-  width: 6px;
-}
+.truncate-cell::-webkit-scrollbar { width: 6px; }
+.truncate-cell::-webkit-scrollbar-thumb { background-color: var(--border-color); border-radius: 3px; }
 
-.truncate-cell::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 3px;
-}
+.assigned-table tbody tr:last-child td { border-bottom: none; }
 
-.assigned-table tbody tr:last-child td {
-  border-bottom: none;
-}
-
-.assign-employee {
-  width: 250px;
-  /* fixed width, adjust as needed */
-  min-width: 200px;
-  max-width: 200px;
-  vertical-align: top;
-}
-
-.sr-no {
-  width: 40px;
-  /* Serial number column */
-  min-width: 40px;
-  max-width: 40px;
-  text-align: center;
-}
+.assign-employee { width: 250px; min-width: 200px; max-width: 200px; vertical-align: top; }
+.sr-no { width: 40px; min-width: 40px; max-width: 40px; text-align: center; }
 
 /* No Data Message */
 .no-data1 {
   text-align: center;
   font-style: italic;
-  color: #9ca3af;
+  color: var(--text-muted); /* Updated */
   padding: 20px;
 }
 
+/* Badges */
 .badge {
   padding: 3px 8px;
   border-radius: 8px;
@@ -324,67 +214,12 @@
   display: inline-block;
   text-align: center;
 }
+.badge-not-assigned { background: #9bbff9; }
+.badge-assigned { background: #f59e0b; }
+.badge-accepted { background: #10b981; }
+.badge-rejected { background: #ef4444; }
 
-/* Status Badge Colors */
-.badge-not-assigned {
-  background: #9bbff9;
-}
-
-.badge-assigned {
-  background: #f59e0b;
-}
-
-.badge-accepted {
-  background: #10b981;
-}
-
-.badge-rejected {
-  background: #ef4444;
-}
-
-/* Responsive Table for Small Screens */
-@media screen and (max-width: 1024px) {
-
-  .table-not-assigned,
-  .table-assigned,
-  .table-accepted,
-  .table-rejected {
-    font-size: 13px;
-  }
-}
-
-@media screen and (max-width: 768px) {
-
-  .table-not-assigned,
-  .table-assigned,
-  .table-accepted,
-  .table-rejected {
-    display: block;
-    overflow-x: auto;
-  }
-
-  thead tr {
-    display: table;
-    width: 100%;
-    table-layout: fixed;
-  }
-
-  tbody tr {
-    display: table;
-    width: 100%;
-    table-layout: fixed;
-  }
-}
-
-.badge {
-  display: inline-block;
-  padding: 2px 10px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 500;
-  text-align: center;
-}
-
+/* Table Wrapper */
 .table-wrapper {
   width: 100%;
   overflow-x: auto;
@@ -395,6 +230,7 @@
   margin-bottom: 20px;
   font-size: 16px;
   text-align: center;
+  color: var(--text-main); /* Updated */
 }
 
 .remove-icon {
@@ -402,44 +238,35 @@
   font-size: 14px;
   transition: 0.2s ease;
   margin-left: 20px;
-  color: red;
+  color: #ef4444;
 }
 
 .remove-icon:hover {
-  color: #102858;
+  color: #b91c1c;
   transform: scale(1.2);
-}
-
-/* Disabled dropdown item */
-.disabled-option {
-  cursor: not-allowed !important;
-  pointer-events: auto;
-}
-
-.dropdown-content button:hover:not(.disabled-option) {
-  background-color: #f0f0f0;
 }
 
 .remark-by-management {
   font-style: italic;
-  color: gray;
+  color: var(--text-muted); /* Updated */
   margin-left: 8px;
 }
 
-
+/* Search Bar in Table */
 .search-bar-table {
   position: relative;
   width: 70%;
-  /* match input width */
 }
 
 .search-bar-table input {
   width: 100%;
   padding: 6px 30px 6px 8px;
   box-sizing: border-box;
-  border: 1px solid #61b1f7;
+  border: 1px solid var(--input-border); /* Updated */
   border-radius: 6px;
   font-size: 13px;
+  background: var(--bg-input); /* Updated */
+  color: var(--text-main); /* Updated */
 }
 
 .search-icon-table {
@@ -451,15 +278,13 @@
   pointer-events: none;
 }
 
-
-
 .search-results-table {
   position: absolute;
   top: 100%;
   left: 0;
   right: 0;
-  background: #fff;
-  border: 1px solid #ccc;
+  background: var(--popup-bg); /* Updated */
+  border: 1px solid var(--border-color); /* Updated */
   max-height: 150px;
   overflow-y: auto;
   z-index: 10;
@@ -473,17 +298,14 @@
   padding: 6px 8px;
   cursor: pointer;
   font-size: 13px;
+  color: var(--text-main); /* Updated */
 }
 
 .search-results-table li:hover {
-  background-color: #f0f0f0;
+  background-color: var(--bg-hover); /* Updated */
 }
 
-
-/* =============================== */
-/* =============================== */
-/* Selected Employee Tag           */
-/* =============================== */
+/* Selected Employee Tag */
 .selected-emp-tag {
   margin-top: 10px;
   display: inline-block;
@@ -492,7 +314,7 @@
   padding: 10px 14px;
   border-radius: 8px;
   font-size: 14px;
-  color: #182848;
+  color: var(--text-main); /* Updated */
   font-weight: 500;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   animation: fadeIn 0.3s ease;
@@ -510,15 +332,8 @@
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .top-row {
@@ -529,96 +344,55 @@
   margin-bottom: 20px;
 }
 
-/* Inline Action Group Container */
-.inline-action-group {
-  display: flex;
-  flex-direction: column;
-  /* Stack input and buttons if narrow, or row if wide */
-  gap: 5px;
-  align-items: center;
-  justify-content: center;
-  min-width: 140px;
-  /* Ensure enough space for date input */
-}
-
-/* The Date Input */
+/* Inline Action Inputs */
 .inline-date-input {
   padding: 4px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--input-border); /* Updated */
   border-radius: 4px;
   font-size: 12px;
   width: 100%;
+  background: var(--bg-input); /* Updated */
+  color: var(--text-main); /* Updated */
 }
 
-/* Button Group Wrapper */
 .inline-btn-group {
   display: flex;
   gap: 8px;
   margin-top: 2px;
-}
+justify-content: center;}
 
-/* Save Button (Checkmark) */
-.inline-save-btn {
-  background-color: #319795;
-  /* Teal/Green */
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 4px 8px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+.inline-save-btn { background-color: #319795; color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.inline-save-btn:hover { background-color: #2c8a88; }
 
-.inline-save-btn:hover {
-  background-color: #2c8a88;
-}
+.inline-cancel-btn { background-color: #e53e3e; color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.inline-cancel-btn:hover { background-color: #c53030; }
 
-/* Cancel Button (Cross) */
-.inline-cancel-btn {
-  background-color: #e53e3e;
-  /* Red */
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 4px 8px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.inline-cancel-btn:hover {
-  background-color: #c53030;
-}
-
-/* --- Main Row Styling --- */
+/* Main Row Styling */
 .assigned-table tr.main-row {
   cursor: pointer;
   transition: background-color 0.2s;
 }
 
 .assigned-table tr.main-row:hover {
-  background-color: #f7fafc;
+  background-color: var(--bg-hover); /* Updated */
 }
 
 .assigned-table tr.main-row.expanded {
-  background-color: #dddddd;
+  background-color: var(--bg-row-even); /* Updated */
   border-bottom: none;
 }
 
 .expand-icon-cell {
-  color: #718096;
+  color: var(--text-muted); /* Updated */
   font-size: 12px;
   text-align: center;
 }
 
-/* --- Detail Row Styling --- */
+/* Detail Row Styling */
 .detail-row td {
-  background-color: #fcfcfc;
+  background-color: var(--bg-row-even); /* Updated */
   padding: 0 !important;
-  border-bottom: 2px solid #e2e8f0;
+  border-bottom: 2px solid var(--border-color); /* Updated */
 }
 
 .detail-panel {
@@ -638,29 +412,25 @@
   flex-direction: column;
 }
 
-.detail-item.full-width {
-  grid-column: 1 / -1;
-  /* Span full width */
-}
+.detail-item.full-width { grid-column: 1 / -1; }
 
 .detail-label {
   font-size: 11px;
   text-transform: uppercase;
-  color: #718096;
+  color: var(--text-secondary); /* Updated */
   font-weight: 700;
   margin-bottom: 4px;
 }
 
 .detail-text {
   font-size: 14px;
-  color: #2d3748;
-  background: white;
+  color: var(--text-main); /* Updated */
+  background: var(--bg-card); /* Updated */
   padding: 8px;
   border-radius: 4px;
-  border: 1px solid #edf2f7;
+  border: 1px solid var(--border-color); /* Updated */
   margin: 0;
   white-space: pre-wrap;
-  /* Preserve line breaks in text */
 }
 
 .highlight-date {
@@ -672,44 +442,30 @@
 }
 
 /* History List Styling */
-.history-container {
-  max-height: 120px;
-  overflow-y: auto;
-}
+.history-container { max-height: 120px; overflow-y: auto; }
 
-.history-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
+.history-list { list-style: none; padding: 0; margin: 0; }
 
 .history-list li {
   display: flex;
   justify-content: space-between;
   padding: 4px 0;
-  border-bottom: 1px dashed #e2e8f0;
+  border-bottom: 1px dashed var(--border-color); /* Updated */
   font-size: 13px;
+  color: var(--text-main); /* Updated */
 }
 
-.history-list li:last-child {
-  border-bottom: none;
-}
+.history-list li:last-child { border-bottom: none; }
 
-.history-date {
-  font-weight: 600;
-  color: #2b6cb0;
-}
+.history-date { font-weight: 600; color: #2b6cb0; }
+.history-meta { color: var(--text-muted); font-size: 11px; }
 
-.history-meta {
-  color: #718096;
-  font-size: 11px;
-}
-
+/* Status Badges 1 */
 .status-badge1 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 90px;         
+  min-width: 90px;
   height: 28px;
   padding: 0 10px;
   border-radius: 6px;
@@ -719,28 +475,13 @@
   white-space: nowrap;
 }
 
-.status-badge1-completed {
-  background-color: #d2ffeb;
-  color: #0a3b28;
-}
+.status-badge1-completed { background-color: #d2ffeb; color: #0a3b28; }
+.status-badge1-pending { background-color: #fdeed1; color: #9c4221; }
+.status-badge1-draft { background-color: #dceefe; color: #0e2b5e; }
 
-.status-badge1-pending {
-  background-color: #fdeed1;
-  color: #9c4221;
-}
+/* Mini Badges */
+.table-header-stats { display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 8px; }
 
-.status-badge1-draft {
-  background-color: #dceefe;
-  color: #0e2b5e;
-}
-
-
-.table-header-stats {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-bottom: 8px; /* Space between badges and table */
-}
 .mini-badge {
   display: inline-flex;
   align-items: center;
@@ -752,52 +493,31 @@
   letter-spacing: 0.5px;
   border: 1px solid transparent;
   transition: all 0.3s ease;
-  background: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  background: var(--bg-card); /* Updated */
+  box-shadow: 0 2px 4px var(--shadow-color);
 }
 
-/* Dot inside the badge */
-.badge-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  margin-right: 6px;
-  display: inline-block;
-}
+.badge-dot { width: 6px; height: 6px; border-radius: 50%; margin-right: 6px; display: inline-block; }
 
-/* "Not Ready" State (Pending) */
-.mini-badge.not-ready {
-  color: #062451;
-  border-color: #2771d1;
-}
+.mini-badge.not-ready { color: #062451; border-color: #2771d1; }
+.mini-badge.not-ready .badge-dot { background-color: #091f36; animation: pulseGray 2s infinite; }
 
-.mini-badge.not-ready .badge-dot {
-  background-color: #091f36;
-  animation: pulseGray 2s infinite;
-}
+.mini-badge.ready { color: #2f855a; background-color: #f0fff4; border-color: #c6f6d5; }
+.mini-badge.ready .badge-dot { background-color: #48bb78; }
 
-/* "Ready" State (Success/Completed) */
-.mini-badge.ready {
-  color: #2f855a;
-  background-color: #f0fff4;
-  border-color: #c6f6d5;
-}
-
-.mini-badge.ready .badge-dot {
-  background-color: #48bb78;
-}
-
-/* Animations */
 @keyframes pulseGray {
-  0% {
-    opacity: 1;
-  }
+  0% { opacity: 1; }
+  50% { opacity: 0.4; }
+  100% { opacity: 1; }
+}
 
-  50% {
-    opacity: 0.4;
-  }
+/* Responsiveness */
+@media screen and (max-width: 1024px) {
+  .table-not-assigned, .table-assigned, .table-accepted, .table-rejected { font-size: 13px; }
+}
 
-  100% {
-    opacity: 1;
-  }
+@media screen and (max-width: 768px) {
+  .table-not-assigned, .table-assigned, .table-accepted, .table-rejected { display: block; overflow-x: auto; }
+  thead tr { display: table; width: 100%; table-layout: fixed; }
+  tbody tr { display: table; width: 100%; table-layout: fixed; }
 }

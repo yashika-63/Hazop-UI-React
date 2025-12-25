@@ -120,40 +120,48 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
         ));
     };
 
-    const removeTeamMember = (empCode, hazopId, teamMemberId) => {
+   const removeTeamMember = (empCode, hazopId, teamMemberId) => {
         const member = hazopTeam.find(m => m.empCode === empCode);
-
+ 
         if (!member) {
             showToast("Member not found in the team.", "error");
             return;
         }
-
+ 
         setRemoveConfirmationPopup({
             message: `Do you want to remove ${member.firstName} ${member.lastName}?`,
             yes: async () => {
                 setRemoveConfirmationPopup(null);
                 setLoading(true);
-
+ 
                 try {
-                    if (originalTeam.some((m) => m.empCode === empCode)) {
+                    if (teamMemberId && originalTeam.some((m) => m.empCode === empCode)) {
                         await axios.put(
-                            `http://${strings.localhost}/api/hazopTeam/updateStatusToFalse?empCode=${empCode}&id=${teamMemberId}`
+                            `http://${strings.localhost}/api/hazopTeam/updateStatusToFalse?id=${teamMemberId}`
                         );
                         showToast("Team member removed from backend!", "success");
                     } else {
                         showToast("Team member removed!", "success");
                     }
+                   
+                    // --- FIX IS HERE ---
+                    // 1. Remove from visible list
                     setHazopTeam(hazopTeam.filter((m) => m.empCode !== empCode));
+                   
+                    // 2. ALSO Remove from 'originalTeam' so if added back, they are treated as new
+                    setOriginalTeam(originalTeam.filter((m) => m.empCode !== empCode));
+ 
                 } catch (err) {
                     console.error("Error removing team member:", err);
                     showToast("Failed to remove team member.", "error");
                 }
-
+ 
                 setLoading(false);
             },
             no: () => setRemoveConfirmationPopup(null)
         });
     };
+ 
 
     const handleSave = () => {
         // Calculate changes

@@ -2,10 +2,10 @@
 .hazop-card,
 .node-card,
 .recommendation-card {
-  border: 2px solid #a1cbf3;
+  border: 2px solid var(--border-color); /* Updated */
   border-radius: 10px;
-  background: #fdfefe;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  background: var(--bg-card); /* Updated */
+  box-shadow: 0 6px 20px var(--shadow-color); /* Updated */
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -13,11 +13,11 @@
   transition: 0.25s ease;
   width: 100%;
   margin: 0 auto;
+  margin-bottom: 20px;
 }
 
 .hazop-view-page {
   padding: 10px;
-  /* max-width: 1090px; */
   margin: 0 auto;
 }
 
@@ -37,7 +37,7 @@
   border-collapse: collapse;
   margin-top: 0.5rem;
   font-size: 0.92rem;
-  background: #ffffff;
+  background: var(--bg-card); /* Updated */
   border-radius: 8px;
   overflow: hidden;
 }
@@ -47,12 +47,12 @@
 .node-details-table-custom thead tr th,
 .confirm-table-custom thead tr th,
 .assignment-table-custom thead tr th {
-  background: #d6e5f3;
-  color: black;
+  background: var(--bg-header); /* Updated */
+  color: var(--text-main); /* Updated */
   padding: 0.6rem;
   text-align: left;
   font-weight: 600;
-  border-bottom: 2px solid #b3ceed;
+  border-bottom: 2px solid var(--border-color); /* Updated */
 }
 
 /* UNIQUE TABLE CELLS */
@@ -60,20 +60,22 @@
 .node-details-table-custom td,
 .confirm-table-custom td,
 .assignment-table-custom td {
-  border: 1px solid #e1e7ef;
+  border: 1px solid var(--border-color); /* Updated */
   padding: 0.55rem;
-  background-color: #ffffff;
+  background-color: var(--bg-card); /* Updated */
+  color: var(--text-main); /* Updated */
 }
 
+/* Table Stripes */
 .hazop-table tr:nth-child(even),
 .node-details-table-custom tr:nth-child(even),
 .confirm-table-custom tr:nth-child(even),
 .assignment-table-custom tr:nth-child(even) {
-  background-color: #f3f8ff;
+  background-color: var(--bg-row-even); /* Updated */
 }
 
 .recommendation-card h3 {
-  color: #2f5f7a;
+  color: var(--text-secondary); /* Updated */
   font-weight: 600;
   padding: 10px;
 }
@@ -83,17 +85,17 @@
   position: sticky;
   bottom: 0;
   padding: 1rem 0;
-  background: #ffffff;
+  /* background: var(--bg-card); Updated */
   display: flex;
   justify-content: space-between;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--border-color); /* Updated */
 }
 
 .modal-actions button {
   padding: 0.6rem 1.3rem;
   border: none;
   border-radius: 6px;
-  background: #103b65;
+  background: #103b65; /* Keep Brand Color */
   color: white;
   font-weight: 600;
   cursor: pointer;
@@ -109,12 +111,14 @@
   height: 70px;
   margin-top: 10px;
   border-radius: 6px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--input-border); /* Updated */
   padding: 0.5rem;
   resize: none;
   box-sizing: border-box;
   font-size: 14px;
   line-height: 1.5;
+  background: var(--bg-input); /* Updated */
+  color: var(--text-main); /* Updated */
 }
 
 /* RESPONSIVE */
@@ -122,7 +126,6 @@
   .modal-content1 {
     padding: 1rem;
   }
-
   .modal-actions button {
     width: 48%;
   }
@@ -130,14 +133,15 @@
 
 /* Node Card */
 .node-card {
-  background: #ffffff;
+  background: var(--bg-card); /* Updated */
   border-radius: 12px;
   padding: 1rem 1rem;
   margin-bottom: 1.5rem;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 6px 20px var(--shadow-color); /* Updated */
   width: 100%;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   gap: 0px;
+  color: var(--text-main); /* Updated */
 }
 
 .node-card:hover {
@@ -150,9 +154,8 @@
   margin: 0;
   font-size: 1.2rem;
   font-weight: 600;
-  color: #000000;
-  /* Warm orange */
-  border-bottom: 2px solid #0b3469;
+  color: var(--text-main); /* Updated */
+  border-bottom: 2px solid var(--border-color); /* Updated */
   padding-bottom: 4px;
 }
 
@@ -160,16 +163,16 @@
 .node-detail-section {
   margin-top: 1rem;
   padding: 0.8rem;
-  background: #ffffff;
+  background: var(--bg-row-even); /* Updated */
   border-radius: 8px;
-  border-left: 4px solid #91b4e3;
+  border-left: 4px solid var(--border-color); /* Updated */
 }
 
 /* Node Detail Label */
 .node-detail-label {
   font-weight: 600;
   margin-bottom: 0.6rem;
-  color: #111111;
+  color: var(--text-main); /* Updated */
 }
 
 /* Recommendations */
@@ -181,13 +184,14 @@
 .rec-label {
   font-weight: 600;
   margin-bottom: 0.3rem;
-  color: #0d0d0e;
+  color: var(--text-main); /* Updated */
 }
 
 .node-recommendations ul {
   list-style-type: disc;
   padding-left: 1.2rem;
   margin: 0;
+  color: var(--text-main); /* Updated */
 }
 
 .node-recommendations li {
@@ -204,124 +208,69 @@
 }
 
 .node-details-table th {
-  background-color: #cfdef3;
-  color: #0f0f0f;
+  background-color: var(--bg-header); /* Updated */
+  color: var(--text-main); /* Updated */
   padding: 0.4rem;
   text-align: left;
 }
 
 .node-details-table td {
   padding: 0.5rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color); /* Updated */
   vertical-align: top;
   word-break: break-word;
+  color: var(--text-main); /* Updated */
 }
 
 /* Force text color inside the table cells */
-.node-details-table td.risk-trivial-text {
-  color: var(--trivial) !important;
-  font-weight: 600;
-}
-
-.node-details-table td.risk-tolerable-text {
-  color: var(--tolerable) !important;
-  font-weight: 600;
-}
-
-.node-details-table td.risk-moderate-text {
-  color: var(--moderate) !important;
-  font-weight: 600;
-}
-
-.node-details-table td.risk-substantial-text {
-  color: var(--substantial) !important;
-  font-weight: 600;
-}
-
-.node-details-table td.risk-intolerable-text {
-  color: var(--intolerable) !important;
-  font-weight: 600;
-}
-
-.node-details-table td.risk-default {
-  color: #555 !important;
-}
+.node-details-table td.risk-trivial-text { color: var(--trivial) !important; font-weight: 600; }
+.node-details-table td.risk-tolerable-text { color: var(--tolerable) !important; font-weight: 600; }
+.node-details-table td.risk-moderate-text { color: var(--moderate) !important; font-weight: 600; }
+.node-details-table td.risk-substantial-text { color: var(--substantial) !important; font-weight: 600; }
+.node-details-table td.risk-intolerable-text { color: var(--intolerable) !important; font-weight: 600; }
+.node-details-table td.risk-default { color: var(--text-muted) !important; }
 
 /* Responsive */
 @media (max-width: 768px) {
-  .node-card {
-    padding: 0.8rem;
-  }
-
-  .node-detail-section {
-    padding: 0.6rem;
-  }
-
-  .node-details-table th,
-  .node-details-table td {
-    font-size: 0.85rem;
-    padding: 0.4rem;
-  }
+  .node-card { padding: 0.8rem; }
+  .node-detail-section { padding: 0.6rem; }
+  .node-details-table th, .node-details-table td { font-size: 0.85rem; padding: 0.4rem; }
 }
-
-
 
 /* Base readonly input */
 input.readonly {
-  border: 2px solid #ccc;
+  border: 2px solid var(--border-color); /* Updated */
   border-left-width: 5px;
-  background-color: #f9f9f9;
+  background-color: var(--bg-row-even); /* Updated */
   text-align: center;
+  color: var(--text-main); /* Updated */
 }
 
 /* Trivial */
-input.readonly.risk-trivial-text {
-  border-color: #207229;
-  border-left-color: #207229;
-}
-
+input.readonly.risk-trivial-text { border-color: #207229; border-left-color: #207229; }
 /* Tolerable */
-input.readonly.risk-tolerable-text {
-  border-color: #56a744;
-  border-left-color: #56a744;
-}
-
+input.readonly.risk-tolerable-text { border-color: #56a744; border-left-color: #56a744; }
 /* Moderate */
-input.readonly.risk-moderate-text {
-  border-color: #fef65e;
-  border-left-color: #fef65e;
-}
-
+input.readonly.risk-moderate-text { border-color: #fef65e; border-left-color: #fef65e; }
 /* Substantial */
-input.readonly.risk-substantial-text {
-  border-color: #fa9201;
-  border-left-color: #fa9201;
-}
-
+input.readonly.risk-substantial-text { border-color: #fa9201; border-left-color: #fa9201; }
 /* Intolerable */
-input.readonly.risk-intolerable-text {
-  border-color: #f91111;
-  border-left-color: #f91111;
-}
-
+input.readonly.risk-intolerable-text { border-color: #f91111; border-left-color: #f91111; }
 /* Default */
-input.readonly.risk-default {
-  border-color: #ccc;
-  border-left-color: #ccc;
-}
+input.readonly.risk-default { border-color: #ccc; border-left-color: #ccc; }
 
 
 /* --- Filter Bar Container --- */
-.filters-container {
+.filters-container{
   display: flex;
   gap: 15px;
   margin-bottom: 20px;
   flex-wrap: wrap;
   padding: 15px 20px;
-  background-color: #ffffff; /* White background for clean look */
+  background-color: var(--bg-card); /* Updated */
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* Subtle shadow */
-  border: 1px solid #e0e0e0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-color); /* Updated */
   align-items: center;
 }
 
@@ -338,21 +287,28 @@ input.readonly.risk-default {
   width: 100%;
   padding: 10px 12px;
   font-size: 14px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--input-border); /* Updated */
   border-radius: 6px;
-  background-color: #fff;
-  color: #333;
+  background-color: var(--bg-input); /* Updated */
+  color: var(--text-main); /* Updated */
   transition: all 0.2s ease-in-out;
   cursor: pointer;
   outline: none;
-  appearance: none; /* Removes default browser arrow */
+  appearance: none; 
+  
+  /* Standard Arrow (Black) */
   background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23333%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
   background-repeat: no-repeat;
   background-position: right 12px top 50%;
   background-size: 10px auto;
 }
 
-/* Hover & Focus Effects */
+/* --- DARK MODE FIX FOR SELECT ARROW --- */
+/* This swaps the arrow to white when 'dark' class is on body */
+body.dark .filter-select {
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23ffffff%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+}
+
 .filter-select:hover {
   border-color: #888;
 }
@@ -363,12 +319,11 @@ input.readonly.risk-default {
 }
 
 .filter-select:disabled {
-  background-color: #f5f5f5;
-  color: #999;
+  background-color: var(--bg-row-even); /* Updated */
+  color: var(--text-muted); /* Updated */
   cursor: not-allowed;
-  border-color: #ddd;
+  border-color: var(--border-color); /* Updated */
 }
-
 
 /* --- Mobile Responsiveness --- */
 @media (max-width: 768px) {

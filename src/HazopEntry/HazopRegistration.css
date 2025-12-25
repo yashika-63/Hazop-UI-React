@@ -17,39 +17,49 @@
 .team-table td {
   text-align: left;
   padding: 12px;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--border-color);
+  /* Variable */
+  color: var(--text-main);
+  /* Variable */
 }
 
 .team-table th {
-  background-color: #f7f7f7;
+  background-color: var(--bg-header);
+  /* Variable */
   font-weight: 600;
-  color: #333;
+  color: var(--text-secondary);
+  /* Variable */
 }
 
 .team-table tbody tr:nth-child(even) {
-  background-color: #fafafa;
+  background-color: var(--bg-row-even);
+  /* Variable */
 }
 
 .team-table tbody tr:hover {
-  background-color: #f1f1f1;
+  background-color: var(--bg-hover);
+  /* Variable */
 }
 
 .remove-button {
   padding: 4px 8px;
   font-size: 0.85rem;
-  color: red;
-  background-color: #ffffff;
-  border: 1px solid red;
+  color: #ff4d4f;
+  /* Slightly brighter red for dark mode visibility */
+  background-color: var(--bg-card);
+  /* Variable */
+  border: 1px solid #ff4d4f;
   border-radius: 4px;
   cursor: pointer;
   transition: background 0.2s;
 }
 
 .remove-button:hover {
-  background-color: red;
+  background-color: #ff4d4f;
   color: white;
-  border: red;
+  border-color: #ff4d4f;
 }
+
 /* Badge style for the Role Column */
 .role-badge {
   padding: 6px 12px;
@@ -63,16 +73,21 @@
 
 /* Gray styling for Team Member */
 .role-member {
-  background-color: #f0f2f5;
-  color: #555;
-  border: 1px solid #ddd;
+  background-color: var(--bg-row-even);
+  /* Variable */
+  color: var(--text-secondary);
+  /* Variable */
+  border: 1px solid var(--border-color);
+  /* Variable */
 }
 
 /* Green/Gold styling for Team Lead */
 .role-lead {
-  background-color: #e6fffa;
-  color: #047857; /* Dark Green */
-  border: 1px solid #047857;
+  background-color: rgba(4, 120, 87, 0.15);
+  /* Semi-transparent green for both modes */
+  color: #10b981;
+  /* Brighter green visible on dark & light */
+  border: 1px solid #059669;
   box-shadow: 0 2px 4px rgba(0, 128, 0, 0.1);
 }
 
@@ -87,19 +102,32 @@
 }
 
 .btn-make-lead {
-  background-color: #3f71c2; /* Blue */
+  background-color: #3f71c2;
+  /* Blue */
   color: white;
-}
-
-.btn-revoke-lead {
-  background-color: #e5e7eb;
-  color: #374151;
-  border: 1px solid #d1d5db;
 }
 
 .btn-make-lead:hover {
   background-color: #2563eb;
 }
+
+.btn-revoke-lead {
+  background-color: var(--bg-input);
+  /* Variable */
+  color: var(--text-main);
+  /* Variable */
+  border: 1px solid var(--border-color);
+  /* Variable */
+}
+
+.btn-revoke-lead:hover {
+  background-color: var(--bg-hover);
+  /* Variable */
+}
+
+/* -------------------------------------- */
+/* HAZOP LIST TABLE                       */
+/* -------------------------------------- */
 .hazoplist-table {
   width: 100%;
   border-collapse: separate;
@@ -110,6 +138,7 @@
 
 .hazoplist-table thead {
   border-radius: 12px;
+  /* Keep gradient but ensure it fits branding */
   background: linear-gradient(270deg, #4b6cb7, #182848, #4b6cb7);
   background-size: 600% 600%;
   animation: gradientAnimation 8s ease infinite;
@@ -140,29 +169,33 @@
 }
 
 .hazoplist-table tbody tr {
-  background: rgba(255, 255, 255, 0.6);
+  background: var(--bg-card);
+  /* Variable - Replaces rgba white */
   border-radius: 12px;
   position: relative;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 10px var(--shadow-color);
+  /* Variable */
   transition: all 0.25s ease;
   z-index: 1;
-  /* backdrop-filter: blur(6px); */
 }
 
 .hazoplist-table tbody tr:hover {
   transform: translateY(-3px);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-  background: rgba(75, 108, 183, 0.1);
+  background: var(--bg-hover);
+  /* Variable */
   cursor: pointer;
   z-index: 5;
 }
 
 .hazoplist-table td {
-  padding: 8px 18px;
-  color: #333;
-  /* white-space: nowrap; */
-  border-top: 1px solid rgba(0, 0, 0, 0.05);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 10px 18px;
+  color: var(--text-main);
+  /* Variable */
+  border-top: 1px solid var(--border-color);
+  /* Variable */
+  border-bottom: 1px solid var(--border-color);
+  /* Variable */
   transition: background 0.25s ease, color 0.25s ease;
 }
 
@@ -177,24 +210,23 @@
 }
 
 .hazoplist-table tbody tr:nth-child(even) {
-  background: rgba(255, 255, 255, 0.55);
+  background: var(--bg-row-even);
+  /* Variable */
 }
 
 /* --------- Description Cell --------- */
 .description-cell {
   max-width: 300px;
-  /* Adjust column width as needed */
   overflow: visible;
-  /* Allow content to expand */
   white-space: normal;
-  /* Allow multiple lines */
   word-wrap: break-word;
-  /* Break long words to fit the cell */
-  color: #444;
+  color: var(--text-secondary);
+  /* Variable */
   line-height: 1.4;
 }
 
 /* --------- Risk indicators --------- */
+/* Kept specific colors as they are semantic (Red/Yellow/Green) */
 .risk-high {
   color: #d9534f;
   font-weight: 500;
@@ -213,7 +245,8 @@
 /* Optional: buttons inside dropdown more visible */
 .dropdown-content button {
   font-size: 14px;
-  color: #333;
+  color: var(--text-main);
+  /* Variable */
   display: flex;
   align-items: center;
   gap: 6px;
@@ -238,6 +271,7 @@
 }
 
 @media (max-width: 768px) {
+
   .hazoplist-table th,
   .hazoplist-table td {
     font-size: 12px;
@@ -249,22 +283,28 @@
   }
 }
 
+/* HAZOP INFO BOX */
 .hazop-info {
-  border: 1px solid #ddd;
-  background-color: #fafafa;
+  border: 1px solid var(--border-color);
+  /* Variable */
+  background-color: var(--bg-row-even);
+  /* Variable */
   padding: 16px 16px;
   margin-bottom: 16px;
   border-radius: 6px;
   font-size: 13px;
-  color: #333;
+  color: var(--text-main);
+  /* Variable */
 }
 
 .hazop-info h3 {
   margin: 0 0 12px 0;
   font-size: 15px;
   font-weight: 600;
-  color: #111;
-  border-bottom: 1px solid #e0e0e0;
+  color: var(--text-main);
+  /* Variable */
+  border-bottom: 1px solid var(--border-color);
+  /* Variable */
   padding-bottom: 6px;
 }
 
@@ -277,24 +317,25 @@
 .hazop-info-grid div {
   line-height: 1.4;
   word-break: break-word;
+  color: var(--text-secondary);
+  /* Variable */
 }
 
 .hazop-info-grid div.full-width {
   grid-column: 1 / -1;
-  /* span both columns for Description */
 }
 
 .hazop-info-grid div strong {
   display: inline-block;
   min-width: 130px;
   font-weight: 500;
-  color: #555;
+  color: var(--text-main);
+  /* Variable */
 }
 
 @media (max-width: 600px) {
   .hazop-info-grid {
     grid-template-columns: 1fr;
-    /* stack all fields on small screens */
     gap: 6px 0;
   }
 
@@ -303,23 +344,59 @@
   }
 }
 
+/* =======================================
+   PAGINATION BUTTON
+======================================= */
 .pagination-btn {
   background: linear-gradient(270deg, #4b6cb7, #182848, #4b6cb7);
   background-size: 600% 600%;
   animation: gradientAnimation 8s ease infinite;
-  color: #fff;
+  color: #ffffff;
   backdrop-filter: blur(8px);
-  padding: 6px 10px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px var(--shadow-color);
 }
 
+.pagination-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px var(--shadow-color);
+  opacity: 0.95;
+}
+
+/* Disabled State - Theme Adaptive */
 .pagination-btn:disabled {
-  background: #a5a5a5;
+  background: var(--bg-input) !important;
+  color: var(--text-muted) !important;
+  border: 1px solid var(--border-color);
   cursor: not-allowed;
+
+}
+
+/* Ensure Keyframes exist (if not already defined) */
+@keyframes gradientAnimation {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .page-info {
   font-size: 13px;
   font-weight: 600;
-  color: #333;
+  color: var(--text-main);
+  /* Variable */
   padding-top: 4px;
 }

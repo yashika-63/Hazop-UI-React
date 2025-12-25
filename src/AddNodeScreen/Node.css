@@ -1,17 +1,18 @@
 /* Generic card */
 .card {
-  background: #ffffff;
+  background: var(--bg-card); /* Variable */
   border-radius: 18px;
   padding: 20px 22px;
-  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 18px 45px var(--shadow-color); /* Variable */
   margin-bottom: 20px;
-  border: 1px solid rgba(148, 163, 184, 0.16);
+  border: 1px solid var(--border-color); /* Variable */
+  transition: background 0.3s ease;
 }
 
 .label {
   font-size: 12px;
   font-weight: 500;
-  color: #6b7280;
+  color: var(--text-secondary); /* Variable */
   text-transform: uppercase;
   letter-spacing: 0.4px;
   margin-bottom: 4px;
@@ -20,7 +21,7 @@
 .value {
   font-size: 15px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text-main); /* Variable */
   letter-spacing: -0.18px;
 }
 
@@ -39,12 +40,13 @@
 .table-header h2 {
   font-size: 18px;
   margin: 0;
+  color: var(--text-main); /* Variable */
 }
 
 .no-data {
   text-align: center;
   padding: 9px 10px;
-  color: #9ca3af;
+  color: var(--text-muted); /* Variable */
 }
 
 /* BODY */
@@ -58,15 +60,9 @@
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* Animation */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
 .error-text {
   margin-top: 10px;
-  color: #b91c1c;
+  color: #b91c1c; /* Keep Red for errors */
   font-size: 12px;
 }
 
@@ -76,13 +72,14 @@
 
 /* card layout tuned for paragraph fields */
 .nd-detail-card {
-  background-color: #fff;
+  background-color: var(--bg-card); /* Variable */
   border: 1px solid transparent;
   border-radius: 20px;
   padding: 16px 20px;
   position: relative;
   margin-bottom: 30px;
-  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 4px 10px var(--shadow-color); /* Variable */
+  color: var(--text-main); /* Variable */
 }
 
 .nd-detail-card:hover {
@@ -96,7 +93,7 @@
   align-items: center;
   margin-bottom: 1rem;
   padding-bottom: 0.5rem;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--border-color); /* Variable */
 }
 
 .description-clamp {
@@ -105,10 +102,12 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: var(--text-secondary); /* Variable */
 }
 
 .description-full {
   white-space: pre-wrap;
+  color: var(--text-main); /* Variable */
 }
 
 .node-header {
@@ -121,6 +120,7 @@
 .node-header h1 {
   margin: 0;
   flex: 1;
+  color: var(--text-main); /* Variable */
 }
 
 /* Existing control takes 1 column */
@@ -142,37 +142,15 @@
   margin-top: 10px;
 }
 
-/* A very light border tint based on risk */
-.risk-trivial {
-  border-color: var(--trivial) !important;
-}
+/* --- RISK BORDERS & BADGES --- */
+/* These use specific colors defined in root or globally, so they are fine to keep as is */
 
-.risk-tolerable {
-  border-color: var(--tolerable) !important;
-}
-
-.risk-moderate {
-  border-color: var(--moderate) !important;
-}
-
-.risk-substantial {
-  border-color: var(--substantial) !important;
-}
-
-.risk-intolerable {
-  border-color: var(--intolerable) !important;
-}
-
-.risk-default {
-  border-color: #ccc !important;
-} 
-
-.nd-detail-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 16px;
-}
+.risk-trivial { border-color: var(--trivial) !important; }
+.risk-tolerable { border-color: var(--tolerable) !important; }
+.risk-moderate { border-color: var(--moderate) !important; }
+.risk-substantial { border-color: var(--substantial) !important; }
+.risk-intolerable { border-color: var(--intolerable) !important; }
+.risk-default { border-color: #ccc !important; } 
 
 .nd-detail-badges {
   display: flex;
@@ -190,72 +168,21 @@
   border: 2px solid transparent;
 }
 
-/* text + subtle background only for the badge */
-.risk-badge.risk-trivial {
-  color: var(--trivial);
-  background-color: #dbf8e3;
-  border-color: #5e9d74;
-}
-
-.risk-badge.risk-tolerable {
-  color: var(--tolerable);
-  background-color: #d9f6d3;
-  border-color: #56a744;
-}
-
-.risk-badge.risk-moderate {
-  background-color: var(--moderate);
-  border-color: #f6ff00;
-}
-
-.risk-badge.risk-substantial {
-  color: var(--substantial);
-  background-color: #ffe0b4;
-  border-color: #fa9201;
-}
-
-.risk-badge.risk-intolerable {
-  color: var(--intolerable);
-  background-color: #ffd0d0;
-  border-color: #f91111;
-}
-
-.risk-badge.risk-default {
-  color: grey;
-  background-color: #f5f1f1ff;
-  border-color: grey;
-}
+/* Badge colors - Keeping specific hex codes for status colors is usually fine */
+.risk-badge.risk-trivial { color: var(--trivial); background-color: #dbf8e3; border-color: #5e9d74; }
+.risk-badge.risk-tolerable { color: var(--tolerable); background-color: #d9f6d3; border-color: #56a744; }
+.risk-badge.risk-moderate { background-color: var(--moderate); border-color: #f6ff00; color: #333; }
+.risk-badge.risk-substantial { color: var(--substantial); background-color: #ffe0b4; border-color: #fa9201; }
+.risk-badge.risk-intolerable { color: var(--intolerable); background-color: #ffd0d0; border-color: #f91111; }
+.risk-badge.risk-default { color: grey; background-color: #f5f1f1; border-color: grey; }
 
 /* Dynamic border colors */
-.border-trivial {
-  border-left: 5px solid var(--trivial) !important;
-  border: 2px solid var(--trivial)
-}
-
-.border-tolerable {
-  border: 2px solid var(--tolerable) !important;
-  border-left: 5px solid var(--tolerable) !important;
-}
-
-.border-moderate {
-  border: 2px solid var(--moderate) !important;
-  border-left: 5px solid var(--moderate) !important;
-}
-
-.border-substantial {
-  border: 2px solid var(--substantial) !important;
-  border-left: 5px solid var(--substantial) !important;
-}
-
-.border-intolerable {
-  border: 2px solid var(--intolerable) !important;
-  border-left: 5px solid var(--intolerable) !important;
-}
-
-.border-default {
-  border: 2px solid #ccc !important;
-  border-left: 5px solid #ccc !important;
-}
+.border-trivial { border-left: 5px solid var(--trivial) !important; border: 2px solid var(--trivial) }
+.border-tolerable { border: 2px solid var(--tolerable) !important; border-left: 5px solid var(--tolerable) !important; }
+.border-moderate { border: 2px solid var(--moderate) !important; border-left: 5px solid var(--moderate) !important; }
+.border-substantial { border: 2px solid var(--substantial) !important; border-left: 5px solid var(--substantial) !important; }
+.border-intolerable { border: 2px solid var(--intolerable) !important; border-left: 5px solid var(--intolerable) !important; }
+.border-default { border: 2px solid #ccc !important; border-left: 5px solid #ccc !important; }
 
 .discussion-header {
   display: flex;
@@ -273,11 +200,12 @@
 .highlight-node-card {
   animation: highlightPulse 2s infinite;
   border: 2px solid orange !important;
-  background-color: #fffaf0 !important; /* Light orange background */
+  background-color: #fffaf0 !important; /* Note: Highlighting specific color */
   transition: all 0.5s ease;
-  z-index: 10; /* Ensure it sits above others during highlight */
+  z-index: 10;
 }
 
+/* Popups */
 .info-popup {
   position: fixed;
   top: 0; left: 0;
@@ -286,102 +214,50 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 9999;
 }
 
 .info-content {
-  background: white;
+  background: var(--bg-card); /* Variable */
   padding: 20px;
   border-radius: 8px;
   width: 350px;
+  color: var(--text-main); /* Variable */
+  border: 1px solid var(--border-color);
 }
 
+/* Ribbon Bar */
 .ribbon-bar {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: #eee;
-  border-bottom: 1px solid #ccc;
+  background: var(--bg-row-even); /* Variable (replaces #eee) */
+  border-bottom: 1px solid var(--border-color); /* Variable */
 }
 
 .ribbon-bar button:hover {
-  background: #e6e6e6;
+  background: var(--bg-hover); /* Variable */
 }
 
-.ribbon-deviation {
-  background-color: #d4f7d4;        /* light green */
-  border: 1px solid #3c9c3c;        /* dark green border */
-  color: #1f5e1f;                   /* optional: dark green icon/text */
-  padding: 2px 8px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: 0.2s ease-in-out;
-}
+/* Specific Ribbon Buttons (Keeping colors but ensuring they look okay) */
+.ribbon-deviation { background-color: #d4f7d4; border: 1px solid #3c9c3c; color: #1f5e1f; padding: 2px 8px; border-radius: 5px; cursor: pointer; transition: 0.2s ease-in-out; }
+.ribbon-deviation:hover { background-color: #c8f3c8; border-color: #2d8a2d; transform: translateY(-1px); }
+.ribbon-deviation:active { transform: scale(0.97); }
 
-.ribbon-deviation:hover {
-  background-color: #c8f3c8;        /* slightly darker on hover */
-  border-color: #2d8a2d;
-  transform: translateY(-1px);
-}
+.ribbon-node { background-color: #d9e8ff; border: 1px solid #2f6bcc; color: #1f3f8a; padding: 6px 10px; border-radius: 5px; cursor: pointer; transition: 0.2s ease-in-out; }
+.ribbon-node:hover { background-color: #cfe0ff; border-color: #234fa3; transform: translateY(-1px); }
+.ribbon-node:active { transform: scale(0.97); }
 
-.ribbon-deviation:active {
-  transform: scale(0.97);
-}
+.ribbon-document{ background-color: #efdeff; border: 1px solid #c18bf4; color: #44176d; padding: 6px 10px; border-radius: 5px; cursor: pointer; transition: 0.2s ease-in-out; }
+.ribbon-document:hover { background-color: #d8b2fc; border-color: #69339b; transform: translateY(-1px); }
 
-.ribbon-node {
-  background-color: #d9e8ff;        /* light blue */
-  border: 1px solid #2f6bcc;        /* dark blue border */
-  color: #1f3f8a;                   /* dark blue icon/text */
-  padding: 6px 10px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: 0.2s ease-in-out;
-}
+.ribbon-view { background-color: #dbfff7; border: 1px solid #0e8d71; color: #105244; padding: 6px 10px; border-radius: 5px; cursor: pointer; transition: 0.2s ease-in-out; }
+.ribbon-view:hover { background-color: #bcfcee; border-color: #0a322a; transform: translateY(-1px); }
+.ribbon-view:active { transform: scale(0.97); }
 
-.ribbon-node:hover {
-  background-color: #cfe0ff;        /* slightly darker on hover */
-  border-color: #234fa3;
-  transform: translateY(-1px);
-}
-
-.ribbon-node:active {
-  transform: scale(0.97);
-}
-.ribbon-document{
-  background-color: #efdeff;       
-  border: 1px solid #c18bf4;       
-  color: #44176d;                 
-  padding: 6px 10px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: 0.2s ease-in-out;
-}
-.ribbon-document:hover {
-  background-color: #d8b2fc;        /* slightly darker on hover */
-  border-color: #69339b;
-  transform: translateY(-1px);
-}
-.ribbon-view {
-  background-color: #dbfff7;        
-  border: 1px solid #0e8d71;  
-  color: #105244;                
-  padding: 6px 10px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: 0.2s ease-in-out;
-}
-
-.ribbon-view:hover {
-  background-color: #bcfcee;      
-  border-color: #0a322a;
-  transform: translateY(-1px);
-}
-
-.ribbon-view:active {
-  transform: scale(0.97);
-}
-
+/* Small Modal */
 .small-modal-box {
-  background: #fff;
+  background: var(--bg-card); /* Variable */
   border-radius: 10px;
   width: 40%;
   padding: 30px;
@@ -391,16 +267,14 @@
   flex-direction: column;
   max-height: 80vh;
   overflow-x: auto;
+  color: var(--text-main); /* Variable */
+  border: 1px solid var(--border-color);
 }
 
 .small-modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100%;
-  height: 100%;
+  top: 0; left: 0; right: 0; bottom: 0;
+  width: 100%; height: 100%;
   background-color: rgba(0, 0, 0, 0.6);
   display: flex;
   justify-content: center;
@@ -409,17 +283,17 @@
   backdrop-filter: blur(6px);
   z-index: 1000;
   overflow-y: auto;
-  /* allow scrolling if modal is taller than viewport */
 }
 
 .recommendation-textarea-style {
   width: 100%;
   padding: 5.5px;
   border-radius: 9px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--input-border); /* Variable */
   font-size: 14px;
   outline: none;
-  background: transparent;
+  background: var(--bg-input); /* Variable */
+  color: var(--text-main); /* Variable */
   transition: all 0.2s ease;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   max-height: 150px;
@@ -431,5 +305,52 @@
 .recommendation-item {
   display: flex;
   align-items: center;  
-  margin-bottom: 5px,
+  margin-bottom: 5px;
+  color: var(--text-main); /* Variable */
+}
+/* --- Label Row Layout --- */
+.header-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.header-label-row div {
+  display: flex;
+  align-items: center;
+}
+
+/* --- Format Button (Sub/Sup) Styling --- */
+.fmt-btn-container {
+  display: inline-flex;
+  gap: 5px;
+  margin-left: 10px;
+}
+
+.fmt-btn {
+  cursor: pointer;
+  padding: 4px 8px;
+  
+  /* Use Theme Variables */
+  background-color: var(--bg-card); 
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  
+  border-radius: 4px;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.fmt-btn:hover {
+  background-color: var(--bg-hover);
+  border-color: #319795; /* Brand color on hover */
+  color: #319795;
+}
+
+.fmt-btn:active {
+  transform: translateY(1px);
 }
