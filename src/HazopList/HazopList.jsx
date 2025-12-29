@@ -10,15 +10,14 @@ import {
 import HazopReport from "../Reports/HazopReport";
 import HazopRevision from "./HazopRevision";
 import { strings } from "../string";
-import { fetchDataByKey, fetchSitesByDepartment, formatDate, truncateWords } from "../CommonUI/CommonUI";
+import { fetchDataByKey, fetchSitesByDepartment, formatDate, truncateWords, showToast } from "../CommonUI/CommonUI";
 import MocPopup from "../MOC/MocPopup";
 
 const HazopList = () => {
   // --- Data States ---
   const [hazopData, setHazopData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
+  
   // --- Dropdown / Popup States ---
   const [openDropdown, setOpenDropdown] = useState(null);
   const [selectedHazopId, setSelectedHazopId] = useState(null);
@@ -37,15 +36,18 @@ const HazopList = () => {
   const [siteFilter, setSiteFilter] = useState("");
 
   // --- Sorting State ---
-  const [sortOrder, setSortOrder] = useState("desc"); // "asc" or "desc"
+  const [sortOrder, setSortOrder] = useState("desc");
 
   // --- Filter Options States ---
   const [departmentOptions, setDepartmentOptions] = useState([]);
   const [siteOptions, setSiteOptions] = useState([]);
 
-  const companyId = localStorage.getItem("companyId");
+  // Get Company ID (assuming stored in local storage)
+  const companyId = localStorage.getItem("companyId") || 1; 
 
-  // --- 1. Fetch Filter Options (Departments) ---
+  // =============================================
+  // 1. INITIAL LOAD: Fetch Departments for Filter
+  // =============================================
   useEffect(() => {
     const loadDepartments = async () => {
       try {
@@ -58,7 +60,9 @@ const HazopList = () => {
     loadDepartments();
   }, []);
 
-  // --- 2. Fetch Sites when Department Changes ---
+  // =============================================
+  // 2. FILTER LOGIC: Fetch Sites when Dept Changes
+  // =============================================
   useEffect(() => {
     if (departmentFilter) {
       fetchSitesByDepartment(departmentFilter, setSiteOptions);
@@ -68,64 +72,101 @@ const HazopList = () => {
     }
   }, [departmentFilter]);
 
-  // --- 3. Main Data Fetching ---
+  // =============================================
+  // 3. MAIN DATA FETCHING
+  // =============================================
   const fetchHazopData = async () => {
     try {
       setLoading(true);
+      let url = "";
+      const isSearching = searchText.length > 0;
 
-      const params = new URLSearchParams();
-      params.append("companyId", companyId);
-      params.append("page", page);
-      params.append("size", size);
+      // --- SCENARIO A: SEARCHING ---
+      if (isSearching) {
+        // Search API usually returns a flat array: [...]
+        url = `http://${strings.localhost}/api/moc-reference/search-hazop?search=${encodeURIComponent(searchText)}`;
+      } 
+      // --- SCENARIO B: PAGINATION & FILTERING ---
+      else {
+        // Paginated API returns object: { content: [...], totalPages: X }
+        const params = new URLSearchParams();
+        params.append("companyId", companyId);
+        params.append("page", page);
+        params.append("size", size);
+        params.append("sort", `hazopDate,${sortOrder}`); // Server-side sorting
 
-      // Filters
-      if (searchText) params.append("search", searchText);
-      if (statusFilter) params.append("status", statusFilter);
-      if (departmentFilter) params.append("department", departmentFilter);
-      if (siteFilter) params.append("site", siteFilter);
+        // Append Filters if they exist
+        if (statusFilter) params.append("status", statusFilter);
+        if (departmentFilter) params.append("department", departmentFilter);
+        if (siteFilter) params.append("site", siteFilter);
 
-      // Sorting
-      params.append("sort", `hazopDate,${sortOrder}`);
-
-      const url = searchText
-        ? `http://${strings.localhost}/api/moc-reference/search-hazop?search=${searchText}`
-        : `http://${strings.localhost}/api/hazopRegistration/by-company-paginated?${params.toString()}`;
+        url = `http://${strings.localhost}/api/hazopRegistration/by-company-paginated?${params.toString()}`;
+      }
 
       const response = await axios.get(url);
 
-      const content = response.data.content || response.data || [];
-
-      // Client-side Sort Fallback
-      if (searchText) {
+      // --- DATA MAPPING LOGIC ---
+      let content = [];
+      
+      if (isSearching) {
+        // Search API returns direct array
+        content = response.data || [];
+        
+        // Search API often doesn't support server-side sort, so we sort client-side here
         content.sort((a, b) => {
-          const dateA = new Date(a.hazopDate);
-          const dateB = new Date(b.hazopDate);
-          return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
+            const dateA = new Date(a.hazopDate);
+            const dateB = new Date(b.hazopDate);
+            return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
         });
+
+        // Hide pagination controls when searching
+        setTotalPages(1); 
+      } else {
+        // Paginated API returns { content: [...] }
+        content = response.data.content || [];
+        setTotalPages(response.data.totalPages || 0);
       }
 
       setHazopData(content);
-      setTotalPages(response.data.totalPages || 1);
-
-      if (content.length === 0 && page > 0) setPage(0);
 
     } catch (err) {
       console.error("Fetch Error:", err);
-      setError("Error fetching HAZOP data");
+      showToast("Error fetching data", "error");
       setHazopData([]);
     } finally {
       setLoading(false);
     }
   };
 
+  // Trigger fetch when any dependency changes
   useEffect(() => {
     fetchHazopData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, searchText, statusFilter, departmentFilter, siteFilter, sortOrder]);
 
-  // --- Handlers ---
+
+  // =============================================
+  // 4. EVENT HANDLERS
+  // =============================================
+  
   const handleSearchChange = (e) => {
     setSearchText(e.target.value);
+    setPage(0); // Reset page on search
+  };
+
+  // !!! CRITICAL: Reset Page to 0 when filters change !!!
+  const handleStatusChange = (e) => {
+    setStatusFilter(e.target.value);
+    setPage(0); 
+  };
+
+  const handleDepartmentChange = (e) => {
+    setDepartmentFilter(e.target.value);
+    setPage(0);
+  };
+
+  const handleSiteChange = (e) => {
+    setSiteFilter(e.target.value);
     setPage(0);
   };
 
@@ -133,10 +174,14 @@ const HazopList = () => {
     setOpenDropdown(openDropdown === id ? null : id);
   };
 
+  const handleSortClick = () => {
+    setSortOrder(prev => prev === "asc" ? "desc" : "asc");
+  };
+
   const handlePrevPage = () => { if (page > 0) setPage(page - 1); };
   const handleNextPage = () => { if (page < totalPages - 1) setPage(page + 1); };
 
-  // --- Dropdown UI ---
+  // --- Render Dropdown ---
   const renderDropdown = (item) => (
     <div className="dropdown">
       <button className="dots-button" onClick={() => toggleDropdown(item.id)}>
@@ -160,9 +205,9 @@ const HazopList = () => {
 
   return (
     <div>
+      {/* --- HEADER & SEARCH --- */}
       <div>
         <h1>HAZOP List</h1>
-
         <div className="search-container">
           <div className="search-bar-wrapper">
             <input
@@ -177,12 +222,13 @@ const HazopList = () => {
       </div>
 
       {/* --- FILTERS SECTION --- */}
-      <div className="filters-container" >
-        {/* Status */}
+      <div className="filters-container">
+        
+        {/* Status Filter */}
         <div className="filter-group">
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+            onChange={handleStatusChange} // Uses handler that resets page
             className="filter-select"
           >
             <option value="">All Status</option>
@@ -191,11 +237,11 @@ const HazopList = () => {
           </select>
         </div>
 
-        {/* Department */}
+        {/* Department Filter */}
         <div className="filter-group">
           <select
             value={departmentFilter}
-            onChange={(e) => setDepartmentFilter(e.target.value)}
+            onChange={handleDepartmentChange} // Uses handler that resets page
             className="filter-select"
           >
             <option value="">All Departments</option>
@@ -205,11 +251,11 @@ const HazopList = () => {
           </select>
         </div>
 
-        {/* Site */}
+        {/* Site Filter */}
         <div className="filter-group">
           <select
             value={siteFilter}
-            onChange={(e) => setSiteFilter(e.target.value)}
+            onChange={handleSiteChange} // Uses handler that resets page
             className="filter-select"
             disabled={!departmentFilter}
             style={{ cursor: !departmentFilter ? "not-allowed" : "pointer", opacity: !departmentFilter ? 0.6 : 1 }}
@@ -222,21 +268,21 @@ const HazopList = () => {
         </div>
       </div>
 
-      {/* --- TABLE --- */}
+      {/* --- DATA TABLE --- */}
       <div className="table-responsive">
         <table className="hazoplist-table">
           <thead>
             <tr>
               <th>Hazop ID</th>
               <th>Hazop Title</th>
-
-              {/* --- CLICKABLE SORT HEADER (UPDATED) --- */}
+              
+              {/* Sortable Header */}
               <th
-                onClick={() => setSortOrder(prev => prev === "asc" ? "desc" : "asc")}
+                onClick={handleSortClick}
                 style={{ cursor: "pointer", userSelect: "none" }}
-                title="Click to sort"
+                title={`Sort by Date: ${sortOrder === 'asc' ? 'Oldest First' : 'Newest First'}`}
               >
-                HAZOP Date {sortOrder === 'asc' ? "↑↓" : "↓↑"}
+                  HAZOP Date {sortOrder === 'asc' ? "↑↓" : "↓↑"}
               </th>
 
               <th>Site</th>
@@ -253,7 +299,9 @@ const HazopList = () => {
               hazopData.map((hazop) => (
                 <tr key={hazop.id}>
                   <td>{hazop.id}</td>
-                  <td title={hazop.hazopTitle}>{truncateWords(hazop.hazopTitle || "-")}</td>
+                  <td title={hazop.hazopTitle}>
+                    {truncateWords(hazop.hazopTitle || "-", 6)}
+                  </td>
                   <td>{formatDate(hazop.hazopDate) || "-"}</td>
                   <td>{hazop.site || "-"}</td>
                   <td>{hazop.department || "-"}</td>
@@ -268,14 +316,14 @@ const HazopList = () => {
             ) : (
               <tr>
                 <td colSpan="7" className="no-data">
-                  No Data Found matching your filters
+                  No Data Found matching your filters.
                 </td>
               </tr>
             )}
           </tbody>
         </table>
 
-        {/* PAGINATION */}
+        {/* --- PAGINATION (Only show if NOT searching) --- */}
         {!searchText && (
           <div className="center-controls">
             <button
@@ -303,7 +351,7 @@ const HazopList = () => {
         )}
       </div>
 
-      {/* POPUPS */}
+      {/* --- POPUPS --- */}
       {selectedHazopId && (
         <HazopReport hazopId={selectedHazopId} onClose={() => setSelectedHazopId(null)} />
       )}

@@ -76,8 +76,8 @@ const Login = ({ setToken }) => {
 
       <div className="form-container">
         <div className="login-container">
-          <div className="logo">
-            <img src="/assets/Pristine.png" alt="Pristine Logo" style={{ width: '90%' }} />
+          <div>
+            <img src="assets/AACL.png" alt="Pristine Logo" style={{ width: '60%' }} />
           </div>
         </div>
 
@@ -110,7 +110,9 @@ const Login = ({ setToken }) => {
               <FaEye className="password-toggle-icon" onClick={() => setShowPassword(true)} />
             )}
           </div>
-
+          <div>
+            <img src="/assets/Pristine.png" alt="Pristine Logo" style={{ width: '40%' , marginBottom:'5px' }} />
+          </div>
           <button type="submit" className="loginbutton">
             Login
           </button>

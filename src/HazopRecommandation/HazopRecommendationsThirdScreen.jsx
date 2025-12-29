@@ -285,6 +285,12 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
         }
     };
 
+
+    const getFullName = (user) =>
+        [user.firstName, user.middleName, user.lastName]
+            .filter(Boolean)
+            .join(" ");
+
     const handleView = (item) => {
         setSelectedRecommendation(item);
         setShowReassignPopup(true);
@@ -410,7 +416,7 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
                 </thead>
                 <tbody>
                     {records.length === 0 ? (
-                        <tr><td colSpan="9" className="no-data1">No Data Available</td></tr>
+                        <tr><td colSpan="7" className="no-data1">No Data Available</td></tr>
                     ) : (
                         records.map((item, index) => (
                             <React.Fragment key={item.id}>
@@ -463,7 +469,7 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
                                 {/* Expanded Row Content (Details & History) - Same as before */}
                                 {expandedRowId === item.id && (
                                     <tr className="detail-row">
-                                        <td colSpan="9">
+                                        <td colSpan="8">
                                             <div className="detail-panel">
                                                 <div className="detail-grid">
                                                     <div className="detail-item full-width">
@@ -575,51 +581,20 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
                                     <td>
                                         {formatDate(member.employeeActionTakenDate) || '-'}
                                     </td>
+
                                     <td>
                                         {!member.employeeActionTaken ? (
-                                            <span
-                                                className="status-pending"
-                                                style={{
-                                                    color: '#ea580c',
-                                                    backgroundColor: '#ffedd5',
-                                                    padding: '2px 8px',
-                                                    borderRadius: '10px',
-                                                    fontSize: '12px',
-                                                    fontWeight: '600'
-                                                }}
-                                            >
+                                            <span className="status-pending">
                                                 Pending
                                             </span>
                                         ) : (
-                                            // CASE 2 & 3: Action IS Taken (Check if Completed or Rejected)
                                             <div>
                                                 {member.employeeAction ? (
-                                                    <span
-                                                        className="status-completed"
-                                                        style={{
-                                                            color: '#16a34a',
-                                                            backgroundColor: '#dcfce7',
-                                                            padding: '2px 8px',
-                                                            borderRadius: '10px',
-                                                            fontSize: '12px',
-                                                            fontWeight: '600'
-                                                        }}
-                                                    >
+                                                    <span className="status-completed">
                                                         Completed
                                                     </span>
                                                 ) : (
-                                                    // Action Taken is true, but Action is false -> Rejected
-                                                    <span
-                                                        className="status-rejected"
-                                                        style={{
-                                                            color: '#dc2626', // Red
-                                                            backgroundColor: '#fee2e2', // Light Red
-                                                            padding: '2px 8px',
-                                                            borderRadius: '10px',
-                                                            fontSize: '12px',
-                                                            fontWeight: '600'
-                                                        }}
-                                                    >
+                                                    <span className="status-rejected">
                                                         Rejected
                                                     </span>
                                                 )}
@@ -723,7 +698,7 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
                                 <ul className="search-results">
                                     {searchResults.map(user => (
                                         <li key={user.empCode} onClick={() => addTeamMember(user)}>
-                                            {user.empCode} - ({user.emailId || "NA"}) ({user.department || "NA"})
+                                            {getFullName(user)} ({user.empCode}) – ({user.emailId || "NA"}) ({user.department || "NA"})
                                         </li>
                                     ))}
                                 </ul>

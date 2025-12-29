@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import {
-  FaHouseChimney,    
+  FaHouseChimney,
   FaListCheck,
-  FaSitemap,         
-  FaBell,             
-  FaChartSimple,      
-  FaUsersGear        
+  FaSitemap,
+  FaBell,
+  FaChartSimple,
+  FaUsersGear
 } from "react-icons/fa6";
 
 import "./CommonCss/Sidebar.css";
@@ -19,15 +19,22 @@ const Sidebar = ({ isOpen }) => {
   const role = localStorage.getItem("Role");
   const empCode = localStorage.getItem("empCode");
 
-  useEffect(() => {
+  const fetchSidebarCounts = () => {
     if (empCode) {
-      fetch(
-        `http://${strings.localhost}/api/hazop-dashboard/total-pending-count?empCode=${empCode}`
-      )
+      fetch(`http://${strings.localhost}/api/hazop-dashboard/total-pending-count?empCode=${empCode}`)
         .then((res) => res.json())
         .then((data) => setTotalPendingCount(data.totalPendingCount || 0))
         .catch((err) => console.error(err));
     }
+  };
+
+  useEffect(() => {
+    fetchSidebarCounts();
+    // Listen for updates from other components
+    window.addEventListener('refreshHazopCounts', fetchSidebarCounts);
+    return () => {
+      window.removeEventListener('refreshHazopCounts', fetchSidebarCounts);
+    };
   }, [empCode]);
 
   const menuItems = [
@@ -53,7 +60,7 @@ const Sidebar = ({ isOpen }) => {
       name: "Approval Requests",
       path: "/RequestHandler",
       icon: <FaBell />,
-      badge: totalPendingCount,
+      badge: totalPendingCount, // Count passed here
       permissionKey: "ApprovalRequest",
     },
     {
@@ -69,15 +76,11 @@ const Sidebar = ({ isOpen }) => {
       permissionKey: "RoleBasedHazopPage",
     },
   ];
-  
 
   return (
     <div className={`sidebar ${isOpen ? "open" : "closed"}`}>
       <ul className="menu-list">
         {menuItems
-          // Filter Logic:
-          // 1. If allowedRoles is null/undefined -> Show to everyone (ApprovalRequest)
-          // 2. Else -> Check if current user role is in the allowed list
           .filter((item) => {
             const allowedRoles = PERMISSIONS[item.permissionKey];
             if (allowedRoles === null) return true;
@@ -91,10 +94,27 @@ const Sidebar = ({ isOpen }) => {
                   isActive ? "menu-link active" : "menu-link"
                 }
               >
-                <span className="icon">{item.icon}</span>
+                {/* 1. Icon Container (Icon + Red Dot Badge) */}
+                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                  <span className="icon">{item.icon}</span>
+
+                  {/* Red Dot: Only visible when closed AND badge > 0 */}
+                  {!isOpen && item.badge > 0 && (
+                    <span className="sidebar-dot-badge"></span>
+                  )}
+                </div>
+
+                {/* 2. Text (Visible only when Open) */}
                 {isOpen && <span className="text">{item.name}</span>}
-                {item.badge > 0 && isOpen && (
+
+                {/* 3. Number Badge (Visible only when Open AND badge > 0) */}
+                {isOpen && item.badge > 0 && (
                   <span className="sidebar-badge">{item.badge}</span>
+                )}
+
+                {/* 4. Tooltip (Visible on Hover when Closed) */}
+                {!isOpen && (
+                  <span className="sidebar-tooltip">{item.name}</span>
                 )}
               </NavLink>
             </li>

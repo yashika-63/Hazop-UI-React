@@ -5,7 +5,7 @@ import { strings } from "../string";
 import { getRiskColor, showToast, truncateWords } from "../CommonUI/CommonUI";
 import { useNavigate } from "react-router-dom"; // 1. Import useNavigate
 
-const HazopRecommendationApproval = () => {
+const HazopRecommendationApproval = ({ onActionComplete }) => {
     const navigate = useNavigate(); // 2. Initialize hook
     const [recommendations, setRecommendations] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -59,7 +59,7 @@ const HazopRecommendationApproval = () => {
             });
         } else {
             console.error("Missing ID. Node:", targetNodeId, "Detail:", targetDetailId);
-             showToast("Navigation details missing", "error");
+            showToast("Navigation details missing", "error");
         }
     };
 
@@ -71,6 +71,8 @@ const HazopRecommendationApproval = () => {
             );
             fetchRecommendations();
             showToast("Approved successfully.", 'success');
+            if (onActionComplete) onActionComplete();
+            window.dispatchEvent(new Event('refreshHazopCounts'));
         } catch (err) {
             console.error("Error approving recommendation:", err);
             showToast("Failed to approve.", 'error');
@@ -96,6 +98,8 @@ const HazopRecommendationApproval = () => {
             fetchRecommendations();
             showToast("Rejected successfully.", 'success');
             setShowRejectModal(false);
+            if (onActionComplete) onActionComplete();
+            window.dispatchEvent(new Event('refreshHazopCounts'));
         } catch (err) {
             console.error("Error rejecting recommendation:", err);
             showToast("Failed to reject.", 'error');
@@ -120,7 +124,7 @@ const HazopRecommendationApproval = () => {
                 <thead>
                     <tr>
                         <th>Node Reference No</th>
-                        <th>Deviation</th> 
+                        <th>Deviation</th>
                         <th>Recommendation</th>
                         <th>Department</th>
                         <th>Initial Risk rating</th>

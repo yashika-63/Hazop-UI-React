@@ -7,7 +7,7 @@ import { strings } from "../string";
 import { useNavigate } from "react-router-dom";
 
 
-const HazopTeamAcceptanceApproval = () => {
+const HazopTeamAcceptanceApproval = ({ onActionComplete }) => {
     const [teamData, setTeamData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -107,6 +107,9 @@ const HazopTeamAcceptanceApproval = () => {
             closeModal();
 
             setTeamData(prev => prev.filter(item => item.id !== teamId));
+            if (onActionComplete) onActionComplete();
+            window.dispatchEvent(new Event('refreshHazopCounts'));
+            
         } catch (err) {
             console.error(err);
 

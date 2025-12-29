@@ -270,6 +270,10 @@ const RoleBasedHazopPage = () => {
       )}
     </div>
   );
+const getFullName = (user) =>
+  [user.firstName, user.middleName, user.lastName]
+    .filter(Boolean)
+    .join(" ");
 
 
   const truncateWords = (text, wordLimit = 4) => {
@@ -534,7 +538,7 @@ const RoleBasedHazopPage = () => {
                 <ul className="search-results">
                   {searchResults.map((user) => (
                     <li key={user.empCode} onClick={() => addTeamMember(user)}>
-                      {user.empCode} - ({user.emailId || "NA"}) ({user.department || "NA"})
+                      {getFullName(user)} ({user.empCode}) – ({user.emailId || "NA"}) ({user.department || "NA"})
                     </li>
                   ))}
                 </ul>

@@ -263,7 +263,11 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
           (async () => {
             await axios.post(
               `http://${strings.localhost}/api/hazopTeam/saveTeam/${hazopId}`,
-              hazopTeam.map((m) => m.empCode)
+              // hazopTeam.map((m) => m.empCode) 
+                hazopTeam.map((m) => ({
+                        empCode: m.empCode
+                        // name: m.name
+                    }))
             );
 
             for (const member of hazopTeam) {
@@ -413,6 +417,10 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
     </table>
   ));
 
+  const getFullName = (user) =>
+    [user.firstName, user.middleName, user.lastName]
+      .filter(Boolean)
+      .join(" ");
 
   return (
     <div>
@@ -571,7 +579,7 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
               <ul className="search-results">
                 {searchResults.map((user) => (
                   <li key={user.empCode} onClick={() => addTeamMember(user)}>
-                    {user.empCode}- ({user.emailId || "NA"}) ({user.department || 'NA'})
+                    {getFullName(user)} ({user.empCode}) – ({user.emailId || "NA"}) ({user.department || "NA"})
                   </li>
                 ))}
               </ul>

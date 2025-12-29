@@ -14,7 +14,6 @@ const RequestHandler = () => {
     const [activeSection, setActiveSection] = useState(defaultTab);
     const [loadedTabs, setLoadedTabs] = useState([defaultTab]);
     const empCode = localStorage.getItem("empCode");
-    // state for counts
     const [counts, setCounts] = useState({
         teamAcceptancePending: 0,
         recommendationVerificationPending: 0,
@@ -22,11 +21,13 @@ const RequestHandler = () => {
         approvalPending: 0,
         assignmentPending: 0,
         totalPendingCount: 0,
-        signOffPending: 0
+        signOffPending: 0,
+        assignmentPending: 0
 
     });
 
-    useEffect(() => {
+
+    const fetchCounts = () => {
         fetch(`http://${strings.localhost}/api/hazop-dashboard/total-pending-count?empCode=${empCode}`)
             .then(res => res.json())
             .then(data => {
@@ -35,12 +36,34 @@ const RequestHandler = () => {
                     recommendationVerificationPending: data.recommendationVerificationPending,
                     registrationVerificationPending: data.registrationVerificationPending,
                     approvalPending: data.approvalPending,
-                    assignmentPending: data.assignmentPending
+                    assignmentPending: data.assignmentPending,
+                    assignmentPending: data.assignmentPending,
+                    signOffPending: data.signOffPending // Added the missing key here too
                 });
             })
             .catch(err => console.error(err));
-    }, []);
+    };
 
+    // useEffect(() => {
+    //     fetch(`http://${strings.localhost}/api/hazop-dashboard/total-pending-count?empCode=${empCode}`)
+    //         .then(res => res.json())
+    //         .then(data => {
+    //             setCounts({
+    //                 teamAcceptancePending: data.teamAcceptancePending,
+    //                 recommendationVerificationPending: data.recommendationVerificationPending,
+    //                 registrationVerificationPending: data.registrationVerificationPending,
+    //                 approvalPending: data.approvalPending,
+    //                 assignmentPending: data.assignmentPending,
+    //                 signOffPending: data.signOffPending
+    //             });
+    //         })
+    //         .catch(err => console.error(err));
+    // }, []);
+
+
+    useEffect(() => {
+        fetchCounts();
+    }, []);
     const handleButtonClick = (section) => {
         setActiveSection(section);
         setSearchParams({ tab: section });
@@ -98,8 +121,8 @@ const RequestHandler = () => {
                     >
                         <FaCheckDouble />
                         Hazop Completion
-                        {counts.approvalPending > 0 && (
-                            <span className="badge">{counts.approvalPending}</span>
+                        {counts.assignmentPending > 0 && (
+                            <span className="badge">{counts.assignmentPending}</span>
                         )}
                     </button>
 
@@ -117,11 +140,25 @@ const RequestHandler = () => {
                 </div>
 
                 <div className="Companycontent">
-                    {activeSection === 'HazopTeamAcceptance' && <HazopTeamAcceptanceApproval />}
-                    {activeSection === 'HazopRecommendationApproval' && <HazopRecommendationApproval />}
-                    {activeSection === 'HazopApprove' && <HazopApprovalPage />}
-                    {activeSection === 'HazopConfirmationApproval' && <HazopConfirmationApproval />}
-                    {activeSection === 'RecommendationApproval' && <RecommendationApproval />}
+                    {activeSection === 'HazopTeamAcceptance' && (
+                        <HazopTeamAcceptanceApproval onActionComplete={fetchCounts} />
+                    )}
+
+                    {activeSection === 'HazopRecommendationApproval' && (
+                        <HazopRecommendationApproval onActionComplete={fetchCounts} />
+                    )}
+
+                    {activeSection === 'HazopApprove' && (
+                        <HazopApprovalPage onActionComplete={fetchCounts} />
+                    )}
+
+                    {activeSection === 'HazopConfirmationApproval' && (
+                        <HazopConfirmationApproval onActionComplete={fetchCounts} />
+                    )}
+
+                    {activeSection === 'RecommendationApproval' && (
+                        <RecommendationApproval onActionComplete={fetchCounts} />
+                    )}
                 </div>
             </div>
         </div>

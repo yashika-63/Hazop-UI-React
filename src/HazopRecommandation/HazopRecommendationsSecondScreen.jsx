@@ -217,6 +217,11 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
 
     if (loading) return <p className="loading">Loading...</p>;
 
+
+      const getFullName = (user) =>
+        [user.firstName, user.middleName, user.lastName]
+            .filter(Boolean)
+            .join(" ");
     return (
         <div>
             {/* --- NOT ASSIGNED TABLE --- */}
@@ -254,8 +259,7 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
                                                 <ul className="search-results-table">
                                                     {searchResults[item.id].map(emp => (
                                                         <li key={emp.empCode} onClick={() => handleSelectEmployee(item.id, emp)}>
-                                                            {emp.empCode} - ({emp.emailId || 'NA'})
-                                                        </li>
+                                                            {getFullName(emp)} ({emp.empCode}) – ({emp.emailId || "NA"})                                                        </li>
                                                     ))}
                                                 </ul>
                                             )}
@@ -263,7 +267,7 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
                                     </td>
                                     <td>
                                         <button className="confirm-btn" onClick={(e) => { e.stopPropagation(); handleAssign(item.id); }} disabled={!selectedEmployees[item.id] || assigningIds.includes(item.id)}>
-                                            {assigningIds.includes(item.id) ? "..." : "Assign"}
+                                            {assigningIds.includes(item.id) ? "Assigning..." : "Assign"}
                                         </button>
                                     </td>
                                 </tr>

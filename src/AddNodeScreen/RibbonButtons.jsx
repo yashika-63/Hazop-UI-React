@@ -30,7 +30,8 @@ const RibbonButtons = ({
   navigate,
   handleOpenReport,
   handleGeneratePdf,
-  handleGenerateExcel
+  handleGenerateExcel,
+  loading 
 }) => {
   const [showUploadPopup, setShowUploadPopup] = useState(false);
   const uploadRef = useRef(null);
@@ -56,8 +57,9 @@ const RibbonButtons = ({
           <div className="center-controls1">
             <button
               className="ribbon-deviation"
-              title="Save"
+              title={loading ? "Saving..." : "Save"}
               onClick={handleSubmit}
+              disabled={loading}
             >
               <FaSave />
             </button>

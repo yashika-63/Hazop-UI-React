@@ -166,7 +166,10 @@ const HazopRevision = ({ hazopId, onClose }) => {
       if (hazopTeam.length > 0) {
         await axios.post(
           `http://${strings.localhost}/api/hazopTeam/saveTeam/${newHazopId}`,
-          hazopTeam.map((m) => m.empCode)
+          hazopTeam.map((m) => ({
+            empCode: m.empCode
+            // name: m.name
+          }))
         );
       }
 

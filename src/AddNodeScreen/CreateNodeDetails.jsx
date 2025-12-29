@@ -263,6 +263,15 @@ const CreateNodeDetails = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (loading) {
+      showToast("Save already in progress...", "warning");
+      return;
+    }
+    if (isSaved) {
+      showToast("This data is already saved. Modify something to save again.", "info");
+      return;
+    }
+
     if (!validate()) return;
 
     try {
@@ -849,6 +858,7 @@ const CreateNodeDetails = () => {
   return (
     <div style={{ marginTop: '-20px' }}>
       <RibbonButtons
+        loading={loading}
         handleSubmit={handleSubmit}
         handlePrevNext={handlePrevNext}
         handleAddDiscussionNext={handleAddDiscussionNext}
@@ -1350,8 +1360,8 @@ const CreateNodeDetails = () => {
         <RibbonNodeList
           show={showRibbonNodeList}
           onClose={() => setShowRibbonNodeList(false)}
-          registrationId = {hazopRegistrationId}
-          />
+          registrationId={hazopRegistrationId}
+        />
       )}
 
       {showRiskPopup && (

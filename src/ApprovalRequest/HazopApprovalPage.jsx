@@ -5,10 +5,10 @@ import { formatDate, showToast, truncateText } from "../CommonUI/CommonUI";
 import { strings } from "../string";
 import { FaEye, FaEllipsisV, FaTimes, FaCheck } from "react-icons/fa";
 
-const HazopApprovalPage = () => {
+const HazopApprovalPage = ({onActionComplete}) => {
     const [pendingActions, setPendingActions] = useState([]);
     const [loading, setLoading] = useState(true);
-    
+
     // --- Navigation ---
     const navigate = useNavigate();
 
@@ -16,7 +16,7 @@ const HazopApprovalPage = () => {
     const [openDropdown, setOpenDropdown] = useState(null);
     const [showVerifyModal, setShowVerifyModal] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
-    
+
     // --- OTP Logic States ---
     const [isSendingOtp, setIsSendingOtp] = useState(false);
     const [otpSent, setOtpSent] = useState(false);
@@ -57,16 +57,16 @@ const HazopApprovalPage = () => {
 
     // --- 3. Handle View Details Navigation (Updated) ---
     const handleViewDetails = (item) => {
-        localStorage.setItem("hazopId", item.javaHazopRegistration?.id); 
-                navigate("/HazopView");
+        localStorage.setItem("hazopId", item.javaHazopRegistration?.id);
+        navigate("/HazopView");
     };
 
     const handleVerifyClick = (item) => {
         setSelectedItem(item);
-        setOtpSent(false); 
+        setOtpSent(false);
         setOtpValue("");
         setShowVerifyModal(true);
-        setOpenDropdown(null); 
+        setOpenDropdown(null);
     };
 
     const handleCloseModal = () => {
@@ -86,15 +86,15 @@ const HazopApprovalPage = () => {
                 null,
                 {
                     params: {
-                        commentId: selectedItem.id, 
+                        commentId: selectedItem.id,
                         empCode: empCode,
-                        empEmail: selectedItem.empEmail || "" 
+                        empEmail: selectedItem.empEmail || ""
                     }
                 }
             );
 
             showToast("OTP sent successfully to your email.", "success");
-            setOtpSent(true); 
+            setOtpSent(true);
         } catch (error) {
             console.error("Error sending OTP:", error);
             showToast("Failed to send OTP. Please try again.", "error");
@@ -125,7 +125,11 @@ const HazopApprovalPage = () => {
 
             showToast("Verified successfully!", "success");
             handleCloseModal();
-            fetchPendingActions(); 
+            fetchPendingActions();
+            if (onActionComplete) {
+                onActionComplete();
+            }
+
         } catch (error) {
             console.error("Error verifying OTP:", error);
             showToast("Invalid OTP or Verification Failed.", "error");
@@ -175,7 +179,7 @@ const HazopApprovalPage = () => {
                                             {item.sendForReviewStatus ? "Completed" : "Pending"}
                                         </span>
                                     </td>
-                                    
+
                                     <td className="action-cell">
                                         <div className="dropdown" style={{ position: 'relative' }}>
                                             <button
@@ -195,7 +199,7 @@ const HazopApprovalPage = () => {
                                                             <FaCheck /> Verify
                                                         </button>
                                                     )}
-                                                    
+
                                                     {/* View Details Button */}
                                                     <button onClick={() => handleViewDetails(item)}>
                                                         <FaEye /> View Details
@@ -284,7 +288,7 @@ const HazopApprovalPage = () => {
                                 <div className="confirm-buttons">
                                     <button
                                         className="cancel-btn"
-                                        onClick={() => setOtpSent(false)} 
+                                        onClick={() => setOtpSent(false)}
                                         disabled={isVerifyingOtp}
                                     >
                                         Back

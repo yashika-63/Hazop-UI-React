@@ -31,7 +31,7 @@ const MOCList = () => {
         fetchMOCData(currentPage);
     };
 
-    const fetchMOCData = async (page = 0, search = "") => {
+const fetchMOCData = async (page = 0, search = "") => {
         setLoading(true);
         try {
             const url = search
@@ -44,29 +44,27 @@ const MOCList = () => {
             const result = await response.json();
 
             let content = [];
-            let pageNumber = 0;
             let pageCount = 0;
 
-            if (search) {
-                // 🔥 Handle Flat List Response (The fix for your specific issue)
-                if (Array.isArray(result)) {
-                    content = result;
-                    pageNumber = 0;
-                    pageCount = 1; // Pagination won't work perfectly with flat lists
-                } else {
-                    content = result.data || [];
-                    pageNumber = (result.currentPage || 1) - 1;
-                    pageCount = result.totalPages || 1;
-                }
+            if (search && Array.isArray(result)) {
+                // Handle Flat List Search Result
+                content = result;
+                pageCount = 1;
+                // If it's a flat list, we are always on page 0
+                setCurrentPage(0);
             } else {
+                // Handle Standard Paginated Result
                 content = result.data || [];
-                pageNumber = (result.currentPage || 1) - 1;
                 pageCount = result.totalPages || 0;
+                
+                // FIX: Use the 'page' argument you passed in, 
+                // do not calculate it from the API response.
+                setCurrentPage(page);
             }
 
             setData(content);
-            setCurrentPage(pageNumber);
             setTotalPages(pageCount);
+            
         } catch (error) {
             console.error("Error fetching MOC data:", error);
             setData([]);

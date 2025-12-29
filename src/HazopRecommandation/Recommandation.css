@@ -99,13 +99,14 @@
    ASSIGNED TABLE WRAPPER
 ======================================= */
 .assigned-table-wrapper {
-  margin-bottom: 25px;
   border-radius: 10px;
-  background: var(--bg-card); /* Updated */
   box-shadow: 0 6px 20px var(--shadow-color); /* Updated */
   padding: 15px;
   position: relative;
   border: 1px solid var(--border-color); /* Added border */
+  width: 1080px;
+  margin: 20px auto;
+
 }
 
 .assigned-table-wrapper h5 {
@@ -476,6 +477,7 @@ justify-content: center;}
 }
 
 .status-badge1-completed { background-color: #d2ffeb; color: #0a3b28; }
+.status-badge1-rejected { background-color: #ffcac3; color: #ce2f2f; }
 .status-badge1-pending { background-color: #fdeed1; color: #9c4221; }
 .status-badge1-draft { background-color: #dceefe; color: #0e2b5e; }
 
@@ -499,7 +501,7 @@ justify-content: center;}
 
 .badge-dot { width: 6px; height: 6px; border-radius: 50%; margin-right: 6px; display: inline-block; }
 
-.mini-badge.not-ready { color: #062451; border-color: #2771d1; }
+.mini-badge.not-ready { color:var(--text-main); border-color: #2771d1; }
 .mini-badge.not-ready .badge-dot { background-color: #091f36; animation: pulseGray 2s infinite; }
 
 .mini-badge.ready { color: #2f855a; background-color: #f0fff4; border-color: #c6f6d5; }

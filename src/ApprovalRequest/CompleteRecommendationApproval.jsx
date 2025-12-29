@@ -5,7 +5,7 @@ import { formatDate, showToast, truncateWords } from "../CommonUI/CommonUI";
 import { FaEllipsisV, FaEye, FaCalendarAlt, FaCheck, FaTimes, FaHistory } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
-const CompleteRecommendationApproval = () => {
+const CompleteRecommendationApproval = ({ onActionComplete }) => {
     const [completedAssignments, setCompletedAssignments] = useState([]);
     const [loading, setLoading] = useState(true);
     // const [selectedRecord, setSelectedRecord] = useState(null);
@@ -217,6 +217,9 @@ const CompleteRecommendationApproval = () => {
                 return newState;
             });
 
+            if (onActionComplete) onActionComplete();
+            window.dispatchEvent(new Event('refreshHazopCounts'));
+
         } catch (err) {
             console.error(err);
             showToast("Failed to update target date", "error");
@@ -253,6 +256,8 @@ const CompleteRecommendationApproval = () => {
 
             showToast("Task marked as completed", "success");
             fetchCompletedAssignments();
+            if (onActionComplete) onActionComplete();
+            window.dispatchEvent(new Event('refreshHazopCounts'));
         } catch (err) {
             console.error(err);
             showToast("Failed to complete task", "error");
@@ -284,6 +289,8 @@ const CompleteRecommendationApproval = () => {
             fetchCompletedAssignments();
             setSelectedRecord(null);
             setConfirmation(null);
+            if (onActionComplete) onActionComplete();
+            window.dispatchEvent(new Event('refreshHazopCounts'));
         } catch (err) {
             console.error(err);
             showToast("Failed to complete task", "error");

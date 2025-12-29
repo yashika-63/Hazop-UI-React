@@ -113,11 +113,11 @@ const HazopCard = ({
                     </button>
                     
                     {/* Only show if logic passed in useEffect */}
-                    {canSendForCompletion && (
+                    {/* {canSendForCompletion && (
                         <button type="button" onClick={() => openSendCompletionPopup(item)}>
                         <FaCheckCircle /> Send for Completion
                         </button>
-                    )}
+                    )} */}
 
                     <button type="button" onClick={() => handleNavigate(item)}>
                         <FaArrowsSpin /> HAZOP Status

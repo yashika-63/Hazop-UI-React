@@ -169,6 +169,13 @@ const HazopPage = () => {
 
   const refreshHazopData = () => fetchColumns();
 
+
+
+  const getFullName = (user) =>
+  [user.firstName, user.middleName, user.lastName]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     <div className="page-wrapper">
       <div className="page-card">
@@ -314,7 +321,7 @@ const HazopPage = () => {
                 <ul className="search-results">
                   {searchResults.map((user) => (
                     <li key={user.empCode} onClick={() => addTeamMember(user)}>
-                      {user.empCode} - ({user.emailId || "NA"}) ({user.department || "NA"})
+                      {getFullName(user)} ({user.empCode}) – ({user.emailId || "NA"}) ({user.department || "NA"})
                     </li>
                   ))}
                 </ul>

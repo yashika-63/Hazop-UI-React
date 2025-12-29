@@ -3,6 +3,7 @@ import './CommonCss/Sidebar.css';
 import { useNavigate } from 'react-router-dom';
 import { Moon, Sun } from 'lucide-react';
 import { useTheme } from './Context/ThemeContext';
+import { FaRightFromBracket } from 'react-icons/fa6';
 
 const Topbar = ({ toggleSidebar, isOpen }) => {
 
@@ -65,7 +66,7 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
       <div style={{ width: 15 }}></div>
 
       <div className="topbar-logo">
-        <img src="/assets/Alkyl Logo.png" alt="Logo" />
+        <img src="/AACL.png" alt="Logo" />
       </div>
 
       <div
@@ -83,7 +84,10 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
           <div className={`profile-popup ${showProfile ? 'active' : ''}`} style={{ backgroundColor: 'var(--popup-bg)', color: 'var(--text-main)' }}>
             <p><strong style={{ color: 'var(--text-main)' }}>{fullName}</strong></p>
             <p style={{ color: 'var(--text-secondary)' }}>{email}</p>
-            <button type='button' className='logout-btn' onClick={handleLogout} style={{ marginTop: '10px' }}>Logout</button>
+            <button type='button' className='logout-btn' onClick={handleLogout}>
+              <FaRightFromBracket /> Logout
+            </button>
+            {/* <button type='button' className='logout-btn' onClick={handleLogout} style={{ marginTop: '10px' }}>Logout</button> */}
           </div>
         )}
       </div>

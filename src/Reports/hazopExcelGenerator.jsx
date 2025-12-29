@@ -109,10 +109,6 @@ const addCompactHeader = (sheet, hazop, pageNo, totalPages) => {
     sheet.getCell('I7').value = "Approved By"; styleHeader(sheet.getCell('I7'), true);
 
     // Row 8: Signatures / Names
-    // sheet.getCell('F8').value = "Sign"; styleHeader(sheet.getCell('F8'), true);
-    // sheet.getCell('G8').value = hazop?.createdBy || "-"; styleData(sheet.getCell('G8'));
-    // sheet.getCell('H8').value = hazop?.verificationemployeeName || "-"; styleData(sheet.getCell('H8'));
-    // sheet.getCell('I8').value = hazop?.completionEmployeeName || "-"; styleData(sheet.getCell('I8'));
     sheet.getCell('F8').value = "Sign"; styleHeader(sheet.getCell('F8'), true);
 
     // Set these values to empty strings to keep the cells blank
@@ -124,11 +120,10 @@ const addCompactHeader = (sheet, hazop, pageNo, totalPages) => {
 
 // --- DYNAMIC REPORT HEADER ---
 // Matches the header width to the specific sheet's last column
+// --- DYNAMIC REPORT HEADER ---
 const addReportHeader = (sheet, hazop, pageNo, totalPages, lastColIndex) => {
 
     // Determine Start Column: 
-    // If table is wide (>10 cols), start at G (7). 
-    // If table is narrow (<=10 cols), start at B (2) to ensure we have enough room.
     const startCol = lastColIndex > 10 ? 7 : 2;
     const endCol = lastColIndex;
 
@@ -141,9 +136,8 @@ const addReportHeader = (sheet, hazop, pageNo, totalPages, lastColIndex) => {
         return { s, e };
     };
 
-    // Helper for 2-column rows (Label | Value) - Label gets approx 25-30%
+    // Helper for 2-column rows (Label | Value)
     const getLabelValueSplit = () => {
-        // e.g. Start 7, End 16 (10 cols). Label 7-8 (2 cols), Value 9-16 (8 cols)
         const labelEnd = startCol + (lastColIndex > 10 ? 1 : 1);
         return { labelEnd, valStart: labelEnd + 1 };
     };
@@ -193,9 +187,7 @@ const addReportHeader = (sheet, hazop, pageNo, totalPages, lastColIndex) => {
     sheet.mergeCells(7, r4p3.s, 7, r4p3.e); applyBorder(sheet.getCell(7, r4p3.s));
     sheet.mergeCells(7, r4p4.s, 7, r4p4.e); sheet.getCell(7, r4p4.s).value = `${pageNo} Of ${totalPages}`; styleData(sheet.getCell(7, r4p4.s));
 
-    // Signatures (Row 8 Headers, Row 9 Data)
-    // We split remaining width into 3 parts (Prepared, Reviewed, Approved) after the initial spacer/label col.
-
+    // --- SIGNATURES SECTION (Modified) ---
     const spacerEnd = r4p1.e;
     const sigStart = spacerEnd + 1;
     const sigTotalWidth = endCol - sigStart + 1;
@@ -205,17 +197,29 @@ const addReportHeader = (sheet, hazop, pageNo, totalPages, lastColIndex) => {
     const s2e = Math.floor(sigStart + (sigSpan * 2) - 1);
     const s3e = endCol;
 
-    // Row 8
-    // sheet.mergeCells(8, r4p1.s, 8, spacerEnd); applyBorder(sheet.getCell(8, r4p1.s)); // Empty/Spacer
+    // ** 1. "Sign" Label (Merged Rows 8 & 9, taking up the 'MBS' column width) **
+    sheet.mergeCells(8, r4p1.s, 9, r4p1.e);
+    const signCell = sheet.getCell(8, r4p1.s);
+    signCell.value = "Sign";
+    styleHeader(signCell, true); // Centered, Bold, Grey BG, Bordered
+
+    // ** 2. Signature Headers (Row 8) **
     sheet.mergeCells(8, sigStart, 8, s1e); sheet.getCell(8, sigStart).value = "Prepared By"; styleHeader(sheet.getCell(8, sigStart), true);
     sheet.mergeCells(8, s1e + 1, 8, s2e); sheet.getCell(8, s1e + 1).value = "Reviewed By"; styleHeader(sheet.getCell(8, s1e + 1), true);
     sheet.mergeCells(8, s2e + 1, 8, s3e); sheet.getCell(8, s2e + 1).value = "Approved By"; styleHeader(sheet.getCell(8, s2e + 1), true);
 
-    // Row 9
-    // sheet.mergeCells(9, r4p1.s, 9, spacerEnd); applyBorder(sheet.getCell(9, r4p1.s)); // Empty/Spacer
-    sheet.mergeCells(9, sigStart, 9, s1e); sheet.getCell(9, sigStart).value = hazop?.createdBy || "-"; styleData(sheet.getCell(9, sigStart));
-    sheet.mergeCells(9, s1e + 1, 9, s2e); sheet.getCell(9, s1e + 1).value = hazop?.verificationemployeeName || "-"; styleData(sheet.getCell(9, s1e + 1));
-    sheet.mergeCells(9, s2e + 1, 9, s3e); sheet.getCell(9, s2e + 1).value = hazop?.completionEmployeeName || "-"; styleData(sheet.getCell(9, s2e + 1));
+    // ** 3. Signature Data Blocks (Row 9) **
+    sheet.mergeCells(9, sigStart, 9, s1e);
+    sheet.getCell(9, sigStart).value = null;
+    styleData(sheet.getCell(9, sigStart));
+
+    sheet.mergeCells(9, s1e + 1, 9, s2e);
+    sheet.getCell(9, s1e + 1).value = null;
+    styleData(sheet.getCell(9, s1e + 1));
+
+    sheet.mergeCells(9, s2e + 1, 9, s3e);
+    sheet.getCell(9, s2e + 1).value = null;
+    styleData(sheet.getCell(9, s2e + 1));
 };
 
 
@@ -234,7 +238,14 @@ export async function generateHazopExcel({
     hazopId
 }) {
     const workbook = new ExcelJS.Workbook();
-    const TOTAL_PAGES = 7;
+
+    // Calculate total pages based on number of nodes
+    // Static sheets: Cover, List, Recs, Comp, T1, T2 = 6 sheets
+    // Dynamic: +1 per node
+    const nodeCount = nodes.length > 0 ? nodes.length : 0;
+    const TOTAL_PAGES = 6 + nodeCount;
+    let currentPage = 1;
+
     // ==========================================
     // SHEET 1: COVER (A4 Page Style)
     // ==========================================
@@ -246,7 +257,7 @@ export async function generateHazopExcel({
     // Columns B to I width setup
     coverSheet.columns = [
         { width: 2 },  // A (Spacer)
-        { width: 5 },  // B (Sr)
+        { width: 15 },  // B (Sr)
         { width: 20 }, // C
         { width: 15 }, // D
         { width: 15 }, // E
@@ -256,7 +267,7 @@ export async function generateHazopExcel({
         { width: 15 }  // I (Header End)
     ];
 
-    addCompactHeader(coverSheet, hazop, 1, TOTAL_PAGES);
+    addCompactHeader(coverSheet, hazop, currentPage, TOTAL_PAGES);
 
     // -- Company Name Block (Rows 9-13) --
     coverSheet.mergeCells('B9:I13');
@@ -264,21 +275,50 @@ export async function generateHazopExcel({
     compCell.value = "ALKYL AMINES CHEMICALS LIMITED";
     compCell.font = { bold: true, size: 18, name: 'Arial', color: { argb: COLORS.TEXT_BLUE } };
     compCell.alignment = { horizontal: 'center', vertical: 'middle' };
-    applyBorder(compCell, 'medium');
 
-    // -- Project Name Block (Rows 14-16) --
-    coverSheet.mergeCells('B14:I16');
-    const projCell = coverSheet.getCell('B14');
+    // Manual Border: Medium on Top/Left/Right, NO Bottom border
+    compCell.border = {
+        top: { style: 'medium', color: { argb: COLORS.BORDER_BLACK } },
+        left: { style: 'medium', color: { argb: COLORS.BORDER_BLACK } },
+        right: { style: 'medium', color: { argb: COLORS.BORDER_BLACK } }
+        // bottom is intentionally omitted to remove the line
+    };
+
+    // -- Site Name Block (Rows 14-15) --
+    coverSheet.mergeCells('B14:I15');
+    const siteCell = coverSheet.getCell('B14');
+    siteCell.value = hazop?.site || "";
+    siteCell.font = { bold: true, size: 14, name: 'Arial', color: { argb: COLORS.TEXT_BLUE } };
+    siteCell.alignment = { horizontal: 'center', vertical: 'top' }; // Changed to 'top' so it sits closer to company name
+
+    // Manual Border: Medium on Bottom/Left/Right, NO Top border
+    siteCell.border = {
+        left: { style: 'medium', color: { argb: COLORS.BORDER_BLACK } },
+        right: { style: 'medium', color: { argb: COLORS.BORDER_BLACK } },
+        bottom: { style: 'medium', color: { argb: COLORS.BORDER_BLACK } }
+        // top is intentionally omitted to merge with the block above
+    };
+    // -- Project Name Block (Rows 16-18) -- [SHIFTED DOWN]
+    // Changed from B14:I16 to B16:I18 to avoid overlap error
+    coverSheet.mergeCells('B16:I18');
+    const projCell = coverSheet.getCell('B16');
     projCell.value = `HAZOP STUDY: ${hazop?.hazopTitle || "Project Name"}`;
     projCell.font = { bold: true, size: 14, name: 'Arial' };
     projCell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
     applyBorder(projCell, 'medium');
 
-    // -- Site Info --
-    let cRow = 18;
-    coverSheet.getCell(`B${cRow}`).value = "Site Name:";
+    // -- Site Info / HAZOP Title --
+    // Start at Row 20 (since Project Name ends at 18)
+    let cRow = 20;
+
+    coverSheet.getCell(`B${cRow}`).value = "HAZOP Title:";
     coverSheet.getCell(`B${cRow}`).font = { bold: true };
-    coverSheet.mergeCells(`C${cRow}:I${cRow}`); coverSheet.getCell(`C${cRow}`).value = hazop?.site || "";
+
+    // Merge cells C to I for the long title
+    coverSheet.mergeCells(`C${cRow}:I${cRow}`);
+    coverSheet.getCell(`C${cRow}`).value = hazop?.hazopTitle || "";
+
+    // Move down for the next section
     cRow += 2;
 
     // -- MOC References --
@@ -321,7 +361,6 @@ export async function generateHazopExcel({
             name += ` (${member.role})`;
         }
 
-        // 1. SIGNATURE LOGIC UPDATE
         let signatureText = "";
         if (member.employeeActionTaken) {
             const signedDate = member.employeeActionTakenDate ? formatDate(member.employeeActionTakenDate) : "";
@@ -337,7 +376,7 @@ export async function generateHazopExcel({
 
     // -- Attached Documents --
     if (documents && documents.length > 0) {
-        cRow += 2; // Add some spacing
+        cRow += 2;
         coverSheet.getCell(`B${cRow}`).value = "ATTACHED DOCUMENTS";
         coverSheet.getCell(`B${cRow}`).font = { bold: true, underline: true };
         cRow++;
@@ -358,7 +397,7 @@ export async function generateHazopExcel({
             coverSheet.mergeCells(`C${cRow}:I${cRow}`);
             const nameCell = coverSheet.getCell(`C${cRow}`);
             nameCell.value = { text: fileName, hyperlink: fileUrl };
-            nameCell.font = { name: 'Arial', size: 10, color: { argb: 'FF0000FF' }, underline: true }; // Blue link style
+            nameCell.font = { name: 'Arial', size: 10, color: { argb: 'FF0000FF' }, underline: true };
             nameCell.alignment = { vertical: 'top', horizontal: 'left', wrapText: true };
             applyBorder(nameCell);
 
@@ -366,87 +405,153 @@ export async function generateHazopExcel({
         });
     }
 
-    // 2. MOVED DATE ROW HERE (Below Documents)
-    cRow += 2; // Add spacing before Date
+    // Date Row
+    cRow += 2;
     coverSheet.getCell(`C${cRow}`).value = "DATE :";
     coverSheet.getCell(`C${cRow}`).font = { bold: true };
     coverSheet.getCell(`D${cRow}`).value = formatDate(new Date());
 
     styleA4Page(coverSheet);
-
-
+    currentPage++;
 
     // ==========================================
     // 2. NODE LIST (Standard Grid)
-    // Data range: B to H (Index 2 to 8) -> lastColIndex = 8
     // ==========================================
     const listSheet = workbook.addWorksheet('H-TC-HAZOP-NODE LIST', { pageSetup: { orientation: 'landscape' } });
     listSheet.columns = [
-        { width: 8 }, // A
-        { width: 12 }, { width: 12 }, { width: 12 }, { width: 12 }, { width: 12 }, { width: 12 }, { width: 12 } // B-H
+        { width: 8 }, { width: 12 }, { width: 12 }, { width: 12 }, { width: 12 }, { width: 12 }, { width: 12 }, { width: 12 }
     ];
-    addReportHeader(listSheet, hazop, 2, TOTAL_PAGES, 8); // Pass 8 as lastColIndex
+    addReportHeader(listSheet, hazop, currentPage, TOTAL_PAGES, 8);
 
-    listSheet.getCell('A12').value = "LIST OF PROCESS ACTIVITIES";
-    listSheet.getCell('A12').font = { bold: true, underline: true };
+    // -- Custom Header Block (Rows 10-13) --
 
-    const lHead = 15;
-    listSheet.getCell(`B${lHead}`).value = "ACTIVITY NO."; styleHeader(listSheet.getCell(`B${lHead}`), true);
-    listSheet.mergeCells(`C${lHead}:G${lHead}`); listSheet.getCell(`C${lHead}`).value = "DESCRIPTION"; styleHeader(listSheet.getCell(`C${lHead}`), true);
-    listSheet.getCell(`H${lHead}`).value = "PAGE NO"; styleHeader(listSheet.getCell(`H${lHead}`), true);
+    // Row 10: Company - Site Name
+    listSheet.mergeCells('A11:H11');
+    listSheet.getCell('A11').value = `ALKYL AMINES CHEMICALS LIMITED - ${hazop?.site || ""}`;
+    listSheet.getCell('A11').font = { bold: true, size: 16, name: 'Arial', color: { argb: COLORS.TEXT_BLUE } };
+    listSheet.getCell('A11').alignment = { horizontal: 'center', vertical: 'middle' };
 
-    let lRow = 16;
+    // Row 11: HAZOP STUDY
+    listSheet.mergeCells('A12:H12');
+    listSheet.getCell('A12').value = "HAZOP STUDY";
+    listSheet.getCell('A12').font = { bold: true, size: 12, name: 'Arial', color: { argb: COLORS.TEXT_BLUE } };
+    listSheet.getCell('A12').alignment = { horizontal: 'center', vertical: 'middle' };
+
+    // Row 12: Project Name
+    listSheet.mergeCells('A13:H13');
+    listSheet.getCell('A13').value = `Project Name : ${hazop?.hazopTitle || "-"}`;
+    listSheet.getCell('A13').font = { bold: true, size: 12, name: 'Arial', color: { argb: COLORS.TEXT_BLUE } };
+    listSheet.getCell('A13').alignment = { horizontal: 'center', vertical: 'middle' };
+
+    // Row 14: Title
+    listSheet.getCell('A15').value = "LIST OF PROCESS ACTIVITIES";
+    listSheet.getCell('A15').font = { bold: true, underline: true };
+
+    // -- Table Header (Shifted to Row 16) --
+    const lHead = 17;
+    listSheet.getCell(`B${lHead}`).value = "ACTIVITY NO.";
+    styleHeader(listSheet.getCell(`B${lHead}`), true);
+
+    listSheet.mergeCells(`C${lHead}:G${lHead}`);
+    listSheet.getCell(`C${lHead}`).value = "DESCRIPTION";
+    styleHeader(listSheet.getCell(`C${lHead}`), true);
+
+    listSheet.getCell(`H${lHead}`).value = "PAGE NO";
+    styleHeader(listSheet.getCell(`H${lHead}`), true);
+
+    // -- Data Rows --
+    let lRow = 18;
     const nodesForList = (registrationNodes && registrationNodes.length > 0) ? registrationNodes : nodes;
+
     if (nodesForList && nodesForList.length > 0) {
-        nodesForList.forEach(node => {
+        nodesForList.forEach((node, idx) => {
             const actNo = node.nodeNumber || (node.nodeInfo ? node.nodeInfo.nodeNumber : "-");
-            listSheet.getCell(`B${lRow}`).value = actNo; styleData(listSheet.getCell(`B${lRow}`));
+            listSheet.getCell(`B${lRow}`).value = actNo;
+            styleData(listSheet.getCell(`B${lRow}`));
+
             listSheet.mergeCells(`C${lRow}:G${lRow}`);
             const desc = node.designIntent || (node.nodeInfo ? node.nodeInfo.designIntent : "") || "-";
-            listSheet.getCell(`C${lRow}`).value = desc; styleData(listSheet.getCell(`C${lRow}`), 'left');
-            listSheet.getCell(`H${lRow}`).value = "3"; styleData(listSheet.getCell(`H${lRow}`));
+            listSheet.getCell(`C${lRow}`).value = desc;
+            styleData(listSheet.getCell(`C${lRow}`), 'left');
+
+            // PAGE NUMBER LOGIC:
+            // currentPage = The page number of this "Node List" sheet.
+            // + 1 = The first node starts on the *next* page.
+            // + idx = Increment for subsequent nodes (assuming 1 sheet per node).
+            listSheet.getCell(`H${lRow}`).value = currentPage + 1 + idx;
+            styleData(listSheet.getCell(`H${lRow}`));
+
             lRow++;
         });
     }
 
+    currentPage++; // Increment global counter (This sheet is done)
     // ==========================================
-    // 3. HAZOP DETAILS (Standard Grid)
-    // Data range: C to P (Index 3 to 16) -> lastColIndex = 16
+    // 3. HAZOP DETAILS (DYNAMIC SHEETS PER NODE)
     // ==========================================
-    const detailSheet = workbook.addWorksheet('H-TC-HAZOP-DETAILS', { pageSetup: { orientation: 'landscape' } });
-    detailSheet.columns = [
-        { width: 3 },  // A (Blank)
-        { width: 3 },  // B (Blank)
-        { width: 12 }, // C
-        { width: 18 }, // D
-        { width: 12 }, // E
-        { width: 22 }, // F
-        { width: 22 }, // G
-        { width: 22 }, // H
-        { width: 20 }, // I
-        { width: 5 },  // J
-        { width: 5 },  // K
-        { width: 5 },  // L
-        { width: 20 }, // M
-        { width: 5 },  // N
-        { width: 5 },  // O
-        { width: 5 }   // P
-    ];
-    addReportHeader(detailSheet, hazop, 3, TOTAL_PAGES, 16); // Pass 16 as lastColIndex
-
-    let dRow = 11;
     if (nodes && nodes.length > 0) {
-        nodes.forEach(node => {
+        nodes.forEach((node, index) => {
             const nInfo = node.nodeInfo || node;
             const nodeId = nInfo.id;
-            const details = nodeDetailsState[nodeId] || [];
 
-            // Node Details Headers
-            detailSheet.getCell(`C${dRow}`).value = "Node No"; styleData(detailSheet.getCell(`C${dRow}`), 'left');
-            detailSheet.getCell(`D${dRow}`).value = nInfo.nodeNumber || ""; styleData(detailSheet.getCell(`D${dRow}`), 'center');
-            detailSheet.mergeCells(`F${dRow}:H${dRow}`); detailSheet.getCell(`F${dRow}`).value = "Hazop Worksheet No."; styleData(detailSheet.getCell(`F${dRow}`), 'right');
-            detailSheet.mergeCells(`J${dRow}:L${dRow}`); detailSheet.getCell(`J${dRow}`).value = "Date auto filled"; styleData(detailSheet.getCell(`J${dRow}`), 'right');
-            detailSheet.mergeCells(`M${dRow}:N${dRow}`); detailSheet.getCell(`M${dRow}`).value = formatDate(nInfo.creationDate); styleData(detailSheet.getCell(`M${dRow}`), 'center');
+            // Create a UNIQUE Sheet Name
+            let safeNodeNum = nInfo.nodeNumber ? String(nInfo.nodeNumber).replace(/[:\\/?*\[\]]/g, "") : (index + 1);
+            let sheetName = `Node - ${safeNodeNum}`;
+
+            if (workbook.getWorksheet(sheetName)) {
+                sheetName = `Node - ${safeNodeNum} (${index})`;
+            }
+
+            const detailSheet = workbook.addWorksheet(sheetName, { pageSetup: { orientation: 'landscape' } });
+
+            detailSheet.columns = [
+                { width: 3 }, { width: 3 }, { width: 12 }, { width: 18 }, { width: 12 },
+                { width: 22 }, { width: 22 }, { width: 22 }, { width: 20 }, { width: 5 },
+                { width: 5 }, { width: 5 }, { width: 20 }, { width: 5 }, { width: 5 }, { width: 5 }
+            ];
+
+            // Add Header with Dynamic Page Number
+            addReportHeader(detailSheet, hazop, currentPage, TOTAL_PAGES, 16);
+
+            let dRow = 11;
+
+            // --- Node Info Header Section ---
+
+            // 1. Node Number Label
+            const nodeLabel = detailSheet.getCell(`C${dRow}`);
+            nodeLabel.value = "Node No :";
+            nodeLabel.font = { bold: true, name: 'Arial', size: 10 };
+            nodeLabel.alignment = { horizontal: 'left', vertical: 'middle' };
+
+            // 2. Node Number Value
+            const nodeValue = detailSheet.getCell(`D${dRow}`);
+            nodeValue.value = nInfo.nodeNumber || "";
+            nodeValue.font = { name: 'Arial', size: 10 };
+            nodeValue.alignment = { horizontal: 'left', vertical: 'middle' };
+
+            // 3. Worksheet Label
+            detailSheet.mergeCells(`F${dRow}:H${dRow}`);
+            const sheetLabel = detailSheet.getCell(`F${dRow}`);
+            sheetLabel.value = "Hazop Worksheet No. :";
+            sheetLabel.font = { bold: true, name: 'Arial', size: 10 };
+            sheetLabel.alignment = { horizontal: 'right', vertical: 'middle' };
+
+            // 4. Date Label
+            detailSheet.mergeCells(`J${dRow}:L${dRow}`);
+            const dateLabel = detailSheet.getCell(`J${dRow}`);
+            dateLabel.value = "Date :";
+            dateLabel.font = { bold: true, name: 'Arial', size: 10 };
+            dateLabel.alignment = { horizontal: 'right', vertical: 'middle' };
+
+            // 5. Date Value
+            detailSheet.mergeCells(`M${dRow}:N${dRow}`);
+            const dateValue = detailSheet.getCell(`M${dRow}`);
+            dateValue.value = formatDate(nInfo.creationDate);
+            dateValue.font = { name: 'Arial', size: 10 };
+            dateValue.alignment = { horizontal: 'center', vertical: 'middle' };
+
+            // Optional: If you want a single line underneath the whole row to separate it
+            // detailSheet.getRow(dRow).border = { bottom: { style: 'thin' } };
             dRow++;
 
             detailSheet.getCell(`C${dRow}`).value = "Design Intent"; styleData(detailSheet.getCell(`C${dRow}`), 'left');
@@ -477,7 +582,7 @@ export async function generateHazopExcel({
             detailSheet.mergeCells(`K${dRow}:P${dRow}`); detailSheet.getCell(`K${dRow}`).value = `Quantity / flow rate ${nInfo.quantityFlowRate || "-"}`; styleData(detailSheet.getCell(`K${dRow}`));
             dRow += 2;
 
-            // Main Table Headers
+            // --- Table Headers ---
             const h1 = dRow;
             const h2 = dRow + 1;
             detailSheet.mergeCells(`C${h1}:C${h2}`); detailSheet.getCell(`C${h1}`).value = "General Parameter";
@@ -500,11 +605,12 @@ export async function generateHazopExcel({
             detailSheet.getCell(`P${h2}`).value = "R";
 
             for (let r = h1; r <= h2; r++) {
-                for (let c = 3; c <= 16; c++) {
-                    styleHeader(detailSheet.getCell(r, c), true);
-                }
+                for (let c = 3; c <= 16; c++) styleHeader(detailSheet.getCell(r, c), true);
             }
             dRow += 2;
+
+            // --- Fill Table Data for THIS specific node ---
+            const details = nodeDetailsState[nodeId] || [];
 
             if (details.length > 0) {
                 details.forEach(det => {
@@ -544,74 +650,102 @@ export async function generateHazopExcel({
                 styleData(detailSheet.getCell(`C${dRow}`), 'center');
                 dRow++;
             }
-            dRow++;
+
+            // Increment Page Counter for the NEXT sheet
+            currentPage++;
         });
+    } else {
+        // Fallback if no nodes exist, create one empty details sheet
+        const detailSheet = workbook.addWorksheet('Details', { pageSetup: { orientation: 'landscape' } });
+        currentPage++;
     }
+
 
     // ==========================================
     // 4. RECOMMENDATIONS (Standard Grid)
-    // Data range: C to H (Index 3 to 8) -> lastColIndex = 8
     // ==========================================
     const recSheet = workbook.addWorksheet('RECOMMENDATIONS', { pageSetup: { orientation: 'landscape' } });
-    recSheet.columns = [
-        { width: 3 },  // A (Blank)
-        { width: 10 },  // B (Blank)
-        { width: 10 },  // C (Sr No)
-        { width: 20 }, // D (Node No)
-        { width: 25 }, // E (Recommendation)
-        { width: 25 }, // F (Remark by Management)
-        { width: 10 }, // G (Completion Status)
-        { width: 10 }  // H (Completion Date)
-    ];
-    addReportHeader(recSheet, hazop, 4, TOTAL_PAGES, 8); // Pass 8 as lastColIndex
 
-    recSheet.mergeCells('C10:H10');
+    // Updated columns definition (Added width for Responsibility at index 5)
+    recSheet.columns = [
+        { width: 3 },  // A (Spacer)
+        { width: 10 }, // B (Spacer/Sr calculation offset)
+        { width: 8 },  // C: Sr No
+        { width: 12 }, // D: Node No
+        { width: 25 }, // E: Recommendation
+        { width: 25 }, // F: Remark by Management
+        { width: 15 }, // G: Responsibility (NEW)
+        { width: 15 }, // H: Completion Status
+        { width: 12 }  // I: Date
+    ];
+    addReportHeader(recSheet, hazop, currentPage, TOTAL_PAGES, 9); // Adjusted total columns hint if needed
+
+    // -- Title Row --
+    // Merged range increased from H to I to cover new column
+    recSheet.mergeCells('C10:I10');
     recSheet.getCell('C10').value = "Recommendation List for Approval of Management";
     recSheet.getCell('C10').font = { bold: true, size: 12 };
     recSheet.getCell('C10').alignment = { horizontal: 'center' };
 
+    // -- Table Headers --
     const rHead = 12;
-    const rHeaders = ["Sr No", "Node No", "Recommendation", "Remark by Management", "Completion Status", "Date"];
+    // Added "Responsibility" to the array
+    const rHeaders = ["Sr No", "Node No", "Recommendation", "Remark by Management", "Responsibility", "Completion Status", "Date"];
 
     rHeaders.forEach((h, i) => {
+        // i=0 -> C(3), i=1 -> D(4), etc.
         const cell = recSheet.getCell(rHead, i + 3);
         cell.value = h;
         styleHeader(cell, true);
     });
 
+    // -- Data Rows --
     let rRow = 13;
     if (allRecommendations && allRecommendations.length > 0) {
         allRecommendations.forEach((rec, idx) => {
+            // Col C: Sr No
             recSheet.getCell(`C${rRow}`).value = idx + 1;
             styleData(recSheet.getCell(`C${rRow}`));
 
+            // Col D: Node No
             const nodeRef = rec.nodeNumber || (rec.javaHazopNode?.nodeNumber ? `${rec.javaHazopNode.nodeNumber}.${rec.javaHazopNodeDetail?.nodeDetailNumber || '0'}` : "-");
             recSheet.getCell(`D${rRow}`).value = nodeRef;
             styleData(recSheet.getCell(`D${rRow}`));
 
+            // Col E: Recommendation
             recSheet.getCell(`E${rRow}`).value = rec.recommendation || "-";
             styleData(recSheet.getCell(`E${rRow}`), 'left');
 
+            // Col F: Remark by Management
             recSheet.getCell(`F${rRow}`).value = rec.remarkbyManagement || "-";
             styleData(recSheet.getCell(`F${rRow}`), 'left');
 
+            // Col G: Responsibility (NEW)
+            // Assuming 'rec.department' holds the responsibility info
+            recSheet.getCell(`G${rRow}`).value = rec.responsibility || "-";
+            styleData(recSheet.getCell(`G${rRow}`), 'left');
+
+            // Col H: Completion Status (Shifted from G)
             const status = rec.completionStatus ? "Completed" : "Pending";
-            recSheet.getCell(`G${rRow}`).value = status;
-            styleData(recSheet.getCell(`G${rRow}`));
+            recSheet.getCell(`H${rRow}`).value = status;
+            styleData(recSheet.getCell(`H${rRow}`));
             if (rec.completionStatus) {
-                recSheet.getCell(`G${rRow}`).font = { color: { argb: 'FF008000' }, bold: true };
+                recSheet.getCell(`H${rRow}`).font = { color: { argb: 'FF008000' }, bold: true };
             }
 
-            recSheet.getCell(`H${rRow}`).value = rec.completionDate ? formatDate(rec.completionDate) : "-";
-            styleData(recSheet.getCell(`H${rRow}`));
+            // Col I: Date (Shifted from H)
+            recSheet.getCell(`I${rRow}`).value = rec.completionDate ? formatDate(rec.completionDate) : "-";
+            styleData(recSheet.getCell(`I${rRow}`));
 
             rRow++;
         });
     } else {
-        recSheet.mergeCells(`C${rRow}:H${rRow}`);
+        // Merge range increased from H to I
+        recSheet.mergeCells(`C${rRow}:I${rRow}`);
         recSheet.getCell(`C${rRow}`).value = "No recommendations found.";
         styleData(recSheet.getCell(`C${rRow}`), 'center');
     }
+    currentPage++;
 
     // ==========================================
     // SHEET 5: COMPLETION (A4 Page Style)
@@ -625,45 +759,80 @@ export async function generateHazopExcel({
         { width: 2 }, { width: 5 }, { width: 20 }, { width: 15 }, { width: 15 }, { width: 15 }, { width: 15 }, { width: 15 }, { width: 15 }
     ];
 
-    addCompactHeader(compSheet, hazop, 5, TOTAL_PAGES);
+    addCompactHeader(compSheet, hazop, currentPage, TOTAL_PAGES);
 
-    // Company (Rows 9-13)
+    // -- Company Name Block (Rows 9-13) --
     compSheet.mergeCells('B9:I13');
     const ccCell = compSheet.getCell('B9');
     ccCell.value = "ALKYL AMINES CHEMICALS LIMITED";
     ccCell.font = { bold: true, size: 18, name: 'Arial', color: { argb: COLORS.TEXT_BLUE } };
     ccCell.alignment = { horizontal: 'center', vertical: 'middle' };
-    applyBorder(ccCell, 'medium');
 
-    // Project (Rows 14-16)
-    compSheet.mergeCells('B14:I16');
-    const cpCell = compSheet.getCell('B14');
+    // Manual Border: Medium on Top/Left/Right, NO Bottom border
+    ccCell.border = {
+        top: { style: 'medium', color: { argb: COLORS.BORDER_BLACK } },
+        left: { style: 'medium', color: { argb: COLORS.BORDER_BLACK } },
+        right: { style: 'medium', color: { argb: COLORS.BORDER_BLACK } }
+    };
+
+    // -- Site Name Block (Rows 14-15) --
+    compSheet.mergeCells('B14:I15');
+    const compSiteCell = compSheet.getCell('B14');
+    compSiteCell.value = hazop?.site || "";
+    compSiteCell.font = { bold: true, size: 14, name: 'Arial', color: { argb: COLORS.TEXT_BLUE } };
+    compSiteCell.alignment = { horizontal: 'center', vertical: 'top' }; // Align top to sit closer to company name
+
+    // Manual Border: Medium on Bottom/Left/Right, NO Top border
+    compSiteCell.border = {
+        left: { style: 'medium', color: { argb: COLORS.BORDER_BLACK } },
+        right: { style: 'medium', color: { argb: COLORS.BORDER_BLACK } },
+        bottom: { style: 'medium', color: { argb: COLORS.BORDER_BLACK } }
+    };
+    // -- Project Name Block (Rows 16-18) -- [SHIFTED DOWN]
+    compSheet.mergeCells('B16:I18');
+    const cpCell = compSheet.getCell('B16');
     cpCell.value = `COMPLETION CERTIFICATE: ${hazop?.hazopTitle || ""}`;
     cpCell.font = { bold: true, size: 14, name: 'Arial' };
     cpCell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
     applyBorder(cpCell, 'medium');
 
-    // Status Area
-    let compRow = 18;
-    compSheet.getCell(`B${compRow}`).value = "Status:"; compSheet.getCell(`B${compRow}`).font = { bold: true };
+    // -- Status Area (Starts at Row 20) --
+    let compRow = 20;
+
+    compSheet.getCell(`B${compRow}`).value = "Status:";
+    compSheet.getCell(`B${compRow}`).font = { bold: true };
+
     compSheet.getCell(`C${compRow}`).value = hazop?.completionStatus ? "COMPLETED" : "IN PROGRESS";
     compSheet.getCell(`C${compRow}`).border = { bottom: { style: 'thin' } };
 
-    compSheet.getCell(`G${compRow}`).border = { bottom: { style: 'thin' } };
+    compSheet.getCell(`G${compRow}`).border = { bottom: { style: 'thin' } }; // (Optional placeholder line)
+
     compRow += 3;
 
-    // Team Signatures Title
-    compSheet.getCell(`B${compRow}`).value = "Closure Approvals"; compSheet.getCell(`B${compRow}`).font = { bold: true, underline: true };
+    // -- Team Signatures Title --
+    compSheet.getCell(`B${compRow}`).value = "Closure Approvals";
+    compSheet.getCell(`B${compRow}`).font = { bold: true, underline: true };
     compRow += 2;
 
-    // Table Header
-    compSheet.getCell(`B${compRow}`).value = "Sr."; styleHeader(compSheet.getCell(`B${compRow}`), true);
-    compSheet.mergeCells(`C${compRow}:E${compRow}`); compSheet.getCell(`C${compRow}`).value = "Name"; styleHeader(compSheet.getCell(`C${compRow}`), true);
-    compSheet.mergeCells(`F${compRow}:G${compRow}`); compSheet.getCell(`F${compRow}`).value = "Signed On"; styleHeader(compSheet.getCell(`F${compRow}`), true);
-    compSheet.mergeCells(`H${compRow}:I${compRow}`); compSheet.getCell(`H${compRow}`).value = "Status"; styleHeader(compSheet.getCell(`H${compRow}`), true);
+    // -- Table Header --
+    compSheet.getCell(`B${compRow}`).value = "Sr.";
+    styleHeader(compSheet.getCell(`B${compRow}`), true);
+
+    compSheet.mergeCells(`C${compRow}:E${compRow}`);
+    compSheet.getCell(`C${compRow}`).value = "Name";
+    styleHeader(compSheet.getCell(`C${compRow}`), true);
+
+    compSheet.mergeCells(`F${compRow}:G${compRow}`);
+    compSheet.getCell(`F${compRow}`).value = "Signed On";
+    styleHeader(compSheet.getCell(`F${compRow}`), true);
+
+    compSheet.mergeCells(`H${compRow}:I${compRow}`);
+    compSheet.getCell(`H${compRow}`).value = "Status";
+    styleHeader(compSheet.getCell(`H${compRow}`), true);
+
     compRow++;
 
-    // Data Mapping from teamComments API
+    // -- Data Mapping --
     if (teamComments && teamComments.length > 0) {
         teamComments.forEach((member, idx) => {
             compSheet.getCell(`B${compRow}`).value = idx + 1;
@@ -691,10 +860,11 @@ export async function generateHazopExcel({
     }
 
     styleA4Page(compSheet);
+    currentPage++;
+
 
     // ==========================================
     // 6. TABLE 1 (Risk Matrix - All Data)
-    // Data range: B to J (Index 2 to 10) -> lastColIndex = 10
     // ==========================================
     const t1Sheet = workbook.addWorksheet('H-TC-HAZOP-TABLE 1');
     t1Sheet.columns = [
@@ -703,7 +873,7 @@ export async function generateHazopExcel({
         { width: 15 }, { width: 15 }, { width: 15 }, // C, D, E
         { width: 12 }, { width: 12 }, { width: 12 }, { width: 12 }, { width: 12 } // F-J
     ];
-    addReportHeader(t1Sheet, hazop, 6, TOTAL_PAGES, 10); // Pass 10 as lastColIndex
+    addReportHeader(t1Sheet, hazop, currentPage, TOTAL_PAGES, 10);
 
     t1Sheet.getCell('B11').value = "1.0  RISK MATRIX USED FOR THE STUDY";
     t1Sheet.getCell('B11').font = { bold: true, size: 12 };
@@ -773,16 +943,17 @@ export async function generateHazopExcel({
         });
         mRow++;
     });
+    currentPage++;
+
 
     // ==========================================
     // 7. TABLE 2 (Standard)
-    // Data range: B to J (Index 2 to 10) -> lastColIndex = 10
     // ==========================================
     const t2Sheet = workbook.addWorksheet('H-TC-HAZOP-TABLE 2', { pageSetup: { orientation: 'landscape' } });
     t2Sheet.columns = [
         { width: 8 }, { width: 10 }, { width: 12 }, { width: 40 }, { width: 10 }, { width: 10 }, { width: 10 }, { width: 10 }, { width: 1 }, { width: 1 }
     ];
-    addReportHeader(t2Sheet, hazop, 7, TOTAL_PAGES, 10); // Pass 10 as lastColIndex
+    addReportHeader(t2Sheet, hazop, currentPage, TOTAL_PAGES, 10);
 
     t2Sheet.getCell('B10').value = "Table-2"; t2Sheet.getCell('B10').font = { bold: true };
     t2Sheet.getCell('B11').value = "   2.0   RISK LEVEL Vs ACTION PLAN"; t2Sheet.getCell('B11').font = { bold: true };

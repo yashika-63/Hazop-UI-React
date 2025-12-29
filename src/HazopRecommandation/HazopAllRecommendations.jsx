@@ -1,107 +1,129 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { FaSearch } from 'react-icons/fa';
+import { FaSearch, FaExclamationTriangle } from 'react-icons/fa'; // Added warning icon
 import '../styles/global.css';
-import { getRiskClass, getRiskColor, getRiskLevelText, showToast, truncateText, truncateWords } from '../CommonUI/CommonUI';
+import { getRiskColor, showToast, truncateText } from '../CommonUI/CommonUI';
 import { strings } from '../string';
+
 const HazopAllRecommendations = ({ hazopId }) => {
 
     const [recommendations, setRecommendations] = useState([]);
     const [loading, setLoading] = useState(true);
     const [expandedRowId, setExpandedRowId] = useState(null);
 
+    // New State for completion status
+    const [isHazopComplete, setIsHazopComplete] = useState(false);
+    const [statusLoading, setStatusLoading] = useState(true);
+
     const [globalSearch, setGlobalSearch] = useState("");
     const [globalResults, setGlobalResults] = useState([]);
     const [selectedGlobalEmployee, setSelectedGlobalEmployee] = useState(null);
     const navigate = useNavigate();
+
     const toggleRow = (id) => {
+        if (loading) return;
         setExpandedRowId(expandedRowId === id ? null : id);
     };
+
     /* =====================================
-       FETCH DATA
+       FETCH DATA & CHECK STATUS
        ===================================== */
-    const fetchRecommendations = async () => {
+    useEffect(() => {
         if (!hazopId) return;
 
-        setLoading(true);
-        try {
-            const res = await axios.get(
-                `http://${strings.localhost}/api/nodeRecommendation/getByHazopRegistration/${hazopId}`
-            );
+        const loadData = async () => {
+            setLoading(true);
+            setStatusLoading(true);
+            try {
+                // 1. Fetch Recommendations
+                const recRes = await axios.get(
+                    `http://${strings.localhost}/api/nodeRecommendation/getByHazopRegistration/${hazopId}`
+                );
+                setRecommendations(recRes.data ?? []);
 
-            setRecommendations(res.data ?? []);
+                // 2. Check Hazop Status
+                const statusRes = await axios.get(
+                    `http://${strings.localhost}/api/hazopNode/check-status/${hazopId}`
+                );
 
-        } catch (err) {
-            console.error(err);
-            showToast("Failed to load recommendations", "error");
-        } finally {
-            setLoading(false);
-        }
-    };
+                // Set status based on allNodesComplete flag
+                if (statusRes.data && statusRes.data.allNodesComplete === true) {
+                    setIsHazopComplete(true);
+                } else {
+                    setIsHazopComplete(false);
+                }
 
-    useEffect(() => {
-        fetchRecommendations();
+            } catch (err) {
+                console.error(err);
+                showToast("Failed to load data", "error");
+            } finally {
+                setLoading(false);
+                setStatusLoading(false);
+            }
+        };
+
+        loadData();
     }, [hazopId]);
-    // --- NEW: Navigation Handler ---
+
     const handleNavigateToDetail = (e, rec) => {
         e.stopPropagation();
-
-        // Find the Node ID (Logic handles both structure types)
         const targetNodeId = rec.javaHazopNode?.id || hazopId;
-
-        // Find the Detail ID
         const targetDetailId = rec.javaHazopNodeDetail?.id;
 
         if (targetNodeId && targetDetailId) {
             navigate('/ViewNodeDiscussion', {
-                state: {
-                    nodeId: targetNodeId,      // Key must be 'nodeId'
-                    detailId: targetDetailId   // Key must be 'detailId'
-                }
+                state: { nodeId: targetNodeId, detailId: targetDetailId }
             });
         } else {
             showToast("Navigation details missing", "error");
         }
     };
+
     /* =====================================
        HANDLE GLOBAL EMPLOYEE SEARCH
        ===================================== */
     const handleGlobalSearchChange = async (value) => {
         setGlobalSearch(value);
-
         if (value.length < 2) {
             setGlobalResults([]);
             return;
         }
-
         try {
             const res = await axios.get(
                 `http://${strings.localhost}/api/employee/search?search=${encodeURIComponent(value)}`
             );
-
             setGlobalResults(res.data || []);
-
         } catch (err) {
             console.error(err);
         }
     };
 
+    const getFullName = (user) =>
+        [user.firstName, user.middleName, user.lastName].filter(Boolean).join(" ");
 
     /* =====================================
        SEND ALL RECOMMENDATIONS
        ===================================== */
     const handleSendAll = async () => {
+        if (!isHazopComplete) {
+            showToast("Cannot send: All nodes are not completed yet.", "error");
+            return;
+        }
         if (!selectedGlobalEmployee) {
             showToast("Please select a reviewer first", "error");
             return;
         }
-
+        if (isAlreadySent) {
+            showToast("Recommendations already sent for review", "info");
+            return;
+        }
         const empCode = selectedGlobalEmployee.empCode;
 
-        // Only target items that are NOT yet sent for review
         const draftRecs = recommendations.filter(
-            (rec) => rec.sendForVerificationActionStatus === false && rec.completionStatus !== true
+            (rec) => rec.sendForVerification === false &&
+                rec.sendForVerificationAction === false &&
+                rec.completionStatus !== true
         );
 
         if (draftRecs.length === 0) {
@@ -116,9 +138,12 @@ const HazopAllRecommendations = ({ hazopId }) => {
                     `http://${strings.localhost}/api/nodeRecommendation/sendForVerification/${rec.id}/${empCode}`
                 );
             }
-
             showToast(`${draftRecs.length} recommendations sent for review!`, "success");
-            fetchRecommendations(); // Refresh data to update status to "Pending Review"
+
+            // Refresh data
+            const recRes = await axios.get(`http://${strings.localhost}/api/nodeRecommendation/getByHazopRegistration/${hazopId}`);
+            setRecommendations(recRes.data ?? []);
+
         } catch (err) {
             console.error(err);
             showToast("Failed to send recommendations", "error");
@@ -128,86 +153,114 @@ const HazopAllRecommendations = ({ hazopId }) => {
     };
 
     const getStatusBadge = (rec) => {
-        if (rec.completionStatus === true) {
-            return (
-                <span className="status-badge1 status-badge1-completed">
-                    Completed
-                </span>
-            );
+        if (rec.sendForVerification === false && rec.sendForVerificationAction === true && rec.sendForVerificationActionStatus === true) {
+            return <span className="status-badge1 status-badge1-completed">Completed</span>;
         }
-
-        if (rec.sendForVerification === false && rec.sendForVerificationAction === false) {
-            return (
-                <span className="status-badge1 status-badge1-pending">
-                    Pending
-                </span>
-            );
+        if (rec.sendForVerification === false && rec.sendForVerificationAction === false && rec.sendForVerificationActionStatus === true) {
+            return <span className="status-badge1 status-badge1-rejected">Rejected</span>;
         }
-
-        return (
-            <span className="status-badge1 status-badge1-draft">
-                Sent
-            </span>
-        );
+        if (rec.sendForVerification === false && rec.sendForVerificationAction === false && rec.sendForVerificationActionStatus === false) {
+            return <span className="status-badge1 status-badge1-pending">Pending</span>;
+        }
+        return <span className="status-badge1 status-badge1-draft">Sent</span>;
     };
+
+    const isAlreadySent = recommendations.some((rec) => rec.sendForVerification === true);
 
     return (
         <div>
-            <button className="nd-back-btn" onClick={() => navigate(-1)} style={{ marginBottom: '10px' }}>  ← Back </button>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <button className="nd-back-btn" onClick={() => navigate(-1)} style={{ marginBottom: '10px' }} disabled={loading}>
+                    ← Back
+                </button>
+            </div>
+
+            {loading && (
+                <div className="loading-overlay">
+                    <div className="loading-spinner"></div>
+                </div>
+            )}
+
+            {/* Warning Message if Nodes Not Complete */}
+            {!statusLoading && !isHazopComplete && (
+                <div style={{
+                    backgroundColor: '#fff3cd',
+                    color: '#856404',
+                    padding: '10px 15px',
+                    borderRadius: '4px',
+                    border: '1px solid #ffeeba',
+                    marginBottom: '15px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    fontWeight: '400',
+                    width: '980px',
+                    margin: '10px auto'
+                }}>
+                    <FaExclamationTriangle />
+                    <span>All nodes are not completed yet. You cannot send recommendations for review until all nodes are finalized.</span>
+                </div>
+            )}
 
             {/* ============================ */}
             {/* GLOBAL EMPLOYEE SELECTOR     */}
             {/* ============================ */}
-            <div className="top-row">
-                <div className="search-container">
-                    <div className="search-bar-wrapper">
-                        <input
-                            type="text"
-                            placeholder="Search employee..."
-                            value={globalSearch}
-                            onChange={(e) => handleGlobalSearchChange(e.target.value)}
-                        />
-                        <FaSearch className="search-icon-table" />
+            {/* Only show Search and Send button if Hazop is Complete */}
+            {isHazopComplete && (
+                <div className="top-row">
+                    <div className="search-container">
+                        <div className="search-bar-wrapper">
+                            <input
+                                type="text"
+                                placeholder="Search employee..."
+                                disabled={loading || isAlreadySent}
+                                value={globalSearch}
+                                onChange={(e) => handleGlobalSearchChange(e.target.value)}
+                            />
+                            <FaSearch className="search-icon-table" />
 
-                        {globalResults.length > 0 && (
-                            <ul className="search-results-table">
-                                {globalResults.map((emp) => (
-                                    <li
-                                        key={emp.empCode}
-                                        onClick={() => {
-                                            setSelectedGlobalEmployee(emp);
-                                            setGlobalSearch(emp.empCode);
-                                            setGlobalResults([]);
-                                        }}
-                                    >
-                                        {emp.empCode} — {emp.emailId || "NA"}
-                                    </li>
-                                ))}
-                            </ul>
+                            {globalResults.length > 0 && (
+                                <ul className="search-results-table">
+                                    {globalResults.map((emp) => (
+                                        <li
+                                            key={emp.empCode}
+                                            onClick={() => {
+                                                setSelectedGlobalEmployee(emp);
+                                                setGlobalSearch(emp.empCode);
+                                                setGlobalResults([]);
+                                            }}
+                                        >
+                                            {getFullName(emp)} ({emp.empCode}) – ({emp.emailId || "NA"})
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* RIGHT SIDE — EMP TAG + BUTTON */}
+                    <div className="right-actions">
+                        {selectedGlobalEmployee && (
+                            <div className="selected-emp-tag">
+                                <strong>{selectedGlobalEmployee.empCode}</strong> ({selectedGlobalEmployee.emailId})
+                            </div>
                         )}
+
+                        <button
+                            className="confirm-btn send-all-btn"
+                            disabled={!selectedGlobalEmployee || loading || isAlreadySent}
+                            onClick={handleSendAll}
+                            style={{ opacity: (!selectedGlobalEmployee || isAlreadySent) ? 0.6 : 1 }}
+                        >
+                            {loading
+                                ? "Sending..."
+                                : isAlreadySent
+                                    ? "Already Sent for Review"
+                                    : "Send All for review"}
+                        </button>
                     </div>
                 </div>
-
-                {/* RIGHT SIDE — EMP TAG + BUTTON */}
-                <div className="right-actions">
-                    {selectedGlobalEmployee && (
-                        <div className="selected-emp-tag">
-                            <strong>{selectedGlobalEmployee.empCode}</strong> (
-                            {selectedGlobalEmployee.emailId})
-                        </div>
-                    )}
-
-                    <button
-                        className="confirm-btn send-all-btn"
-                        disabled={!selectedGlobalEmployee || loading}
-                        onClick={handleSendAll}
-                    >
-                        {loading ? "Sending..." : "Send All for review"}
-                    </button>
-                </div>
-
-            </div>
-
+            )}
 
             <table className="assigned-table">
                 <thead>
@@ -224,10 +277,10 @@ const HazopAllRecommendations = ({ hazopId }) => {
                 <tbody>
                     {recommendations.length === 0 ? (
                         <tr>
-                            <td colSpan="3" className="no-data1">No data found</td>
+                            <td colSpan="6" className="no-data1">No data found</td>
                         </tr>
                     ) : (
-                        recommendations.map((rec, index) => (
+                        recommendations.map((rec) => (
                             <tr key={rec.id} className={expandedRowId === rec.id ? "expanded-row" : ""}
                                 onClick={() => toggleRow(rec.id)}>
                                 <td>
@@ -264,7 +317,6 @@ const HazopAllRecommendations = ({ hazopId }) => {
                     )}
                 </tbody>
             </table>
-
         </div>
     );
 };
