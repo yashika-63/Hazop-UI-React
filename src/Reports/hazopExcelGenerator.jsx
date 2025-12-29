@@ -984,6 +984,17 @@ export async function generateHazopExcel({
     });
 
     // WRITE FILE
+    // ... rest of your code ...
+
     const buffer = await workbook.xlsx.writeBuffer();
-    saveAs(new Blob([buffer]), `Hazop_Study_Report_${hazopId || "Export"}.xlsx`);
+
+    // 1. Get the title or fallback
+    const rawTitle = hazop?.hazopTitle || `Hazop_Report_${hazopId}`;
+
+    // 2. Sanitize the filename (replace invalid characters with underscores)
+    // This removes / \ : * ? " < > |
+    const safeTitle = rawTitle.replace(/[\\/:*?"<>|]/g, "_");
+
+    // 3. Save with the new name
+    saveAs(new Blob([buffer]), `${safeTitle}.xlsx`);
 }
