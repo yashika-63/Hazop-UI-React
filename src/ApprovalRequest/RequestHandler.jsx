@@ -37,7 +37,6 @@ const RequestHandler = () => {
                     registrationVerificationPending: data.registrationVerificationPending,
                     approvalPending: data.approvalPending,
                     assignmentPending: data.assignmentPending,
-                    assignmentPending: data.assignmentPending,
                     signOffPending: data.signOffPending // Added the missing key here too
                 });
             })
@@ -121,8 +120,8 @@ const RequestHandler = () => {
                     >
                         <FaCheckDouble />
                         Hazop Completion
-                        {counts.assignmentPending > 0 && (
-                            <span className="badge">{counts.assignmentPending}</span>
+                        {counts.approvalPending > 0 && (
+                            <span className="badge">{counts.approvalPending}</span>
                         )}
                     </button>
 

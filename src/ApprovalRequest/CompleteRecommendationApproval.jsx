@@ -5,7 +5,7 @@ import { formatDate, showToast, truncateWords } from "../CommonUI/CommonUI";
 import { FaEllipsisV, FaEye, FaCalendarAlt, FaCheck, FaTimes, FaHistory } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
-const CompleteRecommendationApproval = ({ onActionComplete }) => {
+const CompleteRecommendationApproval = ({ onActionComplete ,refreshTrigger}) => {
     const [completedAssignments, setCompletedAssignments] = useState([]);
     const [loading, setLoading] = useState(true);
     // const [selectedRecord, setSelectedRecord] = useState(null);
@@ -84,7 +84,7 @@ const CompleteRecommendationApproval = ({ onActionComplete }) => {
 
     useEffect(() => {
         fetchCompletedAssignments();
-    }, []);
+    }, [refreshTrigger]);
 
     // --- HELPER FUNCTIONS ---
 

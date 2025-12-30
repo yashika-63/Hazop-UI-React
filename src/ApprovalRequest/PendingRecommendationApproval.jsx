@@ -87,7 +87,7 @@ const RejectConfirmationPopup = ({
   </div>
 );
 
-const PendingRecommendationApproval = () => {
+const PendingRecommendationApproval = ({ onActionSuccess }) => {
   const [assignments, setAssignments] = useState([]);
   const [openDropdown, setOpenDropdown] = useState(null);
   const [selectedRecord, setSelectedRecord] = useState(null);
@@ -225,6 +225,9 @@ const PendingRecommendationApproval = () => {
         }
       );
       showToast("Rejected successfully", "success");
+      if (onActionSuccess) {
+        onActionSuccess();
+      }
       resetAll();
     } catch (err) {
       showToast("Failed to reject", "error");
@@ -279,6 +282,9 @@ const PendingRecommendationApproval = () => {
       );
 
       showToast("Recommendation Accepted Successfully", "success");
+      if (onActionSuccess) {
+        onActionSuccess();
+      }
       resetAll();
     } catch (err) {
       console.error("Error in saving/accepting:", err);

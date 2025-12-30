@@ -74,7 +74,7 @@ const CreateNodeDetails = () => {
 
       setForm({
         ...passedDetail,
-        additionalControl: recs.map((r) => r.recommendation).join("\n") || "• ",
+        additionalControl: recs.map((r) => r.recommendation).join("\n"),
       });
 
       setTempRecommendations(recs);
@@ -590,7 +590,7 @@ const CreateNodeDetails = () => {
       const recs = await loadRecommendations(lastRecord.id);
       setForm({
         ...lastRecord,
-        additionalControl: recs.map((r) => r.recommendation).join("\n") || "• ",
+        additionalControl: recs.map((r) => r.recommendation).join("\n"),
       });
 
       setTempRecommendations(recs);
@@ -613,7 +613,7 @@ const CreateNodeDetails = () => {
     const recs = await loadRecommendations(nextDetail.id);
     setForm({
       ...nextDetail,
-      additionalControl: recs.map((r) => r.recommendation).join("\n") || "• ",
+      additionalControl: recs.map((r) => r.recommendation).join("\n"),
     });
     setTempRecommendations(recs);
     setCurrentDetailId(nextDetail.id);
@@ -820,6 +820,8 @@ const CreateNodeDetails = () => {
 
     return "risk-default";
   };
+
+
 
   const addBulletPoint = () => {
     const bullet = "• ";
@@ -1122,9 +1124,10 @@ const CreateNodeDetails = () => {
                           fontSize: '12px',
                           fontWeight: 'normal',
                           marginLeft: '4px',
-                          color: form.additionalControl.length >= 5000 ? 'red' : '#666'
+                          // We sum the length of all actual recommendation strings
+                          color: tempRecommendations.reduce((acc, rec) => acc + (rec.recommendation?.length || 0), 0) >= 5000 ? 'red' : '#666'
                         }}>
-                          ({form.additionalControl.length}/5000)
+                          ({tempRecommendations.reduce((acc, rec) => acc + (rec.recommendation?.length || 0), 0)}/5000)
                         </span>
                       </div>
                     </div>

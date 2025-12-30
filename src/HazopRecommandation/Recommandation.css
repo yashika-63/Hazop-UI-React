@@ -104,7 +104,7 @@
   padding: 15px;
   position: relative;
   border: 1px solid var(--border-color); /* Added border */
-  width: 1080px;
+  /* width: 1080px; */
   margin: 20px auto;
 
 }
