@@ -88,7 +88,7 @@
   /* background: var(--bg-card); Updated */
   display: flex;
   justify-content: space-between;
-  border-top: 1px solid var(--border-color); /* Updated */
+  /* border-top: 1px solid var(--border-color); Updated */
 }
 
 .modal-actions button {
@@ -202,24 +202,43 @@
 .node-details-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   margin-top: 0.4rem;
   margin-bottom: 20px;
 }
 
 .node-details-table th {
-  background-color: var(--bg-header); /* Updated */
-  color: var(--text-main); /* Updated */
+  background-color: var(--table-header-bg);
+  color: var(--table-text-color);
   padding: 0.4rem;
   text-align: left;
+  border-bottom: 2px solid var(--table-border-color);
 }
 
 .node-details-table td {
   padding: 0.5rem;
-  border: 1px solid var(--border-color); /* Updated */
+  border: 1px solid var(--table-border-color);
   vertical-align: top;
   word-break: break-word;
-  color: var(--text-main); /* Updated */
+  color: var(--table-text-color);
+}
+
+/* Alternating rows */
+.node-details-table tr:nth-child(even) {
+  background-color: var(--table-row-even-bg);
+}
+
+.node-details-table tr:hover {
+  background-color: var(--table-row-hover-bg);
+}
+
+/* Inputs */
+input.readonly {
+  border: 2px solid var(--table-border-color);
+  border-left-width: 5px;
+  background-color: var(--table-row-even-bg);
+  text-align: center;
+  color: var(--table-text-color);
 }
 
 /* Force text color inside the table cells */

@@ -19,6 +19,7 @@ const Sidebar = ({ isOpen }) => {
   const role = localStorage.getItem("Role");
   const empCode = localStorage.getItem("empCode");
 
+  // Fetch count from API
   const fetchSidebarCounts = () => {
     if (empCode) {
       fetch(`http://${strings.localhost}/api/hazop-dashboard/total-pending-count?empCode=${empCode}`)
@@ -29,11 +30,19 @@ const Sidebar = ({ isOpen }) => {
   };
 
   useEffect(() => {
+    // Initial fetch
     fetchSidebarCounts();
-    // Listen for updates from other components
-    window.addEventListener('refreshHazopCounts', fetchSidebarCounts);
+
+    // Listen for refresh events from other components
+    const handleRefresh = () => fetchSidebarCounts();
+    window.addEventListener('refreshHazopCounts', handleRefresh);
+
+    // Optional: polling every 30 seconds
+    const interval = setInterval(fetchSidebarCounts, 30000);
+
     return () => {
-      window.removeEventListener('refreshHazopCounts', fetchSidebarCounts);
+      window.removeEventListener('refreshHazopCounts', handleRefresh);
+      clearInterval(interval);
     };
   }, [empCode]);
 
@@ -60,7 +69,7 @@ const Sidebar = ({ isOpen }) => {
       name: "Approval Requests",
       path: "/RequestHandler",
       icon: <FaBell />,
-      badge: totalPendingCount, // Count passed here
+      badge: totalPendingCount,
       permissionKey: "ApprovalRequest",
     },
     {
@@ -94,25 +103,23 @@ const Sidebar = ({ isOpen }) => {
                   isActive ? "menu-link active" : "menu-link"
                 }
               >
-                {/* 1. Icon Container (Icon + Red Dot Badge) */}
+                {/* Icon + Badge */}
                 <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                   <span className="icon">{item.icon}</span>
-
-                  {/* Red Dot: Only visible when closed AND badge > 0 */}
                   {!isOpen && item.badge > 0 && (
                     <span className="sidebar-dot-badge"></span>
                   )}
                 </div>
 
-                {/* 2. Text (Visible only when Open) */}
+                {/* Text */}
                 {isOpen && <span className="text">{item.name}</span>}
 
-                {/* 3. Number Badge (Visible only when Open AND badge > 0) */}
+                {/* Number Badge */}
                 {isOpen && item.badge > 0 && (
                   <span className="sidebar-badge">{item.badge}</span>
                 )}
 
-                {/* 4. Tooltip (Visible on Hover when Closed) */}
+                {/* Tooltip */}
                 {!isOpen && (
                   <span className="sidebar-tooltip">{item.name}</span>
                 )}

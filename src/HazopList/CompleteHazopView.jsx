@@ -253,7 +253,7 @@ const CompleteHazopView = ({
           {
             params: {
               id: hazopId,
-              verificationEmpCode: approvedBy,
+              verificationEmpCode: empCode,
               approve,
             },
           }

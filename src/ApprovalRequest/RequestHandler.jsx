@@ -120,8 +120,8 @@ const RequestHandler = () => {
                     >
                         <FaCheckDouble />
                         Hazop Completion
-                        {counts.approvalPending > 0 && (
-                            <span className="badge">{counts.approvalPending}</span>
+                        {counts.registrationVerificationPending > 0 && (
+                            <span className="badge">{counts.registrationVerificationPending}</span>
                         )}
                     </button>
 

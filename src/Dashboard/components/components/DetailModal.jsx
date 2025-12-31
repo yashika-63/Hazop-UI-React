@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatDate } from '../../../CommonUI/CommonUI';
 
 const DetailModal = ({ isOpen, onClose, selectedDetail, data }) => {
     if (!isOpen || !selectedDetail) return null;
@@ -56,16 +57,22 @@ const DetailModal = ({ isOpen, onClose, selectedDetail, data }) => {
                                 <div key={idx} className="hazop-detail-item">
                                     <div className="hazop-detail-header">
                                         <h3>Recommendation {idx + 1}</h3>
-                                        <span className={`hazop-badge ${rec.completionStatus ? 'hazop-badge-success' : 'hazop-badge-warning'}`}>
-                                            {rec.completionStatus ? 'Completed' : 'Pending'}
+                                        <span className={`hazop-badge ${!rec.sendForVerification && rec.sendForVerificationAction === false && rec.sendForVerificationActionStatus ? 'hazop-badge-danger'
+                                                : !rec.sendForVerification && rec.sendForVerificationAction === true && rec.sendForVerificationActionStatus ? 'hazop-badge-success'
+                                                    : 'hazop-badge-warning'
+                                            }`}>
+                                            {!rec.sendForVerification && rec.sendForVerificationAction === false && rec.sendForVerificationActionStatus ? 'Rejected'
+                                                : !rec.sendForVerification && rec.sendForVerificationAction === true && rec.sendForVerificationActionStatus ? 'Completed'
+                                                    : 'Pending'}
                                         </span>
+
                                     </div>
                                     <div className="hazop-detail-grid">
                                         <div><strong>Description:</strong> {rec.recommendation || 'N/A'}</div>
-                                        <div><strong>Priority:</strong> {rec.priority || 'N/A'}</div>
-                                        <div><strong>Due Date:</strong> {rec.dueDate || 'N/A'}</div>
-                                        <div><strong>Assigned To:</strong> {rec.assignedTo || 'Unassigned'}</div>
-                                        <div><strong>Action Required:</strong> {rec.actionRequired || 'N/A'}</div>
+                                        <div><strong>Remark by Management:</strong> {rec.remarkbyManagement || 'N/A'}</div>
+                                        <div><strong>Completion Date:</strong> {formatDate(rec.completionDate) || 'N/A'}</div>
+                                        <div><strong>Assigned To:</strong> {rec.verificationResponsibleEmployeeName || 'Unassigned'}</div>
+                                        <div><strong>Department:</strong> {rec.department || 'N/A'}</div>
                                     </div>
                                 </div>
                             ))}
@@ -92,7 +99,7 @@ const DetailModal = ({ isOpen, onClose, selectedDetail, data }) => {
                                 ))}
                                 {(!data.assignments.accepted || data.assignments.accepted.length === 0) && <p className="text-gray-500 italic">No accepted assignments.</p>}
                             </div>
-                            
+
                             {/* Pending Section */}
                             <div className="hazop-detail-section">
                                 <h3 className="section-title text-blue-600">Assigned / Pending ({data.assignments.assigned?.length || 0})</h3>
@@ -110,8 +117,8 @@ const DetailModal = ({ isOpen, onClose, selectedDetail, data }) => {
                                 ))}
                                 {(!data.assignments.assigned || data.assignments.assigned.length === 0) && <p className="text-gray-500 italic">No pending assignments.</p>}
                             </div>
-                             
-                             {/* Rejected and Not Assigned sections would go here similarly if needed for full completeness, usually for modal summary */}
+
+                            {/* Rejected and Not Assigned sections would go here similarly if needed for full completeness, usually for modal summary */}
                         </div>
                     )}
                 </div>

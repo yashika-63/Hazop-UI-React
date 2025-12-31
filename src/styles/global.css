@@ -28,6 +28,11 @@
   --sidebar-border: rgba(255, 255, 255, 0.1);
   --sidebar-active-bg: rgba(255, 255, 255, 0.15);
   --topbar-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+   --table-header-bg: #e0e7ff;
+  --table-row-even-bg: #f1f5f9;
+  --table-row-hover-bg: #e0e7ff;
+  --table-border-color: #cbd5e1;
+  --table-text-color: #1f2937;
 }
 
 /* --- DARK THEME OVERRIDES (Updated) --- */
@@ -51,6 +56,11 @@ body.dark {
 
   --shadow-color: rgba(0, 0, 0, 0.6);
   --popup-bg: #2a2a2a;
+    --table-header-bg: #2a2a2a;
+  --table-row-even-bg: #252525;
+  --table-row-hover-bg: #3a3a3a;
+  --table-border-color: #404040;
+  --table-text-color: #e5e5e5;
 
   /* --- SIDEBAR & TOPBAR (Deep Dark/Black) --- */
   /* This creates the contrast you asked for: Grey Body vs Dark Nav */
