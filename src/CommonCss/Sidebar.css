@@ -141,13 +141,19 @@
     background-color: #ff4d4f;
     /* Notification Red */
     color: white;
-    border-radius: 10px;
-    padding: 2px 8px;
+    border-radius: 50%;
+    /* Make it circular */
+
+    /* Set fixed width & height for a circle */
+    width: 20px;
+    height: 20px;
+
     font-size: 11px;
     font-weight: 700;
-    line-height: 1.2;
+    line-height: 20px;
+    /* Vertically center the number */
 
-    /* Center text */
+    /* Center text horizontally and vertically */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -156,6 +162,7 @@
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     box-shadow: 0 2px 5px rgba(255, 77, 79, 0.4);
 }
+
 
 /* --- STATE: OPEN SIDEBAR --- */
 /* Push badge to the far right */
@@ -227,6 +234,7 @@
     padding: 18px 10px;
     margin: 0;
     list-style: none;
+    text-align: left;
 }
 
 .menu-list li {
@@ -235,13 +243,12 @@
 
 .menu-link {
     display: flex;
-    align-items: center;
     padding: 10px 16px;
     gap: 14px;
     position: relative;
     text-decoration: none;
     font-size: 14px;
-
+    justify-content: flex-start;
     /* Adapts to theme */
     color: var(--sidebar-text);
 

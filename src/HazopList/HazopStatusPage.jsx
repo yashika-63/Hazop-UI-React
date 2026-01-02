@@ -106,8 +106,8 @@ const HazopStatusPage = () => {
                 <thead>
                     <tr>
                         <th>Sr.No</th>
-                        <th>HAZOP ID</th>
-                        <th>Title</th>
+                        <th>Hazop ID</th>
+                        <th>Hazop Title</th>
                         <th>Department</th>
                         <th>Site</th>
                         <th>Status</th>

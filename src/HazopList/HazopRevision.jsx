@@ -240,7 +240,7 @@ const HazopRevision = ({ hazopId, onClose }) => {
           <div className="input-row">
             <div className="form-group">
               <label> <span className="required-marker">*</span>
-                HAZOP Date</label>
+                Hazop Date</label>
               <input
                 type="date"
                 name="hazopDate"

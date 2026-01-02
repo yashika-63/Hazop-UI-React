@@ -160,7 +160,7 @@ h1 {
   font-size: 24px;
   margin-bottom: 26px;
   text-align: center;
-  text-decoration: underline;
+  /* text-decoration: underline; */
 }
 
 h2 {

@@ -317,7 +317,7 @@ const PendingRecommendationApproval = ({ onActionSuccess }) => {
       <table className="hazoplist-table">
         <thead>
           <tr>
-            <th>Node Reference No</th>
+            <th>Node Ref No</th>
             <th>Deviation</th>
             <th>Recommendation</th>
             <th>Assigned By</th>
@@ -327,7 +327,7 @@ const PendingRecommendationApproval = ({ onActionSuccess }) => {
         <tbody>
           {assignments.length === 0 ? (
             <tr>
-              <td colSpan={7}>No Recommendations</td>
+              <td colSpan={7}>No Assigned Recommendations</td>
             </tr>
           ) : (
             assignments.map((rec, idx) => (

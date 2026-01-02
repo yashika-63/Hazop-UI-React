@@ -442,7 +442,7 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
         <div className="input-row">
           <div className="form-group">
             <span className="required-marker">*</span>
-            <label>HAZOP Date</label>
+            <label>Hazop Date</label>
             <input
               type="date"
               ref={refs.hazopDate}

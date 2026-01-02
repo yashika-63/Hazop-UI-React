@@ -282,7 +282,7 @@ const HazopList = () => {
                 style={{ cursor: "pointer", userSelect: "none" }}
                 title={`Sort by Date: ${sortOrder === 'asc' ? 'Oldest First' : 'Newest First'}`}
               >
-                  HAZOP Date {sortOrder === 'asc' ? "↑↓" : "↓↑"}
+                  Hazop Date {sortOrder === 'asc' ? "↑↓" : "↓↑"}
               </th>
 
               <th>Site</th>

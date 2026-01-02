@@ -123,7 +123,7 @@ const HazopRecommendationApproval = ({ onActionComplete }) => {
             <table className="hazoplist-table">
                 <thead>
                     <tr>
-                        <th>Node Reference No</th>
+                        <th>Node Ref No</th>
                         <th>Deviation</th>
                         <th>Recommendation</th>
                         <th>Department</th>
@@ -135,7 +135,7 @@ const HazopRecommendationApproval = ({ onActionComplete }) => {
                 <tbody>
                     {recommendations.length === 0 ? (
                         <tr>
-                            <td colSpan="8">No recommendations found.</td>
+                            <td colSpan="8">No pending recommendations found.</td>
                         </tr>
                     ) : (
                         recommendations.map((rec, index) => (

@@ -13,7 +13,7 @@
   font-weight: 600;
   color: var(--text-main); /* Updated */
   margin-bottom: 40px;
-  text-decoration: underline dashed;
+  /* text-decoration: underline dashed; */
   text-align: center;
 }
    

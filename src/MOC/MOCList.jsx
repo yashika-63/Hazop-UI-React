@@ -31,7 +31,7 @@ const MOCList = () => {
         fetchMOCData(currentPage);
     };
 
-const fetchMOCData = async (page = 0, search = "") => {
+    const fetchMOCData = async (page = 0, search = "") => {
         setLoading(true);
         try {
             const url = search
@@ -56,7 +56,7 @@ const fetchMOCData = async (page = 0, search = "") => {
                 // Handle Standard Paginated Result
                 content = result.data || [];
                 pageCount = result.totalPages || 0;
-                
+
                 // FIX: Use the 'page' argument you passed in, 
                 // do not calculate it from the API response.
                 setCurrentPage(page);
@@ -64,7 +64,7 @@ const fetchMOCData = async (page = 0, search = "") => {
 
             setData(content);
             setTotalPages(pageCount);
-            
+
         } catch (error) {
             console.error("Error fetching MOC data:", error);
             setData([]);
@@ -128,9 +128,9 @@ const fetchMOCData = async (page = 0, search = "") => {
                         <th>Sr.No</th>
                         <th>MOC No</th>
                         <th>MOC Title</th>
+                        <th>MOC Date</th>
                         <th>Department</th>
                         <th>Plant</th>
-                        <th>MOC Date</th>
                         <th>Hazop Status</th>
                         <th>Action</th>
                     </tr>
@@ -148,10 +148,9 @@ const fetchMOCData = async (page = 0, search = "") => {
                                 <td>{currentPage * pageSize + index + 1}</td>
                                 <td>{item.mocNo}</td>
                                 <td>{item.mocTitle}</td>
+                                 <td>{formatDate(item.mocDate)}</td>
                                 <td>{item.department}</td>
                                 <td>{item.plant}</td>
-                                <td>{formatDate(item.mocDate)}</td>
-
                                 <td><span
                                     className={
                                         item.hazopGenerationStatus?.toLowerCase() === "generated"

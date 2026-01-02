@@ -265,7 +265,7 @@ const HazopAllRecommendations = ({ hazopId }) => {
             <table className="assigned-table">
                 <thead>
                     <tr>
-                        <th>Node Reference No</th>
+                        <th>Node Ref No</th>
                         <th>Deviation</th>
                         <th>Recommendation</th>
                         <th>Initial Risk rating</th>

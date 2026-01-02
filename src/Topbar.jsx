@@ -82,8 +82,8 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
         {showProfile && (
           // Note: Popup background should remain 'popup-bg' so it matches the theme of the page content
           <div className={`profile-popup ${showProfile ? 'active' : ''}`} style={{ backgroundColor: 'var(--popup-bg)', color: 'var(--text-main)' }}>
-            <p><strong style={{ color: 'var(--text-main)' }}>{fullName}</strong></p>
-            <p style={{ color: 'var(--text-secondary)' }}>{email}</p>
+            <p><strong style={{ color: 'var(--text-main)' }}>{fullName || 'Guest User'}</strong></p>
+            <p style={{ color: 'var(--text-secondary)' }}>{email || 'No Email Found'}</p>
             <button type='button' className='logout-btn' onClick={handleLogout}>
               <FaRightFromBracket /> Logout
             </button>

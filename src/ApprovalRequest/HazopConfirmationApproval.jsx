@@ -71,7 +71,7 @@ const HazopConfirmationApproval = () => {
             <table className="hazoplist-table">
                 <thead>
                     <tr>
-                        <th>Title</th>
+                        <th>Hazop Title</th>
                         <th>Site</th>
                         <th>Department</th>
                         <th>Created Date</th>

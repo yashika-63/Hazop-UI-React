@@ -151,7 +151,7 @@ const HazopApprovalPage = ({onActionComplete}) => {
                     <thead>
                         <tr>
                             <th style={{ width: '50px' }}>Sr.No</th>
-                            <th>HAzop Title</th>
+                            <th>Hazop Title</th>
                             <th>Assigned Date</th>
                             <th>Department</th>
                             <th>Created By</th>
