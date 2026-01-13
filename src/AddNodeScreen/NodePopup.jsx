@@ -32,19 +32,44 @@ const NodePopup = ({ onSave }) => {
 
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  
+  // --- NEW: Track which field is currently active ---
+  const [activeField, setActiveField] = useState(null);
 
   // --- 1. Mappings for Subscript and Superscript ---
-  const subMap = {
+const subMap = {
+    // Normal to Sub
     '0': '₀', '1': '₁', '2': '₂', '3': '₃', '4': '₄', '5': '₅', '6': '₆', '7': '₇', '8': '₈', '9': '₉',
-    '+': '₊', '-': '₋', '=': '₌', '(': '₍', ')': '₎', 'x': 'ₓ', 'y': 'ᵧ'
+    '+': '₊', '-': '₋', '=': '₌', '(': '₍', ')': '₎', 'x': 'ₓ', 'y': 'ᵧ',
+    // Superscript to Sub (Allow conversion)
+    '⁰': '₀', '¹': '₁', '²': '₂', '³': '₃', '⁴': '₄', '⁵': '₅', '⁶': '₆', '⁷': '₇', '⁸': '₈', '⁹': '₉',
+    '⁺': '₊', '⁻': '₋', '⁼': '₌', '⁽': '₍', '⁾': '₎', 'ˣ': 'ₓ', 'ʸ': 'ᵧ', 'ⁿ': 'ₙ'
   };
 
   const supMap = {
+    // Normal to Sup
     '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹',
-    '+': '⁺', '-': '⁻', '=': '⁼', '(': '⁽', ')': '⁾', 'n': 'ⁿ', 'x': 'ˣ', 'y': 'ʸ'
+    '+': '⁺', '-': '⁻', '=': '⁼', '(': '⁽', ')': '⁾', 'n': 'ⁿ', 'x': 'ˣ', 'y': 'ʸ',
+    // Subscript to Sup (Allow conversion)
+    '₀': '⁰', '₁': '¹', '₂': '²', '₃': '³', '₄': '⁴', '₅': '⁵', '₆': '⁶', '₇': '⁷', '₈': '⁸', '₉': '⁹',
+    '₊': '⁺', '₋': '⁻', '₌': '⁼', '₍': '⁽', '₎': '⁾', 'ₓ': 'ˣ', 'ᵧ': 'ʸ'
   };
 
-  // --- 2. Helper to Format Selected Text ---
+  // --- 2. Track Focus ---
+  // This function runs whenever a user clicks inside an input
+  const handleFocus = (e) => {
+    setActiveField(e.target.id);
+  };
+
+  // --- 3. Global Formatter ---
+  const applyGlobalFormat = (type) => {
+    if (!activeField) {
+      showToast("Please click inside a text field first.", "info");
+      return;
+    }
+    formatSelection(activeField, type);
+  };
+
   const formatSelection = (fieldName, type) => {
     const input = document.getElementById(fieldName);
     if (!input) return;
@@ -54,7 +79,9 @@ const NodePopup = ({ onSave }) => {
     const currentText = form[fieldName] || "";
 
     if (start === end) {
-      showToast("Please highlight the text/numbers you want to format first.", "info");
+      showToast("Please highlight the numbers/text to format.", "info");
+      // Keep focus on the field even if validation fails
+      input.focus();
       return;
     }
 
@@ -70,6 +97,7 @@ const NodePopup = ({ onSave }) => {
 
     setForm(prev => ({ ...prev, [fieldName]: newText }));
 
+    // Restore cursor position and focus
     setTimeout(() => {
       input.focus();
       input.setSelectionRange(start + convertedText.length, start + convertedText.length);
@@ -84,50 +112,17 @@ const NodePopup = ({ onSave }) => {
   const validate = () => {
     const newErrors = {};
 
-    if (!form.date) {
-      newErrors.date = "Date is required.";
-      showToast("Date is required", "warn");
-    }
-    if (!form.designIntent.trim()) {
-      newErrors.designIntent = "Design intent is required.";
-      showToast("Design Intent is required", "warn");
-    }
-    if (!form.pIdRevision) {
-      newErrors.pIdRevision = "P&ID No. & Revision is required.";
-      showToast("P&ID No. is required", "warn");
-    }
-    if (!form.sopNo.trim()) {
-      newErrors.sopNo = "SOP Number is required.";
-      showToast("SOP number is required", "warn");
-    }
-    if (!form.sopDate) {
-      newErrors.sopDate = "SOP Date is required.";
-      showToast("SOP date is required", "warn");
-    }
-    if (!form.equipment.trim()) {
-      newErrors.equipment = "Equipment is required.";
-      showToast("Equipment is required", "warn");
-    }
-    if (!form.controls.trim()) {
-      newErrors.controls = "Controls are required.";
-      showToast("Controls are required", "warn");
-    }
-    if (!form.chemicalAndUtilities.trim()) {
-      newErrors.chemicalAndUtilities = "Chemicals and utilities are required.";
-      showToast("Chemicals and utilities are required", "warn");
-    }
-    if (!form.temperature.trim()) {
-      newErrors.temperature = "Temperature is required.";
-      showToast("Temperature is required", "warn");
-    }
-    if (!form.pressure.trim()) {
-      newErrors.pressure = "Pressure is required.";
-      showToast("Pressure is required", "warn");
-    }
-    if (!form.quantityFlowRate.trim()) {
-      newErrors.quantityFlowRate = "Quantity is required.";
-      showToast("Quantity is required", "warn");
-    }
+    if (!form.date) { newErrors.date = "Date is required."; showToast("Date is required", "warn"); }
+    if (!form.designIntent.trim()) { newErrors.designIntent = "Design intent is required."; showToast("Design Intent is required", "warn"); }
+    if (!form.pIdRevision) { newErrors.pIdRevision = "P&ID No. & Revision is required."; showToast("P&ID No. is required", "warn"); }
+    if (!form.sopNo.trim()) { newErrors.sopNo = "SOP Number is required."; showToast("SOP number is required", "warn"); }
+    if (!form.sopDate) { newErrors.sopDate = "SOP Date is required."; showToast("SOP date is required", "warn"); }
+    if (!form.equipment.trim()) { newErrors.equipment = "Equipment is required."; showToast("Equipment is required", "warn"); }
+    if (!form.controls.trim()) { newErrors.controls = "Controls are required."; showToast("Controls are required", "warn"); }
+    if (!form.chemicalAndUtilities.trim()) { newErrors.chemicalAndUtilities = "Chemicals and utilities are required."; showToast("Chemicals and utilities are required", "warn"); }
+    if (!form.temperature.trim()) { newErrors.temperature = "Temperature is required."; showToast("Temperature is required", "warn"); }
+    if (!form.pressure.trim()) { newErrors.pressure = "Pressure is required."; showToast("Pressure is required", "warn"); }
+    if (!form.quantityFlowRate.trim()) { newErrors.quantityFlowRate = "Quantity is required."; showToast("Quantity is required", "warn"); }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -158,7 +153,7 @@ const NodePopup = ({ onSave }) => {
       ];
 
       await axios.post(
-        `http://${strings.localhost}/api/hazopNode/saveNodes/${currentRegId}`,
+        `${strings.localhost}/api/hazopNode/saveNodes/${currentRegId}`,
         payload
       );
 
@@ -175,28 +170,6 @@ const NodePopup = ({ onSave }) => {
     }
   };
 
-  // --- Reusable Toolbar Component (Cleaned up styles) ---
-  const FormatButtons = ({ fieldName }) => (
-    <div className="fmt-btn-container">
-      <button
-        type="button"
-        onClick={() => formatSelection(fieldName, 'sub')}
-        className="fmt-btn"
-        title="Subscript (Select text first)"
-      >
-        <FaSubscript />
-      </button>
-      <button
-        type="button"
-        onClick={() => formatSelection(fieldName, 'sup')}
-        className="fmt-btn"
-        title="Superscript (Select text first)"
-      >
-        <FaSuperscript />
-      </button>
-    </div>
-  );
-
   return (
     <div>
       <div className="node-header">
@@ -206,7 +179,45 @@ const NodePopup = ({ onSave }) => {
         <h1>Create Node</h1>
       </div>
 
-      <div>
+      <div
+        className="global-toolbar"
+        style={{
+          position: "sticky",
+          top: 0,
+          zIndex: 10,
+          padding: "10px 20px",
+          borderBottom: "1px solid var(--border-color, #ddd)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between", 
+        }}
+      >
+       
+
+        {/* RIGHT SIDE: Buttons (marginLeft: auto pushes it right) */}
+        <div className="fmt-btn-container" style={{ marginLeft: "auto", display: "flex", gap: "8px" }}>
+          <button
+            type="button"
+            onClick={() => applyGlobalFormat("sub")}
+            className={`fmt-btn ${activeField ? "active-fmt" : ""}`}
+            title="Subscript"
+            style={{ padding: "6px 12px", display: "flex", alignItems: "center", gap: "6px" }}
+          >
+            <FaSubscript /> Subscript
+          </button>
+          <button
+            type="button"
+            onClick={() => applyGlobalFormat("sup")}
+            className={`fmt-btn ${activeField ? "active-fmt" : ""}`}
+            title="Superscript"
+            style={{ padding: "6px 12px", display: "flex", alignItems: "center", gap: "6px" }}
+          >
+            <FaSuperscript /> Superscript
+          </button>
+        </div>
+      </div>
+
+      <div> 
         <div>
           <div>
             <div className="form-group">
@@ -221,6 +232,7 @@ const NodePopup = ({ onSave }) => {
                 value={form.designIntent}
                 rows={4}
                 onChange={handleChange}
+                onFocus={handleFocus} // Added Focus Handler
                 className="textareaFont"
                 disabled={loading}
               />
@@ -247,9 +259,11 @@ const NodePopup = ({ onSave }) => {
                   <span className="required-marker">* </span>P&ID No. & Revision
                 </label>
                 <input
+                  id="pIdRevision"
                   type="text"
                   name="pIdRevision"
                   value={form.pIdRevision}
+                  onFocus={handleFocus}
                   onChange={handleChange}
                   disabled={loading}
                 />
@@ -260,9 +274,11 @@ const NodePopup = ({ onSave }) => {
                   <span className="required-marker">* </span>SOP Number
                 </label>
                 <input
+                 id="sopNo"
                   type="text"
                   name="sopNo"
                   value={form.sopNo}
+                  onFocus={handleFocus}
                   onChange={handleChange}
                   disabled={loading}
                 />
@@ -286,11 +302,9 @@ const NodePopup = ({ onSave }) => {
             {/* SOP */}
             <div className="input-row">
               <div className="form-group">
-                {/* 1. TEMPERATURE: KEPT BUTTONS */}
                 <label className="header-label-row">
                   <div>
                     <span className="required-marker">* </span>Temperature
-                    <FormatButtons fieldName="temperature" />
                   </div>
                   <small className={`char-count ${form.temperature.length >= 1000 ? "limit-reached" : ""}`}>
                     {form.temperature.length}/1000
@@ -302,17 +316,16 @@ const NodePopup = ({ onSave }) => {
                   name="temperature"
                   value={form.temperature}
                   onChange={handleChange}
+                  onFocus={handleFocus} // Added Focus Handler
                   disabled={loading}
                   maxLength={1000}
                 />
               </div>
 
               <div className="form-group">
-                {/* 2. PRESSURE: KEPT BUTTONS */}
                 <label className="header-label-row">
                   <div>
                     <span className="required-marker">* </span>Pressure, barg
-                    <FormatButtons fieldName="pressure" />
                   </div>
                   <small className={`char-count ${form.pressure.length >= 1000 ? "limit-reached" : ""}`}>
                     {form.pressure.length}/1000
@@ -324,17 +337,16 @@ const NodePopup = ({ onSave }) => {
                   name="pressure"
                   value={form.pressure}
                   onChange={handleChange}
+                  onFocus={handleFocus} // Added Focus Handler
                   disabled={loading}
                   maxLength={1000}
                 />
               </div>
 
               <div className="form-group">
-                {/* 3. QUANTITY: KEPT BUTTONS */}
                 <label className="header-label-row">
                   <div>
                     <span className="required-marker">* </span>Quantity
-                    <FormatButtons fieldName="quantityFlowRate" />
                   </div>
                   <small className={`char-count ${form.quantityFlowRate.length >= 1000 ? "limit-reached" : ""}`}>
                     {form.quantityFlowRate.length}/1000
@@ -346,6 +358,7 @@ const NodePopup = ({ onSave }) => {
                   name="quantityFlowRate"
                   value={form.quantityFlowRate}
                   onChange={handleChange}
+                  onFocus={handleFocus} // Added Focus Handler
                   disabled={loading}
                   maxLength={1000}
                 />
@@ -370,6 +383,7 @@ const NodePopup = ({ onSave }) => {
                 name="equipment"
                 value={form.equipment}
                 onChange={handleChange}
+                onFocus={handleFocus} // Added Focus Handler
                 disabled={loading}
                 rows={3}
                 className="textareaFont"
@@ -392,6 +406,7 @@ const NodePopup = ({ onSave }) => {
                 name="controls"
                 value={form.controls}
                 onChange={handleChange}
+                onFocus={handleFocus} // Added Focus Handler
                 disabled={loading}
                 rows={3}
                 maxLength={2000}
@@ -401,11 +416,9 @@ const NodePopup = ({ onSave }) => {
 
             {/* Chemicals */}
             <div className="form-group full-width">
-              {/* 4. CHEMICALS: KEPT BUTTONS */}
               <label className="header-label-row">
                 <div>
                   <span className="required-marker">* </span>Chemicals and utilities
-                  <FormatButtons fieldName="chemicalAndUtilities" />
                 </div>
                 <small className={`char-count ${form.chemicalAndUtilities.length >= 1000 ? "limit-reached" : ""}`}>
                   {form.chemicalAndUtilities.length}/1000
@@ -417,6 +430,7 @@ const NodePopup = ({ onSave }) => {
                 name="chemicalAndUtilities"
                 value={form.chemicalAndUtilities}
                 onChange={handleChange}
+                onFocus={handleFocus} // Added Focus Handler
                 disabled={loading}
                 rows={3}
                 maxLength={1000}

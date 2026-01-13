@@ -20,14 +20,10 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
     // --- Dropdown & Row Expansion ---
     const [openDropdown, setOpenDropdown] = useState(null);
     const [expandedRowId, setExpandedRowId] = useState(null);
-
-    // --- Search & Assignment States ---
     const [searchResults, setSearchResults] = useState({});
     const [searchInputs, setSearchInputs] = useState({});
     const [selectedEmployees, setSelectedEmployees] = useState({});
     const [assigningIds, setAssigningIds] = useState([]);
-
-    // --- New States for History & Inline Date Edit ---
     const [historyData, setHistoryData] = useState({});
     const [loadingHistory, setLoadingHistory] = useState(false);
     const [editingDateRowId, setEditingDateRowId] = useState(null);
@@ -43,7 +39,7 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
         if (!isRefresh) setLoading(true);
         try {
             const res = await axios.get(
-                `http://${strings.localhost}/api/recommendation/assign/getAllByRegistration/${hazopId}`
+                `${strings.localhost}/api/recommendation/assign/getAllByRegistration/${hazopId}`
             );
             setData({
                 rejected: res.data.rejected ?? [],
@@ -70,7 +66,7 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
 
         setLoadingHistory(true);
         try {
-            const res = await axios.get(`http://${strings.localhost}/api/nodeRecommendation/getByAssignment?assignmentId=${assignmentId}`);
+            const res = await axios.get(`${strings.localhost}/api/nodeRecommendation/getByAssignment?assignmentId=${assignmentId}`);
             setHistoryData(prev => ({
                 ...prev,
                 [assignmentId]: res.data || []
@@ -120,7 +116,7 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
         setIsSending(true);
         try {
             await axios.post(
-                `http://${strings.localhost}/api/nodeRecommendation/saveRecord`,
+                `${strings.localhost}/api/nodeRecommendation/saveRecord`,
                 null,
                 {
                     params: {
@@ -180,7 +176,7 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
             return;
         }
         try {
-            const res = await axios.get(`http://${strings.localhost}/api/employee/search?search=${encodeURIComponent(value)}`);
+            const res = await axios.get(`${strings.localhost}/api/employee/search?search=${encodeURIComponent(value)}`);
             setSearchResults(prev => ({ ...prev, [recId]: res.data || [] }));
         } catch (err) { console.error(err); }
     };
@@ -196,7 +192,7 @@ const HazopRecommendationsSecondScreen = ({ hazopId }) => {
         if (!employee) return;
         setAssigningIds(prev => [...prev, recId]);
         try {
-            await axios.post(`http://${strings.localhost}/api/recommendation/assign/save`, null, {
+            await axios.post(`${strings.localhost}/api/recommendation/assign/save`, null, {
                 params: {
                     recommendationId: recId,
                     createdByEmpCode: employee.empCode,

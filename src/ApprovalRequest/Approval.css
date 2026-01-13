@@ -125,3 +125,114 @@
   display: flex;
   gap: 8px;
 }
+
+
+/* =========================================
+   MOBILE RESPONSIVE OVERRIDES (LAYOUT)
+   Add this to the very bottom of your CSS
+   ========================================= */
+
+@media screen and (max-width: 768px) {
+  
+  /* 1. Main Layout: Stack sidebar and content vertically */
+  .layout {
+    flex-direction: column;
+  }
+
+/* 2. Sidebar (VerticalForm): Force Horizontal Scroll Row */
+  .verticalForm {
+    /* Flex Container Settings */
+    display: flex !important;
+    flex-direction: row !important;    /* Forces items side-by-side */
+    overflow-x: auto !important;       /* Enables horizontal scrolling */
+    
+    /* Sizing & Spacing */
+    width: 100% !important;
+    padding: 10px 5px !important;
+    gap: 10px !important;              /* Space between buttons */
+    margin-bottom: 15px !important;
+    
+    /* Remove list styles if it's a ul/ol */
+    list-style: none !important;
+    
+    /* Visuals */
+    background: #fff;                  /* Clean background */
+    border-bottom: 1px solid #ddd;
+    
+    /* Smooth Scroll */
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;             /* Hide scrollbar (Firefox) */
+  }
+
+  .verticalForm::-webkit-scrollbar {
+    display: none;                     /* Hide scrollbar (Chrome/Safari) */
+  }
+
+  /* CRITICAL: Fix the Buttons inside */
+  .verticalForm button,
+  .verticalForm a,
+  .verticalForm .btn {
+    /* Reset Widths */
+    width: auto !important;            /* Stop button from being full width */
+    min-width: fit-content !important; /* Ensure text fits */
+    flex: 0 0 auto !important;         /* Prevent shrinking or growing */
+    
+    /* Layout */
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    
+    /* Spacing */
+    margin: 0 !important;              /* Remove bottom margins */
+    padding: 8px 16px !important;      /* Comfortable touch target */
+    white-space: nowrap !important;    /* Keep text on one line */
+  }
+
+  /* 3. Content Area */
+  .Companycontent {
+    padding: 10px; /* Reduce padding to save screen space */
+  }
+
+  /* 4. Details Container: Ensure it fits the screen */
+  .details-container {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  /* 5. Details Row: Stack Label above Value */
+  /* This prevents squashed text on narrow screens */
+  .details-row {
+    flex-direction: column;
+    align-items: flex-start; /* Align everything to the left */
+    padding: 12px 10px;
+    gap: 4px;
+  }
+
+  .details-row .label {
+    width: 100%;
+    font-size: 11px; /* Slightly smaller label to distinguish from value */
+    text-transform: uppercase;
+    color: var(--text-secondary); /* Often looks better for labels on mobile */
+    margin-bottom: 2px;
+  }
+
+  .details-row .value {
+    width: 100%;
+    text-align: left; /* Switch from right-align to left-align */
+    font-size: 14px;
+    padding-left: 0; /* Remove any previous spacing */
+    color: var(--text-main);
+  }
+
+  /* 6. Action Buttons: Ensure they don't overflow */
+  .action-buttons {
+    flex-wrap: wrap; /* Allow buttons to wrap to next line if needed */
+    margin-top: 10px;
+  }
+  
+  .approveBtn, .rejectBtn {
+    flex: 1; /* Make buttons stretch to fill available width */
+    text-align: center;
+    padding: 10px;
+  }
+}

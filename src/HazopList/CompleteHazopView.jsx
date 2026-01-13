@@ -2,9 +2,15 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { strings } from "../string";
 import "../styles/global.css";
-import { formatDate, getBorderColor, getRiskLevelText, getRiskTextClass, showToast } from "../CommonUI/CommonUI";
+import {
+  formatDate,
+  getBorderColor,
+  getRiskLevelText,
+  getRiskTextClass,
+  showToast,
+} from "../CommonUI/CommonUI";
 import { useNavigate } from "react-router-dom";
-import './HazopView.css';
+import "./HazopView.css";
 
 const CompleteHazopView = ({
   hazopId,
@@ -42,10 +48,10 @@ const CompleteHazopView = ({
       try {
         const [hRes, tRes] = await Promise.all([
           axios.get(
-            `http://${strings.localhost}/api/hazopRegistration/by-id?hazopId=${hazopId}`
+            `${strings.localhost}/api/hazopRegistration/by-id?hazopId=${hazopId}`
           ),
           axios.get(
-            `http://${strings.localhost}/api/hazopTeam/teamByHazop/${hazopId}?status=true`
+            `${strings.localhost}/api/hazopTeam/teamByHazop/${hazopId}?status=true`
           ),
         ]);
         setHazop(hRes.data || {});
@@ -65,7 +71,7 @@ const CompleteHazopView = ({
     setLoading(true);
     try {
       const nRes = await axios.get(
-        `http://${strings.localhost}/api/hazopNode/by-registration-status?registrationId=${hazopId}&status=true`
+        `${strings.localhost}/api/hazopNode/by-registration-status?registrationId=${hazopId}&status=true`
       );
       const fetchedNodes = Array.isArray(nRes.data) ? nRes.data : [];
       setNodes(fetchedNodes);
@@ -74,9 +80,7 @@ const CompleteHazopView = ({
       await Promise.all(
         fetchedNodes.map(async (node) => {
           const detailsRes = await axios
-            .get(
-              `http://${strings.localhost}/api/hazopNodeDetail/node/${node.id}`
-            )
+            .get(`${strings.localhost}/api/hazopNodeDetail/node/${node.id}`)
             .then((res) => (Array.isArray(res.data) ? res.data : []))
             .catch(() => []);
           dMap[node.id] = detailsRes;
@@ -100,7 +104,7 @@ const CompleteHazopView = ({
             (nodeDetails[node.id] || []).map(async (detail) => {
               const recs = await axios
                 .get(
-                  `http://${strings.localhost}/api/nodeRecommendation/getByDetailId/${detail.id}`
+                  `${strings.localhost}/api/nodeRecommendation/getByDetailId/${detail.id}`
                 )
                 .then((res) => (Array.isArray(res.data) ? res.data : []))
                 .catch(() => []);
@@ -123,10 +127,10 @@ const CompleteHazopView = ({
     try {
       const [allRecRes, assignRes] = await Promise.all([
         axios.get(
-          `http://${strings.localhost}/api/nodeRecommendation/getByHazopRegistration/${hazopId}`
+          `${strings.localhost}/api/nodeRecommendation/getByHazopRegistration/${hazopId}`
         ),
         axios.get(
-          `http://${strings.localhost}/api/recommendation/assign/getAllByRegistration/${hazopId}`
+          `${strings.localhost}/api/recommendation/assign/getAllByRegistration/${hazopId}`
         ),
       ]);
       setAllRecommendations(
@@ -156,7 +160,7 @@ const CompleteHazopView = ({
   const loadVerificationRecords = async () => {
     try {
       const res = await axios.get(
-        `http://${strings.localhost}/api/nodeRecommendation/getVerificationActionRecords/${hazopId}`
+        `${strings.localhost}/api/nodeRecommendation/getVerificationActionRecords/${hazopId}`
       );
       setVerificationRecords(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
@@ -165,7 +169,9 @@ const CompleteHazopView = ({
   };
   const loadTeamComments = async () => {
     try {
-      const res = await axios.get(`http://${strings.localhost}/api/team-comments/getByHazop/${hazopId}`);
+      const res = await axios.get(
+        `${strings.localhost}/api/team-comments/getByHazop/${hazopId}`
+      );
       setTeamComments(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error("Error loading team comments:", err);
@@ -175,13 +181,13 @@ const CompleteHazopView = ({
   const loadDocuments = async () => {
     try {
       const res = await axios.get(
-        `http://${strings.localhost}/api/javaHazopDocument/getByKeys`,
+        `${strings.localhost}/api/javaHazopDocument/getByKeys`,
         {
           params: {
             companyId: localStorage.getItem("companyId") || 1,
             primeryKey: "HAZOPFIRSTPAGEID",
-            primeryKeyValue: hazopId
-          }
+            primeryKeyValue: hazopId,
+          },
         }
       );
       setDocuments(Array.isArray(res.data) ? res.data : []);
@@ -193,9 +199,9 @@ const CompleteHazopView = ({
   const loadMocReferences = async () => {
     try {
       const res = await axios.get(
-        `http://${strings.localhost}/api/moc-reference/by-hazop`,
+        `${strings.localhost}/api/moc-reference/by-hazop`,
         {
-          params: { hazopRegistrationId: hazopId }
+          params: { hazopRegistrationId: hazopId },
         }
       );
       setMocReferences(Array.isArray(res.data) ? res.data : []);
@@ -203,7 +209,6 @@ const CompleteHazopView = ({
       console.error("Error loading MOC references:", err);
     }
   };
-
 
   const handleNext = async () => {
     if (step === 1) await loadNodes();
@@ -232,23 +237,19 @@ const CompleteHazopView = ({
     try {
       if (mode === "approval") {
         // Existing Approval API
-        await axios.post(
-          `http://${strings.localhost}/hazopApproval/action`,
-          null,
-          {
-            params: {
-              approvalRequestId,
-              empCode,
-              actionTaken: approve,
-              approvedBy,
-              comment: enteredComment,
-            },
-          }
-        );
+        await axios.post(`${strings.localhost}/hazopApproval/action`, null, {
+          params: {
+            approvalRequestId,
+            empCode,
+            actionTaken: approve,
+            approvedBy,
+            comment: enteredComment,
+          },
+        });
       } else if (mode === "confirmation") {
         // NEW Confirmation API
         await axios.put(
-          `http://${strings.localhost}/api/hazopRegistration/verify`,
+          `${strings.localhost}/api/hazopRegistration/verify`,
           null,
           {
             params: {
@@ -392,7 +393,7 @@ const CompleteHazopView = ({
                         return (
                           <li key={doc.id}>
                             <a
-                              href={`http://${strings.localhost}/api/javaHazopDocument/view/${doc.id}`}
+                              href={`${strings.localhost}/api/javaHazopDocument/view/${doc.id}`}
                               target="_blank"
                               rel="noopener noreferrer"
                             >
@@ -404,7 +405,6 @@ const CompleteHazopView = ({
                     </ul>
                   </div>
                 )}
-
 
                 <h3>Team Members</h3>
                 {team.length === 0 ? (
@@ -441,41 +441,40 @@ const CompleteHazopView = ({
                   <div key={node.id} className="node-card">
                     <p>
                       <strong>
-                        Node #{node.nodeNumber} - {node.designIntent || '-'}
+                        Node #{node.nodeNumber} - {node.designIntent || "-"}
                       </strong>
                     </p>
                     <div>
-                      <strong>Design Intent:</strong> {node.designIntent || '-'}
+                      <strong>Design Intent:</strong> {node.designIntent || "-"}
                     </div>
 
                     <div className="input-row">
                       <div>
-                        <strong>Equipment:</strong> {node.equipment || '-'}
+                        <strong>Equipment:</strong> {node.equipment || "-"}
                       </div>
                       <div>
-                        <strong>Controls:</strong> {node.controls || '-'}
+                        <strong>Controls:</strong> {node.controls || "-"}
                       </div>
                     </div>
 
                     <div className="input-row">
                       <div>
-                        <strong>Temperature:</strong> {node.temprature || '-'}
+                        <strong>Temperature:</strong> {node.temprature || "-"}
                       </div>
                       <div>
-                        <strong>Pressure:</strong> {node.pressure || '-'}
+                        <strong>Pressure:</strong> {node.pressure || "-"}
                       </div>
-
                     </div>
 
                     <div className="input-row">
                       <div>
                         <strong>Chemical & Utilities:</strong>{" "}
-                        {node.chemicalAndUtilities || '-'}
+                        {node.chemicalAndUtilities || "-"}
                       </div>
                       <div>
-                        <strong>Flow/Quantity:</strong> {node.quantityFlowRate || '-'}
+                        <strong>Flow/Quantity:</strong>{" "}
+                        {node.quantityFlowRate || "-"}
                       </div>
-
                     </div>
                     <div className="input-row">
                       <div>
@@ -493,7 +492,8 @@ const CompleteHazopView = ({
 
                       <div>
                         <strong>Completion Date:</strong>{" "}
-                        {formatDate(node.completionDate || "-")}                                            </div>
+                        {formatDate(node.completionDate || "-")}{" "}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -522,11 +522,8 @@ const CompleteHazopView = ({
                           <div key={detail.id} className="node-detail-section">
                             <div className="node-detail-label">
                               {idx + 1}. Deviation
-
                             </div>
-                            <div >
-
-
+                            <div>
                               <div>
                                 <div className="input-row">
                                   <div className="form-group">
@@ -603,38 +600,68 @@ const CompleteHazopView = ({
 
                                     <div className="metric-row">
                                       <div className="form-group">
-                                        <label>Probability</label>
+                                        <label>P</label>
                                         <input
-                                          className={`readonly ${getRiskClass(detail.existineProbability)}`}
-                                          value={detail.existineProbability}
+                                          value={
+                                            detail.existineProbability || "-"
+                                          }
                                           readOnly
-                                          style={{ borderColor: getBorderColor(detail.existineProbability), width: '60px' }}
+                                          style={{
+                                            borderLeft: `5px solid ${getBorderColor(
+                                              detail.riskRating
+                                            )}`,
+                                            borderWidth: "2px",
+                                            borderStyle: "solid",
+                                            borderColor: getBorderColor(
+                                              detail.riskRating
+                                            ),
+                                            width: "80%",
+                                          }}
                                         />
                                       </div>
-
                                       <div className="form-group">
-                                        <label>Severity</label>
+                                        <label>S</label>
                                         <input
-                                          className={`readonly ${getRiskClass(detail.existingSeverity)}`}
-                                          value={detail.existingSeverity}
+                                          value={detail.existingSeverity || "-"}
                                           readOnly
-                                          style={{ borderColor: getBorderColor(detail.existingSeverity), width: '60px' }}
+                                          style={{
+                                            borderLeft: `5px solid ${getBorderColor(
+                                              detail.riskRating
+                                            )}`,
+                                            borderWidth: "2px",
+                                            borderStyle: "solid",
+                                            borderColor: getBorderColor(
+                                              detail.riskRating
+                                            ),
+                                            width: "80%",
+                                          }}
+                                        />
+                                      </div>
+                                      <div className="form-group">
+                                        <label>R</label>
+                                        <input
+                                          value={detail.riskRating || "-"}
+                                          readOnly
+                                          style={{
+                                            borderLeft: `5px solid ${getBorderColor(
+                                              detail.riskRating
+                                            )}`,
+                                            borderWidth: "2px",
+                                            borderStyle: "solid",
+                                            borderColor: getBorderColor(
+                                              detail.riskRating
+                                            ),
+                                            width: "90%",
+                                          }}
                                         />
                                       </div>
                                     </div>
-
                                     <div className="form-group metric-single">
-                                      <label>Risk Rating</label>
-                                      <input
-                                        className={`readonly ${getRiskClass(detail.riskRating)}`}
-                                        value={detail.riskRating}
-                                        readOnly
-                                        style={{ borderColor: getBorderColor(detail.riskRating) }}
-                                      />
                                       <small
                                         className={`risk-text ${getRiskTextClass(
                                           detail.riskRating
-                                        )} center-controls`} style={{ textAlign: 'center', marginTop: '10px' }}
+                                        )} center-controls`}
+                                        style={{ textAlign: "center" }}
                                       >
                                         {getRiskLevelText(detail.riskRating)}
                                       </small>
@@ -652,49 +679,87 @@ const CompleteHazopView = ({
                                       />
                                     </div>
 
-                                    <div className="metric-row">
-                                      <div className="form-group">
-                                        <label>Probability</label>
-                                        <input
-                                          className={`readonly ${getRiskClass(detail.additionalProbability)}`}
-                                          value={detail.additionalProbability}
-                                          readOnly
-                                          style={{ borderColor: getBorderColor(detail.additionalProbability), width: '60px' }}
-                                        />
+                                    <div>
+                                      <div className="metric-row">
+                                        <div className="form-group">
+                                          <label>P</label>
+                                          <input
+                                            value={
+                                              detail.additionalProbability ||
+                                              "-"
+                                            }
+                                            readOnly
+                                            style={{
+                                              borderLeft: `5px solid ${getBorderColor(
+                                                detail.additionalRiskRating
+                                              )}`,
+                                              borderWidth: "2px",
+                                              borderStyle: "solid",
+                                              borderColor: getBorderColor(
+                                                detail.additionalRiskRating
+                                              ),
+                                              width: "80%",
+                                            }}
+                                          />
+                                        </div>
+                                        <div className="form-group">
+                                          <label>S</label>
+                                          <input
+                                            value={
+                                              detail.additionalSeverity || "-"
+                                            }
+                                            readOnly
+                                            style={{
+                                              borderLeft: `5px solid ${getBorderColor(
+                                                detail.additionalRiskRating
+                                              )}`,
+                                              borderWidth: "2px",
+                                              borderStyle: "solid",
+                                              borderColor: getBorderColor(
+                                                detail.additionalRiskRating
+                                              ),
+                                              width: "80%",
+                                            }}
+                                          />
+                                        </div>
+                                        <div className="form-group">
+                                          <label>R</label>
+                                          <input
+                                            value={
+                                              detail.additionalRiskRating || "-"
+                                            }
+                                            readOnly
+                                            style={{
+                                              borderLeft: `5px solid ${getBorderColor(
+                                                detail.additionalRiskRating
+                                              )}`,
+                                              borderWidth: "2px",
+                                              borderStyle: "solid",
+                                              borderColor: getBorderColor(
+                                                detail.additionalRiskRating
+                                              ),
+                                              width: "90%",
+                                            }}
+                                          />
+                                        </div>
                                       </div>
 
-                                      <div className="form-group">
-                                        <label>Severity</label>
-                                        <input
-                                          className={`readonly ${getRiskClass(detail.additionalSeverity)}`}
-                                          value={detail.additionalSeverity}
-                                          readOnly
-                                          style={{ borderColor: getBorderColor(detail.additionalSeverity), width: '60px' }}
-                                        />
+                                      <div className="form-group metric-single">
+                                        <small
+                                          className={`risk-text ${getRiskTextClass(
+                                            detail.additionalRiskRating
+                                          )} center-controls`}
+                                          style={{ textAlign: "center" }}
+                                        >
+                                          {getRiskLevelText(
+                                            detail.additionalRiskRating
+                                          )}
+                                        </small>
                                       </div>
-                                    </div>
-
-                                    <div className="form-group metric-single">
-                                      <label>Additional Risk Rating</label>
-                                      <input
-                                        className={`readonly ${getRiskClass(detail.additionalRiskRating)}`}
-                                        value={detail.additionalRiskRating}
-                                        readOnly
-                                        style={{ borderColor: getBorderColor(detail.additionalRiskRating) }}
-                                      />
-                                      <small
-                                        className={`risk-text ${getRiskTextClass(
-                                          detail.additionalRiskRating
-                                        )} center-controls`} style={{ textAlign: 'center', marginTop: '10px' }}
-                                      >
-                                        {getRiskLevelText(detail.additionalRiskRating)}
-                                      </small>
                                     </div>
                                   </div>
-
                                 </div>
                               </div>
-
                             </div>
 
                             {recsMap[idx] && recsMap[idx].length > 0 && (
@@ -753,7 +818,7 @@ const CompleteHazopView = ({
                 <div className="recommendation-card">
                   <h3>All Recommendations</h3>
 
-                  <div className="table-wrapper">
+                  <div className="table-wrapper2">
                     <table className="node-details-table">
                       <thead>
                         <tr>
@@ -763,8 +828,6 @@ const CompleteHazopView = ({
                           <th>Department</th>
                           <th>Completion Status</th>
                           <th>Completion Date</th>
-
-
                         </tr>
                       </thead>
 
@@ -799,7 +862,6 @@ const CompleteHazopView = ({
                                 ? formatDate(rec.completionDate)
                                 : "-"}
                             </td>
-
                           </tr>
                         ))}
                       </tbody>
@@ -818,7 +880,7 @@ const CompleteHazopView = ({
                         {assignData[type].length === 0 ? (
                           <p>No data</p>
                         ) : (
-                          <div className="table-wrapper">
+                          <div className="table-wrapper2">
                             <table className="node-details-table">
                               <thead>
                                 <tr>
@@ -831,8 +893,6 @@ const CompleteHazopView = ({
                                   <th>Completion Date</th>
                                   <th>Acceptance Status</th>
                                   <th>Accepted By</th>
-
-
                                 </tr>
                               </thead>
 
@@ -875,13 +935,11 @@ const CompleteHazopView = ({
                                         {a.assignworkAcceptance
                                           ? "Accepted"
                                           : a.assignWorkSendForAcceptance
-                                            ? "Waiting for Acceptance"
-                                            : "Not Sent"}
+                                          ? "Waiting for Acceptance"
+                                          : "Not Sent"}
                                       </td>
 
                                       <td>{a.acceptedByEmployeeName || "-"}</td>
-
-
                                     </tr>
                                   );
                                 })}
@@ -1001,7 +1059,6 @@ const CompleteHazopView = ({
                     Cancel
                   </button>
                 </div>
-
               </div>
             )}
             {step === 5 && (
@@ -1049,7 +1106,6 @@ const CompleteHazopView = ({
             mode="approval"
           />
         )}
-
       </div>
     </div>
   );

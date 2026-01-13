@@ -80,3 +80,39 @@ button:focus-visible {
 html {
   scrollbar-width: none;
 }
+
+/* =========================================
+   MOBILE RESPONSIVE (BASE STYLES)
+   Add this to the very bottom of your CSS
+   ========================================= */
+
+@media screen and (max-width: 768px) {
+
+  /* 1. Typography Adjustments */
+  /* 3.2em is massive on a phone. Reduce it to prevent wrapping issues. */
+  h1 {
+    font-size: 2rem; /* Reduced from 3.2em */
+    line-height: 1.2;
+    margin-bottom: 20px; /* Ensure spacing below headers */
+  }
+
+  /* Improve text readability on small screens */
+  :root {
+    line-height: 1.5; /* More breathing room for text than 1.2 */
+  }
+
+  /* 2. Button Touch Targets */
+  /* Ensure generic buttons are large enough to tap with a thumb */
+  button {
+    padding: 12px 20px; /* Use px to ensure physical size */
+    min-height: 28px;   /* Standard minimum touch target height */
+    font-size: 1rem;    /* Ensure text is readable */
+  }
+
+  /* 3. Body Layout */
+  /* Ensure no accidental horizontal scroll on the body itself */
+  body {
+    overflow-x: hidden;
+    width: 100%;
+  }
+}

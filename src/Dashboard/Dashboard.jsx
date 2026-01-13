@@ -82,12 +82,12 @@ const Dashboard = () => {
 
             try {
                 const [fullDetails, recommendations, assignments, verificationRecords, mocReferences, activeNodes] = await Promise.all([
-                    safeFetch(`http://${strings.localhost}/api/hazopRegistration/${hazopId}/full-details`, fallbackFullDetails),
-                    safeFetch(`http://${strings.localhost}/api/nodeRecommendation/getByHazopRegistration/${hazopId}`, []),
-                    safeFetch(`http://${strings.localhost}/api/recommendation/assign/getAllByRegistration/${hazopId}`, fallbackAssignments),
-                    safeFetch(`http://${strings.localhost}/api/nodeRecommendation/getVerificationActionRecords/${hazopId}`, []),
-                    safeFetch(`http://${strings.localhost}/api/moc-reference/by-hazop?hazopRegistrationId=${hazopId}`, []),
-                    safeFetch(`http://${strings.localhost}/api/hazopNode/by-registration-status?registrationId=${hazopId}&status=true`, [])
+                    safeFetch(`${strings.localhost}/api/hazopRegistration/${hazopId}/full-details`, fallbackFullDetails),
+                    safeFetch(`${strings.localhost}/api/nodeRecommendation/getByHazopRegistration/${hazopId}`, []),
+                    safeFetch(`${strings.localhost}/api/recommendation/assign/getAllByRegistration/${hazopId}`, fallbackAssignments),
+                    safeFetch(`${strings.localhost}/api/nodeRecommendation/getVerificationActionRecords/${hazopId}`, []),
+                    safeFetch(`${strings.localhost}/api/moc-reference/by-hazop?hazopRegistrationId=${hazopId}`, []),
+                    safeFetch(`${strings.localhost}/api/hazopNode/by-registration-status?registrationId=${hazopId}&status=true`, [])
                 ]);
 
                 setData({

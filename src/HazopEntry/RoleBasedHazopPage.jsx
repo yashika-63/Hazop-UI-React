@@ -66,15 +66,14 @@ const RoleBasedHazopPage = () => {
 
 
       const col1 = await axios.get(
-        `http://${strings.localhost}/api/hazopRegistration/getForTeamLeader?empCode=${LoginUser}&companyId=${companyId}&status=true&completionStatus=false&sendForVerification=false`
+        `${strings.localhost}/api/hazopRegistration/getForTeamLeader?empCode=${LoginUser}&companyId=${companyId}&status=true&completionStatus=false&sendForVerification=false`
       );
-      console.log("response,", col1);
       const col2 = await axios.get(
-        `http://${strings.localhost}/api/hazopRegistration/getForTeamLeader?empCode=${LoginUser}&companyId=${companyId}&status=true&completionStatus=false&sendForVerification=true`
+        `${strings.localhost}/api/hazopRegistration/getForTeamLeader?empCode=${LoginUser}&companyId=${companyId}&status=true&completionStatus=false&sendForVerification=true`
       );
 
       const col3 = await axios.get(
-        `http://${strings.localhost}/api/hazopRegistration/getForTeamLeader?empCode=${LoginUser}&companyId=${companyId}&status=true&completionStatus=true&sendForVerification=false`
+        `${strings.localhost}/api/hazopRegistration/getForTeamLeader?empCode=${LoginUser}&companyId=${companyId}&status=true&completionStatus=true&sendForVerification=false`
       );
       const col1WithCount = await Promise.all(
         col1.data.map(async (item) => {
@@ -111,7 +110,7 @@ const RoleBasedHazopPage = () => {
 
   const checkSendForCompletionEligibility = async (hazopId) => {
     try {
-      const res = await axios.get(`http://${strings.localhost}/api/hazopNode/check-status/${hazopId}`);
+      const res = await axios.get(`${strings.localhost}/api/hazopNode/check-status/${hazopId}`);
       const data = res.data;
 
       return (
@@ -170,7 +169,7 @@ const RoleBasedHazopPage = () => {
 
     try {
       const response = await axios.get(
-        `http://${strings.localhost}/api/employee/search?search=${encodeURIComponent(value)}`
+        `${strings.localhost}/api/employee/search?search=${encodeURIComponent(value)}`
       );
       setSearchResults(response.data || []);
     } catch (err) {
@@ -197,7 +196,7 @@ const RoleBasedHazopPage = () => {
     setLoading(true);
     try {
       await axios.post(
-        `http://${strings.localhost}/api/hazopRegistration/hazop/sendForVerification/${selectedHazopForSend.id}/${encodeURIComponent(selectedEmployee.empCode)}`
+        `${strings.localhost}/api/hazopRegistration/hazop/sendForVerification/${selectedHazopForSend.id}/${encodeURIComponent(selectedEmployee.empCode)}`
       );
 
       setShowConfirmPopup(false);
@@ -216,7 +215,7 @@ const RoleBasedHazopPage = () => {
   const fetchTeamCount = async (hazopId) => {
     try {
       const res = await axios.get(
-        `http://${strings.localhost}/api/hazopTeam/count/${hazopId}`
+        `${strings.localhost}/api/hazopTeam/count/${hazopId}`
       );
 
       return Number(res.data) || 0;  // API returns raw number

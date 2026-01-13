@@ -457,3 +457,95 @@ input[type="email"] {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
 }
+
+
+/* =========================================
+   MOBILE RESPONSIVE (LOGIN FIX)
+   Replace your existing bottom @media block with this
+   ========================================= */
+
+@media screen and (max-width: 768px) {
+  
+  /* 1. Reset the Login Container */
+  .logincontainer {
+    padding: 20px;
+    align-items: center; /* Ensures vertical centering */
+  }
+
+  /* 2. Fix the Form Container Positioning */
+  .form-container {
+    /* FORCE RESET: Override the desktop margin-left: 750px */
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    margin: 0 auto !important; /* Centers it horizontally */
+    
+    /* Sizing */
+    max-width: 250px !important; /* Cap width for tablets */
+    width: 100% !important;
+    
+    /* Box Model */
+    box-sizing: border-box; /* Ensures padding doesn't increase width */
+    padding: 25px 20px !important;
+    
+    /* Reset Position if needed */
+    left: auto !important;
+    top: auto !important;
+    transform: none !important;
+  }
+
+  /* 3. Form Selector (Tabs) */
+  .form-selector {
+    width: 100% !important;
+    margin: 20px auto 0 !important;
+    box-sizing: border-box;
+  }
+
+  /* 4. Input Fields (Prevent Zoom & Overflow) */
+  .input-group input,
+  input[type="text"],
+  input[type="password"],
+  input[type="email"],
+  input[type="otp"] {
+    font-size: 16px !important; /* Prevents iOS auto-zoom */
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* 5. Password Validation Box */
+  .password-validation-message {
+    width: 100% !important;
+    box-sizing: border-box;
+    margin-left: 0 !important;
+  }
+
+  /* 6. Modals & Popups */
+  .modal-container1,
+  .popup-box {
+    width: 60% !important;
+    max-width: 90% !important;
+    left: auto !important;
+    transform: none !important;
+    margin: auto;
+    
+  }
+  .logincontainer {
+    /* 1. Fix for Mobile Address Bars (Safari/Chrome) */
+    /* 'dvh' (Dynamic Viewport Height) adjusts automatically when the 
+       address bar appears or disappears, preventing cut-off content. */
+    height: 100vh;      /* Fallback for older browsers */
+    height: 100dvh;     /* Modern fix */
+    
+    /* 2. Prevent scroll bounce on some devices */
+    min-height: -webkit-fill-available;
+    
+    /* 3. Ensure content doesn't touch the very edges if screen is small */
+    padding: 15px; 
+  }
+
+  /* Optional: Adjust background for Portrait Mode */
+  .logincontainer::before {
+    /* Sometimes 'center' cuts off important parts of an image in portrait.
+       You can try 'left center' or keeping it 'center'. */
+    background-position: center; 
+  }
+}

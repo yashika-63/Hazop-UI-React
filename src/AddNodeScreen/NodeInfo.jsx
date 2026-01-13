@@ -9,7 +9,7 @@ const NodeInfo = ({ currentNodeId }) => {
         const fetchNode = async () => {
           try {
             const response = await fetch(
-              `http://${strings.localhost}/api/hazopNode/${currentNodeId}`
+              `${strings.localhost}/api/hazopNode/${currentNodeId}`
             );
     
             if (response.ok) {

@@ -22,7 +22,7 @@ const Login = ({ setToken }) => {
 
     try {
       const response = await axios.post(
-        `http://${strings.localhost}/api/auth/login?em_emp_code=${encodeURIComponent(empCode)}&em_password=${encodeURIComponent(password)}`
+        `${strings.localhost}/api/auth/login?em_emp_code=${encodeURIComponent(empCode)}&em_password=${encodeURIComponent(password)}`
       );
 
       if (response.data && response.data.message === "Login Successful!") {

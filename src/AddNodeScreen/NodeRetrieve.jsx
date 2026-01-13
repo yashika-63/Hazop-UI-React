@@ -21,7 +21,7 @@ const NodeRetrieve = () => {
     try {
       setLoading(true);
       const res = await axios.get(
-        `http://${strings.localhost}/api/hazopNode/by-registration-status`,
+        `${strings.localhost}/api/hazopNode/by-registration-status`,
         {
           params: {
             registrationId: registrationId,
@@ -39,7 +39,7 @@ const NodeRetrieve = () => {
 
   const activateNode = async (nodeId) => {
     try {
-      await axios.put(`http://${strings.localhost}/api/hazopNode/update/${nodeId}`, {
+      await axios.put(`${strings.localhost}/api/hazopNode/update/${nodeId}`, {
         Status: true,
       });
       setNodes((prev) => prev.filter((node) => node.id !== nodeId));

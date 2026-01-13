@@ -111,7 +111,7 @@ const PendingRecommendationApproval = ({ onActionSuccess }) => {
   const fetchAssignments = async () => {
     try {
       const response = await axios.get(
-        `http://${strings.localhost}/api/recommendation/assign/getAssignments`,
+        `${strings.localhost}/api/recommendation/assign/getAssignments`,
         {
           params: {
             assignToEmpCode: empCode,
@@ -188,7 +188,7 @@ const PendingRecommendationApproval = ({ onActionSuccess }) => {
     if (value.length < 2) return setSearchResults([]);
     try {
       const response = await axios.get(
-        `http://${strings.localhost}/api/employee/search?search=${value}`
+        `${strings.localhost}/api/employee/search?search=${value}`
       );
       setSearchResults(response.data || []);
     } catch (err) {
@@ -209,7 +209,7 @@ const PendingRecommendationApproval = ({ onActionSuccess }) => {
     setLoading(true);
     try {
       await axios.post(
-        `http://${strings.localhost}/api/recommendation/assign/acceptOrReject`,
+        `${strings.localhost}/api/recommendation/assign/acceptOrReject`,
         {},
         {
           params: {
@@ -253,7 +253,7 @@ const PendingRecommendationApproval = ({ onActionSuccess }) => {
     try {
       // Step 1: Hit the SAVE API as requested
       await axios.post(
-        `http://${strings.localhost}/api/nodeRecommendation/saveRecord`,
+        `${strings.localhost}/api/nodeRecommendation/saveRecord`,
         null, // No body, using params
         {
           params: {
@@ -266,7 +266,7 @@ const PendingRecommendationApproval = ({ onActionSuccess }) => {
 
       // Step 2: Hit the ACCEPT API
       await axios.post(
-        `http://${strings.localhost}/api/recommendation/assign/acceptOrReject`,
+        `${strings.localhost}/api/recommendation/assign/acceptOrReject`,
         {},
         {
           params: {

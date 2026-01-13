@@ -503,3 +503,86 @@
     cursor: pointer;
     margin-right: 10px;
 }
+
+
+
+
+/* =========================================
+   MOBILE RESPONSIVE OVERRIDES (NAV & SIDEBAR)
+   Add this to the very bottom of your CSS
+   ========================================= */
+
+@media screen and (max-width: 768px) {
+
+    /* 1. Topbar: Reduce padding and icon sizes */
+    .topbar {
+        padding: 0 10px;
+        /* Reduce side padding */
+        height: 50px;
+        /* Ensure height stays compact */
+    }
+
+    .topbar-logo {
+        font-size: 18px;
+        /* Smaller logo text */
+        padding: 0 5px;
+    }
+
+    /* 2. Sidebar: Full Height & Overlay */
+    .sidebar {
+        top: 50px;
+        height: 100%;
+        /* height: calc(100vh - 50px);
+        height: calc(100dvh - 50px); */
+        z-index: 2000;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+
+    /* 3. Content Area: Stop the "Shift" */
+    /* Normally, when sidebar opens, content moves right (margin 200px).
+     On mobile, we cancel this move so content doesn't fall off the screen. */
+    .content-area.shifted {
+        margin-left: 60px !important;
+        /* Keep the closed margin */
+        padding: 15px;
+        /* Reduce padding */
+    }
+
+    /* Adjust standard content padding for mobile */
+    .content-area {
+        padding: 15px;
+        margin-left: 60px;
+        /* Ensure content clears the closed icon bar */
+    }
+
+    /* 4. Profile & Welcome Message Cleanup */
+    /* The "Welcome, User" text takes too much space on mobile. Hide it. */
+    .welcome-message {
+        display: none;
+    }
+
+    /* Reduce the massive right margin on the profile wrapper */
+    .profile-wrapper {
+        margin-right: 0;
+        /* Remove the 60px margin */
+        margin-left: 10px;
+    }
+
+    /* 5. Theme Toggle Button */
+    .theme-toggle-btn {
+        width: 38px;
+        /* Slightly smaller button */
+        height: 38px;
+        margin-right: 8px;
+    }
+
+    /* 6. Popup Adjustments */
+    /* Ensure the profile popup doesn't go off-screen */
+    .profile-popup {
+        right: 10px;
+        /* Position it slightly inside the screen edge */
+        width: 200px;
+        /* Fixed width */
+    }
+}

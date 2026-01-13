@@ -19,7 +19,6 @@ const RequestHandler = () => {
         recommendationVerificationPending: 0,
         registrationVerificationPending: 0,
         approvalPending: 0,
-        assignmentPending: 0,
         totalPendingCount: 0,
         signOffPending: 0,
         assignmentPending: 0
@@ -28,7 +27,7 @@ const RequestHandler = () => {
 
 
     const fetchCounts = () => {
-        fetch(`http://${strings.localhost}/api/hazop-dashboard/total-pending-count?empCode=${empCode}`)
+        fetch(`${strings.localhost}/api/hazop-dashboard/total-pending-count?empCode=${empCode}`)
             .then(res => res.json())
             .then(data => {
                 setCounts({
@@ -44,7 +43,7 @@ const RequestHandler = () => {
     };
 
     // useEffect(() => {
-    //     fetch(`http://${strings.localhost}/api/hazop-dashboard/total-pending-count?empCode=${empCode}`)
+    //     fetch(`${strings.localhost}/api/hazop-dashboard/total-pending-count?empCode=${empCode}`)
     //         .then(res => res.json())
     //         .then(data => {
     //             setCounts({
@@ -139,6 +138,7 @@ const RequestHandler = () => {
                 </div>
 
                 <div className="Companycontent">
+                    <div className="table-wrapper">
                     {activeSection === 'HazopTeamAcceptance' && (
                         <HazopTeamAcceptanceApproval onActionComplete={fetchCounts} />
                     )}
@@ -158,6 +158,7 @@ const RequestHandler = () => {
                     {activeSection === 'RecommendationApproval' && (
                         <RecommendationApproval onActionComplete={fetchCounts} />
                     )}
+                    </div>
                 </div>
             </div>
         </div>

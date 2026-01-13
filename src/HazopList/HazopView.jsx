@@ -36,10 +36,10 @@ const HazopView = ({ onClose, mode = "view-only" }) => {
             try {
                 const [hRes, tRes] = await Promise.all([
                     axios.get(
-                        `http://${strings.localhost}/api/hazopRegistration/by-id?hazopId=${hazopId}`
+                        `${strings.localhost}/api/hazopRegistration/by-id?hazopId=${hazopId}`
                     ),
                     axios.get(
-                        `http://${strings.localhost}/api/hazopTeam/teamByHazop/${hazopId}?status=true`
+                        `${strings.localhost}/api/hazopTeam/teamByHazop/${hazopId}?status=true`
                     ),
                 ]);
                 setHazop(hRes.data || {});
@@ -59,7 +59,7 @@ const HazopView = ({ onClose, mode = "view-only" }) => {
         setLoading(true);
         try {
             const nRes = await axios.get(
-                `http://${strings.localhost}/api/hazopNode/by-registration-status?registrationId=${hazopId}&status=true`
+                `${strings.localhost}/api/hazopNode/by-registration-status?registrationId=${hazopId}&status=true`
             );
             const fetchedNodes = Array.isArray(nRes.data) ? nRes.data : [];
             setNodes(fetchedNodes);
@@ -69,7 +69,7 @@ const HazopView = ({ onClose, mode = "view-only" }) => {
                 fetchedNodes.map(async (node) => {
                     const detailsRes = await axios
                         .get(
-                            `http://${strings.localhost}/api/hazopNodeDetail/node/${node.id}`
+                            `${strings.localhost}/api/hazopNodeDetail/node/${node.id}`
                         )
                         .then((res) => (Array.isArray(res.data) ? res.data : []))
                         .catch(() => []);
@@ -94,7 +94,7 @@ const HazopView = ({ onClose, mode = "view-only" }) => {
                         (nodeDetails[node.id] || []).map(async (detail) => {
                             const recs = await axios
                                 .get(
-                                    `http://${strings.localhost}/api/nodeRecommendation/getByDetailId/${detail.id}`
+                                    `${strings.localhost}/api/nodeRecommendation/getByDetailId/${detail.id}`
                                 )
                                 .then((res) => (Array.isArray(res.data) ? res.data : []))
                                 .catch(() => []);
@@ -117,10 +117,10 @@ const HazopView = ({ onClose, mode = "view-only" }) => {
         try {
             const [allRecRes, assignRes] = await Promise.all([
                 axios.get(
-                    `http://${strings.localhost}/api/nodeRecommendation/getByHazopRegistration/${hazopId}`
+                    `${strings.localhost}/api/nodeRecommendation/getByHazopRegistration/${hazopId}`
                 ),
                 axios.get(
-                    `http://${strings.localhost}/api/recommendation/assign/getAllByRegistration/${hazopId}`
+                    `${strings.localhost}/api/recommendation/assign/getAllByRegistration/${hazopId}`
                 ),
             ]);
             setAllRecommendations(
@@ -150,7 +150,7 @@ const HazopView = ({ onClose, mode = "view-only" }) => {
     const loadVerificationRecords = async () => {
         try {
             const res = await axios.get(
-                `http://${strings.localhost}/api/nodeRecommendation/getVerificationActionRecords/${hazopId}`
+                `${strings.localhost}/api/nodeRecommendation/getVerificationActionRecords/${hazopId}`
             );
             setVerificationRecords(Array.isArray(res.data) ? res.data : []);
         } catch (err) {
@@ -161,7 +161,7 @@ const HazopView = ({ onClose, mode = "view-only" }) => {
 
     const loadTeamComments = async () => {
         try {
-            const res = await axios.get(`http://${strings.localhost}/api/team-comments/getByHazop/${hazopId}`);
+            const res = await axios.get(`${strings.localhost}/api/team-comments/getByHazop/${hazopId}`);
             setTeamComments(Array.isArray(res.data) ? res.data : []);
         } catch (err) {
             console.error("Error loading team comments:", err);
@@ -171,7 +171,7 @@ const HazopView = ({ onClose, mode = "view-only" }) => {
     const loadDocuments = async () => {
         try {
             const res = await axios.get(
-                `http://${strings.localhost}/api/javaHazopDocument/getByKeys`,
+                `${strings.localhost}/api/javaHazopDocument/getByKeys`,
                 {
                     params: {
                         companyId: localStorage.getItem("companyId") || 1,
@@ -190,7 +190,7 @@ const HazopView = ({ onClose, mode = "view-only" }) => {
     const loadMocReferences = async () => {
         try {
             const res = await axios.get(
-                `http://${strings.localhost}/api/moc-reference/by-hazop`,
+                `${strings.localhost}/api/moc-reference/by-hazop`,
                 {
                     params: { hazopRegistrationId: hazopId }
                 }
@@ -296,7 +296,7 @@ const HazopView = ({ onClose, mode = "view-only" }) => {
                                                 return (
                                                     <li key={doc.id}>
                                                         <a
-                                                            href={`http://${strings.localhost}/api/javaHazopDocument/view/${doc.id}`}
+                                                            href={`${strings.localhost}/api/javaHazopDocument/view/${doc.id}`}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
                                                         >
@@ -680,7 +680,7 @@ const HazopView = ({ onClose, mode = "view-only" }) => {
                                 <div className="recommendation-card">
                                     <h3>All Recommendations</h3>
 
-                                    <div className="table-wrapper">
+                                    <div className="table-wrapper2">
                                         <table className="node-details-table">
                                             <thead>
                                                 <tr>
@@ -745,7 +745,7 @@ const HazopView = ({ onClose, mode = "view-only" }) => {
                                                 {assignData[type].length === 0 ? (
                                                     <p>No data</p>
                                                 ) : (
-                                                    <div className="table-wrapper">
+                                                    <div className="table-wrapper2">
                                                         <table className="node-details-table">
                                                             <thead>
                                                                 <tr>
@@ -758,8 +758,6 @@ const HazopView = ({ onClose, mode = "view-only" }) => {
                                                                     <th>Completion Date</th>
                                                                     <th>Acceptance Status</th>
                                                                     <th>Accepted By</th>
-
-
                                                                 </tr>
                                                             </thead>
 
@@ -807,8 +805,6 @@ const HazopView = ({ onClose, mode = "view-only" }) => {
                                                                             </td>
 
                                                                             <td>{a.acceptedByEmployeeName || "-"}</td>
-
-
                                                                         </tr>
                                                                     );
                                                                 })}
@@ -845,10 +841,7 @@ const HazopView = ({ onClose, mode = "view-only" }) => {
                                                 {verificationRecords.map((r) => (
                                                     <tr key={r.id}>
                                                         <td>{r.recommendation || "-"}</td>
-
                                                         <td>{r.remarkbyManagement || "-"}</td>
-
-                                                        {/* Completion Status */}
                                                         <td>
                                                             {r.completionStatus ? (
                                                                 <span
@@ -864,11 +857,7 @@ const HazopView = ({ onClose, mode = "view-only" }) => {
                                                                 </span>
                                                             )}
                                                         </td>
-
-                                                        {/* Send for verification */}
                                                         <td>{r.sendForVerification ? "Yes" : "No"}</td>
-
-                                                        {/* Was verification action triggered */}
                                                         <td>
                                                             {r.sendForVerificationAction ? (
                                                                 <span style={{ color: "blue" }}>
@@ -878,8 +867,6 @@ const HazopView = ({ onClose, mode = "view-only" }) => {
                                                                 <span>No Action</span>
                                                             )}
                                                         </td>
-
-                                                        {/* Status of verification action */}
                                                         <td>
                                                             {r.sendForVerificationActionStatus ? (
                                                                 <span
@@ -895,7 +882,6 @@ const HazopView = ({ onClose, mode = "view-only" }) => {
                                                                 </span>
                                                             )}
                                                         </td>
-
                                                         <td>
                                                             {r.verificationResponsibleEmployeeName || "-"}
                                                         </td>

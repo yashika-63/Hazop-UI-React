@@ -44,7 +44,7 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
     const loadDocuments = async (hazopId) => {
         try {
             const res = await axios.get(
-                `http://${strings.localhost}/api/javaHazopDocument/getByKeys`,
+                `${strings.localhost}/api/javaHazopDocument/getByKeys`,
                 {
                     params: {
                         companyId: localStorage.getItem("companyId") || 1,
@@ -63,7 +63,7 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
         setLoading(true);
         try {
             const response = await axios.get(
-                `http://${strings.localhost}/api/hazopTeam/teamByHazop/${hazopId}?status=true`
+                `${strings.localhost}/api/hazopTeam/teamByHazop/${hazopId}?status=true`
             );
 
             // Map response to ensure we use 'role' for display in frontend
@@ -93,7 +93,7 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
 
         try {
             const response = await axios.get(
-                `http://${strings.localhost}/api/employee/search?search=${encodeURIComponent(value)}`
+                `${strings.localhost}/api/employee/search?search=${encodeURIComponent(value)}`
             );
             setSearchResults(response.data || []);
         } catch (err) {
@@ -137,7 +137,7 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
                 try {
                     if (teamMemberId && originalTeam.some((m) => m.empCode === empCode)) {
                         await axios.put(
-                            `http://${strings.localhost}/api/hazopTeam/updateStatusToFalse?id=${teamMemberId}`
+                            `${strings.localhost}/api/hazopTeam/updateStatusToFalse?id=${teamMemberId}`
                         );
                         showToast("Team member removed from backend!", "success");
                     } else {
@@ -203,7 +203,7 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
             // 1. Save New Team Members (Bulk add)
             if (newMembers.length > 0) {
                 await axios.post(
-                    `http://${strings.localhost}/api/hazopTeam/saveTeam/${hazopId}`,
+                    `${strings.localhost}/api/hazopTeam/saveTeam/${hazopId}`,
                     newMembers.map((m) => ({
                         empCode: m.empCode
                         // name: m.name
@@ -219,7 +219,7 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
                 const roleToSend = member.role === "Team Lead" ? "Team Lead" : "Team Member";
 
                 await axios.post(
-                    `http://${strings.localhost}/api/hazopTeamRole/save?companyId=${companyId}&empCode=${member.empCode}&hazopRole=${roleToSend}&hazopId=${hazopId}`
+                    `${strings.localhost}/api/hazopTeamRole/save?companyId=${companyId}&empCode=${member.empCode}&hazopRole=${roleToSend}&hazopId=${hazopId}`
                 );
             }
 
@@ -382,7 +382,7 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
                                     <li key={doc.id} style={{ display: 'flex', alignItems: 'center', padding: '8px', borderBottom: '1px solid #f0f0f0' }}>
                                         <FaFileAlt style={{ color: '#555', marginRight: '10px' }} />
                                         <a
-                                            href={`http://${strings.localhost}/api/javaHazopDocument/view/${doc.id}`}
+                                            href={`${strings.localhost}/api/javaHazopDocument/view/${doc.id}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             style={{ flexGrow: 1, textDecoration: 'none', color: '#007bff' }}
@@ -390,7 +390,7 @@ const AddHazopTeamPopup = ({ closePopup, hazopData, existingTeam }) => {
                                             {fileName}
                                         </a>
                                         <a
-                                            href={`http://${strings.localhost}/api/javaHazopDocument/view/${doc.id}`}
+                                            href={`${strings.localhost}/api/javaHazopDocument/view/${doc.id}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="view-icon-btn"

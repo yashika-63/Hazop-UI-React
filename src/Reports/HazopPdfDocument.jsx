@@ -152,7 +152,7 @@ const HazopPdfDocument = ({
                             </View>
                             {documents.map((doc, i) => {
                                 const fileName = doc.filePath ? doc.filePath.split(/[\\/]/).pop() : "Unnamed Document";
-                                // const fileUrl = `http://${strings.localhost}/api/javaHazopDocument/view/${doc.id}`;
+                                // const fileUrl = `${strings.localhost}/api/javaHazopDocument/view/${doc.id}`;
                                 return (
                                     <View key={i} style={[styles.tableRow, i % 2 !== 0 ? styles.tableRowEven : {}]}>
                                         <View style={[styles.tableCol, { width: '10%' }]}>

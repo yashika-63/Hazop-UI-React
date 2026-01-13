@@ -10,7 +10,7 @@ export default function HazopWorkflow() {
   const { id } = useParams();
   useEffect(() => {
     if (!id) return;
-    fetch(`http://${strings.localhost}/api/hazop/status/${id}`)
+    fetch(`${strings.localhost}/api/hazop/status/${id}`)
       .then((res) => res.json())
       .then((data) => setStatus(data));
   }, []);

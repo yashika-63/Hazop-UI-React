@@ -223,7 +223,7 @@
 /* Table Wrapper */
 .table-wrapper {
   width: 100%;
-  overflow-x: auto;
+  /* overflow-x: auto; */
   margin-top: 20px;
 }
 
@@ -522,4 +522,143 @@ justify-content: center;}
   .table-not-assigned, .table-assigned, .table-accepted, .table-rejected { display: block; overflow-x: auto; }
   thead tr { display: table; width: 100%; table-layout: fixed; }
   tbody tr { display: table; width: 100%; table-layout: fixed; }
+}
+
+
+
+
+/* =========================================
+   MOBILE RESPONSIVE (ASSIGNMENTS & TOPBAR)
+   Add this to the very bottom of your CSS
+   ========================================= */
+
+@media screen and (max-width: 768px) {
+
+  /* 1. Top Form Bar: Allow buttons to scroll or wrap */
+  .TopFormBar {
+    overflow-x: auto; /* Allow horizontal scroll if many buttons */
+    white-space: nowrap;
+    justify-content: flex-start; /* Align left */
+    gap: 15px;
+    padding: 10px;
+  }
+
+  .TopFormBar button {
+    flex-shrink: 0; /* Prevent buttons from squishing */
+    font-size: 13px;
+  }
+
+  /* 2. Top Row (Search & Filters): Stack vertically */
+  .top-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+  }
+
+  .search-bar-table {
+    width: 100%; /* Full width search */
+  }
+
+  .right-actions {
+    justify-content: space-between; /* Spread out badges/icons */
+    width: 100%;
+  }
+
+  /* 3. Assigned & Recommendation Tables -> CARD VIEW */
+  .assigned-table,
+  .recommendation-table {
+    display: block;
+    width: 100%;
+  }
+
+  /* Hide headers */
+  .assigned-table thead,
+  .recommendation-table thead {
+    display: none; 
+  }
+
+  /* Main Rows become Cards */
+  .assigned-table tbody tr.main-row,
+  .recommendation-table tbody tr {
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-card);
+    margin-bottom: 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 2px 5px var(--shadow-color);
+  }
+
+  /* Cells inside the card */
+  .assigned-table td,
+  .recommendation-table td {
+    display: block;
+    width: 100%;
+    padding: 6px 0;
+    border: none;
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%; /* Remove desktop truncation limits */
+  }
+
+  /* Remove border from last cell in card */
+  .assigned-table td:last-child,
+  .recommendation-table td:last-child {
+    border-bottom: none;
+  }
+
+  /* Specific column overrides */
+  .sr-no { 
+    display: none !important; /* Hide Serial Number on mobile to save space */
+  }
+  
+  .assign-employee {
+    width: 100%;
+    max-width: 100%;
+    font-weight: 700; /* Make employee name stand out */
+    font-size: 15px;
+  }
+
+  /* 4. EXPANDED DETAIL VIEW */
+  /* This is critical for the expand/collapse functionality */
+  .assigned-table tr.detail-row {
+    display: block;
+    border: none;
+    background: transparent;
+    padding: 0;
+    margin-top: -10px; /* Pull it up slightly to connect with card */
+    margin-bottom: 20px;
+  }
+
+  .detail-panel {
+    border-left: none; /* Remove side border */
+    border-top: 4px solid #73bbe2; /* Move accent to top */
+    padding: 15px;
+    background: var(--bg-row-even);
+    border-radius: 0 0 10px 10px; /* Round bottom corners */
+  }
+
+  /* Change Grid from 3 columns to 1 column */
+  .detail-grid {
+    grid-template-columns: 1fr; 
+    gap: 12px;
+  }
+
+  /* 5. Inline Actions (Date & Buttons) */
+  .inline-btn-group {
+    width: 100%;
+    margin-top: 10px;
+  }
+  
+  .inline-save-btn, 
+  .inline-cancel-btn {
+    flex: 1; /* Make buttons stretch full width */
+    padding: 8px;
+  }
+
+  /* 6. Text Truncation */
+  .truncate-cell {
+    max-height: none; /* Show full text on mobile card view */
+    overflow: visible;
+  }
 }

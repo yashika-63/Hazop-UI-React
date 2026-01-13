@@ -389,7 +389,7 @@ export async function generateHazopExcel({
 
         documents.forEach((doc, idx) => {
             const fileName = doc.filePath ? doc.filePath.split(/[\\/]/).pop() : "Unnamed Document";
-            const fileUrl = `http://${strings.localhost}/api/javaHazopDocument/view/${doc.id}`;
+            const fileUrl = `${strings.localhost}/api/javaHazopDocument/view/${doc.id}`;
 
             coverSheet.getCell(`B${cRow}`).value = idx + 1;
             styleData(coverSheet.getCell(`B${cRow}`));

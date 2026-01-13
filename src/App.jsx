@@ -40,7 +40,6 @@ const App = () => {
   
   // 1. Get current theme from Context (to style the main container)
   const { theme } = useTheme(); 
-console.log("📱 App Component Rendered with Theme:", theme);
 
   const isAuthenticated = !!localStorage.getItem('empCode');
   const userRole = localStorage.getItem("Role");

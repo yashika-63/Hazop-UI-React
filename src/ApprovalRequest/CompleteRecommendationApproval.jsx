@@ -32,7 +32,7 @@ const CompleteRecommendationApproval = ({ onActionComplete ,refreshTrigger}) => 
 
         setLoadingHistory(true);
         try {
-            const res = await axios.get(`http://${strings.localhost}/api/nodeRecommendation/getByAssignment?assignmentId=${assignmentId}`);
+            const res = await axios.get(`${strings.localhost}/api/nodeRecommendation/getByAssignment?assignmentId=${assignmentId}`);
             setHistoryData(prev => ({
                 ...prev,
                 [assignmentId]: res.data || []
@@ -62,7 +62,7 @@ const CompleteRecommendationApproval = ({ onActionComplete ,refreshTrigger}) => 
         try {
             setLoading(true);
             const response = await axios.get(
-                `http://${strings.localhost}/api/recommendation/assign/getByEmployeeStatus`,
+                `${strings.localhost}/api/recommendation/assign/getByEmployeeStatus`,
                 {
                     params: {
                         empCode: empCode,
@@ -194,7 +194,7 @@ const CompleteRecommendationApproval = ({ onActionComplete ,refreshTrigger}) => 
         setActionLoading(true);
         try {
             await axios.post(
-                `http://${strings.localhost}/api/nodeRecommendation/saveRecord`,
+                `${strings.localhost}/api/nodeRecommendation/saveRecord`,
                 null,
                 {
                     params: {
@@ -243,7 +243,7 @@ const CompleteRecommendationApproval = ({ onActionComplete ,refreshTrigger}) => 
 
         try {
             await axios.post(
-                `http://${strings.localhost}/api/recommendation/assign/completeTask`,
+                `${strings.localhost}/api/recommendation/assign/completeTask`,
                 {},
                 {
                     params: {
@@ -274,7 +274,7 @@ const CompleteRecommendationApproval = ({ onActionComplete ,refreshTrigger}) => 
 
         try {
             await axios.post(
-                `http://${strings.localhost}/api/recommendation/assign/completeTask`,
+                `${strings.localhost}/api/recommendation/assign/completeTask`,
                 {},
                 {
                     params: {

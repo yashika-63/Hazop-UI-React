@@ -25,7 +25,7 @@ const HazopRecommendationApproval = ({ onActionComplete }) => {
 
         try {
             const response = await axios.get(
-                `http://${strings.localhost}/api/nodeRecommendation/filter?sendForVerification=true&sendForVerificationActionStatus=false&verificationResponsibleEmpCode=${empCode}`
+                `${strings.localhost}/api/nodeRecommendation/filter?sendForVerification=true&sendForVerificationActionStatus=false&verificationResponsibleEmpCode=${empCode}`
             );
             setRecommendations(response.data || []);
         } catch (err) {
@@ -67,7 +67,7 @@ const HazopRecommendationApproval = ({ onActionComplete }) => {
         setLoading(true);
         try {
             await axios.put(
-                `http://${strings.localhost}/api/nodeRecommendation/verify/${id}/${empCode}/true?remark=Yes`
+                `${strings.localhost}/api/nodeRecommendation/verify/${id}/${empCode}/true?remark=Yes`
             );
             fetchRecommendations();
             showToast("Approved successfully.", 'success');
@@ -92,7 +92,7 @@ const HazopRecommendationApproval = ({ onActionComplete }) => {
         setLoading(true);
         try {
             await axios.put(
-                `http://${strings.localhost}/api/nodeRecommendation/verify/${selectedRejectId}/${empCode}/false?remark=No`,
+                `${strings.localhost}/api/nodeRecommendation/verify/${selectedRejectId}/${empCode}/false?remark=No`,
                 { comment: rejectComment }
             );
             fetchRecommendations();

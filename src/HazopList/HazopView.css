@@ -14,8 +14,13 @@
   width: 100%;
   margin: 0 auto;
   margin-bottom: 20px;
+  
 }
-
+.table-wrapper2 {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 20px;
+}
 .hazop-view-page {
   padding: 10px;
   margin: 0 auto;
@@ -354,5 +359,146 @@ body.dark .filter-select {
   .filter-group {
     width: 100%;
     margin-bottom: 10px;
+  }
+}
+
+
+/* =========================================
+   MOBILE RESPONSIVE OVERRIDES (HAZOP & CARDS)
+   Add this to the very bottom of your CSS
+   ========================================= */
+
+@media screen and (max-width: 768px) {
+  
+  /* 1. General Container Padding */
+  .hazop-view-page {
+    padding: 5px; /* Maximize screen width */
+  }
+
+  /* 2. Card Adjustments */
+  .hazop-card,
+  .node-card,
+  .recommendation-card {
+    padding: 12px;
+    margin-bottom: 15px;
+  }
+
+  /* 3. COMPLEX TABLES -> CARDS TRANSFORMATION */
+  /* This targets all your specific table classes */
+  .hazop-table,
+  .node-details-table-custom,
+  .confirm-table-custom,
+  .assignment-table-custom,
+  .node-details-table {
+    display: block;
+    background: transparent; /* Remove table bg, rows will have it */
+    border: none;
+  }
+
+  /* Hide the Table Headers (The labels don't fit) */
+  .hazop-table thead,
+  .node-details-table-custom thead,
+  .confirm-table-custom thead,
+  .assignment-table-custom thead,
+  .node-details-table thead {
+    display: none; 
+  }
+
+  /* Turn Table Rows into Individual Cards */
+  .hazop-table tbody tr,
+  .node-details-table-custom tbody tr,
+  .confirm-table-custom tbody tr,
+  .assignment-table-custom tbody tr,
+  .node-details-table tbody tr {
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-card);
+    margin-bottom: 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 2px 5px var(--shadow-color);
+  }
+
+  /* Style the Cells within the "Card" */
+  .hazop-table td,
+  .node-details-table-custom td,
+  .confirm-table-custom td,
+  .assignment-table-custom td,
+  .node-details-table td {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 8px 0;
+    border: none;
+    border-bottom: 1px solid var(--border-color);
+    /* Ensure content wraps nicely */
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  /* Remove border from the last item in the card */
+  .hazop-table td:last-child,
+  .node-details-table-custom td:last-child,
+  .confirm-table-custom td:last-child,
+  .assignment-table-custom td:last-child,
+  .node-details-table td:last-child {
+    border-bottom: none;
+  }
+
+  /* 4. Risk Input Fields (Readonly) */
+  /* Make them look better in the stacked view */
+  input.readonly {
+    width: 100%; /* Stretch to fill the mobile card width */
+    margin-top: 5px;
+    padding: 8px;
+    font-size: 14px;
+  }
+
+  /* 5. Modal Actions */
+  /* Stack buttons if text is long, or keep side-by-side if short */
+  .modal-actions {
+    flex-direction: column;
+    gap: 10px;
+    position: sticky;
+    bottom: 0;
+    background: var(--bg-card); /* Ensure background covers content behind it */
+    z-index: 100;
+    padding: 15px;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .modal-actions button {
+    width: 100%; /* Full width buttons for easy tapping */
+  }
+
+
+  /* --- 1. FILTERS: Horizontal Scroll Strip --- */
+  .filters-container {
+    display: flex;
+    flex-direction: row; /* Keep in one row */
+    flex-wrap: nowrap;   /* Prevent stacking */
+    overflow-x: auto;    /* Enable horizontal scroll */
+    gap: 10px;
+    padding: 10px 5px;
+    width: 100%;
+    align-items: center;
+    justify-content: flex-start;
+    
+    /* Hide scrollbar for cleaner look (Optional) */
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; 
+  }
+
+  .filter-group {
+    flex: 0 0 auto; /* Don't shrink, don't grow */
+    width: 120px;   /* Fixed small width */
+    min-width: 120px;
+  }
+
+  .filter-select {
+    padding: 6px;     /* Smaller padding */
+    font-size: 12px;  /* Smaller font */
+    height: 32px;
   }
 }

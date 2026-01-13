@@ -12,7 +12,6 @@ export const ThemeProvider = ({ children }) => {
 
   // Effect to apply the class to the HTML Body
   useEffect(() => {
-    console.log("🎨 Applying Class to Body:", theme); // <--- DEBUG LOG
     document.body.className = theme; // This sets <body class="dark">
   }, [theme]);
 

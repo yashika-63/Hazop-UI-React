@@ -23,16 +23,14 @@ const Recommendations = ({
 
   useEffect(() => {
     if (!nodeDetailId) {
-      console.log(
-        "nodeDetailId is null or undefined, not fetching recommendations."
-      );
+     
       return;
     }
     const fetchRecommendations = async () => {
       try {
         setLoading(true);
         const res = await fetch(
-          `http://${strings.localhost}/api/nodeRecommendation/getByDetailId/${nodeDetailId}`
+          `${strings.localhost}/api/nodeRecommendation/getByDetailId/${nodeDetailId}`
         );
         if (res.ok) {
           const data = await res.json();

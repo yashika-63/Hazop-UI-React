@@ -53,7 +53,7 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
 
     const fetchTeamMembers = async () => {
         try {
-            const res = await axios.get(`http://${strings.localhost}/api/hazopTeam/teamByHazop/${hazopId}?status=true`);
+            const res = await axios.get(`${strings.localhost}/api/hazopTeam/teamByHazop/${hazopId}?status=true`);
             setTeamMembers(res.data || []);
         } catch (err) {
             console.error("Failed to fetch team members", err);
@@ -64,7 +64,7 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
         setLoading(true);
         try {
             const res = await axios.get(
-                `http://${strings.localhost}/api/nodeRecommendation/getVerificationActionRecords/${hazopId}`
+                `${strings.localhost}/api/nodeRecommendation/getVerificationActionRecords/${hazopId}`
             );
             setRecords(res.data || []);
         } catch (err) {
@@ -78,7 +78,7 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
 
     const fetchTeamComments = async () => {
         try {
-            const res = await axios.get(`http://${strings.localhost}/api/team-comments/getByHazop/${hazopId}`);
+            const res = await axios.get(`${strings.localhost}/api/team-comments/getByHazop/${hazopId}`);
             setTeamComments(res.data || []);
         } catch (err) {
             console.error("Failed to fetch team comments", err);
@@ -89,7 +89,7 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
         setLoading(true);
         try {
             const response = await axios.get(
-                `http://${strings.localhost}/api/hazopTeam/teamByHazop/${hazopId}?status=true`
+                `${strings.localhost}/api/hazopTeam/teamByHazop/${hazopId}?status=true`
             );
 
             const mappedData = (response.data || []).map(member => ({
@@ -155,7 +155,7 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
         }
         try {
             const response = await axios.get(
-                `http://${strings.localhost}/api/employee/search?search=${encodeURIComponent(value)}`
+                `${strings.localhost}/api/employee/search?search=${encodeURIComponent(value)}`
             );
             setSearchResults(response.data || []);
         } catch (err) {
@@ -192,7 +192,7 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
         setIsSending(true);
         try {
             await axios.post(
-                `http://${strings.localhost}/api/hazopRegistration/hazop/sendForVerification/${hazopId}/${encodeURIComponent(selectedReviewEmployee.empCode)}`
+                `${strings.localhost}/api/hazopRegistration/hazop/sendForVerification/${hazopId}/${encodeURIComponent(selectedReviewEmployee.empCode)}`
             );
             showToast("Hazop sent for review successfully.", "success");
             setShowSendReviewPopup(false);
@@ -211,7 +211,7 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
         setIsSending(true);
         try {
             await axios.post(
-                `http://${strings.localhost}/hazopApproval/save?hazopId=${hazopId}&employeeCode=${selectedEmployee.empCode}`
+                `${strings.localhost}/hazopApproval/save?hazopId=${hazopId}&employeeCode=${selectedEmployee.empCode}`
             );
             showToast("Hazop Send successfully for verification.", "success");
             setShowConfirmation(false);
@@ -261,7 +261,7 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
             const apiCalls = teamMembers.map((member) => {
                 const email = member.emailId || member.empEmail || "";
                 return axios.post(
-                    `http://${strings.localhost}/api/team-comments/send-for-review`,
+                    `${strings.localhost}/api/team-comments/send-for-review`,
                     null,
                     {
                         params: {
@@ -309,7 +309,7 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
 
         try {
             setIsSending(true);
-            await axios.post(`http://${strings.localhost}/api/recommendation/assign/reassign`, null, { params: payload });
+            await axios.post(`${strings.localhost}/api/recommendation/assign/reassign`, null, { params: payload });
             showToast("Recommendation reassigned successfully", "success");
             setShowReassignPopup(false);
             setSelectedEmployee(null);
@@ -342,7 +342,7 @@ const HazopRecommendationsThirdScreen = ({ hazopId }) => {
         setIsSending(true);
         try {
             await axios.post(
-                `http://${strings.localhost}/api/nodeRecommendation/saveRecord`,
+                `${strings.localhost}/api/nodeRecommendation/saveRecord`,
                 null,
                 {
                     params: {

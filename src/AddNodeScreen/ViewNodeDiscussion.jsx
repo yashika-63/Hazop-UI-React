@@ -71,17 +71,17 @@ const ViewNodeDiscussion = () => {
         const loadData = async () => {
             setLoading(true);
             try {
-                const nodeRes = await fetch(`http://${strings.localhost}/api/hazopNode/${nodeId}`);
+                const nodeRes = await fetch(`${strings.localhost}/api/hazopNode/${nodeId}`);
                 if (nodeRes.ok) setNode(await nodeRes.json());
 
-                const detailRes = await fetch(`http://${strings.localhost}/api/hazopNodeDetail/node/${nodeId}`);
+                const detailRes = await fetch(`${strings.localhost}/api/hazopNodeDetail/node/${nodeId}`);
                 if (detailRes.ok) {
                     const allDetails = await detailRes.json();
                     const found = allDetails.find(d => d.id === detailId);
                     setDetail(found);
                 }
 
-                const recRes = await fetch(`http://${strings.localhost}/api/nodeRecommendation/getByDetailId/${detailId}`);
+                const recRes = await fetch(`${strings.localhost}/api/nodeRecommendation/getByDetailId/${detailId}`);
                 if (recRes.ok) setRecommendations(await recRes.json());
 
             } catch (err) {

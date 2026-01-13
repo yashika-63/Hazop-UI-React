@@ -42,14 +42,14 @@ const HazopReportPage= ({ hazopId, onClose }) => {
                     regNodesRes,
                     teamCommentsRes,documentsRes,
                 ] = await Promise.all([
-                    axios.get(`http://${strings.localhost}/api/hazopRegistration/${hazopId}/full-details`),
-                    axios.get(`http://${strings.localhost}/api/nodeRecommendation/getByHazopRegistration/${hazopId}`).catch(() => ({ data: [] })),
-                    axios.get(`http://${strings.localhost}/api/recommendation/assign/getAllByRegistration/${hazopId}`).catch(() => ({ data: {} })),
-                    axios.get(`http://${strings.localhost}/api/nodeRecommendation/getVerificationActionRecords/${hazopId}`).catch(() => ({ data: [] })),
-                    axios.get(`http://${strings.localhost}/api/moc-reference/by-hazop?hazopRegistrationId=${hazopId}`).catch(() => ({ data: [] })),
-                    axios.get(`http://${strings.localhost}/api/hazopNode/by-registration-status?registrationId=${hazopId}&status=true`).catch(() => ({ data: [] })),
-                    axios.get(`http://${strings.localhost}/api/team-comments/getByHazop/${hazopId}`).catch(() => ({ data: [] })),
-                    axios.get(`http://${strings.localhost}/api/javaHazopDocument/getByKeys`, {
+                    axios.get(`${strings.localhost}/api/hazopRegistration/${hazopId}/full-details`),
+                    axios.get(`${strings.localhost}/api/nodeRecommendation/getByHazopRegistration/${hazopId}`).catch(() => ({ data: [] })),
+                    axios.get(`${strings.localhost}/api/recommendation/assign/getAllByRegistration/${hazopId}`).catch(() => ({ data: {} })),
+                    axios.get(`${strings.localhost}/api/nodeRecommendation/getVerificationActionRecords/${hazopId}`).catch(() => ({ data: [] })),
+                    axios.get(`${strings.localhost}/api/moc-reference/by-hazop?hazopRegistrationId=${hazopId}`).catch(() => ({ data: [] })),
+                    axios.get(`${strings.localhost}/api/hazopNode/by-registration-status?registrationId=${hazopId}&status=true`).catch(() => ({ data: [] })),
+                    axios.get(`${strings.localhost}/api/team-comments/getByHazop/${hazopId}`).catch(() => ({ data: [] })),
+                    axios.get(`${strings.localhost}/api/javaHazopDocument/getByKeys`, {
                         params: {
                             companyId: companyId,
                             primeryKey: "HAZOPFIRSTPAGEID",

@@ -81,7 +81,7 @@ const NodeDetails = () => {
       setLoading(true);
 
       const response = await fetch(
-        `http://${strings.localhost}/api/hazopNodeDetail/node/${id}`
+        `${strings.localhost}/api/hazopNodeDetail/node/${id}`
       );
 
       if (!response.ok) {
@@ -190,7 +190,7 @@ const NodeDetails = () => {
       }));
 
       const response = await fetch(
-        `http://${strings.localhost}/api/hazopNodeDetail/updateSequenceById/${id}`,
+        `${strings.localhost}/api/hazopNodeDetail/updateSequenceById/${id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -240,7 +240,7 @@ const NodeDetails = () => {
 
     try {
       await axios.put(
-        `http://${strings.localhost}/api/hazopNodeDetail/updateSequenceById/${id}`,
+        `${strings.localhost}/api/hazopNodeDetail/updateSequenceById/${id}`,
         payload,
         { headers: { "Content-Type": "application/json" } }
       );
@@ -289,7 +289,7 @@ const NodeDetails = () => {
     try {
       setLoading(true);
       const response = await fetch(
-        `http://${strings.localhost}/api/hazopNode/${id}`
+        `${strings.localhost}/api/hazopNode/${id}`
       );
       if (!response.ok) {
         const text = await response.text();
@@ -313,7 +313,7 @@ const NodeDetails = () => {
       setLoading(true);
 
       const response = await fetch(
-        `http://${strings.localhost}/api/hazopNode/complete/${id}`,
+        `${strings.localhost}/api/hazopNode/complete/${id}`,
         { method: "PUT" }
       );
 
@@ -337,7 +337,7 @@ const NodeDetails = () => {
       setLoading(true);
 
       const response = await fetch(
-        `http://${strings.localhost}/api/nodeRecommendation/getByDetailId/${detailId}`
+        `${strings.localhost}/api/nodeRecommendation/getByDetailId/${detailId}`
       );
 
       if (!response.ok) {
@@ -431,7 +431,7 @@ const NodeDetails = () => {
       setLoading(true);
 
       const response = await fetch(
-        `http://${strings.localhost}/api/hazopNode/delete/${id}`,
+        `${strings.localhost}/api/hazopNode/delete/${id}`,
         { method: "PUT" }
       );
 

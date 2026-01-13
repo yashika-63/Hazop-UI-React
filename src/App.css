@@ -74,3 +74,38 @@
   padding: 30px;
 } */
 
+
+
+
+/* =========================================
+   MOBILE RESPONSIVE (LOGOS & WRAPPERS)
+   Add this to the very bottom of your CSS
+   ========================================= */
+
+@media screen and (max-width: 768px) {
+
+  /* 1. Logo Adjustments */
+  /* Make logos smaller on mobile so they don't dominate the screen */
+  .logo {
+    height: 4em; /* Reduced from 6em */
+    padding: 1em; /* Reduced from 1.5em */
+  }
+
+  /* 2. Card Padding */
+  /* Reduce padding to give text/content more width */
+  .card {
+    padding: 1rem; /* Reduced from 2em */
+  }
+
+  /* 3. Page Wrapper Adjustments */
+  .page-wrapper {
+    padding-left: 5px; /* Maximize available screen width */
+    padding-right: 5px;
+    
+    /* Ensure flex doesn't center vertically on small screens if content is long */
+    align-items: flex-start; 
+    
+    /* Sometimes on mobile, block display is safer than flex for main wrappers 
+       to prevent width calculation issues, but flex is usually fine if aligned start */
+  }
+}

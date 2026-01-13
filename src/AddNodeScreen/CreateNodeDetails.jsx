@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FaEye, FaMinus, FaPlus } from "react-icons/fa";
+import { FaEye, FaMinus, FaPlus, FaSubscript, FaSuperscript } from "react-icons/fa";
 import { showToast } from "../CommonUI/CommonUI";
 import "./Node.css";
 import { strings } from "../string";
@@ -58,7 +58,113 @@ const CreateNodeDetails = () => {
   const [showRibbonNodeList, setShowRibbonNodeList] = useState(false);
   const passedDetail = location.state?.detail || null;
   const hazopRegistrationId = currentNodeData?.javaHazopRegistration?.id;
+const [activeField, setActiveField] = useState(null);
 
+
+// --- Subscript / Superscript Logic ---
+  // const subMap = { '0': '₀', '1': '₁', '2': '₂', '3': '₃', '4': '₄', '5': '₅', '6': '₆', '7': '₇', '8': '₈', '9': '₉', '+': '₊', '-': '₋', '=': '₌', '(': '₍', ')': '₎', 'x': 'ₓ', 'y': 'ᵧ' };
+  // const supMap = { '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹', '+': '⁺', '-': '⁻', '=': '⁼', '(': '⁽', ')': '⁾', 'n': 'ⁿ', 'x': 'ˣ', 'y': 'ʸ' };
+
+  // --- 1. Mappings for Subscript and Superscript ---
+  const subMap = {
+    // Normal to Sub
+    '0': '₀', '1': '₁', '2': '₂', '3': '₃', '4': '₄', '5': '₅', '6': '₆', '7': '₇', '8': '₈', '9': '₉',
+    '+': '₊', '-': '₋', '=': '₌', '(': '₍', ')': '₎', 'x': 'ₓ', 'y': 'ᵧ',
+    // Superscript to Sub (The new part)
+    '⁰': '₀', '¹': '₁', '²': '₂', '³': '₃', '⁴': '₄', '⁵': '₅', '⁶': '₆', '⁷': '₇', '⁸': '₈', '⁹': '₉',
+    '⁺': '₊', '⁻': '₋', '⁼': '₌', '⁽': '₍', '⁾': '₎', 'ˣ': 'ₓ', 'ʸ': 'ᵧ', 'ⁿ': 'ₙ'
+  };
+
+  const supMap = {
+    // Normal to Sup
+    '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹',
+    '+': '⁺', '-': '⁻', '=': '⁼', '(': '⁽', ')': '⁾', 'n': 'ⁿ', 'x': 'ˣ', 'y': 'ʸ',
+    // Subscript to Sup (The new part)
+    '₀': '⁰', '₁': '¹', '₂': '²', '₃': '³', '₄': '⁴', '₅': '⁵', '₆': '⁶', '₇': '⁷', '₈': '⁸', '₉': '⁹',
+    '₊': '⁺', '₋': '⁻', '₌': '⁼', '₍': '⁽', '₎': '⁾', 'ₓ': 'ˣ', 'ᵧ': 'ʸ'
+  };
+  const handleFocus = (e) => {
+    // Only track if it's a text input or textarea
+    if (e.target.type === 'text' || e.target.type === 'textarea') {
+      setActiveField(e.target.name); // Using 'name' instead of 'id' as some inputs here lack IDs
+    }
+  };
+
+  const applyGlobalFormat = (type) => {
+    if (!activeField) {
+      showToast("Please click inside a text field first.", "info");
+      return;
+    }
+    formatSelection(activeField, type);
+  };
+
+const formatSelection = (fieldName, type) => {
+    // 1. Find the input element using the unique name
+    const input = document.querySelector(`[name="${fieldName}"]`);
+    if (!input) return;
+
+    const start = input.selectionStart;
+    const end = input.selectionEnd;
+
+    // 2. Identify if this is a recommendation field (rec-0, rec-1...)
+    let currentText = "";
+    let isRecommendation = false;
+    let recIndex = -1;
+
+    if (fieldName.startsWith("rec-")) {
+      isRecommendation = true;
+      recIndex = parseInt(fieldName.split("-")[1], 10);
+      // Grab text from the array
+      currentText = tempRecommendations[recIndex]?.recommendation || "";
+    } else {
+      // Grab text from the main form
+      currentText = form[fieldName] || "";
+    }
+
+    if (start === end) {
+      showToast("Please highlight the text/numbers to format.", "info");
+      return;
+    }
+
+    // 3. Convert characters
+    const selectedText = currentText.substring(start, end);
+    const map = type === 'sub' ? subMap : supMap;
+
+    let convertedText = "";
+    for (let char of selectedText) {
+      convertedText += map[char] || char;
+    }
+
+    const newText = currentText.substring(0, start) + convertedText + currentText.substring(end);
+
+    // 4. Update State
+    if (isRecommendation) {
+        // A. Update the specific item in the array
+        const updatedRecs = tempRecommendations.map((r, i) => 
+            i === recIndex ? { ...r, recommendation: newText } : r
+        );
+        setTempRecommendations(updatedRecs);
+
+        // B. Sync with the main form (Additional Control string) so it saves correctly
+        setForm(prev => ({
+            ...prev,
+            additionalControl: updatedRecs.map(r => r.recommendation).join("\n")
+        }));
+        
+        setIsSaved(false);
+    } else {
+        // Normal field update
+        setForm(prev => ({ ...prev, [fieldName]: newText }));
+        setIsSaved(false);
+    }
+
+    // 5. Restore Cursor Position
+    setTimeout(() => {
+      input.setSelectionRange(start + convertedText.length, start + convertedText.length);
+      // We don't need input.focus() here if onMouseDown prevented default, 
+      // but keeping it doesn't hurt.
+    }, 0);
+  };
   useEffect(() => {
     const loadPassedDetail = async () => {
       if (!passedDetail) return;
@@ -68,7 +174,7 @@ const CreateNodeDetails = () => {
 
       // Load recommendations for this detail
       const recRes = await fetch(
-        `http://${strings.localhost}/api/nodeRecommendation/getByDetailId/${passedDetail.id}`
+        `${strings.localhost}/api/nodeRecommendation/getByDetailId/${passedDetail.id}`
       );
       const recs = await recRes.json();
 
@@ -88,7 +194,7 @@ const CreateNodeDetails = () => {
     const fetchNode = async () => {
       if (!currentNodeId) return;
       const res = await fetch(
-        `http://${strings.localhost}/api/hazopNode/${currentNodeId}`
+        `${strings.localhost}/api/hazopNode/${currentNodeId}`
       );
       if (res.ok) {
         const data = await res.json();
@@ -150,7 +256,7 @@ const CreateNodeDetails = () => {
   useEffect(() => {
     if (passedDetail) return;
     fetch(
-      `http://${strings.localhost}/api/hazopNodeDetail/node/${currentNodeId}`
+      `${strings.localhost}/api/hazopNodeDetail/node/${currentNodeId}`
     )
       .then((res) => res.json())
       .then((data) => setDetails(data));
@@ -163,7 +269,7 @@ const CreateNodeDetails = () => {
       try {
         setLoading(true);
         const res = await fetch(
-          `http://${strings.localhost}/api/hazopNodeDetail/node/${nodeID}`
+          `${strings.localhost}/api/hazopNodeDetail/node/${nodeID}`
         );
         // if (!res.ok) throw new Error("Failed to fetch node details");
         const data = await res.json();
@@ -281,7 +387,7 @@ const CreateNodeDetails = () => {
           ? currentDetailNo
           : currentDetailNo || 0;
       const nodeDetailResponse = await fetch(
-        `http://${strings.localhost}/api/hazopNodeDetail/saveDetails/${currentNodeId}?previousDetailNo=${previousDetailNo}`,
+        `${strings.localhost}/api/hazopNodeDetail/saveDetails/${currentNodeId}?previousDetailNo=${previousDetailNo}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -318,7 +424,7 @@ const CreateNodeDetails = () => {
 
         // Send recommendations as an array
         const recommendationsResponse = await fetch(
-          `http://${strings.localhost}/api/nodeRecommendation/save/${currentNodeId}/${nodeDetailId}`,
+          `${strings.localhost}/api/nodeRecommendation/save/${currentNodeId}/${nodeDetailId}`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -368,7 +474,7 @@ const CreateNodeDetails = () => {
       try {
         setLoading(true);
         const res = await fetch(
-          `http://${strings.localhost}/api/hazopNodeDetail/node/${currentNodeId}`
+          `${strings.localhost}/api/hazopNodeDetail/node/${currentNodeId}`
         );
         if (!res.ok) throw new Error("Failed to fetch node details");
         const data = await res.json();
@@ -376,7 +482,7 @@ const CreateNodeDetails = () => {
         if (data && data.length > 0) {
           const detail = data[0];
           const recommendationsRes = await fetch(
-            `http://${strings.localhost}/api/nodeRecommendation/getByDetailId/${detail.id}`
+            `${strings.localhost}/api/nodeRecommendation/getByDetailId/${detail.id}`
           );
           const recommendations = await recommendationsRes.json();
 
@@ -405,7 +511,7 @@ const CreateNodeDetails = () => {
 
     try {
       setLoading(true);
-      let url = `http://${strings.localhost}/api/hazopNodeDetail/getByDirectionNew?nodeId=${currentNodeId}&direction=${direction}`;
+      let url = `${strings.localhost}/api/hazopNodeDetail/getByDirectionNew?nodeId=${currentNodeId}&direction=${direction}`;
       if (
         currentDetailId !== null &&
         currentDetailNo !== null &&
@@ -459,7 +565,7 @@ const CreateNodeDetails = () => {
           ? currentDetailNo
           : currentDetailNo || 0;
       const detailRes = await fetch(
-        `http://${strings.localhost}/api/hazopNodeDetail/saveDetails/${currentNodeId}?previousDetailNo=${previousDetailNo}`,
+        `${strings.localhost}/api/hazopNodeDetail/saveDetails/${currentNodeId}?previousDetailNo=${previousDetailNo}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -484,8 +590,8 @@ const CreateNodeDetails = () => {
       if (recommendationsList.length > 0) {
         for (let rec of recommendationsList) {
           const url = rec.id
-            ? `http://${strings.localhost}/api/nodeRecommendation/update/${rec.id}`
-            : `http://${strings.localhost}/api/nodeRecommendation/save/${currentNodeId}/${nodeDetailId}`;
+            ? `${strings.localhost}/api/nodeRecommendation/update/${rec.id}`
+            : `${strings.localhost}/api/nodeRecommendation/save/${currentNodeId}/${nodeDetailId}`;
 
           await fetch(url, {
             method: rec.id ? "PUT" : "POST",
@@ -527,7 +633,7 @@ const CreateNodeDetails = () => {
     try {
       setLoading(true);
       const res = await fetch(
-        `http://${strings.localhost}/api/hazopNodeDetail/node/${nextNode.id}`
+        `${strings.localhost}/api/hazopNodeDetail/node/${nextNode.id}`
       );
       const contentType = res.headers.get("content-type");
       let detailsData = null;
@@ -557,7 +663,7 @@ const CreateNodeDetails = () => {
       }
       const firstDetail = detailsData[0];
       const recsRes = await fetch(
-        `http://${strings.localhost}/api/nodeRecommendation/getByDetailId/${firstDetail.id}`
+        `${strings.localhost}/api/nodeRecommendation/getByDetailId/${firstDetail.id}`
       );
       const recommendations = await recsRes.json();
       setForm({
@@ -636,7 +742,7 @@ const CreateNodeDetails = () => {
   const loadRecommendations = async (detailId) => {
     try {
       const res = await fetch(
-        `http://${strings.localhost}/api/nodeRecommendation/getByDetailId/${detailId}`
+        `${strings.localhost}/api/nodeRecommendation/getByDetailId/${detailId}`
       );
       if (!res.ok) return [];
 
@@ -655,7 +761,7 @@ const CreateNodeDetails = () => {
       const currentIdParam = currentNodeId || 0;
 
       const nodeRes = await fetch(
-        `http://${strings.localhost}/api/hazopNode/${currentNodeId}`
+        `${strings.localhost}/api/hazopNode/${currentNodeId}`
       );
       if (!nodeRes.ok) throw new Error("Failed to fetch node");
 
@@ -663,7 +769,7 @@ const CreateNodeDetails = () => {
       const registrationId = nodeData.javaHazopRegistration?.id || 0;
 
       const res = await fetch(
-        `http://${strings.localhost}/api/hazopNode/node/getByDirection?currentId=${currentIdParam}&registrationId=${registrationId}&direction=${direction}`
+        `${strings.localhost}/api/hazopNode/node/getByDirection?currentId=${currentIdParam}&registrationId=${registrationId}&direction=${direction}`
       );
 
       if (!res.ok) return null;
@@ -706,7 +812,7 @@ const CreateNodeDetails = () => {
 
       if (recToDelete.id) {
         const deleteRes = await fetch(
-          `http://${strings.localhost}/api/nodeRecommendation/delete/${recToDelete.id}`,
+          `${strings.localhost}/api/nodeRecommendation/delete/${recToDelete.id}`,
           { method: "DELETE" }
         );
 
@@ -715,7 +821,7 @@ const CreateNodeDetails = () => {
 
       if (currentDetailId) {
         const updateRes = await fetch(
-          `http://${strings.localhost}/api/hazopNodeDetail/update/${currentDetailId}`,
+          `${strings.localhost}/api/hazopNodeDetail/update/${currentDetailId}`,
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
@@ -873,7 +979,43 @@ const CreateNodeDetails = () => {
         handleOpenReport={() => setShowReportPopup(true)}
       />
       <NodeInfo currentNodeId={currentNodeId} />
-
+      <div
+        className="global-toolbar"
+        style={{
+          position: "sticky",
+          padding: "2px 10px",
+          borderBottom: "1px solid var(--border-color, #ddd)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+      
+        
+        <div className="fmt-btn-container" style={{ marginLeft: "auto", display: "flex", gap: "8px" }}>
+          <button 
+            type="button" 
+            onMouseDown={(e) => e.preventDefault()} 
+            onClick={() => applyGlobalFormat("sub")} 
+            className={`fmt-btn ${activeField ? "active-fmt" : ""}`} 
+            title="Subscript" 
+            style={{ padding: "6px 12px", display: "flex", alignItems: "center", gap: "6px" }}
+          >
+            <FaSubscript /> Subscript
+          </button>
+          
+          <button 
+            type="button" 
+            onMouseDown={(e) => e.preventDefault()} 
+            onClick={() => applyGlobalFormat("sup")} 
+            className={`fmt-btn ${activeField ? "active-fmt" : ""}`} 
+            title="Superscript" 
+            style={{ padding: "6px 12px", display: "flex", alignItems: "center", gap: "6px" }}
+          >
+            <FaSuperscript /> Superscript
+          </button>
+        </div>
+      </div>
       <div>
         <div>
           <form onSubmit={handleSubmit}>
@@ -895,6 +1037,7 @@ const CreateNodeDetails = () => {
                 <input
                   type="text"
                   name="generalParameter"
+                  onFocus={handleFocus}
                   value={form.generalParameter}
                   onChange={handleChange}
                   maxLength={1000}
@@ -917,6 +1060,7 @@ const CreateNodeDetails = () => {
                 <input
                   type="text"
                   name="specificParameter"
+                  onFocus={handleFocus}
                   value={form.specificParameter}
                   onChange={handleChange}
                   maxLength={1000}
@@ -937,6 +1081,7 @@ const CreateNodeDetails = () => {
                 <input
                   type="text"
                   name="guidWord"
+                  onFocus={handleFocus}
                   value={form.guidWord}
                   onChange={handleChange}
                   maxLength={1000}
@@ -975,6 +1120,7 @@ const CreateNodeDetails = () => {
                   name="deviation"
                   rows={rows}
                   value={form.deviation}
+                  onFocus={handleFocus}
                   onChange={handleChange}
                   className="textareaFont"
                   maxLength={5000}
@@ -996,6 +1142,7 @@ const CreateNodeDetails = () => {
                   name="causes"
                   rows={rows}
                   value={form.causes}
+                  onFocus={handleFocus}
                   onChange={handleChange}
                   className="textareaFont"
                   maxLength={5000}
@@ -1017,6 +1164,7 @@ const CreateNodeDetails = () => {
                   name="consequences"
                   rows={rows}
                   value={form.consequences}
+                  onFocus={handleFocus}
                   onChange={handleChange}
                   className="textareaFont"
                   maxLength={5000}
@@ -1039,6 +1187,7 @@ const CreateNodeDetails = () => {
                   <textarea
                     name="existineControl"
                     rows={smallRows}
+                    onFocus={handleFocus}
                     value={form.existineControl}
                     onChange={handleChange}
                     className="textareaFont"
@@ -1124,7 +1273,6 @@ const CreateNodeDetails = () => {
                           fontSize: '12px',
                           fontWeight: 'normal',
                           marginLeft: '4px',
-                          // We sum the length of all actual recommendation strings
                           color: tempRecommendations.reduce((acc, rec) => acc + (rec.recommendation?.length || 0), 0) >= 5000 ? 'red' : '#666'
                         }}>
                           ({tempRecommendations.reduce((acc, rec) => acc + (rec.recommendation?.length || 0), 0)}/5000)
@@ -1198,6 +1346,10 @@ const CreateNodeDetails = () => {
                                 )
                               );
                             }}
+                            onFocus={(e) => {
+                                setActiveField(`rec-${index}`); 
+                            }}
+                            name={`rec-${index}`}
                             className="textareaFont"
                             style={{
                               width: "100%",

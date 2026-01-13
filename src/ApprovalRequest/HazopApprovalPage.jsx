@@ -35,7 +35,7 @@ const HazopApprovalPage = ({onActionComplete}) => {
         setLoading(true);
         try {
             const response = await axios.get(
-                `http://${strings.localhost}/api/team-comments/pending-actions?empCode=${empCode}`
+                `${strings.localhost}/api/team-comments/pending-actions?empCode=${empCode}`
             );
             setPendingActions(response.data || []);
         } catch (error) {
@@ -82,7 +82,7 @@ const HazopApprovalPage = ({onActionComplete}) => {
         setIsSendingOtp(true);
         try {
             await axios.post(
-                `http://${strings.localhost}/api/team-comments/send-otp`,
+                `${strings.localhost}/api/team-comments/send-otp`,
                 null,
                 {
                     params: {
@@ -111,7 +111,7 @@ const HazopApprovalPage = ({onActionComplete}) => {
         setIsVerifyingOtp(true);
         try {
             await axios.post(
-                `http://${strings.localhost}/api/team-comments/verify-otp`,
+                `${strings.localhost}/api/team-comments/verify-otp`,
                 null,
                 {
                     params: {

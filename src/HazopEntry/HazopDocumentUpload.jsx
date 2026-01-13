@@ -37,7 +37,7 @@ const HazopDocumentUpload = React.forwardRef(({ disabled }, ref) => {
                     formData.append("primeryKeyValue", hazopId);
 
                     await axios.post(
-                        `http://${strings.localhost}/api/javaHazopDocument/upload/${hazopId}`,
+                        `${strings.localhost}/api/javaHazopDocument/upload/${hazopId}`,
                         formData,
                         {
                             headers: { "Content-Type": "multipart/form-data" },
@@ -150,7 +150,7 @@ const HazopDocumentUpload = React.forwardRef(({ disabled }, ref) => {
                 <button
                     type="button"
                     className="browse-btn"
-                    onClick={onBrowseClick} // Triggers the hidden multiple input
+                    onClick={onBrowseClick} 
                     disabled={disabled || uploading}
                 >
                     Browse Files
@@ -164,7 +164,6 @@ const HazopDocumentUpload = React.forwardRef(({ disabled }, ref) => {
                         <div className="file-info">
                             <label className="custom-file-upload">
                                 {doc.file ? "Change" : "Select"}
-                                {/* Single file input for replacing specific row */}
                                 <input
                                     type="file"
                                     onChange={(e) => handleFileChange(index, e.target.files[0])}

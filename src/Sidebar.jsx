@@ -22,7 +22,7 @@ const Sidebar = ({ isOpen }) => {
   // Fetch count from API
   const fetchSidebarCounts = () => {
     if (empCode) {
-      fetch(`http://${strings.localhost}/api/hazop-dashboard/total-pending-count?empCode=${empCode}`)
+      fetch(`${strings.localhost}/api/hazop-dashboard/total-pending-count?empCode=${empCode}`)
         .then((res) => res.json())
         .then((data) => setTotalPendingCount(data.totalPendingCount || 0))
         .catch((err) => console.error(err));

@@ -9,14 +9,13 @@ export const formatDate = (dateString) => {
   if (!dateString) return "N/A";
 
   const date = new Date(dateString);
-  if (isNaN(date)) return "N/A";  // <-- prevents NaN-NaN-NaN
+  if (isNaN(date)) return "N/A"; // <-- prevents NaN-NaN-NaN
   const day = String(date.getDate()).padStart(2, "0");
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const year = date.getFullYear();
 
   return `${day}-${month}-${year}`;
 };
-
 
 export const formatDateToBackend = (dateString) => {
   if (!dateString) return null;
@@ -33,10 +32,10 @@ export const showToast = (message, type) => {
       type === "success"
         ? "my-toast my-toast-success"
         : type === "error"
-          ? "my-toast my-toast-error"
-          : type === "warn"
-            ? "my-toast my-toast-warn"
-            : "my-toast my-toast-info",
+        ? "my-toast my-toast-error"
+        : type === "warn"
+        ? "my-toast my-toast-warn"
+        : "my-toast my-toast-info",
     position: "top-right",
     autoClose: 3000,
     hideProgressBar: false,
@@ -53,14 +52,8 @@ export const showToast = (message, type) => {
 };
 
 function ScrollableViewer({ content }) {
-  return (
-    <div className="scrollable-viewer">
-      {content}
-    </div>
-  );
+  return <div className="scrollable-viewer">{content}</div>;
 }
-
-
 
 export const truncateWords = (text, wordLimit = 3) => {
   if (!text) return "-";
@@ -69,13 +62,9 @@ export const truncateWords = (text, wordLimit = 3) => {
   return words.slice(0, wordLimit).join(" ") + "...";
 };
 
-
-
 export const truncateText = (text, maxLength = 80) => {
   if (!text) return "-";
-  return text.length > maxLength
-      ? text.substring(0, maxLength) + "..."
-      : text;
+  return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
 };
 
 export const getRiskClass = (risk) => {
@@ -92,17 +81,16 @@ export const getRiskClass = (risk) => {
   return "risk-default";
 };
 export const getRiskColor = (risk) => {
-  if (!risk) return '#fff';
+  if (!risk) return "#fff";
   const r = Number(risk);
 
-  if ([1, 2, 3, 4, 5].includes(r)) return '#207229';        // Trivial
-  if ([6, 8, 9, 10].includes(r)) return '#56a744';          // Tolerable
-  if ([12, 15].includes(r)) return '#fef65e';              // Moderate
-  if ([16, 18].includes(r)) return '#fa9201';              // Substantial
-  if ([20, 25].includes(r)) return '#f91111';              // Intolerable
-  return '#fff';
+  if ([1, 2, 3, 4, 5].includes(r)) return "#207229"; // Trivial
+  if ([6, 8, 9, 10].includes(r)) return "#56a744"; // Tolerable
+  if ([12, 15].includes(r)) return "#fef65e"; // Moderate
+  if ([16, 18].includes(r)) return "#fa9201"; // Substantial
+  if ([20, 25].includes(r)) return "#f91111"; // Intolerable
+  return "#fff";
 };
-
 
 export const getBorderColor = (risk) => {
   const r = Number(risk);
@@ -116,22 +104,22 @@ export const getBorderColor = (risk) => {
   return "#ccc";
 };
 
-
-
-
 export const root = document.documentElement;
-export const trivial = getComputedStyle(root).getPropertyValue("--trivial").trim();
+export const trivial = getComputedStyle(root)
+  .getPropertyValue("--trivial")
+  .trim();
 export const tolerable = getComputedStyle(root)
   .getPropertyValue("--tolerable")
   .trim();
-export const moderate = getComputedStyle(root).getPropertyValue("--moderate").trim();
+export const moderate = getComputedStyle(root)
+  .getPropertyValue("--moderate")
+  .trim();
 export const substantial = getComputedStyle(root)
   .getPropertyValue("--substantial")
   .trim();
 export const intolerable = getComputedStyle(root)
   .getPropertyValue("--intolerable")
   .trim();
-
 
 export const getRiskLevelText = (risk) => {
   const r = Number(risk);
@@ -156,16 +144,20 @@ export const getRiskTextClass = (risk) => {
 
   return "risk-default";
 };
+
+
 export const fetchDataByKey = async (keyvalue) => {
   const companyId = localStorage.getItem("companyId");
 
   try {
-    const response = await axios.get(`http://${strings.localhost}/api/JavaMasterData/getByKey/${companyId}/${keyvalue}`);
+    const response = await axios.get(
+      `${strings.localhost}/api/JavaMasterData/getByKey/${companyId}/${keyvalue}`
+    );
     if (response.data && Array.isArray(response.data)) {
-      return response.data.map(item => ({
+      return response.data.map((item) => ({
         masterId: item.masterId,
-        data: item.data || '',
-        category: item.category || '',
+        data: item.data || "",
+        category: item.category || "",
       }));
     }
     console.error(`Invalid data structure or empty response for ${keyvalue}`);
@@ -175,8 +167,6 @@ export const fetchDataByKey = async (keyvalue) => {
     throw error;
   }
 };
-
-
 
 export const fetchSitesByDepartment = async (departmentKey, setSiteOptions) => {
   try {
@@ -192,16 +182,29 @@ export const fetchSitesByDepartment = async (departmentKey, setSiteOptions) => {
     setSiteOptions([]);
   }
 };
+// Add this to your CommonUI file
 
-
-
+export const fetchDepartmentsBySite = async (siteKey, setDepartmentOptions) => {
+  try {
+    if (!siteKey) {
+      setDepartmentOptions([]);
+      return;
+    }
+    // Assuming the backend has data mapped where the Key is the Site Name
+    const deptData = await fetchDataByKey(siteKey); 
+    setDepartmentOptions(deptData);
+  } catch (err) {
+    console.error("Error fetching departments for site", err);
+    setDepartmentOptions([]);
+  }
+};
 export const StatusIcon = ({ status }) => {
   // Define colors for different statuses
   const statusColors = {
-    completed: "green",   // Done
-    ongoing: "blue",      // In progress
-    pending: "orange",    // Waiting / Not started
-    default: "gray"       // Unknown / Not applicable
+    completed: "green", // Done
+    ongoing: "blue", // In progress
+    pending: "orange", // Waiting / Not started
+    default: "gray", // Unknown / Not applicable
   };
 
   return (
@@ -209,14 +212,12 @@ export const StatusIcon = ({ status }) => {
       style={{
         color: statusColors[status] || statusColors.default,
         fontSize: "20px",
-        marginRight: "8px"
+        marginRight: "8px",
       }}
       title={status} // Hover shows status
     />
   );
 };
-
-
 
 export const getFontSize = (textLength) => {
   if (textLength < 500) return 11;
@@ -226,9 +227,9 @@ export const getFontSize = (textLength) => {
 
 // Function to adjust column width dynamically based on text length
 export const getColumnWidth = (textLength) => {
-  if (textLength < 500) return '8%';
-  if (textLength < 1000) return '12%';
-  return '18%'; // For very large text
+  if (textLength < 500) return "8%";
+  if (textLength < 1000) return "12%";
+  return "18%"; // For very large text
 };
 
 // Component to truncate text with "..."
@@ -236,5 +237,3 @@ export const TruncateText = ({ text, maxLength }) => {
   if (!text) return "";
   return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
 };
-
-

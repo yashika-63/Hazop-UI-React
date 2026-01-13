@@ -19,7 +19,7 @@ const navigate = useNavigate();
     try {
       setLoading(true);
       const response = await fetch(
-        `http://${strings.localhost}/api/hazopNode/by-registration-status?registrationId=${registrationId}&status=true`
+        `${strings.localhost}/api/hazopNode/by-registration-status?registrationId=${registrationId}&status=true`
       );
       const data = await response.json();
       setNodeList(data);

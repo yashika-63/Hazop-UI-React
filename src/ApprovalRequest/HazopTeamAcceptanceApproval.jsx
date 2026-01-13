@@ -29,7 +29,7 @@ const HazopTeamAcceptanceApproval = ({ onActionComplete }) => {
 
     const fetchTeamData = async () => {
         try {
-            const response = await axios.get(`http://${strings.localhost}/api/hazopTeam/getDataByEmployee`, {
+            const response = await axios.get(`${strings.localhost}/api/hazopTeam/getDataByEmployee`, {
                 params: {
                     empCode,
                     sendForAcceptance: 1,
@@ -95,7 +95,7 @@ const HazopTeamAcceptanceApproval = ({ onActionComplete }) => {
             const teamId = selectedRecord.id;
             const empCode = selectedRecord.empCode;
 
-            await axios.put(`http://${strings.localhost}/api/hazopTeam/updateAction`, null, {
+            await axios.put(`${strings.localhost}/api/hazopTeam/updateAction`, null, {
                 params: {
                     teamId,
                     empCode,

@@ -32,7 +32,7 @@ const HazopConfirmationApproval = () => {
         setLoading(true);
         try {
             const res = await axios.get(
-                `http://${strings.localhost}/api/hazopRegistration/hazop/byVerificationFilters?verificationEmpCode=${empCode}&sendForVerification=true&verificationActionTaken=false`
+                `${strings.localhost}/api/hazopRegistration/hazop/byVerificationFilters?verificationEmpCode=${empCode}&sendForVerification=true&verificationActionTaken=false`
             );
             setHazopList(res.data || []);
         } catch (err) {

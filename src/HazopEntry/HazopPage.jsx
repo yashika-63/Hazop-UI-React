@@ -66,9 +66,9 @@ const HazopPage = () => {
     setLoading(true);
     try {
       const [col1Res, col2Res, col3Res] = await Promise.allSettled([
-        axios.get(`http://${strings.localhost}/api/hazopRegistration/filter?companyId=${companyId}&status=true&completionStatus=false&sendForVerification=false`),
-        axios.get(`http://${strings.localhost}/api/hazopRegistration/filter?companyId=${companyId}&status=true&completionStatus=false&sendForVerification=true`),
-        axios.get(`http://${strings.localhost}/api/hazopRegistration/recent-top-10?companyId=${companyId}&status=true&completionStatus=true`)
+        axios.get(`${strings.localhost}/api/hazopRegistration/filter?companyId=${companyId}&status=true&completionStatus=false&sendForVerification=false`),
+        axios.get(`${strings.localhost}/api/hazopRegistration/filter?companyId=${companyId}&status=true&completionStatus=false&sendForVerification=true`),
+        axios.get(`${strings.localhost}/api/hazopRegistration/recent-top-10?companyId=${companyId}&status=true&completionStatus=true`)
       ]);
 
       if (col1Res.status === "fulfilled") setNewRegistered(col1Res.value.data || []);
@@ -116,7 +116,7 @@ const HazopPage = () => {
       return;
     }
     try {
-      const response = await axios.get(`http://${strings.localhost}/api/employee/search?search=${encodeURIComponent(value)}`);
+      const response = await axios.get(`${strings.localhost}/api/employee/search?search=${encodeURIComponent(value)}`);
       setSearchResults(response.data || []);
     } catch (err) {
       console.error("Error fetching team members:", err);
@@ -141,7 +141,7 @@ const HazopPage = () => {
     setLoading(true);
     try {
       await axios.post(
-        `http://${strings.localhost}/api/hazopRegistration/hazop/sendForVerification/${selectedHazopForSend.id}/${encodeURIComponent(selectedEmployee.empCode)}`
+        `${strings.localhost}/api/hazopRegistration/hazop/sendForVerification/${selectedHazopForSend.id}/${encodeURIComponent(selectedEmployee.empCode)}`
       );
       setShowConfirmPopup(false);
       setShowSendCompletionPopup(false);

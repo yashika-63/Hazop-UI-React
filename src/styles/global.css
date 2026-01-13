@@ -930,3 +930,145 @@ p {
   color: var(--text-main);
   /* Updated */
 }
+
+
+
+/* =========================================
+   MOBILE RESPONSIVE (GLOBAL COMPONENTS)
+   Add this to the very bottom of your CSS
+   ========================================= */
+
+@media screen and (max-width: 768px) {
+
+  /* 1. Typography Scaling */
+  h1 { font-size: 20px; margin-bottom: 15px; }
+  h2 { font-size: 16px; margin-bottom: 10px; }
+  
+  /* 2. Grid & Form Layouts */
+  /* Stack inputs vertically instead of side-by-side */
+  .input-row, 
+  .input-row-node {
+    grid-template-columns: 1fr; /* Force 1 column */
+    gap: 15px;
+  }
+
+  .form-group {
+    width: 100%;
+  }
+
+  /* Prevent Zoom on iOS inputs */
+  .form-group input,
+  .form-group select,
+  .form-group textarea,
+  .search-bar-wrapper input {
+    font-size: 12px !important; 
+    padding: 8px;
+  }
+
+  /* 3. Search Bar */
+  /* Make search take full width */
+  .search-container {
+    width: 100%;
+  }
+  
+  .search-bar-wrapper {
+    width: 100%;
+  }
+
+  .search-results {
+    width: 100%; /* Match wrapper width */
+  }
+.rightbtn-controls,
+  .center-controls,
+  .center-controls1 {
+    display: flex;
+    flex-wrap: nowrap;          /* Forces single row */
+    justify-content: flex-start;/* Aligns items to the start */
+    align-items: center;
+    gap: 8px;                   /* Slightly reduced gap for space efficiency */
+    width: 100%;
+    padding-bottom: 5px;        /* Adds space for the scrollbar */
+    /* Smooth scrolling experience on iOS */
+    -webkit-overflow-scrolling: touch; 
+    
+    /* Optional: Hide scrollbar visually but keep functionality */
+    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none;  /* IE 10+ */
+  }
+
+  /* Hides scrollbar for Chrome/Safari/Opera */
+  .rightbtn-controls::-webkit-scrollbar,
+  .center-controls::-webkit-scrollbar,
+  .center-controls1::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Ensure buttons themselves don't wrap text or shrink too much */
+  .outline-btn,
+  .save-btn,
+  .add-btn {
+    flex-shrink: 0;             /* Prevents buttons from squishing */
+    white-space: nowrap;        /* Keeps button text on one line */
+    padding: 6px 10px;          /* Optimized touch target size */
+    font-size: 13px;
+  }
+  /* 5. Generic Table Card (.table-card) */
+  /* Allow horizontal scrolling for generic tables */
+  .table-card {
+    overflow-x: auto;
+    display: block;
+  }
+  
+  .table-card table {
+    min-width: 600px; /* Ensure table doesn't squash too much */
+  }
+
+  /* 6. Confirmation Popup & Modals */
+  .confirm-box {
+    width: 90%; /* Fit screen */
+    padding: 20px;
+  }
+
+  .confirm-buttons {
+    flex-direction: column; /* Stack buttons vertically */
+    gap: 10px;
+  }
+
+  .confirm-btn, 
+  .cancel-btn {
+    width: 100%;
+    padding: 12px;
+  }
+
+  /* 7. Toasts */
+  .my-toast {
+    min-width: auto;
+    width: 90%; /* Fit screen width */
+    margin: 10px auto;
+    left: 0; 
+    right: 0;
+  }
+/* Button Css */
+.close-btn {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  cursor: pointer;
+  font-size: 16px;
+  color: var(--text-muted);
+  border: none;
+  background-color: transparent;
+}
+
+.close-btn:hover {
+  color: var(--text-main);
+  outline: none;
+  border: none;
+}
+  /* 8. Header Flex */
+  .header-flex {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+}

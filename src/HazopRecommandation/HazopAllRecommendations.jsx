@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { FaSearch, FaExclamationTriangle } from 'react-icons/fa'; // Added warning icon
+import { FaSearch, FaExclamationTriangle } from 'react-icons/fa'; 
 import '../styles/global.css';
 import { getRiskColor, showToast, truncateText } from '../CommonUI/CommonUI';
 import { strings } from '../string';
@@ -11,11 +11,8 @@ const HazopAllRecommendations = ({ hazopId }) => {
     const [recommendations, setRecommendations] = useState([]);
     const [loading, setLoading] = useState(true);
     const [expandedRowId, setExpandedRowId] = useState(null);
-
-    // New State for completion status
     const [isHazopComplete, setIsHazopComplete] = useState(false);
     const [statusLoading, setStatusLoading] = useState(true);
-
     const [globalSearch, setGlobalSearch] = useState("");
     const [globalResults, setGlobalResults] = useState([]);
     const [selectedGlobalEmployee, setSelectedGlobalEmployee] = useState(null);
@@ -38,13 +35,13 @@ const HazopAllRecommendations = ({ hazopId }) => {
             try {
                 // 1. Fetch Recommendations
                 const recRes = await axios.get(
-                    `http://${strings.localhost}/api/nodeRecommendation/getByHazopRegistration/${hazopId}`
+                    `${strings.localhost}/api/nodeRecommendation/getByHazopRegistration/${hazopId}`
                 );
                 setRecommendations(recRes.data ?? []);
 
                 // 2. Check Hazop Status
                 const statusRes = await axios.get(
-                    `http://${strings.localhost}/api/hazopNode/check-status/${hazopId}`
+                    `${strings.localhost}/api/hazopNode/check-status/${hazopId}`
                 );
 
                 // Set status based on allNodesComplete flag
@@ -91,7 +88,7 @@ const HazopAllRecommendations = ({ hazopId }) => {
         }
         try {
             const res = await axios.get(
-                `http://${strings.localhost}/api/employee/search?search=${encodeURIComponent(value)}`
+                `${strings.localhost}/api/employee/search?search=${encodeURIComponent(value)}`
             );
             setGlobalResults(res.data || []);
         } catch (err) {
@@ -135,13 +132,13 @@ const HazopAllRecommendations = ({ hazopId }) => {
         try {
             for (const rec of draftRecs) {
                 await axios.put(
-                    `http://${strings.localhost}/api/nodeRecommendation/sendForVerification/${rec.id}/${empCode}`
+                    `${strings.localhost}/api/nodeRecommendation/sendForVerification/${rec.id}/${empCode}`
                 );
             }
             showToast(`${draftRecs.length} recommendations sent for review!`, "success");
 
             // Refresh data
-            const recRes = await axios.get(`http://${strings.localhost}/api/nodeRecommendation/getByHazopRegistration/${hazopId}`);
+            const recRes = await axios.get(`${strings.localhost}/api/nodeRecommendation/getByHazopRegistration/${hazopId}`);
             setRecommendations(recRes.data ?? []);
 
         } catch (err) {
@@ -181,7 +178,6 @@ const HazopAllRecommendations = ({ hazopId }) => {
                 </div>
             )}
 
-            {/* Warning Message if Nodes Not Complete */}
             {!statusLoading && !isHazopComplete && (
                 <div style={{
                     backgroundColor: '#fff3cd',
@@ -205,7 +201,7 @@ const HazopAllRecommendations = ({ hazopId }) => {
             {/* ============================ */}
             {/* GLOBAL EMPLOYEE SELECTOR     */}
             {/* ============================ */}
-            {/* Only show Search and Send button if Hazop is Complete */}
+
             {isHazopComplete && (
                 <div className="top-row">
                     <div className="search-container">
@@ -238,7 +234,6 @@ const HazopAllRecommendations = ({ hazopId }) => {
                         </div>
                     </div>
 
-                    {/* RIGHT SIDE — EMP TAG + BUTTON */}
                     <div className="right-actions">
                         {selectedGlobalEmployee && (
                             <div className="selected-emp-tag">

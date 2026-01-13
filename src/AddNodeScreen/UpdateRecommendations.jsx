@@ -26,15 +26,13 @@ const UpdateRecommendations = ({
 
   useEffect(() => {
     if (!nodeDetailId) {
-      console.log(
-        "nodeDetailId is null or undefined, not fetching recommendations."
-      );
+    
       return;
     }
     const fetchRecommendations = async () => {
       try {
         const res = await fetch(
-          `http://${strings.localhost}/api/nodeRecommendation/getByDetailId/${nodeDetailId}`
+          `${strings.localhost}/api/nodeRecommendation/getByDetailId/${nodeDetailId}`
         );
         if (res.ok) {
           const data = await res.json();
@@ -137,7 +135,7 @@ const UpdateRecommendations = ({
     // 3️⃣ DELETE FROM DATABASE (if has ID)
     try {
       const res = await fetch(
-        `http://${strings.localhost}/api/nodeRecommendation/delete/${rec.id}`,
+        `${strings.localhost}/api/nodeRecommendation/delete/${rec.id}`,
         { method: "DELETE" }
       );
 
@@ -164,7 +162,7 @@ const UpdateRecommendations = ({
 
       if (!rec.id) {
         const res = await fetch(
-          `http://${strings.localhost}/api/nodeRecommendation/save/${nodeID}/${nodeDetailId}`,
+          `${strings.localhost}/api/nodeRecommendation/save/${nodeID}/${nodeDetailId}`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -202,7 +200,7 @@ const UpdateRecommendations = ({
       }
 
       const res = await fetch(
-        `http://${strings.localhost}/api/nodeRecommendation/update/${rec.id}`,
+        `${strings.localhost}/api/nodeRecommendation/update/${rec.id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },

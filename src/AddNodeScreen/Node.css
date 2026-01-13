@@ -322,10 +322,20 @@
 }
 
 /* --- Format Button (Sub/Sup) Styling --- */
+/* Update this class in Node.css */
 .fmt-btn-container {
-  display: inline-flex;
-  gap: 5px;
-  margin-left: 10px;
+  display: flex;       /* Changed from inline-flex to flex */
+  align-items: center;
+  gap: 8px;           /* Consistent gap */
+  /* margin-left: 10px;  <-- REMOVE THIS, we handle it in JSX now */
+}
+
+/* Optional: Add a style for when the buttons are active/usable */
+.active-fmt {
+  border-color: #319795;
+  color: #319795;
+  font-weight: 600;
+  background-color: #f0fff4;
 }
 
 .fmt-btn {
@@ -353,4 +363,105 @@
 
 .fmt-btn:active {
   transform: translateY(1px);
+}
+
+
+
+/* =========================================
+   MOBILE RESPONSIVE OVERRIDES
+   Add this to the very bottom of your CSS
+   ========================================= */
+
+@media screen and (max-width: 768px) {
+  
+  /* 1. Card & Container Adjustments */
+  .card, 
+  .nd-detail-card {
+    padding: 15px; /* Reduce padding to save screen space */
+    border-radius: 12px; /* Slightly reduce radius for smaller screens */
+    min-width: 800px;
+  }
+
+  .popup-body {
+    padding: 15px;
+  }
+
+  /* 2. Grid Layouts: Stack columns vertically */
+.metric-row {
+  display: grid;
+  /* Creates 3 columns, each exactly 50px wide */
+  grid-template-columns: repeat(3, 50px); 
+  
+  /* Adds space between the 50px boxes */
+  gap: 10px; 
+
+  /* Optional: Aligns the whole group to the center (or use 'start' for left) */
+  justify-content: center; 
+  
+  margin-right: 0;
+}
+
+  /* 3. Headers: Allow wrapping */
+  .node-header, 
+  .table-header,
+  .discussion-header,
+  .nd-detail-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .node-header h1 {
+    width: 100%;
+    font-size: 1.2rem; /* Slightly smaller font for headers */
+  }
+
+  /* 4. Ribbon Bar: Enable horizontal scrolling or wrapping */
+  .ribbon-bar {
+    flex-wrap: wrap; /* Buttons will wrap to next line if they don't fit */
+    padding: 10px;
+    gap: 8px;
+  }
+
+  /* 5. Modals: Make them full width on mobile */
+  .small-modal-box {
+    width: 95%; /* Take up most of the mobile screen */
+    max-height: 85vh;
+    padding: 20px;
+  }
+
+  .info-content {
+    width: 90%; /* Override fixed 350px width */
+    max-width: 350px;
+  }
+
+  /* 6. Badges & Risk Indicators */
+  .nd-detail-badges {
+    align-items: flex-start; /* Align left on mobile */
+    margin-top: 15px;
+    flex-direction: row; /* allow them to sit side-by-side if space permits */
+    flex-wrap: wrap;
+  }
+
+  /* 7. Textarea & Inputs */
+  .recommendation-textarea-style {
+    min-height: 120px; /* Slightly smaller height */
+  }
+
+  /* 8. Table Adjustments */
+  .table-section {
+    overflow-x: auto; /* Allow table to scroll horizontally if needed */
+  }
+  
+  /* 9. Header Label Row (for formatting buttons) */
+  .header-label-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .fmt-btn-container {
+    margin-left: 0; /* Remove left margin when stacked */
+    margin-top: 5px;
+  }
 }

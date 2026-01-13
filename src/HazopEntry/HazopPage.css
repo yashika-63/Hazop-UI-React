@@ -16,11 +16,12 @@
     background: var(--bg-row-even);
     padding: 20px;
     border-radius: 20px;
-    
+
     /* CHANGE THIS: */
     /* overflow: hidden;  <-- Remove this */
-    overflow: visible; /* <-- Add this so dropdowns can stick out */
-    
+    overflow: visible;
+    /* <-- Add this so dropdowns can stick out */
+
     /* If you absolutely need a scrollbar on the column, use this instead: */
     /* overflow-y: auto; overflow-x: visible; */
 
@@ -52,14 +53,19 @@
     box-shadow: 0 0 10px rgba(160, 196, 255, 0.6),
         0 0 14px rgba(189, 178, 255, 0.7);
     animation: glowPulse 3s ease-in-out infinite;
-    
+
     /* Ensure it doesn't block clicks on the card underneath */
-    pointer-events: none; 
+    pointer-events: none;
 }
 
 @keyframes glowPulse {
-    0%, 100% { opacity: 0.8; }
-    50% { opacity: 1; }
+    0%, 100% {
+        opacity: 0.8;
+    }
+
+    50% {
+        opacity: 1;
+    }
 }
 
 /* 2. Dark Theme Override - Hides the Glow */
@@ -67,12 +73,14 @@ body.dark .kanban-column::before {
     display: none;
     /* or content: none; */
 }
+
 .kanban-column::-webkit-scrollbar {
     width: 6px;
 }
 
 .kanban-column::-webkit-scrollbar-thumb {
-    background: var(--border-color); /* Variable */
+    background: var(--border-color);
+    /* Variable */
     border-radius: 3px;
 }
 
@@ -88,7 +96,8 @@ body.dark .kanban-column::before {
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    color: var(--text-main); /* Variable */
+    color: var(--text-main);
+    /* Variable */
 }
 
 /* ================================
@@ -104,16 +113,19 @@ body.dark .kanban-column::before {
     border-left: 6px solid #7a6ff0;
     transition: .25s;
     color: var(--text-main);
-    
+
     /* UPDATE THIS: */
-    position: relative; /* Ensure it creates a context */
-    z-index: 1;         /* Default low level */
+    position: relative;
+    /* Ensure it creates a context */
+    z-index: 1;
+    /* Default low level */
 }
 
 /* ADD/UPDATE THIS HOVER STATE: */
 .kanban-card:hover {
     transform: translateY(-4px);
-    z-index: 100; /* CRITICAL: Brings this card (and its dropdown) above the next card */
+    z-index: 100;
+    /* CRITICAL: Brings this card (and its dropdown) above the next card */
 }
 
 .kanban-wrapper {
@@ -138,7 +150,8 @@ body.dark .kanban-column::before {
     text-align: center;
     font-weight: 700;
     font-size: 16px;
-    color: #222; /* Keep dark text for readability on light gradient */
+    color: #222;
+    /* Keep dark text for readability on light gradient */
     padding: 14px 0;
     border-radius: 14px;
     position: relative;
@@ -162,7 +175,7 @@ body.dark .kanban-column::before {
     left: -50%;
     width: 200%;
     height: 100%;
-    background: linear-gradient(120deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0) 60%);
+    background: linear-gradient(120deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0) 60%);
     transform: rotate(25deg) translateY(-50%);
     pointer-events: none;
     filter: blur(6px);
@@ -175,14 +188,19 @@ body.dark .kanban-column::before {
 }
 
 @keyframes shineMove {
-    0% { left: -50%; }
-    100% { left: 100%; }
+    0% {
+        left: -50%;
+    }
+
+    100% {
+        left: 100%;
+    }
 }
 
 .kanban-title span {
     position: relative;
     z-index: 2;
-    text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
 }
 
 /* Top line */
@@ -191,7 +209,8 @@ body.dark .kanban-column::before {
     justify-content: flex-end;
     align-items: center;
     font-size: 11px;
-    color: var(--text-secondary); /* Variable */
+    color: var(--text-secondary);
+    /* Variable */
     margin-bottom: 8px;
     gap: 6px;
 }
@@ -223,8 +242,15 @@ body.dark .kanban-column::before {
 }
 
 @keyframes pop {
-    0% { transform: scale(0.6); opacity: 0; }
-    100% { transform: scale(1); opacity: 1; }
+    0% {
+        transform: scale(0.6);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
 
 /* Title */
@@ -232,13 +258,15 @@ body.dark .kanban-column::before {
     font-size: 15px;
     font-weight: 700;
     margin-bottom: 6px;
-    color: var(--text-main); /* Variable */
+    color: var(--text-main);
+    /* Variable */
 }
 
 /* Subtitle */
 .card-sub {
     font-size: 12px;
-    color: var(--text-secondary); /* Variable */
+    color: var(--text-secondary);
+    /* Variable */
     margin-bottom: 10px;
 }
 
@@ -261,7 +289,8 @@ body.dark .kanban-column::before {
 .people-count {
     font-size: 11px;
     font-weight: 500;
-    color: var(--text-secondary); /* Variable */
+    color: var(--text-secondary);
+    /* Variable */
 }
 
 /* Avatar Group */
@@ -281,14 +310,23 @@ body.dark .kanban-column::before {
     align-items: center;
     justify-content: center;
     margin-left: -8px;
-    border: 2px solid var(--bg-card); /* Variable: border matches card background */
+    border: 2px solid var(--bg-card);
+    /* Variable: border matches card background */
     text-transform: uppercase;
 }
 
 /* Priority border colors */
-.priority-pending { border-left-color: #e9771a !important; }
-.priority-medium { border-left-color: #0791d6 !important; }
-.priority-low { border-left-color: #2ecc71 !important; }
+.priority-pending {
+    border-left-color: #e9771a !important;
+}
+
+.priority-medium {
+    border-left-color: #0791d6 !important;
+}
+
+.priority-low {
+    border-left-color: #2ecc71 !important;
+}
 
 /* Expand/Collapse button */
 .toggle-btn {
@@ -319,15 +357,24 @@ body.dark .kanban-column::before {
 }
 
 @keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-3px); }
+    0%, 100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-3px);
+    }
 }
 
 /* Modal Styles */
 .modal-overlay {
     position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    width: 100%; height: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
     background-color: rgba(0, 0, 0, 0.6);
     display: flex;
     justify-content: center;
@@ -339,7 +386,8 @@ body.dark .kanban-column::before {
 }
 
 .modal-body {
-    background: var(--bg-card); /* Variable */
+    background: var(--bg-card);
+    /* Variable */
     border-radius: 10px;
     width: 40%;
     max-width: 600px;
@@ -350,13 +398,21 @@ body.dark .kanban-column::before {
     flex-direction: column;
     max-height: 75vh;
     overflow-y: auto;
-    color: var(--text-main); /* Variable */
+    color: var(--text-main);
+    /* Variable */
     border: 1px solid var(--border-color);
 }
 
 @keyframes modalFadeIn {
-    0% { opacity: 0; transform: translateY(-10px); }
-    100% { opacity: 1; transform: translateY(0); }
+    0% {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .modal-body {
@@ -364,7 +420,8 @@ body.dark .kanban-column::before {
 }
 
 .modal-box {
-    background: var(--bg-card); /* Variable */
+    background: var(--bg-card);
+    /* Variable */
     border-radius: 10px;
     width: 90%;
     max-width: 1000px;
@@ -375,21 +432,39 @@ body.dark .kanban-column::before {
     flex-direction: column;
     max-height: 80vh;
     overflow-x: auto;
-    color: var(--text-main); /* Variable */
+    color: var(--text-main);
+    /* Variable */
     border: 1px solid var(--border-color);
 }
 
 .modal-header {
-    font-size: 1rem;
-    font-weight: bold;
-    border-bottom: 1px solid var(--border-color); /* Variable */
-    background: var(--bg-card); /* Variable */
-    color: var(--text-main); /* Variable */
+    /* Positioning (Sticks to top of modal) */
     position: sticky;
     top: 0;
-    z-index: 10;
-    padding: 10px 0;
-    height: 20px;
+    z-index: 100;
+    /* Increased to ensure it stays on top */
+
+    /* Visuals */
+    background: var(--bg-card);
+    /* Must be opaque to hide scrolling text behind it */
+    color: var(--text-main);
+    border-bottom: 1px solid var(--border-color);
+
+    /* Spacing & Layout */
+    width: 100%;
+    padding: 15px 10px;
+    /* Increased padding for better look */
+    /* height: 20px;  <-- REMOVE THIS (Let padding define the height) */
+
+    /* Typography */
+    font-size: 1rem;
+    font-weight: bold;
+
+    /* alignment */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    /* Useful if you add a close button later */
 }
 
 .modal-content {
@@ -402,8 +477,15 @@ body.modal-open {
 }
 
 @keyframes modalSlideIn {
-    0% { transform: translateY(-30px); opacity: 0; }
-    100% { transform: translateY(0); opacity: 1; }
+    0% {
+        transform: translateY(-30px);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 @media (max-width: 768px) {
@@ -411,27 +493,122 @@ body.modal-open {
         flex-direction: column;
         gap: 20px;
     }
+
     .kanban-column {
         min-height: auto;
     }
+
     .create-btn {
         padding: 12px 18px;
         font-size: 14px;
     }
+
     .modal-box {
-        width: 90%;
-        padding: 30px;
+        width: 60%;
+        /* padding: 30px; */
     }
+
     .kanban-card {
         padding: 18px;
     }
+
     .kanban-column h3 {
         font-size: 18px;
     }
+
     .card-title {
         font-size: 16px;
     }
+
     .card-sub {
         font-size: 14px;
+    }
+}
+
+
+
+/* =========================================
+   MOBILE RESPONSIVE (TRELLO SCROLL & TOP-CENTER MODAL)
+   ========================================= */
+
+@media screen and (max-width: 768px) {
+
+    /* 1. Kanban: Horizontal Scrolling */
+    .kanban-container {
+        display: flex;
+        flex-direction: row;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        padding: 10px 20px;
+        gap: 15px;
+        justify-content: flex-start;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .kanban-column {
+        min-width: 85vw;
+        max-width: 85vw;
+        scroll-snap-align: center;
+        margin-bottom: 0;
+    }
+
+    .kanban-titles {
+        display: none;
+    }
+
+
+    .modal-header {
+        font-size: 12px;
+        padding: 6px 8px;
+        height: auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+
+    .modal-overlay {
+        /* Ensure the dark background covers EVERYTHING */
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        background-color: rgba(0, 0, 0, 0.6);
+        z-index: 9999;
+
+        /* Align to top, Center Horizontally */
+        display: flex !important;
+        align-items: flex-start !important;
+        justify-content: center !important;
+
+        padding: 0 !important;
+    }
+
+    .modal-body,
+    .modal-box,
+    .small-modal-box {
+        /* Position: 15% down from the top */
+        margin-top: 15vh !important;
+        margin-bottom: auto !important;
+        /* Allow bottom to be empty */
+
+        /* Size */
+        width: 95% !important;
+        max-width: 90% !important;
+        min-width: auto !important;
+
+        /* Height: Auto grows with content, but capped so it doesn't overflow screen */
+        height: auto !important;
+        max-height: 70vh !important;
+
+        /* Reset other styles */
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        transform: none !important;
+        border-radius: 12px !important;
+        overflow-y: auto !important;
+        /* Scroll inside the box if content is long */
     }
 }

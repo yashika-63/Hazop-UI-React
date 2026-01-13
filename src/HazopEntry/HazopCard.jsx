@@ -46,11 +46,11 @@ const HazopCard = ({
     const fetchCardDetails = async () => {
       try {
         // 1. Fetch Team Count
-        const countPromise = axios.get(`http://${strings.localhost}/api/hazopTeam/count/${item.id}`);
+        const countPromise = axios.get(`${strings.localhost}/api/hazopTeam/count/${item.id}`);
         
         // 2. Fetch Status (Only needed for 'New Registered' column)
         const statusPromise = columnType === "new" 
-            ? axios.get(`http://${strings.localhost}/api/hazopNode/check-status/${item.id}`)
+            ? axios.get(`${strings.localhost}/api/hazopNode/check-status/${item.id}`)
             : Promise.resolve(null);
 
         const [countRes, statusRes] = await Promise.allSettled([countPromise, statusPromise]);

@@ -25,7 +25,7 @@ const MocPopup = ({ hazopId, onClose }) => {
 
         try {
             const res = await axios.get(
-                `http://${strings.localhost}/api/moc/search?mocNo=${value}`
+                `${strings.localhost}/api/moc/search?mocNo=${value}`
             );
 
             const list = res.data || [];
@@ -41,7 +41,7 @@ const MocPopup = ({ hazopId, onClose }) => {
     const saveMocReference = async () => {
         try {
             await axios.post(
-                `http://${strings.localhost}/api/moc-reference/save`,
+                `${strings.localhost}/api/moc-reference/save`,
                 null,
                 {
                     params: {

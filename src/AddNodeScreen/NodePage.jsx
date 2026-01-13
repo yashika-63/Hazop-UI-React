@@ -62,7 +62,7 @@ const NodePage = () => {
     }
     try {
       const response = await axios.get(
-        `http://${strings.localhost}/api/hazopNode/by-registration-status?registrationId=${hazopData.id}&status=true`
+        `${strings.localhost}/api/hazopNode/by-registration-status?registrationId=${hazopData.id}&status=true`
       );
       setNodes(response.data);
     } catch (error) {
@@ -98,7 +98,7 @@ const NodePage = () => {
     setLoading(true);
     try {
       const response = await axios.get(
-        `http://${strings.localhost}/api/hazopTeam/teamByHazop/${hazopId}?status=true`
+        `${strings.localhost}/api/hazopTeam/teamByHazop/${hazopId}?status=true`
       );
       setHazopTeam(response.data || []);
       setOriginalTeam(response.data || []);
@@ -138,7 +138,7 @@ const NodePage = () => {
   const loadDocuments = async (hazopId) => {
     try {
       const res = await axios.get(
-        `http://${strings.localhost}/api/javaHazopDocument/getByKeys`,
+        `${strings.localhost}/api/javaHazopDocument/getByKeys`,
         {
           params: {
             companyId: localStorage.getItem("companyId") || 1,
@@ -156,7 +156,7 @@ const NodePage = () => {
   const fetchMocDetails = async () => {
     try {
       const res = await axios.get(
-        `http://${strings.localhost}/api/moc-reference/by-hazop?hazopRegistrationId=${hazopData.id}`
+        `${strings.localhost}/api/moc-reference/by-hazop?hazopRegistrationId=${hazopData.id}`
       );
 
       setMocDetails(res.data);
@@ -371,7 +371,7 @@ const NodePage = () => {
                 return (
                   <li key={doc.id}>
                     <a
-                      href={`http://${strings.localhost}/api/javaHazopDocument/view/${doc.id}`}
+                      href={`${strings.localhost}/api/javaHazopDocument/view/${doc.id}`}
                       target="_blank"
                       rel="noopener noreferrer"
                     >

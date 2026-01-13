@@ -2,7 +2,12 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { FaSearch, FaTimes, FaUser, FaUserTie } from "react-icons/fa";
 import "./HazopRegistration.css";
-import { fetchDataByKey, fetchSitesByDepartment, showToast } from "../CommonUI/CommonUI";
+import {
+  fetchDataByKey,
+  fetchSitesByDepartment,
+  fetchDepartmentsBySite,
+  showToast,
+} from "../CommonUI/CommonUI";
 import { strings } from "../string";
 import { useLocation } from "react-router-dom";
 import _ from "lodash";
@@ -38,7 +43,10 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
   useEffect(() => {
     if (showDocumentUploader && scrollRef.current) {
       setTimeout(() => {
-        scrollRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+        scrollRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
       }, 100);
     }
   }, [showDocumentUploader]);
@@ -53,8 +61,6 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
 
   useEffect(() => {
     if (moc) {
-      console.log('MOC:', moc);  // Debugging to check moc data
-
       setFormData({
         hazopDate: moc.mocDate ? moc.mocDate.split("T")[0] : "", // YYYY-MM-DD format
         hazopTitle: moc.mocTitle || "", // Set hazopTitle from mocTitle
@@ -66,16 +72,15 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
         completionStatus: false,
       });
     }
-  }, [moc]);  // The useEffect will run whenever moc changes
+  }, [moc]); // The useEffect will run whenever moc changes
 
   const refs = {
     hazopDate: React.createRef(),
-    department: React.createRef(),
     site: React.createRef(),
+    department: React.createRef(),
     hazopTitle: React.createRef(),
-    description: React.createRef()
+    description: React.createRef(),
   };
-
 
   const validate = () => {
     const newErrors = {};
@@ -116,18 +121,29 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
     return { isValid: Object.keys(newErrors).length === 0, firstErrorField };
   };
 
-
-
-
   useEffect(() => {
     const fetchDropdowns = async () => {
       try {
-        const deptData = await fetchDataByKey("department"); // only fetch departments initially
-        setDepartmentOptions(deptData);
+        // CHANGED: Fetch "Site" master data first.
+        // Ensure your backend has a master key named "Site" or "Plant"
+        const siteData = await fetchDataByKey("Site");
+        setSiteOptions(siteData);
 
-        // If moc has department, fetch sites for that department
-        if (moc && moc.Department) {
-          fetchSitesByDepartment(moc.Department, setSiteOptions);
+        // If MOC data exists, handle pre-filling
+        if (moc) {
+          // Pre-fill form
+          setFormData((prev) => ({
+            ...prev,
+            hazopDate: moc.mocDate ? moc.mocDate.split("T")[0] : "",
+            hazopTitle: moc.mocTitle || "",
+            site: moc.plant || "", // Set Site
+            department: moc.department || "", // Set Dept
+          }));
+
+          // If MOC has a plant/site, immediately fetch associated departments
+          if (moc.plant) {
+            await fetchDepartmentsBySite(moc.plant, setDepartmentOptions);
+          }
         }
       } catch (err) {
         console.error("Error fetching dropdown data", err);
@@ -137,7 +153,6 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
     fetchDropdowns();
   }, [moc]);
 
-
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({
@@ -146,13 +161,11 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
     });
 
     // Fetch sites when department changes and reset site field
-    if (name === "department") {
-      setFormData((prev) => ({ ...prev, site: "" })); // Reset site field when department changes
-      fetchSitesByDepartment(value, setSiteOptions);
+    if (name === "site") {
+      setFormData((prev) => ({ ...prev, department: "" })); // Reset site field when department changes
+      fetchDepartmentsBySite(value, setDepartmentOptions);
     }
   };
-
-
 
   const handleTeamSearchChange = (e) => {
     const value = e.target.value;
@@ -165,14 +178,15 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
 
     try {
       const response = await axios.get(
-        `http://${strings.localhost}/api/employee/search?search=${encodeURIComponent(value)}`
+        `${strings.localhost}/api/employee/search?search=${encodeURIComponent(
+          value
+        )}`
       );
       setSearchResults(response.data || []);
     } catch (err) {
       console.error("Team search failed:", err);
     }
   }, 400);
-
 
   const addTeamMember = (member) => {
     if (!hazopTeam.some((m) => m.empCode === member.empCode)) {
@@ -183,25 +197,31 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
   };
 
   const toggleRole = (empCode) => {
-    setHazopTeam(hazopTeam.map((member) =>
-      member.empCode === empCode ?
-        { ...member, role: member.role === "Team Member" ? "Team Lead" : "Team Member" } :
-        member
-    ));
+    setHazopTeam(
+      hazopTeam.map((member) =>
+        member.empCode === empCode
+          ? {
+              ...member,
+              role: member.role === "Team Member" ? "Team Lead" : "Team Member",
+            }
+          : member
+      )
+    );
   };
-
 
   const removeTeamMember = (empCode) => {
     setHazopTeam(hazopTeam.filter((m) => m.empCode !== empCode));
   };
-
 
   const handleSave = async () => {
     const { isValid, firstErrorField } = validate();
 
     if (!isValid) {
       if (firstErrorField && refs[firstErrorField]?.current) {
-        refs[firstErrorField].current.scrollIntoView({ behavior: "smooth", block: "center" });
+        refs[firstErrorField].current.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
         refs[firstErrorField].current.focus();
       }
       return;
@@ -209,7 +229,8 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
     // CASE 1: No team selected
     if (hazopTeam.length === 0) {
       setConfirmPopup({
-        message: "You have not added any team for this HAZOP. Do you want to proceed without adding a team?",
+        message:
+          "You have not added any team for this HAZOP. Do you want to proceed without adding a team?",
         yes: async () => {
           setConfirmPopup(null);
           await saveHazop();
@@ -217,7 +238,7 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
         no: () => {
           setConfirmPopup(null);
           showToast("Please click on Create HAZOP Team and proceed", "warn");
-        }
+        },
       });
       return;
     }
@@ -229,7 +250,7 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
         setConfirmPopup(null);
         await saveHazop();
       },
-      no: () => setConfirmPopup(null)
+      no: () => setConfirmPopup(null),
     });
   };
 
@@ -245,7 +266,7 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
 
       // 1️⃣ Save HAZOP (mandatory)
       const hazopResponse = await axios.post(
-        `http://${strings.localhost}/api/hazopRegistration/saveByCompany/${companyId}`,
+        `${strings.localhost}/api/hazopRegistration/saveByCompany/${companyId}`,
         payload
       );
 
@@ -262,24 +283,24 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
         tasks.push(
           (async () => {
             await axios.post(
-              `http://${strings.localhost}/api/hazopTeam/saveTeam/${hazopId}`,
-              // hazopTeam.map((m) => m.empCode) 
-                hazopTeam.map((m) => ({
-                        empCode: m.empCode
-                        // name: m.name
-                    }))
+              `${strings.localhost}/api/hazopTeam/saveTeam/${hazopId}`,
+              // hazopTeam.map((m) => m.empCode)
+              hazopTeam.map((m) => ({
+                empCode: m.empCode,
+                // name: m.name
+              }))
             );
 
             for (const member of hazopTeam) {
               await axios.post(
-                `http://${strings.localhost}/api/hazopTeamRole/save`,
+                `${strings.localhost}/api/hazopTeamRole/save`,
                 null,
                 {
                   params: {
                     companyId,
                     empCode: member.empCode,
                     hazopRole: member.role,
-                    hazopId: hazopId
+                    hazopId: hazopId,
                   },
                 }
               );
@@ -290,16 +311,12 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
 
       // Save MOC Reference if exists
       if (moc) {
-        tasks.push(
-          saveMocReference(hazopId)
-        );
+        tasks.push(saveMocReference(hazopId));
       }
 
       // Upload documents if uploader exists
       if (documentUploadRef.current) {
-        tasks.push(
-          documentUploadRef.current.uploadDocuments(hazopId)
-        );
+        tasks.push(documentUploadRef.current.uploadDocuments(hazopId));
       }
 
       // Run all optional tasks concurrently
@@ -307,7 +324,6 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
 
       if (onSaveSuccess) onSaveSuccess();
       closePopup();
-
     } catch (err) {
       console.error("Save failed:", err);
       showToast("Failed to save HAZOP", "error");
@@ -316,27 +332,20 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
     setLoading(false);
   };
 
-
-
   const saveMocReference = async (hazopId) => {
     try {
-      await axios.post(
-        `http://${strings.localhost}/api/moc-reference/save`,
-        null,
-        {
-          params: {
-            mocId: moc.mocId, // mocId comes from the prop
-            hazopRegistrationId: hazopId, // hazopId comes from HAZOP save response
-            companyId
-          }
-        }
-      );
+      await axios.post(`${strings.localhost}/api/moc-reference/save`, null, {
+        params: {
+          mocId: moc.mocId, // mocId comes from the prop
+          hazopRegistrationId: hazopId, // hazopId comes from HAZOP save response
+          companyId,
+        },
+      });
 
-      showToast("MOC Saved Successfully!", 'success');
+      showToast("MOC Saved Successfully!", "success");
 
       // Close the popup after MOC is saved
       closePopup();
-
     } catch (err) {
       const apiMessage =
         err.response?.data?.error ||
@@ -350,81 +359,96 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
     }
   };
 
-
-
   const ConfirmationPopup = ({ message, onConfirm, onCancel }) => {
     return (
       <div className="confirm-overlay">
         <div className="confirm-box">
           <p>{message}</p>
           <div className="confirm-buttons">
-            <button type="button" onClick={onCancel} className="cancel-btn">No</button>
-            <button type="button" onClick={onConfirm} className="confirm-btn">Yes</button>
+            <button type="button" onClick={onCancel} className="cancel-btn">
+              No
+            </button>
+            <button type="button" onClick={onConfirm} className="confirm-btn">
+              Yes
+            </button>
           </div>
         </div>
       </div>
     );
   };
 
-
-
-  const TeamTable = React.memo(({ hazopTeam, toggleRole, removeTeamMember, loading }) => (
-    <table className="team-table">
-      <thead>
-        <tr>
-          <th>Employee Code</th>
-          <th>Name</th>
-          <th>Email</th>
-          <th>Role</th>
-          <th>Role Action</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        {hazopTeam.map((member) => (
-          <tr key={member.empCode}>
-            <td>{member.empCode}</td>
-            <td>{member.firstName} {member.lastName}</td>
-            <td>{member.emailId || "NA"}</td>
-            <td style={{ textAlign: 'center' }}>
-              <span className={`role-badge ${member.role === "Team Lead" ? "role-lead" : "role-member"}`}>
-                {member.role === "Team Lead" ? <FaUserTie style={{ marginRight: 5 }} /> : <FaUser style={{ marginRight: 5 }} />}
-                {member.role}
-              </span>
-            </td>
-            <td>
-              <button
-                type="button"
-                onClick={() => toggleRole(member.empCode)}
-                disabled={loading}
-                className={`role-btn ${member.role === "Team Lead" ? "btn-revoke-lead" : "btn-make-lead"}`}
-              >
-                {member.role === "Team Lead" ? "Set as Member" : "Set as Team Lead"}
-              </button>
-            </td>
-            <td>
-              <button
-                className="remove-button"
-                onClick={() => removeTeamMember(member.empCode)}
-                disabled={loading}
-              >
-                Remove
-              </button>
-            </td>
+  const TeamTable = React.memo(
+    ({ hazopTeam, toggleRole, removeTeamMember, loading }) => (
+      <table className="team-table">
+        <thead>
+          <tr>
+            <th>Employee Code</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Role Action</th>
+            <th>Action</th>
           </tr>
-        ))}
-      </tbody>
-    </table>
-  ));
+        </thead>
+        <tbody>
+          {hazopTeam.map((member) => (
+            <tr key={member.empCode}>
+              <td>{member.empCode}</td>
+              <td>
+                {member.firstName} {member.lastName}
+              </td>
+              <td>{member.emailId || "NA"}</td>
+              <td style={{ textAlign: "center" }}>
+                <span
+                  className={`role-badge ${
+                    member.role === "Team Lead" ? "role-lead" : "role-member"
+                  }`}
+                >
+                  {member.role === "Team Lead" ? (
+                    <FaUserTie style={{ marginRight: 5 }} />
+                  ) : (
+                    <FaUser style={{ marginRight: 5 }} />
+                  )}
+                  {member.role}
+                </span>
+              </td>
+              <td>
+                <button
+                  type="button"
+                  onClick={() => toggleRole(member.empCode)}
+                  disabled={loading}
+                  className={`role-btn ${
+                    member.role === "Team Lead"
+                      ? "btn-revoke-lead"
+                      : "btn-make-lead"
+                  }`}
+                >
+                  {member.role === "Team Lead"
+                    ? "Set as Member"
+                    : "Set as Team Lead"}
+                </button>
+              </td>
+              <td>
+                <button
+                  className="remove-button"
+                  onClick={() => removeTeamMember(member.empCode)}
+                  disabled={loading}
+                >
+                  Remove
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    )
+  );
 
   const getFullName = (user) =>
-    [user.firstName, user.middleName, user.lastName]
-      .filter(Boolean)
-      .join(" ");
+    [user.firstName, user.middleName, user.lastName].filter(Boolean).join(" ");
 
   return (
     <div>
-
       {loading && (
         <div className="loading-overlay">
           <div className="loading-spinner"></div>
@@ -433,7 +457,12 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
 
       <div className="modal-header">
         HAZOP Registration
-        <button type="button" className="close-btn" onClick={closePopup} disabled={loading}>
+        <button
+          type="button"
+          className="close-btn"
+          onClick={closePopup}
+          disabled={loading}
+        >
           <FaTimes />
         </button>
       </div>
@@ -453,6 +482,25 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
               disabled={loading}
             />
           </div>
+          <div className="form-group">
+            <span className="required-marker">*</span>
+            <label>Site</label>
+            <select
+              name="site"
+              ref={refs.site}
+              className={errors.site ? "error-input" : ""}
+              value={formData.site}
+              onChange={handleChange}
+              disabled={loading}
+            >
+              <option value="">-- Select Site --</option>
+              {siteOptions.map((option, index) => (
+                <option key={option.id || index} value={option.data}>
+                  {option.data}
+                </option>
+              ))}
+            </select>
+          </div>
 
           <div className="form-group">
             <span className="required-marker">*</span>
@@ -463,30 +511,12 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
               className={errors.department ? "error-input" : ""}
               value={formData.department}
               onChange={handleChange}
-              disabled={loading}
+              // Disabled until Site is selected
+              disabled={loading || !formData.site}
             >
               <option value="">-- Select Department --</option>
-              {departmentOptions.map((option) => (
-                <option key={option.id} value={option.data}>
-                  {option.data}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="form-group">
-            <span className="required-marker">*</span>
-            <label>Site</label>
-            <select
-              name="site"
-              ref={refs.site}
-              className={errors.site ? "error-input" : ""}
-              value={formData.site}
-              onChange={handleChange}
-              disabled={loading || !formData.department}
-            >
-              <option value="">-- Select Site --</option>
-              {siteOptions.map((option) => (
-                <option key={option.id} value={option.data}>
+              {departmentOptions.map((option, index) => (
+                <option key={option.id || index} value={option.data}>
                   {option.data}
                 </option>
               ))}
@@ -500,10 +530,13 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
                 <span className="required-marker">*</span>Title
               </div>
               <small
-                className={`char-count ${formData.hazopTitle.length >= 1000 ? "limit-reached" : ""}`}
+                className={`char-count ${
+                  formData.hazopTitle.length >= 1000 ? "limit-reached" : ""
+                }`}
               >
                 {formData.hazopTitle.length}/1000
-              </small> </label>
+              </small>{" "}
+            </label>
             <input
               type="text"
               ref={refs.hazopTitle}
@@ -514,18 +547,18 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
               disabled={loading}
               maxLength={1000}
             />
-
           </div>
         </div>
-        <div >
+        <div>
           <div className="form-group">
             <label className="table-header">
               <div>
                 <span className="required-marker">*</span>Description
               </div>
               <small
-                className={`char-count ${formData.description.length >= 5000 ? "limit-reached" : ""
-                  }`}
+                className={`char-count ${
+                  formData.description.length >= 5000 ? "limit-reached" : ""
+                }`}
               >
                 {formData.description.length}/5000
               </small>
@@ -533,15 +566,15 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
             <textarea
               name="description"
               ref={refs.description}
-              className={`textareaFont ${errors.description ? "error-input" : ""}`}
+              className={`textareaFont ${
+                errors.description ? "error-input" : ""
+              }`}
               value={formData.description}
               onChange={handleChange}
               disabled={loading}
               rows={6}
               maxLength={5000}
             />
-
-
           </div>
         </div>
 
@@ -579,7 +612,8 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
               <ul className="search-results">
                 {searchResults.map((user) => (
                   <li key={user.empCode} onClick={() => addTeamMember(user)}>
-                    {getFullName(user)} ({user.empCode}) – ({user.emailId || "NA"}) ({user.department || "NA"})
+                    {getFullName(user)} ({user.empCode}) – (
+                    {user.emailId || "NA"}) ({user.department || "NA"})
                   </li>
                 ))}
               </ul>
@@ -602,8 +636,8 @@ const HazopRegistration = ({ closePopup, onSaveSuccess, moc }) => {
         <div
           ref={scrollRef}
           style={{
-            marginTop: '15px',
-            display: showDocumentUploader ? 'block' : 'none'
+            marginTop: "15px",
+            display: showDocumentUploader ? "block" : "none",
           }}
         >
           <HazopDocumentUpload

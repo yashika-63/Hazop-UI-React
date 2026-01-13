@@ -2,7 +2,12 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { FaSearch, FaTimes } from "react-icons/fa";
 import "../HazopEntry/HazopRegistration.css";
-import { fetchDataByKey, fetchSitesByDepartment, showToast } from "../CommonUI/CommonUI";
+import {
+  fetchDataByKey,
+  fetchDepartmentsBySite,
+  fetchSitesByDepartment,
+  showToast,
+} from "../CommonUI/CommonUI";
 import { strings } from "../string";
 
 const HazopRevision = ({ hazopId, onClose }) => {
@@ -26,7 +31,6 @@ const HazopRevision = ({ hazopId, onClose }) => {
   const [confirmPopup, setConfirmPopup] = useState(null);
   const [departmentOptions, setDepartmentOptions] = useState([]);
   const [siteOptions, setSiteOptions] = useState([]);
-
   const companyId = localStorage.getItem("companyId");
 
   useEffect(() => {
@@ -82,9 +86,9 @@ const HazopRevision = ({ hazopId, onClose }) => {
       ...formData,
       [name]: type === "checkbox" ? checked : value,
     });
-    if (name === "department") {
-      setFormData((prev) => ({ ...prev, site: "" })); // Reset site field when department changes
-      fetchSitesByDepartment(value, setSiteOptions);
+    if (name === "site") {
+      setFormData((prev) => ({ ...prev, department: "" })); 
+      fetchDepartmentsBySite(value, setDepartmentOptions);
     }
   };
 
@@ -99,7 +103,7 @@ const HazopRevision = ({ hazopId, onClose }) => {
 
     try {
       const response = await axios.get(
-        `http://${strings.localhost}/api/employee/search?search=${encodeURIComponent(
+        `${strings.localhost}/api/employee/search?search=${encodeURIComponent(
           value
         )}`
       );
@@ -156,31 +160,30 @@ const HazopRevision = ({ hazopId, onClose }) => {
     try {
       // 1️⃣ Save new HAZOP entry
       const hazopResponse = await axios.post(
-        `http://${strings.localhost}/api/hazopRegistration/saveByCompany/${companyId}`,
+        `${strings.localhost}/api/hazopRegistration/saveByCompany/${companyId}`,
         formData
       );
 
-      const newHazopId = hazopResponse.data.id;   // newly created HAZOP ID
-      const oldHazopId = hazopId;                 // passed from parent component
+      const newHazopId = hazopResponse.data.id; 
+      const oldHazopId = hazopId; 
 
       if (hazopTeam.length > 0) {
         await axios.post(
-          `http://${strings.localhost}/api/hazopTeam/saveTeam/${newHazopId}`,
+          `${strings.localhost}/api/hazopTeam/saveTeam/${newHazopId}`,
           hazopTeam.map((m) => ({
-            empCode: m.empCode
+            empCode: m.empCode,
             // name: m.name
           }))
         );
       }
 
       await axios.post(
-        `http://${strings.localhost}/revision/saveRevision?oldHazopId=${oldHazopId}&newHazopId=${newHazopId}`,
+        `${strings.localhost}/revision/saveRevision?oldHazopId=${oldHazopId}&newHazopId=${newHazopId}`,
         { params: { oldHazopId, newHazopId } }
       );
 
       showToast("HAZOP Revision saved successfully!", "success");
       onClose();
-
     } catch (err) {
       console.error("Save failed:", err);
       showToast("Failed to save HAZOP Revision", "error");
@@ -207,14 +210,11 @@ const HazopRevision = ({ hazopId, onClose }) => {
     );
   };
 
-
-
   useEffect(() => {
     const fetchDropdowns = async () => {
       try {
-        const deptData = await fetchDataByKey("department");
-        setDepartmentOptions(deptData);
-
+        const siteData = await fetchDataByKey("Site");
+        setSiteOptions(siteData);
       } catch (err) {
         console.error("Error fetching dropdown data", err);
       }
@@ -239,8 +239,11 @@ const HazopRevision = ({ hazopId, onClose }) => {
         <div className="modal-content">
           <div className="input-row">
             <div className="form-group">
-              <label> <span className="required-marker">*</span>
-                Hazop Date</label>
+              <label>
+                {" "}
+                <span className="required-marker">*</span>
+                Hazop Date
+              </label>
               <input
                 type="date"
                 name="hazopDate"
@@ -253,8 +256,10 @@ const HazopRevision = ({ hazopId, onClose }) => {
             </div>
 
             <div className="form-group">
-              <label><span className="required-marker">*</span>
-                Title</label>
+              <label>
+                <span className="required-marker">*</span>
+                Title
+              </label>
               <input
                 type="text"
                 name="hazopTitle"
@@ -267,35 +272,37 @@ const HazopRevision = ({ hazopId, onClose }) => {
 
             <div className="form-group">
               <span className="required-marker">*</span>
-              <label>Department</label>
-              <select
-                name="department"
-                className={errors.department ? "error-input" : ""}
-                value={formData.department}
-                onChange={handleChange}
-                disabled={loading}
-              >
-                <option value="">-- Select Department --</option>
-                {departmentOptions.map((option) => (
-                  <option key={option.id} value={option.data}>
-                    {option.data}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="form-group">
-              <span className="required-marker">*</span>
               <label>Site</label>
               <select
                 name="site"
                 className={errors.site ? "error-input" : ""}
                 value={formData.site}
                 onChange={handleChange}
-                disabled={loading || !formData.department}
+                disabled={loading}
               >
                 <option value="">-- Select Site --</option>
-                {siteOptions.map((option) => (
-                  <option key={option.id} value={option.data}>
+                {siteOptions.map((option, index) => (
+                  <option key={option.id || index} value={option.data}>
+                    {option.data}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="form-group">
+              <span className="required-marker">*</span>
+              <label>Department</label>
+              <select
+                name="department"
+                className={errors.department ? "error-input" : ""}
+                value={formData.department}
+                onChange={handleChange}
+                // Disabled until Site is selected
+                disabled={loading || !formData.site}
+              >
+                <option value="">-- Select Department --</option>
+                {departmentOptions.map((option, index) => (
+                  <option key={option.id || index} value={option.data}>
                     {option.data}
                   </option>
                 ))}
@@ -305,14 +312,18 @@ const HazopRevision = ({ hazopId, onClose }) => {
 
           <div className="input-row">
             <div className="form-group">
-              <label><span className="required-marker">*</span>
-                Description</label>
+              <label>
+                <span className="required-marker">*</span>
+                Description
+              </label>
               <textarea
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
                 disabled={loading}
-                className={`textareaFont ${errors.description ? "error-input" : ""}`}
+                className={`textareaFont ${
+                  errors.description ? "error-input" : ""
+                }`}
               ></textarea>
             </div>
           </div>
@@ -417,6 +428,5 @@ const HazopRevision = ({ hazopId, onClose }) => {
     </div>
   );
 };
-
 
 export default HazopRevision;

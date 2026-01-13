@@ -16,7 +16,7 @@ const SequenceUpdatePopup = ({ onClose, nodeId }) => {
   const fetchNodeDetails = async () => {
     try {
       const response = await axios.get(
-        `http://${strings.localhost}/api/hazopNodeDetail/node/${nodeId}`
+        `${strings.localhost}/api/hazopNodeDetail/node/${nodeId}`
       );
 
       if (Array.isArray(response.data)) {
@@ -48,7 +48,7 @@ const SequenceUpdatePopup = ({ onClose, nodeId }) => {
  
     try {
       await axios.put(
-        `http://${strings.localhost}/api/hazopNodeDetail/updateSequenceById/${nodeId}`,
+        `${strings.localhost}/api/hazopNodeDetail/updateSequenceById/${nodeId}`,
         payload,
         { headers: { "Content-Type": "application/json" } }
       );

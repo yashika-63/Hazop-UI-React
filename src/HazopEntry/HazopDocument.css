@@ -139,3 +139,56 @@
     margin-top: 10px;
     font-style: italic;
 }
+
+
+/* =========================================
+   MOBILE RESPONSIVE OVERRIDES (DOC UPLOAD)
+   Add this to the very bottom of your CSS
+   ========================================= */
+
+@media screen and (max-width: 768px) {
+  
+  /* 1. Container adjustments */
+  .document-upload-container {
+    padding: 10px; /* Reduce padding */
+  }
+
+  /* 2. Drop Zone: Compact view */
+  .drop-zone {
+    padding: 15px 10px; /* Less padding inside the dashed box */
+  }
+
+  .drop-zone .upload-icon {
+    font-size: 30px; /* Smaller icon */
+    margin-bottom: 5px;
+  }
+
+  /* 3. Document Row: Fix spacing */
+  .document-row {
+    padding: 8px; /* Tighter padding around the file row */
+    gap: 8px; 
+  }
+
+  /* 4. File Name: CRITICAL FIX */
+  /* Reduce max-width so long filenames truncate (...) instead of breaking layout */
+  .file-name {
+    max-width: 150px; /* Was 250px. Now forces truncation earlier. */
+    font-size: 12px;
+  }
+
+  /* 5. Custom Upload Button (if visible) */
+  .custom-file-upload {
+    padding: 4px 8px;
+    font-size: 11px;
+    max-width: 100px; /* Prevent button from getting too wide */
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* 6. Remove Button */
+  .remove-btn {
+    width: 24px; /* Slightly smaller touch target but still usable */
+    height: 24px;
+    font-size: 12px; /* Smaller 'X' icon inside */
+  }
+}
